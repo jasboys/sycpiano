@@ -15,13 +15,16 @@ import Front from '@/js/components/App/Front/Front.jsx';
 
 export default class App extends React.Component {
     state = {
-        isFront: true
+        showFront: true,
+        showNav: false
     };
     showFront = () => {
-        this.setState({isFront: true});
+        this.setState({showFront: true});
+        setTimeout(()=>this.setState({showNav: false}), 650);
     }
     hideFront = () => {
-        this.setState({isFront: false});
+        this.setState({showFront: false});
+        setTimeout(()=>this.setState({showNav: true}), 650);
     }
     componentDidMount = () => {
         window.addEventListener('wheel', this.hideFront);
@@ -30,12 +33,10 @@ export default class App extends React.Component {
         return (
             <div className='appContainer'>
                 <LogoSVG/>
-                <Front show={this.state.isFront} />
-                <Motion style={{x: spring(!this.state.isFront ? 0 : -90)}}>
-                    {({x}) =>
-                        <NavBar onClick={this.showFront} style={{
-                            top: `${x}`,
-                        }} />
+                <Front show={this.state.showFront} />
+                <Motion style={{top: spring(this.state.showNav ? 0 : -90)}}>
+                    {interpolated =>
+                        <NavBar onClick={this.showFront} style={interpolated} />
                     }
                 </Motion>
                 <RouteTransition
@@ -44,7 +45,8 @@ export default class App extends React.Component {
                     runOnMount={true}
                     atEnter={{ opacity: 0 }}
                     atLeave={{ opacity: 0 }}
-                    atActive={{ opacity: 1, height: 100}}
+                    atActive={{ opacity: 1}}
+                    style={{height: `100%`}}
                 >
                     {this.props.children}
                 </RouteTransition>
