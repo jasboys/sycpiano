@@ -7,10 +7,10 @@ import NavBarLinks from '@/js/components/App/NavBar/NavBarLinks.jsx';
 
 
 export default class NavBar extends React.Component {
-    render() {        
+    render() {
         var links = ['home', 'about', 'schedule', 'media', 'press', 'contact']
         return (
-            <div className='navBar'>
+            <div className='navBar' style={this.props.style}>
                 <NavBarLogo onClick={this.props.onClick} />
                 <NavBarLinks links={links} />
             </div>
