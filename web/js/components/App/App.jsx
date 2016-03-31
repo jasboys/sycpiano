@@ -4,9 +4,7 @@ import '@/less/animations/nav-bar-animation.less';
 
 import React from 'react';
 import {Motion, spring} from 'react-motion';
-import Transition from 'react-motion-ui-pack';
 import {RouteTransition} from 'react-router-transition';
-import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 
 import NavBar from '@/js/components/App/NavBar/NavBar.jsx';
 import {LogoSVG} from '@/js/components/LogoSVG.jsx';
@@ -33,7 +31,7 @@ export default class App extends React.Component {
         return (
             <div className='appContainer'>
                 <LogoSVG/>
-                <Front show={this.state.showFront} />
+                <Front show={this.state.showFront ? [{key: '0'}] : []} />
                 <Motion style={{top: spring(this.state.showNav ? 0 : -90)}}>
                     {interpolated =>
                         <NavBar onClick={this.showFront} style={interpolated} />
