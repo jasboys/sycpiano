@@ -5,28 +5,20 @@ import {LogoInstance} from '@/js/components/LogoSVG.jsx';
 
 function enterAnim(element, callback) {
     TweenLite.fromTo(element, 0.5,
-        {
-            opacity: 0,
-            top: '-50px'
-        }, {
-            delay: 0.5,
-            opacity: 1,
-            top: '0px',
-            onComplete: callback,
-            ease: Power2.easeOut
+        { opacity: 0, top: '-50px' },
+        { opacity: 1, top: '0px',
+          delay: 0.5,
+          onComplete: callback,
+          ease: Power2.easeOut
         });
 }
 
 function leaveAnim(element, callback) {
     TweenLite.fromTo(element, 0.5,
-        {
-            opacity: 1,
-            top: '0px'
-        }, {
-            opacity: 0,
-            top: '-50px',
-            onComplete: callback,
-            ease: Power2.easeOut
+        { opacity: 1, top: '0px', },
+        { opacity: 0, top: '-50px',
+          onComplete: callback,
+          ease: Power2.easeOut
         });
 }
 
