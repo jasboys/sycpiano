@@ -3,6 +3,8 @@ import '@/less/app.less';
 import React from 'react';
 import ReactDOM from 'react-dom'
 import {Motion, spring} from 'react-motion';
+import TransitionGroup from 'react-addons-transition-group';
+
 import {RouteTransition} from 'react-router-transition';
 import TweenLite from 'gsap';
 
@@ -10,6 +12,31 @@ import NavBar from '@/js/components/App/NavBar/NavBar.jsx';
 import {LogoSVG} from '@/js/components/LogoSVG.jsx';
 import Front from '@/js/components/App/Front/Front.jsx';
 
+class Transition extends React.Component {
+    componentWillLeave(callback) {
+        console.log(this.ref);
+        TweenLite.fromTo(this.ref, 0.5,
+            { opacity: '1' },
+            { opacity: '0', onComplete: callback, ease: Power2.easeOut });
+    }
+    componentWillEnter(callback) {
+        TweenLite.fromTo(this.ref, 0.5,
+            { opacity: '0' },
+            { opacity: '1', onComplete: callback, ease: Power2.easeOut });
+    }
+    componentDidMount(callback) {
+        TweenLite.fromTo(this.ref, 0.5,
+            { opacity: '0' },
+            { opacity: '1', onComplete: callback, ease: Power2.easeOut });
+    }
+    render() {
+        return (
+            <span ref={(ref)=>this.ref=ref}>
+                {this.props.children}
+            </span>
+        )
+    }
+};
 
 export default class App extends React.Component {
     state = {
@@ -18,7 +45,6 @@ export default class App extends React.Component {
     };
     showFront = () => {
         this.setState({ showFront: true });
-        //setTimeout(() => this.setState({ showNav: false }), 650);
         var el2 = ReactDOM.findDOMNode(this.refs.ref2);
         TweenLite.fromTo(ReactDOM.findDOMNode(this.refs.nav), 0.4, {top: '0px'}, {top: '-90px', delay: 0.65});
     }
@@ -27,7 +53,6 @@ export default class App extends React.Component {
         TweenLite.fromTo(ReactDOM.findDOMNode(this.refs.nav), 0.4,
             { top: '-90px' },
             { top: '0px', delay: 0.65, ease: Power1.easeOut });
-        //setTimeout(() => this.setState({ showNav: true }), 650);
     }
     componentDidMount = () => {
         window.addEventListener('wheel', this.hideFront);
@@ -39,17 +64,11 @@ export default class App extends React.Component {
                 <LogoSVG/>
                 <Front show={this.state.showFront} />
                 <NavBar onClick={this.showFront} ref='nav' />
-                <RouteTransition
-                    pathname={this.props.location.pathname}
-                    component='span'
-                    runOnMount={true}
-                    atEnter={{ opacity: 0 }}
-                    atLeave={{ opacity: 0 }}
-                    atActive={{ opacity: 1 }}
-                    style={{ height: `100%` }}
-                    >
-                    {this.props.children}
-                </RouteTransition>
+                <TransitionGroup>
+                    <Transition key={this.props.location.pathname}>
+                        {this.props.children}
+                    </Transition>
+                </TransitionGroup>
             </div>
         )
     }
