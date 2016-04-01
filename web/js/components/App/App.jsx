@@ -50,8 +50,7 @@ export default class App extends React.Component {
     }
     hideFront = () => {
         this.setState({ showFront: false });
-        TweenLite.fromTo(ReactDOM.findDOMNode(this.refs.nav), 0.4,
-            { top: '-90px' },
+        TweenLite.to(ReactDOM.findDOMNode(this.refs.nav), 0.4,
             { top: '0px', delay: 0.65, ease: Power1.easeOut });
     }
     componentDidMount = () => {
