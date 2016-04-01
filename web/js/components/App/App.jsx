@@ -15,22 +15,23 @@ export default class App extends React.Component {
         showNav: false
     };
     showFront = () => {
-        this.setState({showFront: true});
-        setTimeout(()=>this.setState({showNav: false}), 650);
+        this.setState({ showFront: true });
+        setTimeout(() => this.setState({ showNav: false }), 650);
     }
     hideFront = () => {
-        this.setState({showFront: false});
-        setTimeout(()=>this.setState({showNav: true}), 650);
+        this.setState({ showFront: false });
+        setTimeout(() => this.setState({ showNav: true }), 650);
     }
     componentDidMount = () => {
         window.addEventListener('wheel', this.hideFront);
+        window.addEventListener('keydown', e => {if (e.keyCode == 40) this.hideFront()});
     }
     render() {
         return (
             <div className='appContainer'>
                 <LogoSVG/>
                 <Front show={this.state.showFront} />
-                <Motion style={{top: spring(this.state.showNav ? 0 : -90)}}>
+                <Motion style={{ top: spring(this.state.showNav ? 0 : -90) }}>
                     {interpolated =>
                         <NavBar onClick={this.showFront} style={interpolated} />
                     }
@@ -41,9 +42,9 @@ export default class App extends React.Component {
                     runOnMount={true}
                     atEnter={{ opacity: 0 }}
                     atLeave={{ opacity: 0 }}
-                    atActive={{ opacity: 1}}
-                    style={{height: `100%`}}
-                >
+                    atActive={{ opacity: 1 }}
+                    style={{ height: `100%` }}
+                    >
                     {this.props.children}
                 </RouteTransition>
             </div>
