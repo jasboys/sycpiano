@@ -6,10 +6,10 @@ import '@/less/front-video.less';
 
 export default class FrontVideo extends React.Component {
     componentWillLeave(callback) {
-        TweenLite.fromTo(this.comp, 0.5, { height: '100%' }, { height: '0%' , onComplete: callback, ease: Power2.easeOut});
+        TweenLite.fromTo(this.comp, 0.5, { height: '100%' }, { height: '0%' , onComplete: callback, ease: Power3.easeOut});
     }
     componentWillEnter(callback) {
-        TweenLite.fromTo(this.comp, 0.5, { height: '0%' }, { height: '100%' , onComplete: callback, ease: Power2.easeOut});
+        TweenLite.fromTo(this.comp, 0.5, { height: '0%' }, { height: '100%' , onComplete: callback, ease: Power3.easeOut});
     }
     render() {
         return (
