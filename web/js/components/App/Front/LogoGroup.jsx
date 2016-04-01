@@ -1,34 +1,52 @@
 import React from 'react';
-import {TransitionMotion, spring} from 'react-motion';
+import TweenLite from 'gsap';
 import '@/less/front-logo.less';
 import {LogoInstance} from '@/js/components/LogoSVG.jsx';
 
+function enterAnim(element, callback) {
+    TweenLite.fromTo(element, 0.5,
+        {
+            opacity: 0,
+            top: '-50px'
+        }, {
+            delay: 0.5,
+            opacity: 1,
+            top: '0px',
+            onComplete: callback,
+            ease: Power2.easeOut
+        });
+}
+
+function leaveAnim(element, callback) {
+    TweenLite.fromTo(element, 0.5,
+        {
+            opacity: 1,
+            top: '0px'
+        }, {
+            opacity: 0,
+            top: '-50px',
+            onComplete: callback,
+            ease: Power2.easeOut
+        });
+}
+
 export default class LogoGroup extends React.Component {
+    componentWillEnter(callback) {
+        enterAnim(this.ref, callback);
+    }
+    componentWillLeave(callback) {
+        leaveAnim(this.ref, callback);
+    }
+    componentDidMount(callback) {
+        enterAnim(this.ref, callback);
+    }
     render() {
         return (
-            <TransitionMotion
-                defaultStyles={[{
-                    key: '0',
-                    style: { opacity: 0, top: -50 }
-                }]}
-                willLeave={() => ({ opacity: spring(0), top: spring(-50) }) }
-                willEnter={() => ({ opacity: 0, top: -50 }) }
-                styles={() => (this.props.show ? [{
-                    key: '0',
-                    style: { opacity: spring(1), top: spring(0) }
-                }] : []) }>
-                {interpolated =>
-                    <div>
-                        {interpolated.length ?
-                            <div key={interpolated[0].key} className='frontLogo' style={interpolated[0].style} >
-                                <LogoInstance className='blur'/>
-                                <LogoInstance className='solid'/>
-                            </div>
+            <div className='frontLogo' ref={(ref) => this.ref = ref}>
+                <LogoInstance className='blur'/>
+                <LogoInstance className='solid'/>
+            </div>
 
-                            : null}
-                    </div>
-                }
-            </TransitionMotion>
         )
     }
 }
