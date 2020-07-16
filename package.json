@@ -97,7 +97,7 @@
     "jdataview": "^2.5.0",
     "jsonfile": "^5.0.0",
     "jsonwebtoken": "^8.5.1",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "lodash-es": "^4.17.15",
     "mathjs": "^6.2.3",
     "mini-svg-data-uri": "^1.1.3",
