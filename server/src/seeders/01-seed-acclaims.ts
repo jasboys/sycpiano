@@ -5,7 +5,7 @@ import { ModelMap } from 'types';
 
 export const up = async (models: ModelMap): Promise<void> => {
     const model = models.acclaim;
-    const filePath = path.join(__dirname, '../../../web/assets/data/acclaim.json');
+    const filePath = path.join(process.env.SEED_DATA_DIR, 'acclaim.json');
     try {
         const content = await fs.promises.readFile(filePath, { encoding: 'utf8' });
 

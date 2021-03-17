@@ -22,13 +22,9 @@ const config = merge(common.config, {
         ],
     },
     plugins: [
-        new webpack.DefinePlugin({
-            MUSIC_PATH: JSON.stringify(common.staticPrefix + '/music'),
-            GAPI_KEY: JSON.stringify(process.env.GAPI_KEY_APP), // restricted key, okay to publish
-        }),
         new webpack.NormalModuleReplacementPlugin(
             /data[\\\/]packed[\\\/]latest.json$/,
-            path.resolve(__dirname, './web/assets/data/tz-data.json'),
+            path.resolve(__dirname, 'web/assets/data/tz-data.json'),
         ),
     ],
 });

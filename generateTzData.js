@@ -14,7 +14,7 @@ function unpackAndUnlink(latest) {
     };
 }
 
-const filePath = `./web/assets/data/tz-data.json`
+const filePath = `web/assets/data/tz-data.json`
 
 function main(done) {
     const unpackedLatest = unpackAndUnlink(packedLatest);

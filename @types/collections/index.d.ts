@@ -1,4 +1,5 @@
 declare module 'collections/sorted-array' {
+    type Key = string | number;
     export class SortedArray<T> extends Array<T> {
         length: number;
         Iterator: Iterator;
@@ -7,15 +8,15 @@ declare module 'collections/sorted-array' {
             values?: T[],
             equals?: (a: T, b: T) => boolean,
             compare?: (a: T, b: T) => number,
-            getDefault?: any
+            getDefault?: (a: Key) => T
         );
         constructClone(values?: T[]): SortedArray<T>;
         has(value: T): boolean;
         get(value: T): T | undefined;
         add(value: T): boolean;
-        addEach(...args: any): void;
+        addEach(...args: T[]): void;
         ['delete'](value: T): boolean;
-        deleteAll(value: T, equals: (...args: any[]) => any): number;
+        deleteAll(value: T, equals: (a: T, b: T) => boolean): number;
         toggle(value: T): void;
         indexOf(value: T): number;
         lastIndexOf(value: T): number;
@@ -25,21 +26,19 @@ declare module 'collections/sorted-array' {
         unshift(...args: T[]): void;
         pop(): T;
         shift(): T;
-        slice(): SortedArray<T>;
-        splice(index: number, length: number, ...args: any[]): SortedArray<T>;
-        swap(index: number, length: number, plus: any): SortedArray<T>;
-        reduce(callback: (result?: any, val?: any, key?: any, collection?: any) => any,
-            basis?: any, thisp?: any): any;
-        reduceRight(
-            callback: (result?: any, val?: any, key?: any, collection?: any) => any,
-            basis?: any, thisp?: any
-        ): any;
+        slice(start?: Key, end?: Key): SortedArray<T>;
+        splice(index: number, length: number, ...args: T[]): T[];
+        swap(index: number, length: number, plus: T[]): T[];
+        reduce<R>(callback: (result: R, val: T, key: Key, collection: SortedArray<T>) => R,
+            basis?: R, thisp?: unknown): R;
+        reduceRight<R>(callback: (result: R, val: T, key: Key, collection: SortedArray<T>) => R,
+        basis?: R, thisp?: unknown): R;
         min(): T;
         max(): T;
         one(): T;
         clear(): void;
-        equals(that: any, equals?: (...args: any[]) => boolean): boolean;
-        compare(that: any, compare?: (...args: any[]) => boolean): boolean;
+        equals(that: unknown, equals?: (a: T, b: T) => boolean): boolean;
+        compare(that: unknown, compare?: (a: T, b: T) => boolean): boolean;
         iterate(start: number, end: number): Iterator<T>;
         toJSON(): T[];
     }
@@ -55,15 +54,15 @@ declare module 'collections/sorted-array-set' {
             values?: T[],
             equals?: (a: T, b: T) => boolean,
             compare?: (a: T, b: T) => number,
-            getDefault?: any
+            getDefault?: (a: Key) => T
         );
         constructClone(values?: T[]): SortedArraySet<T>;
         has(value: T): boolean;
         get(value: T): T | undefined;
         add(value: T): boolean;
-        addEach(...args: any): void;
+        addEach(...args: T[]): void;
         ['delete'](value: T): boolean;
-        deleteAll(value: T, equals: (...args: any[]) => any): number;
+        deleteAll(value: T, equals: (a: T, b: T) => boolean): number;
         indexOf(value: T): number;
         lastIndexOf(value: T): number;
         findValue(value: T): number;
@@ -72,25 +71,23 @@ declare module 'collections/sorted-array-set' {
         unshift(...args: T[]): void;
         pop(): T;
         shift(): T;
-        union(...args: any): SortedArraySet<T>;
-        intersection(...args: any): SortedArraySet<T>;
-        difference(...args: any): SortedArraySet<T>;
-        symmetricDifference(...args: any): SortedArraySet<T>;
-        slice(): SortedArraySet<T>;
-        splice(index: number, length: number, ...args: any[]): SortedArSortedArraySetray<T>;
-        swap(index: number, length: number, plus: any): SortedArraySet<T>;
-        reduce(callback: (result?: any, val?: any, key?: any, collection?: any) => any,
-            basis?: any, thisp?: any): any;
-        reduceRight(
-            callback: (result?: any, val?: any, key?: any, collection?: any) => any,
-            basis?: any, thisp?: any
-        ): any;
+        union(args: T[]): SortedArraySet<T>;
+        intersection(args: T[]): SortedArraySet<T>;
+        difference(args: T[]): SortedArraySet<T>;
+        symmetricDifference(args: T[]): SortedArraySet<T>;
+        slice(start?: Key, end?: Key): SortedArray<T>;
+        splice(index: number, length: number, ...args: T[]): T[];
+        swap(index: number, length: number, plus: T[]): T[];
+        reduce<R>(callback: (result: R, val: T, key: Key, collection: SortedArray<T>) => R,
+            basis?: R, thisp?: unknown): R;
+        reduceRight<R>(callback: (result: R, val: T, key: Key, collection: SortedArray<T>) => R,
+        basis?: R, thisp?: unknown): R;
         min(): T;
         max(): T;
         one(): T;
         clear(): void;
-        equals(that: any, equals?: (...args: any[]) => boolean): boolean;
-        compare(that: any, compare?: (...args: any[]) => boolean): boolean;
+        equals(that: unknown, equals?: (a: T, b: T) => boolean): boolean;
+        compare(that: unknown, compare?: (a: T, b: T) => boolean): boolean;
         iterate(start: number, end: number): Iterator<T>;
         toJSON(): T[];
         toArray(): T[];

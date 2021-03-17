@@ -1,4 +1,4 @@
-declare module 'forest-express-sequelize';
+declare module 'forest-express-sequelize' {
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { RequestHandler, Response } from "express";
@@ -11,16 +11,16 @@ export const PUBLIC_ROUTES: string[];
 // Everything related to record manipulation
 
 export class AbstractRecordTool {
-    constructor(model: object)
-    serialize(records: object[]): StatSerialized;
+    constructor(model: Record<string, unknkown>)
+    serialize(records: Record<string, unknkown>[]): StatSerialized;
 }
 
 export class RecordGetter extends AbstractRecordTool {
-    get(recordId: string): Promise<object>;
+    get(recordId: string): Promise<Record<string, unknkown>>;
 }
 
 export class RecordsGetter extends AbstractRecordTool {
-    getAll(params: Params): Promise<object[]>;
+    getAll(params: Params): Promise<Record<string, unknkown>[]>;
     getIdsFromRequest(params: Params): Promise<string[]>;
 }
 
@@ -33,13 +33,13 @@ export class RecordsExporter extends AbstractRecordTool {
 }
 
 export class RecordUpdater extends AbstractRecordTool {
-    deserialize(body: object): Promise<object>;
-    update(record: object, recordId: string): Promise<object>;
+    deserialize(body: Record<string, unknkown>): Promise<Record<string, unknkown>>;
+    update(record: Record<string, unknkown>, recordId: string): Promise<Record<string, unknkown>>;
 }
 
 export class RecordCreator extends AbstractRecordTool {
-    deserialize(body: object): Promise<object>;
-    create(record: object): Promise<object>;
+    deserialize(body: Record<string, unknkown>): Promise<Record<string, unknkown>>;
+    create(record: Record<string, unknkown>): Promise<Record<string, unknkown>>;
 }
 
 export class RecordRemover extends AbstractRecordTool {
@@ -122,19 +122,19 @@ export interface SmartFieldValueGetter {
 }
 
 export interface SmartFieldValueSetter {
-    (record: any, attributeValue: any): object;
+    (record: any, attributeValue: any): Record<string, unknkown>;
 }
 
 export interface SmartFieldSearcher {
-    (query: any, search: string): object;
+    (query: any, search: string): Record<string, unknkown>;
 }
 
 export interface SmartActionValuesInjector {
-    (record: any): object;
+    (record: any): Record<string, unknkown>;
 }
 
 export interface SegmentAggregationCreator {
-    (record: any): object;
+    (record: any): Record<string, unknkown>;
 }
 
 export interface SmartFieldOptions {
@@ -193,3 +193,4 @@ export interface InitOptions {
 export function init(options: InitOptions): Promise<RequestHandler>;
 
 /* eslint-enable @typescript-eslint/no-explicit-any */
+}

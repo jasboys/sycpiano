@@ -4,7 +4,7 @@ import { ModelMap } from 'types';
 
 export const up = async (models: ModelMap): Promise<void> => {
     const model = models.photo;
-    const filePath = path.join(__dirname, '../../../web/assets/data/photos.json');
+    const filePath = path.join(process.env.SEED_DATA_DIR, 'photos.json');
     try {
         const content = await fs.promises.readFile(filePath, { encoding: 'utf8' });
         const json: Array<{

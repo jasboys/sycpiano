@@ -6,7 +6,7 @@ const isDev = process.env.NODE_ENV !== 'production';
 
 export const up = async (models: ModelMap): Promise<void> => {
     const model = models.music;
-    const filePath = path.join(__dirname, `../../../web/assets/data/music${isDev ? '_example' : ''}.json`);
+    const filePath = path.join(process.env.SEED_DATA_DIR, `music${isDev ? '_example' : ''}.json`);
     try {
         const content = await fs.promises.readFile(filePath, { encoding: 'utf8' });
         const json: Array<{

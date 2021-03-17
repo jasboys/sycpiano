@@ -5,23 +5,13 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const os = require('os');
 require('dotenv').config();
-
-const isProd = process.env.NODE_ENV === 'production';
-
-const threadPoolSize = isProd ? 1 : os.cpus().length - 1;
 
 const staticPrefix = '/static';
 
 const sourcePaths = [
     path.resolve(__dirname, 'web/src'),
 ];
-
-const workerPool = {
-    workers: threadPoolSize,
-    poolTimeout: isProd ? 2000 : Infinity,
-};
 
 const tsxUse = [
     {
@@ -90,10 +80,10 @@ const config = () => {
             new webpack.DefinePlugin({
                 BINARY_PATH: JSON.stringify(staticPrefix + '/binary'),
                 IMAGES_PATH: JSON.stringify(staticPrefix + '/images'),
-                // MUSIC_PATH: JSON.stringify(staticPrefix + '/music'), => see dev and prod files
+                MUSIC_PATH: JSON.stringify(staticPrefix + '/music'),
                 VIDEOS_PATH: JSON.stringify(staticPrefix + '/videos'),
-                // GAPI_KEY => see dev and prod files
-                STRIPE_PUBLIC: JSON.stringify(process.env.STRIPE_PUBLIC),
+                GAPI_KEY: JSON.stringify(process.env.GAPI_KEY_APP),
+                STRIPE_PUBLIC_KEY: JSON.stringify(process.env.STRIPE_PUBLIC_KEY),
             }),
             new CleanWebpackPlugin(),
             new HtmlWebpackPlugin({

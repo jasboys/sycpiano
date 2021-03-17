@@ -5,6 +5,7 @@ import * as path from 'path';
 import * as mustache from 'mustache';
 import { promises as fsAsync, readFileSync } from 'fs';
 import * as moment from 'moment';
+import * as root from 'app-root-path';
 
 const models = db.models;
 
@@ -21,7 +22,7 @@ const transportOptions =
     dkim: {
         domainName: 'seanchenpiano.com',
         keySelector: 'email',
-        privateKey: readFileSync(path.resolve(__dirname, process.env.DKIM_PRIVATE_KEY_FILE), 'utf8'),
+        privateKey: readFileSync(path.resolve(process.env.DKIM_PRIVATE_KEY_FILE), 'utf8'),
     },
 };
 // : {
@@ -52,19 +53,19 @@ export const emailPDFs = async (productIDs: string[], email: string, clientRef?:
         cid?: string;
     }[] = products.map((prod) => ({
         filename: prod.file,
-        path: path.resolve(__dirname, process.env.PRODUCTS_DIR, prod.file),
+        path: path.resolve(process.env.PRODUCTS_DIR, prod.file),
     }));
 
     attachments = [
         ...attachments,
         {
             filename: 'logo.png',
-            path: path.resolve(__dirname, '../../web/assets/images/email_logo.png'),
+            path: path.resolve(process.env.IMAGE_ASSETS_DIR, 'email_logo.png'),
             cid: 'logo@seanchenpiano.com',
         },
     ];
 
-    const template = await fsAsync.readFile(path.resolve(__dirname, '../../web/partials/email.html'), 'utf8');
+    const template = await fsAsync.readFile(path.resolve(root.toString(), 'web/partials', 'email.html'), 'utf8');
 
     const html = mustache.render(template, {
         products: products.map((prod) => prod.name),

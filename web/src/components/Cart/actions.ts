@@ -12,7 +12,7 @@ import { CheckoutErrorObject } from './types';
 
 const LOCAL_STORAGE_KEY = 'seanchenpiano_cart';
 
-const stripe = Stripe(STRIPE_PUBLIC);
+const stripe = Stripe(STRIPE_PUBLIC_KEY);
 
 const isCheckingOut = (state: GlobalStateShape) =>
     state.cart.isCheckingOut;

@@ -20,8 +20,9 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 let ESLint, geslint, stylelint, stylelintFormatter, chalk, glob;
 
+// Only need this in development
 if (!isProduction) {
-    ESLint = require('eslint');
+    ESLint = require('eslint').ESLint;
     geslint = require('gulp-eslint');
     stylelint = require('stylelint');
     stylelintFormatter = require('stylelint-formatter-pretty');
@@ -31,22 +32,14 @@ if (!isProduction) {
 
 const devWebpackConfig = isProduction ? () => {} : require('./webpack.dev.config.js');
 
-const prodWebpackConfig = require('./webpack.prod.config.js');
+const prodWebpackConfig = isProduction ? require('./webpack.prod.config.js') : () => {};
 
 const serverTsProject = ts.createProject('server/tsconfig.json');
 const appTsProject = ts.createProject('tsconfig.json');
 
-let finishResolve;
-
-const finishPromise = new Promise((res, _) => {
-    finishResolve = res;
-});
-
-const deferredReporter = (message) => {
-    finishPromise.then(() => {
-        console.log(message);
-    });
-};
+//
+// BUILD APP SECTION
+//
 
 const buildApp = (done) => (
     webpack(prodWebpackConfig, (err, stats) => {
@@ -77,6 +70,10 @@ const buildApp = (done) => (
 
 exports.buildApp = buildApp;
 
+//
+// BUILD SERVER SECTION
+//
+
 exports.generateTzData = generateTzData;
 
 const cleanServer = async (done) => {
@@ -96,6 +93,10 @@ const lintServer = () => {
         .pipe(geslint.formatEach());
 };
 
+const checkServer = () => {
+    return serverTsProject.src().pipe(serverTsProject(ts.reporter.defaultReporter()));
+};
+
 const compileServer = () => {
     return serverTsProject.src()
         .pipe(serverTsProject(ts.reporter.defaultReporter()))
@@ -103,10 +104,6 @@ const compileServer = () => {
         .js
         .pipe(gulp.dest('./server/build'));
 };
-
-const checkServer = () => {
-    return serverTsProject.src().pipe(serverTsProject(ts.reporter.defaultReporter()));
-}
 
 const compileServerNoCheck = () => {
     const count = glob.sync('server/src/**/*.ts').length;
@@ -116,7 +113,7 @@ const compileServerNoCheck = () => {
     const forEach = new Transform({
         writableObjectMode: true,
         readableObjectMode: true,
-        transform(chunk, encoding, callback) {
+        transform(chunk, _, callback) {
             counter++;
             reporter.updateTask('Compile Server', { percentage: counter / count, message: counter + '/' + count });
             callback(null, chunk);
@@ -131,7 +128,6 @@ const compileServerNoCheck = () => {
         .pipe(gulp.dest('./server/build'))
         .on('end', () => {
             reporter.done('Compile Server');
-            // tscBar.increment(1, { message: 'Finished'.green });
         });
 };
 
@@ -143,122 +139,22 @@ const buildServer = gulp.series(
 
 exports.buildServer = buildServer;
 
+// BUILD PROD
+
 exports.buildProd = gulp.series(buildServer, generateTzData, buildApp);
 
-// build folder needs to exist when nodemon watch is called
-const checkAndMakeBuildDir = (done) => {
-    const buildDir = path.resolve(__dirname, 'web/build');
-    fs.exists(buildDir, (exists) => {
-        if (!exists) {
-            fs.mkdir(buildDir, (err) => {
-                if (err) {
-                    console.log(err);
-                }
-                done();
-            });
-        } else {
-            done();
-        }
-    });
-}
+//
+// WATCH SECTION
+//
 
-const webpackWatch = (done) => {
-    reporter.addTask('Webpack', { type: 'percentage', barColorFn: chalk.green, index: 2 });
-    const compiler = webpack(devWebpackConfig(false, reporter));
-    compiler.hooks.beforeRun.tapAsync('Reset Progress', (p) => {
-        reporter.addTask('Webpack', { type: 'percentage', barColorFn: chalk.green, index: 2 });
-        appPromise = new Promise((res, _) => appPromiseResolve = res);
-    });
-
-    webpackWatcher = compiler.watch({ ignored: /node_modules/ }, (err, stats) => {
-        if (err)
-            throw new PluginError('webpack', err);
-
-        reporter.done('Webpack');
-
-        // deferredReporter('[webpack]\n'.blue + stats.toString('minimal'));
-        reporter.promise.then(() => {
-            console.log(chalk.blue('[webpack]\n') + stats.toString('minimal'));
-        });
-    });
-
-    done();
-};
-
+let child;
 let webpackWatcher = null;
-
-const webpackCompileNoCheck = (done) => {
-    reporter.addTask('Webpack', { type: 'percentage', barColorFn: chalk.green, index: 2 });
-    webpack(devWebpackConfig(false, reporter)).run((err, stats) => {
-        if (err)
-            throw new PluginError('webpack', err);
-
-        reporter.done('Webpack');
-
-        // deferredReporter('[webpack]\n'.blue + stats.toString('minimal'));
-        reporter.promise.then(() => {
-            console.log(chalk.blue('[webpack]\n') + stats.toString('minimal'));
-        });
-        done();
-    });
-};
-
-const watchServer = (done) => {
-    gulp.watch('server/src/**/*', { ignoreInitial: false }, buildServer);
-    done();
-};
-
-const startNodemon = (done) => {
-    gulpNodemon({
-        script: './app.js',
-        ext: 'js html',
-        watch: [
-            'web/build/',
-            'server/build/',
-            'app.js',
-        ],
-        done,
-    });
-};
-
-exports.runDev = gulp.series(
-    gulp.parallel(
-        gulp.series(
-            buildServer,
-            watchServer,
-        ),
-        checkAndMakeBuildDir,
-        webpackWatch,
-    ),
-    startNodemon,
-);
-
-exports.doServer = gulp.series(cleanServer, compileServerNoCheck);
-exports.doApp = gulp.series(checkAndMakeBuildDir, webpackCompileNoCheck);
-
 let appPromiseResolve, serverPromiseResolve;
 let appPromise, serverPromise;
+let watchers = [];
+let mainDone;
 
-const resetServerPromise = (cb) => {
-    serverPromise = new Promise((res, _) => serverPromiseResolve = res);
-    cb();
-};
-
-const resetAppPromise = (cb) => {
-    appPromise = new Promise((res, _) => appPromiseResolve = res);
-    cb();
-};
-
-const resolveServerPromise = (cb) => {
-    serverPromiseResolve();
-    cb();
-};
-
-const resolveAppPromise = (cb) => {
-    appPromiseResolve();
-    cb();
-};
-
+// Handle sigint
 process.on('SIGINT', () => {
     child && child.kill();
     webpackWatcher && webpackWatcher.close();
@@ -268,58 +164,73 @@ process.on('SIGINT', () => {
     treeKill(process.pid);
 });
 
-let child;
+// Reset waiting for server build
+const resetServerPromise = (cb) => {
+    serverPromise = new Promise((res, _) => serverPromiseResolve = res);
+    cb();
+};
 
+// Resolve the server build promise
+const resolveServerPromise = (cb) => {
+    serverPromiseResolve();
+    cb();
+};
+
+// Main Webpack Watch function
+const webpackWatch = (done) => {
+    reporter.addTask('Webpack', { type: 'percentage', barColorFn: chalk.green, index: 2 });
+
+    const compiler = webpack(devWebpackConfig(false, reporter));
+    compiler.hooks.beforeRun.tapAsync('Reset Progress', (_) => {
+        reporter.addTask('Webpack', { type: 'percentage', barColorFn: chalk.green, index: 2 });
+        appPromise = new Promise((res, _) => appPromiseResolve = res);
+    });
+
+    webpackWatcher = compiler.watch({ ignored: /node_modules/ }, (err, stats) => {
+        if (err) {
+            throw new PluginError('webpack', err);
+        }
+
+        reporter.done('Webpack');
+
+        reporter.promise.then(() => {
+            console.log(chalk.blue('[webpack]\n') + stats.toString('minimal'));
+        });
+        appPromiseResolve();
+    });
+
+    done();
+};
+
+// This function replaces nodemon
+// We kill existing app
+// Then once progress bars are reset, we call mainDone, which allows the
+// main watchDev function to finish the first part of the gulp.series.
+// Then after everything is built, we spawn a new node running the app
 const restartApp = async () => {
     try {
+        child && treeKill(child.pid);
         reporter.addTask('Overall', { type: 'indefinite', barColorFn: chalk.white, index: 0 });
         reporter.updateTask('Overall', { message: 'Compiling' });
-        mainDone && mainDone();
+        // mainDone && mainDone();
         await Promise.all([appPromise, serverPromise]);
-        finishResolve();
         reporter.updateTask('Overall', { message: 'Starting App' });
-        child && treeKill(child.pid);
         child = spawn('node', ['./app.js']);
-        reporter.done('Overall', { message: chalk.yellow('Waiting for Changes...') });
         child.stdout.setEncoding('utf8');
         child.stderr.setEncoding('utf8');
         child.stdout.on('data', (data) => console.log(data));
         child.stderr.on('data', (data) => console.log(data));
+        reporter.done('Overall', { message: chalk.yellow('Waiting for Changes...') });
     } catch (e) {
         console.error(e);
     }
-}
+};
 
-let watchers = []
-
-let mainDone;
-
-// const watchDev = (done) => {
-//     reporter = new MultiProgressBars({ initMessage: 'Watch Dev' });
-//     watchers.push(
-//         gulp.watch(
-//             ['server/src/**/*'],
-//             { ignoreInitial: false },
-//             gulp.series(resetServerPromise, cleanServer, compileServerNoCheck, resolveServerPromise),
-//         )
-//     );
-//     watchers.push(
-//         gulp.watch(
-//             ['web/src/**/*', 'web/partials/*'],
-//             { ignoreInitial: false },
-//             gulp.series(resetAppPromise, checkAndMakeBuildDir, webpackCompileNoCheck, resolveAppPromise),
-//         )
-//     );
-//     watchers.push(
-//         gulp.watch(
-//             ['server/src/**/*', 'web/src/**/*', 'web/partials/*'],
-//             { ignoreInitial: false },
-//             restartApp,
-//         )
-//     );
-//     mainDone = done;
-// };
-
+// Main Watch function
+// Initialize progress bars,
+// Watch server src and do rebuild steps
+// Watch src files and run restart app (which waits for builds to complete)
+// Then, once
 const watchDev = gulp.series((done) => {
     reporter = new MultiProgressBars({ initMessage: 'Watch Dev', border: true, anchor: 'bottom', persist: true });
     watchers.push(
@@ -336,10 +247,15 @@ const watchDev = gulp.series((done) => {
             restartApp,
         )
     );
-    mainDone = done;
+    // mainDone = done;
+    done();
 }, webpackWatch);
 
 exports.watchDev = watchDev;
+
+//
+// LINTING AND TYPESCRIPT CHECKING SECTION
+//
 
 const watchAndCheckServer = (done) => {
     gulp.watch('server/src/**/*', { ignoreInitial: false }, gulp.series(lintServer, checkServer));

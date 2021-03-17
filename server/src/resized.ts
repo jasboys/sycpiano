@@ -2,6 +2,9 @@ import * as Promise from 'bluebird';
 import * as express from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as arp from 'app-root-path';
+
+const root = arp.toString();
 
 /* eslint-disable-next-line @typescript-eslint/no-var-requires */
 const mkdirp = require('mkdirp');
@@ -16,7 +19,7 @@ resized.get('/*', async (req: express.Request<any, any, any, { width?: string; h
     if (!imgPath) {
         res.status(404).end();
     }
-    imgPath = path.join(__dirname, '../../web/assets/images', imgPath);
+    imgPath = path.join(process.env.IMAGE_ASSETS_PATH, imgPath);
 
     const w = req.query.width && parseInt(req.query.width, 10);
     const h = req.query.height && parseInt(req.query.height, 10);
@@ -36,7 +39,7 @@ resized.get('/*', async (req: express.Request<any, any, any, { width?: string; h
         const width = w ? `w${w}` : '';
         const height = h ? `h${h}` : '';
         const filename = `${parsedPath.name}.${width}${height}${parsedPath.ext}`;
-        const newDir = path.join(__dirname, '../../.resized-cache/', parsedPath.dir);
+        const newDir = path.join(root, '.resized-cache/', parsedPath.dir);
         try {
             await new Promise((resolve, reject) => {
                 mkdirp(newDir, (err: NodeJS.ErrnoException) => {

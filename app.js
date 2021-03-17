@@ -44,6 +44,8 @@ app.use(bodyParser.json())
 
 // only for dev
 // prod uses nginx to serve static files
+app.use('/static/music', express.static(path.resolve(process.env.MUSIC_ASSETS_DIR)));
+app.use('/static/images', express.static(path.resolve(process.env.IMAGE_ASSETS_DIR)));
 app.use('/static', express.static(path.join(__dirname, '/web/assets')));
 app.use('/static', express.static(path.join(__dirname, '/web/build')));
 

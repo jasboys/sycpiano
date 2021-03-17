@@ -20,9 +20,11 @@ web/build/
 web/assets/music/
 web/assets/data/tz*.json
 web/assets/scripts/
+web/assets/images/
+web/assets/videos/
+web/assets/music_dev/
 server/build/
 server/gapi-key.json
 yarn-error.log
 sslcert/
 *.sql
-products
