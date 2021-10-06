@@ -37,6 +37,7 @@ const HighlightDiv = styled.div<{ active: boolean; isHome: boolean }>({
     marginTop: navBarMarginTop,
     height: 5,
     zIndex: -1,
+    transition: 'opacity 0.2s',
 }, ({ active, isHome }) => ({
     opacity: active ? 1 : 0,
     backgroundColor: isHome ? 'white' : lightBlue,
@@ -91,6 +92,9 @@ const linkStyle = css(
 
         '&:hover': {
             color: mix(0.5, logoBlue, '#444'),
+            [`${HighlightDiv}`]: {
+                opacity: 0.5,
+            },
         },
     },
 );
