@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { Sequelize, DataTypes } from 'sequelize';
+import Sequelize from 'sequelize';
 
 import sequelize from '../sequelize';
 import { Model, ModelMap } from '../types';
@@ -10,12 +10,16 @@ import { Model, ModelMap } from '../types';
  * maps each model name to the corresponding sequelize model.
  */
 
-const importModels = (seq: Sequelize): ModelMap => {
+const connections = {
+    sycpiano: sequelize,
+};
+
+const importModels = (seq: Sequelize.Sequelize): ModelMap => {
     const modelMap = fs.readdirSync(__dirname).filter((file) => {
         return (file.indexOf('.') !== 0) && (file !== 'index.js') && (file.slice(-3) === '.js');
     }).reduce((out, file) => {
         /* eslint-disable-next-line @typescript-eslint/no-var-requires */
-        const model = require(path.join(__dirname, file)).default(seq, DataTypes) as typeof Model;
+        const model = require(path.join(__dirname, file)).default(seq, Sequelize.DataTypes) as typeof Model;
         out[model.name] = model;
         return out;
     }, {} as ModelMap);
@@ -29,6 +33,8 @@ const importModels = (seq: Sequelize): ModelMap => {
 };
 
 const db = {
+    connections,
+    objectMapping: Sequelize,
     sequelize,
     // Export the function, in case we ever want to use it with
     // a different DB connection.

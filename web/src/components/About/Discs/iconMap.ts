@@ -1,3 +1,9 @@
+// UPDATE FOR 2021
+// Google play does not exist anymore (Replace with YouTube?)
+// Probably remove arkiv and change to Steinway
+// Also apple should be called apple not itunes
+// Add tidal?
+
 const iconMap: {
     [key: string]: string;
 } = {

@@ -47,7 +47,7 @@ const config = () => {
         host,
         database,
         port,
-        dialect: 'postgres',
+        dialect: 'postgres' as Dialect,
         logging: () => { return; },
         define: { freezeTableName: true, underscored: true },
     };

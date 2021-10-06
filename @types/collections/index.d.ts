@@ -60,7 +60,7 @@ declare module 'collections/sorted-array-set' {
         has(value: T): boolean;
         get(value: T): T | undefined;
         add(value: T): boolean;
-        addEach(...args: T[]): void;
+        addEach(args: T[]): void;
         ['delete'](value: T): boolean;
         deleteAll(value: T, equals: (a: T, b: T) => boolean): number;
         indexOf(value: T): number;

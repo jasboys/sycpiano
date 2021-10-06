@@ -314,8 +314,8 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "calendarCollaborator.calendarId",
-      "inverseOf": null,
+      "reference": "calendarCollaborator.id",
+      "inverseOf": "calendar",
       "relationship": "HasMany",
       "validations": []
     }, {
@@ -330,8 +330,8 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "calendarPiece.calendarId",
-      "inverseOf": null,
+      "reference": "calendarPiece.id",
+      "inverseOf": "calendar",
       "relationship": "HasMany",
       "validations": []
     }, {
@@ -346,7 +346,7 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "collaborator.calendarId",
+      "reference": "collaborator.id",
       "inverseOf": null,
       "relationship": "BelongsToMany",
       "validations": []
@@ -452,7 +452,7 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "piece.calendarId",
+      "reference": "piece.id",
       "inverseOf": null,
       "relationship": "BelongsToMany",
       "validations": []
@@ -567,8 +567,8 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "calendar.calendarId",
-      "inverseOf": null,
+      "reference": "calendar.id",
+      "inverseOf": "calendarPieces",
       "relationship": "BelongsTo",
       "validations": []
     }, {
@@ -583,8 +583,8 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "collaborator.collaboratorId",
-      "inverseOf": null,
+      "reference": "collaborator.id",
+      "inverseOf": "calendarCollaborators",
       "relationship": "BelongsTo",
       "validations": []
     }, {
@@ -672,8 +672,8 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "calendar.calendarId",
-      "inverseOf": null,
+      "reference": "calendar.id",
+      "inverseOf": "calendarPieces",
       "relationship": "BelongsTo",
       "validations": []
     }, {
@@ -733,8 +733,8 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "piece.pieceId",
-      "inverseOf": null,
+      "reference": "piece.id",
+      "inverseOf": "calendarPieces",
       "relationship": "BelongsTo",
       "validations": []
     }, {
@@ -777,8 +777,8 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "calendarCollaborator.collaboratorId",
-      "inverseOf": null,
+      "reference": "calendarCollaborator.id",
+      "inverseOf": "collaborator",
       "relationship": "HasMany",
       "validations": []
     }, {
@@ -793,7 +793,7 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "calendar.collaboratorId",
+      "reference": "calendar.id",
       "inverseOf": null,
       "relationship": "BelongsToMany",
       "validations": []
@@ -927,7 +927,7 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "product.customerId",
+      "reference": "product.id",
       "inverseOf": null,
       "relationship": "BelongsToMany",
       "validations": []
@@ -986,8 +986,8 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "customer.customerId",
-      "inverseOf": null,
+      "reference": "customer.id",
+      "inverseOf": "products",
       "relationship": "BelongsTo",
       "validations": []
     }, {
@@ -1017,8 +1017,8 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "product.productId",
-      "inverseOf": null,
+      "reference": "product.id",
+      "inverseOf": "customers",
       "relationship": "BelongsTo",
       "validations": []
     }, {
@@ -1091,8 +1091,8 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "discLink.discId",
-      "inverseOf": null,
+      "reference": "discLink.id",
+      "inverseOf": "disc",
       "relationship": "HasMany",
       "validations": []
     }, {
@@ -1225,8 +1225,8 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "disc.discId",
-      "inverseOf": null,
+      "reference": "disc.id",
+      "inverseOf": "discLinks",
       "relationship": "BelongsTo",
       "validations": []
     }, {
@@ -1462,8 +1462,8 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "musicFile.musicId",
-      "inverseOf": null,
+      "reference": "musicFile.id",
+      "inverseOf": "music",
       "relationship": "HasMany",
       "validations": []
     }, {
@@ -1626,8 +1626,8 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "music.musicId",
-      "inverseOf": null,
+      "reference": "music.id",
+      "inverseOf": "musicFiles",
       "relationship": "BelongsTo",
       "validations": []
     }, {
@@ -1848,8 +1848,8 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "calendarPiece.pieceId",
-      "inverseOf": null,
+      "reference": "calendarPiece.id",
+      "inverseOf": "piece",
       "relationship": "HasMany",
       "validations": []
     }, {
@@ -1864,7 +1864,7 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "calendar.pieceId",
+      "reference": "calendar.id",
       "inverseOf": null,
       "relationship": "BelongsToMany",
       "validations": []
@@ -1983,7 +1983,7 @@
       "isRequired": false,
       "isSortable": true,
       "isVirtual": false,
-      "reference": "customer.productId",
+      "reference": "customer.id",
       "inverseOf": null,
       "relationship": "BelongsToMany",
       "validations": []
@@ -2277,11 +2277,13 @@
     "actions": []
   }],
   "meta": {
-    "database_type": "postgres",
     "liana": "forest-express-sequelize",
-    "liana_version": "6.6.3",
-    "engine": "nodejs",
-    "engine_version": "12.18.2",
-    "orm_version": "6.3.5"
+    "liana_version": "7.11.5",
+    "stack": {
+      "database_type": "postgres",
+      "engine": "nodejs",
+      "engine_version": "14.17.1",
+      "orm_version": "6.6.4"
+    }
   }
 }

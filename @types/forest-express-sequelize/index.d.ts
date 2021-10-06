@@ -3,6 +3,7 @@ declare module 'forest-express-sequelize' {
 
 import { RequestHandler, Response } from "express";
 import { Sequelize } from "sequelize/types";
+import type S from "sequelize";
 
 // Everything related to Forest constants
 
@@ -183,11 +184,15 @@ export function collection(name: string, options: CollectionOptions): void;
 export function ensureAuthenticated(): RequestHandler;
 
 export interface InitOptions {
-    modelsDir: string;
-    configDir: string;
+    modelsDir?: string;
+    configDir?: string;
     envSecret: string;
     authSecret: string;
-    sequelize: Sequelize;
+    sequelize?: Sequelize;
+    connections: {
+        [key: string]: Sequelize;
+    };
+    objectMapping: S;
 }
 
 export function init(options: InitOptions): Promise<RequestHandler>;

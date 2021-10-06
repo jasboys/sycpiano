@@ -98,7 +98,7 @@ export const Cart: React.FC<CartProps> = ({ styles, attributes, isMobile, setPop
             onEnter={(el: HTMLDivElement) => {
                 if (!tl.current) {
                     tl.current = gsap.timeline({ reversed: true, paused: true })
-                        .to(el, { height: 'auto', duration: 0.25, ease: 'expo.inOut' });
+                        .to(el, { height: 'auto', duration: 0.30, ease: 'quad.inOut' });
                 }
                 tl.current.pause().play();
             }}

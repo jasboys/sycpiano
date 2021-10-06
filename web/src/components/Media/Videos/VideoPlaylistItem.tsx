@@ -127,34 +127,41 @@ const TextBottom = styled.h4`
     font-size: 0.8rem;
 `;
 
-const VideoPlaylistItem: React.FC<VideoPlaylistItemProps> = ({ item, currentItemId, onClick, isMobile, history }) => (
-    <StyledVideoItem
-        active={currentItemId === item.id}
-        onClick={() => {
-            history.push(`/media/videos/${item.id}`);
-            onClick(isMobile, item.id);
-        }}
-    >
-        <ImageContainer>
-            <img alt="Sean Chen Piano Video" src={item.snippet.thumbnails.high.url} />
-            <Duration active={currentItemId === item.id}>
-                {videoDurationToDisplay(item.contentDetails.duration)}
-            </Duration>
-        </ImageContainer>
-        <VideoInfo>
-            <TextTop
-                id={`${item.id}-info`}
-                text={item.snippet.title}
-                lines={2}
-                ellipsis="..."
-                buttons={false}
-            />
-            <TextBottom>
-                {item.statistics.viewCount} views
+const VideoPlaylistItem: React.FC<VideoPlaylistItemProps> = ({ item, currentItemId, onClick, isMobile, history }) => {
+    const thumbnailUrl =
+        item.snippet.thumbnails.standard?.url ||
+        item.snippet.thumbnails.high?.url ||
+        item.snippet.thumbnails.medium?.url ||
+        item.snippet.thumbnails.standard?.url;
+    return (
+        <StyledVideoItem
+            active={currentItemId === item.id}
+            onClick={() => {
+                history.push(`/media/videos/${item.id}`);
+                onClick(isMobile, item.id);
+            }}
+        >
+            <ImageContainer>
+                <img alt="Sean Chen Piano Video" src={thumbnailUrl} />
+                <Duration active={currentItemId === item.id}>
+                    {videoDurationToDisplay(item.contentDetails.duration)}
+                </Duration>
+            </ImageContainer>
+            <VideoInfo>
+                <TextTop
+                    id={`${item.id}-info`}
+                    text={item.snippet.title}
+                    lines={2}
+                    ellipsis="..."
+                    buttons={false}
+                />
+                <TextBottom>
+                    {item.statistics.viewCount} views
                         | published on {publishedDateToDisplay(item.snippet.publishedAt)}
-            </TextBottom>
-        </VideoInfo>
-    </StyledVideoItem>
-);
+                </TextBottom>
+            </VideoInfo>
+        </StyledVideoItem>
+    );
+}
 
 export default withRouter(VideoPlaylistItem);

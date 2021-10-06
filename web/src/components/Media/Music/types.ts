@@ -16,9 +16,18 @@ export interface MusicFileItem {
     readonly durationSeconds: number;
     readonly musicId: string;
     readonly musicItem?: MusicItem;
+    readonly hash: string;
 }
 
 export type MusicCategories = 'concerto' | 'solo' | 'chamber' | 'composition' | 'videogame';
+
+export const categoryMap = {
+    concerto: 'Concerti',
+    solo: 'Solo Works',
+    chamber: 'Chamber Works',
+    composition: 'Original Compositions',
+    videogame: 'Videogame-Inspired Works',
+};
 
 export interface MusicCategoryItem {
     readonly id: MusicCategories;

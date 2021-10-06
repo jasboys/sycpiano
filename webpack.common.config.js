@@ -27,6 +27,7 @@ const tsxUse = [
                     {
                         targets: "> 0.25%, not dead",
                         useBuiltIns: 'usage',
+                        shippedProposals: true,
                         corejs: '3',
                     }
                 ],
@@ -35,8 +36,6 @@ const tsxUse = [
             plugins: [
                 '@emotion/babel-plugin',
                 '@babel/syntax-dynamic-import',
-                '@babel/proposal-class-properties',
-                '@babel/proposal-object-rest-spread',
                 ['@babel/transform-runtime', { 'corejs': 3 }]
             ],
         },

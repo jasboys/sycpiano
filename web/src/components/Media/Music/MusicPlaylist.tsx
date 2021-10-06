@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { connect } from 'react-redux';
+import { useSelector } from 'react-redux';
 
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
@@ -9,15 +9,11 @@ import ShuffleButton from 'src/components/Media/Music/ShuffleButton';
 import SpotifyButton from 'src/components/Media/Music/SpotifyButton';
 import Playlist from 'src/components/Media/Playlist';
 
-import { MusicFileItem, MusicListItem } from 'src/components/Media/Music/types';
+import { MusicFileItem } from 'src/components/Media/Music/types';
 import { GlobalStateShape } from 'src/types';
 
 import { playlistBackground } from 'src/styles/colors';
 import { screenXSorPortrait } from 'src/styles/screens';
-
-interface MusicPlaylistStateToProps {
-    readonly items: MusicListItem[];
-}
 
 interface MusicPlaylistOwnProps {
     readonly baseRoute: string;
@@ -30,7 +26,7 @@ interface MusicPlaylistOwnProps {
     readonly isShuffle: boolean;
 }
 
-type MusicPlaylistProps = MusicPlaylistOwnProps & MusicPlaylistStateToProps;
+type MusicPlaylistProps = MusicPlaylistOwnProps;
 
 const musicPlaylistStyle = css`
     position: initial;
@@ -67,7 +63,7 @@ const PlaylistContainer = styled.div`
 
 const MusicPlaylist: React.FC<MusicPlaylistProps> = ({
     isMobile,
-    items,
+    // items,
     onClick,
     currentTrackId,
     play,
@@ -75,7 +71,20 @@ const MusicPlaylist: React.FC<MusicPlaylistProps> = ({
     userInteracted,
     isShuffle,
     toggleShuffle,
-}) => (
+}) => {
+    const didRun = React.useRef<boolean>(false);
+    const items = useSelector(({ audioPlaylist }: GlobalStateShape) => audioPlaylist.items);
+
+    React.useEffect(() => {
+        if (didRun.current === false) {
+            if (items.length && currentTrackId) {
+                document.getElementById(currentTrackId).scrollIntoView();
+                didRun.current = true;
+            }
+        }
+    }, [items, currentTrackId]);
+
+    return (
         <PlaylistContainer>
             <Playlist
                 extraStyles={{ div: musicPlaylistStyle, ul: musicULStyle }}
@@ -100,12 +109,15 @@ const MusicPlaylist: React.FC<MusicPlaylistProps> = ({
             <ShuffleButton isMobile={isMobile} onClick={toggleShuffle} on={isShuffle} />
         </PlaylistContainer>
     );
+};
 
-const mapStateToProps = ({ audioPlaylist }: GlobalStateShape) => ({
-    items: audioPlaylist.items,
-});
+export default MusicPlaylist;
 
-export default connect<MusicPlaylistStateToProps, unknown, MusicPlaylistOwnProps>(
-    mapStateToProps,
-    null,
-)(MusicPlaylist);
+// const mapStateToProps = ({ audioPlaylist }: GlobalStateShape) => ({
+//     items: audioPlaylist.items,
+// });
+
+// export default connect<MusicPlaylistStateToProps, unknown, MusicPlaylistOwnProps>(
+//     mapStateToProps,
+//     null,
+// )(MusicPlaylist);

@@ -14,7 +14,7 @@ export const playlistContainerWidth = {
     tablet: '45vw',
 };
 
-export const playlistTogglerWidth = 20;
+export const playlistTogglerWidth = 24;
 
 export const playlistWidth = {
     desktop: `${desktopPlaylistWidth - playlistTogglerWidth}px`,

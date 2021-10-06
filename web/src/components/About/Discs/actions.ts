@@ -30,7 +30,8 @@ const fetchDiscs = (): ThunkAction<Promise<void>, GlobalStateShape, void, FetchD
         try {
             dispatch(fetchDiscsRequest());
             const { data: discs }: { data: Disc[] } = await axios.get('/api/discs');
-            dispatch(fetchDiscsSuccess(discs));
+            // sort by date descending
+            dispatch(fetchDiscsSuccess(discs.sort((a, b) => b.releaseDate - a.releaseDate)));
         } catch (err) {
             console.log('fetch disc error', err);
             dispatch(fetchDiscsError());

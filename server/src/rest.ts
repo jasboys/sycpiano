@@ -21,15 +21,27 @@ const adminRest = express.Router();
 adminRest.use(express.json());
 adminRest.use(express.urlencoded({ extended: true }));
 
-const corsOptions = {
-    origin: (process.env.NODE_ENV === 'production' && process.env.SERVER_ENV !== 'test') ? 'https://app.forestadmin.com' : 'http://app.forestadmin.com',
+let allowedOrigins: Array<RegExp | string> = [/\.forestadmin\.com$/, /localhost:\d{4}$/];
+if (process.env.CORS_ORIGINS) {
+    allowedOrigins = allowedOrigins.concat(process.env.CORS_ORIGINS.split(','));
+}
+
+const corsOptions: cors.CorsOptions = {
+    origin: allowedOrigins,
     allowedHeaders: ['Authorization', 'X-Requested-With', 'Content-Type'],
     optionsSuccessStatus: 204,
+    maxAge: 86400,
+    credentials: true,
 };
 
+adminRest.use('/forest/authentication', cors({
+    ...corsOptions,
+    origin: [...(corsOptions.origin as (string | RegExp)[]), 'null'],
+}));
+
+adminRest.use(cors(corsOptions));
+
 const respondWithError = (error: any, res: express.Response) => {
-    res.header('Access-Control-Allow-Origin', corsOptions.origin);
-    res.header('Access-Control-Allow-Headers', ...corsOptions.allowedHeaders);
     if (error instanceof Sequelize.ValidationError) {
         res.status(400).json({
             error: (error as Sequelize.ValidationError).errors.reduce((reduce, err) => {
@@ -348,11 +360,13 @@ adminRest.post('/forest/actions/populate-test-data', forest.ensureAuthenticated,
 
 const addForest = async () => {
     adminRest.use(await forest.init({
-        modelsDir: path.join(__dirname, './models'), // Your models directory.
+        // modelsDir: path.join(__dirname, './models'), // Your models directory.
         configDir: path.join(__dirname, './forest'),
         envSecret: process.env.FOREST_ENV_SECRET,
         authSecret: process.env.FOREST_AUTH_SECRET,
-        sequelize: db.sequelize,
+        // sequelize: db.sequelize,
+        objectMapping: db.objectMapping,
+        connections: db.connections,
     }));
 };
 

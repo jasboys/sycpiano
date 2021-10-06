@@ -196,7 +196,7 @@ const webpackWatch = (done) => {
         reporter.promise.then(() => {
             console.log(chalk.blue('[webpack]\n') + stats.toString('minimal'));
         });
-        appPromiseResolve();
+        appPromiseResolve?.();
     });
 
     done();

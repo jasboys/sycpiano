@@ -19,7 +19,7 @@ resized.get('/*', async (req: express.Request<any, any, any, { width?: string; h
     if (!imgPath) {
         res.status(404).end();
     }
-    imgPath = path.join(process.env.IMAGE_ASSETS_PATH, imgPath);
+    imgPath = path.join(process.env.IMAGE_ASSETS_DIR, imgPath);
 
     const w = req.query.width && parseInt(req.query.width, 10);
     const h = req.query.height && parseInt(req.query.height, 10);

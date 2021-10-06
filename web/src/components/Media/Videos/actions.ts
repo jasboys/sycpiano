@@ -62,7 +62,9 @@ const fetchPlaylist = (isMobile: boolean, videoId?: string): ThunkAction<Promise
     try {
         dispatch(fetchPlaylistRequest());
         const playlistResponse = await youTube.getPlaylistItems();
-        const videoItems = playlistResponse.data.items;
+        const videoItems = playlistResponse.data.items.filter((item: Youtube.PlaylistItem) => {
+            return Object.keys(item.snippet.thumbnails).length != 0;
+        });
         const videoIds = videoItems.map((item: Youtube.PlaylistItem) => {
             return item.snippet.resourceId.videoId;
         });
