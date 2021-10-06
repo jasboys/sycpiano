@@ -78,7 +78,7 @@
     "@types/urijs": "^1.19.8",
     "@types/youtube": "0.0.38",
     "app-root-path": "^3.0.0",
-    "axios": "^0.19.2",
+    "axios": "^0.21.2",
     "babel-loader": "^8.2.2",
     "blazy": "^1.8.2",
     "bluebird": "^3.7.2",
