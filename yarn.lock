@@ -1156,17 +1156,17 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
+"@babel/runtime@7.15.4", "@babel/runtime@^7.13.10":
+  version "7.15.4"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.15.4.tgz#fd17d16bfdf878e6dd02d19753a39fa8a8d9c84a"
+  integrity sha512-99catp6bHCaxr4sJ/DbTGgHS4+Rs2RVd2g7iOap6SLGPDknRK9ztKNsE/Fg6QhSeh1FGE5f6gHGQmvvn3I3xhw==
+  dependencies:
+    regenerator-runtime "^0.13.4"
+
 "@babel/runtime@^7.1.2", "@babel/runtime@^7.12.1", "@babel/runtime@^7.3.1", "@babel/runtime@^7.4.4", "@babel/runtime@^7.5.5", "@babel/runtime@^7.7.2", "@babel/runtime@^7.8.3", "@babel/runtime@^7.8.4", "@babel/runtime@^7.8.7", "@babel/runtime@^7.9.2":
   version "7.12.5"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.12.5.tgz#410e7e487441e1b360c29be715d870d9b985882e"
   integrity sha512-plcc+hbExy3McchJCEQG3knOsuh3HH+Prx1P6cLIkET/0dLuQDEnrT+s27Axgc9bqfsmNUNHfscgMUdBpC9xfg==
-  dependencies:
-    regenerator-runtime "^0.13.4"
-
-"@babel/runtime@^7.13.10":
-  version "7.15.4"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.15.4.tgz#fd17d16bfdf878e6dd02d19753a39fa8a8d9c84a"
-  integrity sha512-99catp6bHCaxr4sJ/DbTGgHS4+Rs2RVd2g7iOap6SLGPDknRK9ztKNsE/Fg6QhSeh1FGE5f6gHGQmvvn3I3xhw==
   dependencies:
     regenerator-runtime "^0.13.4"
 
@@ -5913,24 +5913,24 @@ for-own@^1.0.0:
   dependencies:
     for-in "^1.0.1"
 
-forest-express-sequelize@^7.11.5:
-  version "7.11.5"
-  resolved "https://registry.yarnpkg.com/forest-express-sequelize/-/forest-express-sequelize-7.11.5.tgz#f3c8131934c9b838a76f83c308b199484b6828f0"
-  integrity sha512-nrqqT/2bjQumztm+pp7pNXJglMLN7z23nTfoWtPHma0pBTGiFUxEZhwBN/dCyZ+wQGtMX8klGPm0RXS/ebZX5Q==
+forest-express-sequelize@^8.3.3:
+  version "8.3.3"
+  resolved "https://registry.yarnpkg.com/forest-express-sequelize/-/forest-express-sequelize-8.3.3.tgz#232e308eac17fec4636fae4d57a1020cd84cea32"
+  integrity sha512-viY0bpEZAzlqUjf4L/q0Pwu/ItJR0ItPbRQUouee42zB9Cn1GuxD8qLxgKpED1pMvI3j5MsJ3Iurpcc04i4NRA==
   dependencies:
-    "@babel/runtime" "7.10.1"
+    "@babel/runtime" "7.15.4"
     bluebird "2.9.25"
     core-js "3.6.5"
-    forest-express "8.7.4"
+    forest-express "9.2.9"
     http-errors "1.6.1"
     lodash "4.17.21"
     moment "2.19.4"
     semver "5.4.1"
 
-forest-express@8.7.4:
-  version "8.7.4"
-  resolved "https://registry.yarnpkg.com/forest-express/-/forest-express-8.7.4.tgz#2bf0026d0eb73b8c8fa5ee3fec4445b51c96d7f3"
-  integrity sha512-NU/CicMlrEqV3VLH/n5JS+KuWUwwC6TJwpVMhyNvT8Sn0s+hqBjce7ipLeoEYJlK9VdhbFCyWme86ahnn0XZdQ==
+forest-express@9.2.9:
+  version "9.2.9"
+  resolved "https://registry.yarnpkg.com/forest-express/-/forest-express-9.2.9.tgz#be7a6e7cbf5f832bc613a0553f7533585013fa55"
+  integrity sha512-TeHwM1uNEkIP1wHNqGIKPyhM7bOIhCN8N42spgYYSV8wjCjvMARYggImWInuURM87KQxnz/R1VwXQdrz9IeKCg==
   dependencies:
     "@babel/runtime" "7.10.1"
     base32-encode "1.1.1"

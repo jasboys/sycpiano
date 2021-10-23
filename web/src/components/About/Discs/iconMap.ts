@@ -8,8 +8,10 @@ const iconMap: {
     [key: string]: string;
 } = {
     amazon: 'amazon.svg',
-    itunes: 'apple.svg',
-    google: 'google-play.svg',
+    itunes: 'apple.svg', // for backward compat
+    apple: 'apple.svg',
+    // google: 'google-play.svg',
+    tidal: 'tidal.svg',
     spotify: 'spotify-color.svg',
     arkiv: 'arkiv.svg',
 };

@@ -3,8 +3,6 @@ import * as React from 'react';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
-import startCase from 'lodash-es/startCase';
-
 import { Link } from 'react-router-dom';
 
 import { categoryMap, isMusicItem, MusicFileItem, MusicItem as MusicItemType, MusicListItem } from 'src/components/Media/Music/types';

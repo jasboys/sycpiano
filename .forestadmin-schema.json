@@ -336,7 +336,7 @@
       "validations": []
     }, {
       "field": "collaborators",
-      "type": ["String"],
+      "type": ["Uuid"],
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -347,7 +347,7 @@
       "isSortable": true,
       "isVirtual": false,
       "reference": "collaborator.id",
-      "inverseOf": null,
+      "inverseOf": "calendars",
       "relationship": "BelongsToMany",
       "validations": []
     }, {
@@ -442,7 +442,7 @@
       "validations": []
     }, {
       "field": "pieces",
-      "type": ["String"],
+      "type": ["Uuid"],
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -453,7 +453,7 @@
       "isSortable": true,
       "isVirtual": false,
       "reference": "piece.id",
-      "inverseOf": null,
+      "inverseOf": "calendars",
       "relationship": "BelongsToMany",
       "validations": []
     }, {
@@ -568,12 +568,12 @@
       "isSortable": true,
       "isVirtual": false,
       "reference": "calendar.id",
-      "inverseOf": "calendarPieces",
+      "inverseOf": "calendarCollaborators",
       "relationship": "BelongsTo",
       "validations": []
     }, {
       "field": "collaborator",
-      "type": "String",
+      "type": "Uuid",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -604,7 +604,7 @@
       "validations": []
     }, {
       "field": "id",
-      "type": "String",
+      "type": "Uuid",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -693,7 +693,7 @@
       "validations": []
     }, {
       "field": "id",
-      "type": "String",
+      "type": "Uuid",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -723,7 +723,7 @@
       "validations": []
     }, {
       "field": "piece",
-      "type": "String",
+      "type": "Uuid",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -794,7 +794,7 @@
       "isSortable": true,
       "isVirtual": false,
       "reference": "calendar.id",
-      "inverseOf": null,
+      "inverseOf": "collaborators",
       "relationship": "BelongsToMany",
       "validations": []
     }, {
@@ -814,7 +814,7 @@
       "validations": []
     }, {
       "field": "id",
-      "type": "String",
+      "type": "Uuid",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -902,7 +902,7 @@
       "validations": []
     }, {
       "field": "id",
-      "type": "String",
+      "type": "Uuid",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -928,7 +928,7 @@
       "isSortable": true,
       "isVirtual": false,
       "reference": "product.id",
-      "inverseOf": null,
+      "inverseOf": "customers",
       "relationship": "BelongsToMany",
       "validations": []
     }, {
@@ -976,7 +976,7 @@
       "validations": []
     }, {
       "field": "customer",
-      "type": "String",
+      "type": "Uuid",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -987,12 +987,12 @@
       "isSortable": true,
       "isVirtual": false,
       "reference": "customer.id",
-      "inverseOf": "products",
+      "inverseOf": null,
       "relationship": "BelongsTo",
       "validations": []
     }, {
       "field": "id",
-      "type": "String",
+      "type": "Uuid",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -1018,7 +1018,7 @@
       "isSortable": true,
       "isVirtual": false,
       "reference": "product.id",
-      "inverseOf": "customers",
+      "inverseOf": null,
       "relationship": "BelongsTo",
       "validations": []
     }, {
@@ -1097,7 +1097,7 @@
       "validations": []
     }, {
       "field": "id",
-      "type": "String",
+      "type": "Uuid",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -1215,7 +1215,7 @@
       "validations": []
     }, {
       "field": "disc",
-      "type": "String",
+      "type": "Uuid",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -1231,7 +1231,7 @@
       "validations": []
     }, {
       "field": "id",
-      "type": "String",
+      "type": "Uuid",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -1334,7 +1334,7 @@
       "validations": []
     }, {
       "field": "id",
-      "type": "String",
+      "type": "Uuid",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -1437,7 +1437,7 @@
       "validations": []
     }, {
       "field": "id",
-      "type": "String",
+      "type": "Uuid",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -1601,7 +1601,7 @@
       "validations": []
     }, {
       "field": "id",
-      "type": "String",
+      "type": "Uuid",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -1616,7 +1616,7 @@
       "validations": []
     }, {
       "field": "music",
-      "type": "String",
+      "type": "Uuid",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -1750,7 +1750,7 @@
       "validations": []
     }, {
       "field": "id",
-      "type": "String",
+      "type": "Uuid",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -1865,7 +1865,7 @@
       "isSortable": true,
       "isVirtual": false,
       "reference": "calendar.id",
-      "inverseOf": null,
+      "inverseOf": "pieces",
       "relationship": "BelongsToMany",
       "validations": []
     }, {
@@ -1900,7 +1900,7 @@
       "validations": []
     }, {
       "field": "id",
-      "type": "String",
+      "type": "Uuid",
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -1973,7 +1973,7 @@
       "validations": []
     }, {
       "field": "customers",
-      "type": ["String"],
+      "type": ["Uuid"],
       "defaultValue": null,
       "enums": null,
       "integration": null,
@@ -1984,7 +1984,7 @@
       "isSortable": true,
       "isVirtual": false,
       "reference": "customer.id",
-      "inverseOf": null,
+      "inverseOf": "products",
       "relationship": "BelongsToMany",
       "validations": []
     }, {
@@ -2278,7 +2278,7 @@
   }],
   "meta": {
     "liana": "forest-express-sequelize",
-    "liana_version": "7.11.5",
+    "liana_version": "8.3.3",
     "stack": {
       "database_type": "postgres",
       "engine": "nodejs",

@@ -120,9 +120,11 @@ class DiscListItem extends React.PureComponent<ChildRendererProps<Disc>, Record<
                         <p>{this.props.item.description}</p>
                         <Divider />
                         <LinksContainer>
-                            {this.props.item.discLinks.map((value) => (
-                                <DiscLink key={`${this.props.item.id}-${value.type}`} linkUrl={value.url} imageUrl={iconMap[value.type]} />
-                            ))}
+                            {this.props.item.discLinks
+                                .filter((value) => value.type !== 'google')
+                                .map((value) => (
+                                    <DiscLink key={`${this.props.item.id}-${value.type}`} linkUrl={value.url} imageUrl={iconMap[value.type]} />
+                                ))}
                         </LinksContainer>
                     </DiscDescription>
                 </DiscItem>
