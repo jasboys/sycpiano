@@ -20,12 +20,12 @@ const getMusicInstancesOfType = (type: string) => {
             type,
         },
         attributes: {
-            exclude: ['created_at', 'updated_at'],
+            exclude: ['created_at', 'updated_at', 'createdAt', 'updatedAt'],
         },
         include: [{
             model: models.musicFile,
             attributes: {
-                exclude: ['created_at', 'updated_at'],
+                exclude: ['created_at', 'updated_at', 'createdAt', 'updatedAt'],
             },
         }],
         order,

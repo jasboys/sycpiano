@@ -59,16 +59,16 @@ const config = () => {
                     include: sourcePaths,
                     use: tsxUse,
                 },
-                {
-                    test: /node_modules\/vfile\/core\.js/,
-                    use: [{
-                        loader: 'imports-loader',
-                        options: {
-                            type: 'commonjs',
-                            imports: ['single process/browser process'],
-                        },
-                    }],
-                },
+                // {
+                //     test: /node_modules\/vfile\/core\.js/,
+                //     use: [{
+                //         loader: 'imports-loader',
+                //         options: {
+                //             type: 'commonjs',
+                //             imports: ['single process/browser process'],
+                //         },
+                //     }],
+                // },
             ],
         },
         optimization: {
@@ -84,6 +84,10 @@ const config = () => {
                 GAPI_KEY: JSON.stringify(process.env.GAPI_KEY_APP),
                 STRIPE_PUBLIC_KEY: JSON.stringify(process.env.STRIPE_PUBLIC_KEY),
             }),
+            // new webpack.ProvidePlugin({
+            //     path: require.resolve('path-browserify'),
+            //     process: require.resolve('process/browser'),
+            // }),
             new CleanWebpackPlugin(),
             new HtmlWebpackPlugin({
                 template: path.resolve(__dirname, 'web/partials/index.html'),
@@ -95,7 +99,10 @@ const config = () => {
             extensions: ['*', '.js', '.jsx', '.ts', '.tsx'],
             alias: {
                 'src': path.resolve(__dirname, 'web/src'),
+            },
+            fallback: {
                 path: require.resolve('path-browserify'),
+                process: require.resolve('process/browser'),
             },
             symlinks: false,
         }

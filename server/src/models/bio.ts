@@ -2,6 +2,7 @@ import { DataTypes, Sequelize } from 'sequelize';
 import { Model } from '../types';
 
 export class bio extends Model {
+    readonly id: number;
     readonly paragraph!: number;
     readonly text!: string;
     readonly createdAt?: Date | string;
@@ -26,6 +27,15 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof bio =
         updatedAt: {
             type: dataTypes.DATE,
             field: 'updated_at',
+        },
+        id: {
+            type: dataTypes.VIRTUAL,
+            get() {
+                return this.paragraph;
+            },
+            set() {
+                return;
+            },
         },
     }, {
             sequelize,

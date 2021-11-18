@@ -1,18 +1,20 @@
 import * as express from 'express';
 import * as moment from 'moment-timezone';
-import Sequelize from 'sequelize';
+import sequelize from 'sequelize';
+import Sequelize, { Op } from 'sequelize';
 
 import db from '../models';
 import { calendar } from '../models/calendar';
 const models = db.models;
 
-const { and, eq, gt, lt, or } = Sequelize.Op;
+// const { and, eq, gt, lt, or } = Sequelize.Op;
+// const { gt, lt } = Sequelize.Op;
 
 const calendarIncludeBase = [
     {
         model: models.collaborator,
         attributes: {
-            exclude: ['id', 'created_at', 'updated_at', 'calendarCollaborators', '_search'],
+            exclude: ['id', 'created_at', 'updated_at', 'createdAt', 'updatedAt', 'calendarCollaborators', '_search'],
         },
         through: {
             attributes: ['order'],
@@ -21,7 +23,7 @@ const calendarIncludeBase = [
     {
         model: models.piece,
         attributes: {
-            exclude: ['id', 'created_at', 'updated_at', 'calendarPieces', '_search'],
+            exclude: ['id', 'created_at', 'updated_at', 'createdAt', 'updatedAt', 'calendarPieces', '_search'],
         },
         through: {
             attributes: ['order'],
@@ -32,12 +34,12 @@ const calendarIncludeBase = [
 function getEventsBefore(before: string, limit: number) {
     return models.calendar.findAll({
         attributes: {
-            exclude: ['created_at', 'updated_at'],
+            exclude: ['created_at', 'updated_at', 'createdAt', 'updatedAt'],
         },
         include: calendarIncludeBase,
         where: {
             dateTime: {
-                [lt]: before,
+                [Op.lt]: before,
             },
         },
         limit,
@@ -53,12 +55,12 @@ function getEventsBefore(before: string, limit: number) {
 function getEventsAfter(after: string, limit: number) {
     return models.calendar.findAll({
         attributes: {
-            exclude: ['created_at', 'updated_at'],
+            exclude: ['created_at', 'updated_at', 'createdAt', 'updatedAt'],
         },
         include: calendarIncludeBase,
         where: {
             dateTime: {
-                [gt]: after,
+                [Op.gt]: after,
             },
         },
         limit,
@@ -74,13 +76,13 @@ function getEventsAfter(after: string, limit: number) {
 function getEventsBetween(start: string, end: string, order: 'ASC' | 'DESC') {
     return models.calendar.findAll({
         attributes: {
-            exclude: ['created_at', 'updated_at'],
+            exclude: ['created_at', 'updated_at', 'createdAt', 'updatedAt'],
         },
         include: calendarIncludeBase,
         where: {
             dateTime: {
-                [gt]: start,
-                [lt]: end,
+                [Op.gt]: start,
+                [Op.lt]: end,
             },
         },
         order: [
@@ -109,90 +111,103 @@ interface CalendarQuery {
 
 calendarRouter.get('/search', async (req: express.Request<any, any, any, CalendarQuery>, res) => {
     const str: string = req.query.q;
-    let idArray: string[];
-    if (str) {
-        const tokens = str.replace(', ', '|').replace(' ', '&');
-
-        const ids: calendar[] = await db.sequelize.query(`
-            SELECT c."id" FROM (
-                SELECT
-                    "calendar"."id",
-                    "calendar"."name",
-                    (tsvector_agg(coalesce("collaborators"."_search", '')) || tsvector_agg(coalesce("pieces"."_search", '')) || ("calendar"."_search")) as "tsv"
-                FROM "calendar" AS "calendar"
-                LEFT OUTER JOIN (
-                    "calendar_collaborator" AS "collaborators->calendarCollaborator"
-                    INNER JOIN "collaborator" AS "collaborators"
-                        ON "collaborators"."id" = "collaborators->calendarCollaborator"."collaborator_id"
-                ) ON "calendar"."id" = "collaborators->calendarCollaborator"."calendar_id"
-                LEFT OUTER JOIN (
-                    "calendar_piece" AS "pieces->calendarPiece"
-                    INNER JOIN "piece" AS "pieces"
-                        ON "pieces"."id" = "pieces->calendarPiece"."piece_id"
-                ) ON "calendar"."id" = "pieces->calendarPiece"."calendar_id"
-                GROUP BY "calendar"."id"
-            ) c WHERE c."tsv" @@ to_tsquery('en', :query);
-        `, {
-                replacements: { query: tokens },
-                type: Sequelize.QueryTypes.SELECT,
-            });
-
-        console.log(ids);
-        idArray = ids.map(({ id }) => id);
+    // let idArray: string[];
+    if (!str) {
+        res.json([]);
     }
+    // if (str) {
+    //     const tokens = str.replace(', ', '|').replace(' ', '&');
 
-    const before = req.query.before ? moment(req.query.before) : undefined;
-    const after = req.query.after ? moment(req.query.after) : undefined;
-    const date = req.query.date ? moment(req.query.date) : undefined;
+    //     const ids: calendar[] = await db.sequelize.query(`
+    //         SELECT cs.* FROM calendar_search('beethoven') cs
+    //         LEFT OUTER JOIN LATERAL (
+    //             "calendar_piece" cp
+    //             INNER JOIN "piece" AS p
+    //                 ON p.id = cp.piece_id
+    //         ) ON cp.calendar_id = cs.id
+    //         LEFT OUTER JOIN LATERAL (
+    //             "calendar_collaborator" cc
+    //             INNER JOIN "collaborator" AS c
+    //                 ON c.id = cc.collaborator_id
+    //         ) ON cc.calendar_id = cs.id
+    //     `, {
+    //             replacements: { query: tokens },
+    //             type: Sequelize.QueryTypes.SELECT,
+    //         });
 
-    let where: {
-        id?: string[];
-        dateTime?: any;
-    } = (str) ? {
-        id: idArray,
-    } : {};
-    if (date) {
-        where = {
-            dateTime: {
-                [eq]: date,
-            },
-        };
-    } else if (before && after) {
-        const arr = [
-            { [lt]: before },
-            { [gt]: after },
-        ];
-        let op;
-        if (before.isBefore(after)) {
-            op = or;
-        } else {
-            op = and;
-        }
-        where = {
-            dateTime: {
-                [op]: arr,
-            },
-        };
-    } else if (before) {
-        where = {
-            dateTime: {
-                [lt]: before,
-            },
-        };
-    } else if (after) {
-        where = {
-            dateTime: {
-                [gt]: after,
-            },
-        };
-    }
+    //     console.log(ids);
+    //     idArray = ids.map(({ id }) => id);
+    // }
+
+    // const before = req.query.before ? moment(req.query.before) : undefined;
+    // const after = req.query.after ? moment(req.query.after) : undefined;
+    // const date = req.query.date ? moment(req.query.date) : undefined;
+
+    // let where: {
+    //     id?: string[];
+    //     dateTime?: any;
+    // } = (str) ? {
+    //     id: idArray,
+    // } : {};
+    // if (date) {
+    //     where = {
+    //         dateTime: {
+    //             [eq]: date,
+    //         },
+    //     };
+    // } else if (before && after) {
+    //     const arr = [
+    //         { [lt]: before },
+    //         { [gt]: after },
+    //     ];
+    //     let op;
+    //     if (before.isBefore(after)) {
+    //         op = or;
+    //     } else {
+    //         op = and;
+    //     }
+    //     where = {
+    //         dateTime: {
+    //             [op]: arr,
+    //         },
+    //     };
+    // } else if (before) {
+    //     where = {
+    //         dateTime: {
+    //             [lt]: before,
+    //         },
+    //     };
+    // } else if (after) {
+    //     where = {
+    //         dateTime: {
+    //             [gt]: after,
+    //         },
+    //     };
+    // }
+
+    // if (str) {
+    //     const tokens = str.replace(', ', '|').replace(' ', '&');
+
+    //     const ids: calendar[] = await db.sequelize.query(`
+    //         SELECT * FROM calendar_search(:query)
+    //         WHERE
+    //     `, {
+    //             replacements: { query: tokens },
+    //             type: Sequelize.QueryTypes.SELECT,
+    //         });
+
+    //     console.log(ids);
+    //     idArray = ids.map(({ id }) => id);
+    // }
+    const tokens = str.replace(', ', '|').replace(' ', '&');
 
     const calendarResults: calendar[] = await db.models.calendar.findAll({
-        where: {
-            ...where,
-        },
+        where: sequelize.where(
+            calendar.rawAttributes.id,
+            Op.in,
+            sequelize.literal(`(SELECT cs.id from calendar_search('${tokens}') cs)`)),
         attributes: {
-            exclude: ['created_at', 'updated_at', '_search'],
+            exclude: ['created_at', 'updated_at', '_search', 'createdAt', 'updatedAt'],
         },
         include: calendarIncludeBase,
         order: [

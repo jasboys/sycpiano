@@ -66,6 +66,20 @@ interface Meta {
     sanitize?: string;
 }
 
+interface GetVideoResponse {
+    items: {
+        snippet: {
+            title: string;
+            description: string;
+            thumbnails: {
+                standard: {
+                    url: string;
+                };
+            };
+        };
+    }[];
+}
+
 export const getMetaFromPathAndSanitize = async (url: string): Promise<Meta> => {
     const parsed = regex.exec(url);
     if (parsed === null) {
@@ -133,7 +147,7 @@ export const getMetaFromPathAndSanitize = async (url: string): Promise<Meta> => 
     if (parsed[2] === 'videos') {
         const videoId = parsed[3];
         try {
-            const playlistResponse = await axios.get(YoutubeVideoUrl, {
+            const playlistResponse = await axios.get<GetVideoResponse>(YoutubeVideoUrl, {
                 params: {
                     key: YoutubeAPIKey,
                     maxResults: 1,

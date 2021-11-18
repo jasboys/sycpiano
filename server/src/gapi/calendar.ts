@@ -138,10 +138,22 @@ export const extractEventDescription = (event: GCalEvent): Record<string, unknow
     }
 };
 
+interface GeocodeResponse {
+        results: {
+            geometry: {
+                location: {
+                    lat: number;
+                    lng: number;
+                };
+            };
+            formattedAddress: string;
+        }[];
+}
+
 export const getLatLng = async (address: string): Promise<{ latlng: { lat: number; lng: number }; formattedAddress: string }> => {
     const geocodeUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
     try {
-        const response = await axios.get(geocodeUrl, {
+        const response = await axios.get<GeocodeResponse>(geocodeUrl, {
             params: {
                 address,
                 key: gapiKey,
@@ -156,11 +168,15 @@ export const getLatLng = async (address: string): Promise<{ latlng: { lat: numbe
     }
 };
 
+interface TimezoneResponse {
+    timeZoneId: string;
+}
+
 export const getTimeZone = async (lat: number, lng: number, timestamp?: string | Date): Promise<string> => {
     const loc = `${lat.toString()},${lng.toString()}`;
     const url = `https://maps.googleapis.com/maps/api/timezone/json`;
     try {
-        const response = await axios.get(url, {
+        const response = await axios.get<TimezoneResponse>(url, {
             params: {
                 location: loc,
                 timestamp: moment(timestamp).unix(),

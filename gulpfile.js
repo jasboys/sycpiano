@@ -251,6 +251,19 @@ const watchDev = gulp.series((done) => {
     done();
 }, webpackWatch);
 
+const watchDevServer = gulp.series((done) => {
+    reporter = new MultiProgressBars({ initMessage: 'Watch Dev', border: true, anchor: 'bottom', persist: true });
+    watchers.push(
+        gulp.watch(
+            ['server/src/**/*'],
+            { ignoreInitial: false },
+            gulp.series(resetServerPromise, cleanServer, compileServerNoCheck, resolveServerPromise, restartApp),
+        )
+    );
+    done();
+})
+
+exports.watchDevServer = watchDevServer;
 exports.watchDev = watchDev;
 
 //

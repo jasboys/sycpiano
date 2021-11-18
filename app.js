@@ -53,10 +53,7 @@ app.engine('html', mustacheExpress());
 app.set('view engine', 'html');
 app.set('views', path.join(__dirname, '/web/build'));
 
-// Matches the /admin route.
-app.get(/\/admin/, (_, res) => res.redirect('https://app.forestadmin.com'));
-
-// Extends Forest api
+// Custom
 app.use(/\/rest/, AdminRest);
 
 // Resize images.
@@ -82,7 +79,7 @@ app.get(/\//, async (req, res) => {
     if (isProduction && req.get('host').match(/^www\..*/i) === null) {
         res.redirect(301, `https://www.${req.get('host')}${req.originalUrl}`);
     }
-    delete req.query.fbclid;
+    delete req.query.fbclid;    // NO FACEBOOK
     const { sanitize = '', notFound = false, ...meta } = await getMetaFromPathAndSanitize(req.path);
     if (notFound) {
         res.status(404);
