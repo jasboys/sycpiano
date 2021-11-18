@@ -100,7 +100,7 @@
     "forest-express-sequelize": "^8.3.3",
     "google-auth-library": "^6.0.0",
     "graceful-fs": "^4.2.4",
-    "gsap": "^3.2.6",
+    "gsap": "^3.6.0",
     "gulp": "^4.0.2",
     "gulp-nodemon": "^2.5.0",
     "gulp-typescript": "^6.0.0-alpha.1",
