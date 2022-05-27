@@ -1,14 +1,14 @@
+import { WithConditionalCSSProp } from '@emotion/react/types/jsx-namespace';
 import * as React from 'react';
-import { AnyComponent, AsyncModule } from 'src/types';
 
 interface AsyncComponentBase<P> {
-    moduleProvider?: () => Promise<AsyncModule<P>>;
+    moduleProvider?: () => Promise<React.ComponentType<P>>;
 }
 
 type AsyncComponentProps<P> = AsyncComponentBase<P> & P;
 
 interface AsyncComponentState<P> {
-    Component: AnyComponent<P>;
+    Component?: React.ComponentType<P>;
 }
 
 // Waits for moduleProvider to return a promise that contains the AsyncModule.
@@ -16,22 +16,23 @@ interface AsyncComponentState<P> {
 // component in render(). Passes through props the props.
 export default class AsyncComponent<P> extends React.PureComponent<AsyncComponentProps<P>, AsyncComponentState<P>> {
     state: AsyncComponentState<P> = {
-        Component: null,
+        Component: undefined,
     };
 
     constructor(props: AsyncComponentProps<P>) {
         super(props);
-        this.props.moduleProvider().then((res) => {
-            const Component = res.Component;
+        this.props.moduleProvider?.().then((res) => {
+            const Component = res;
             this.setState({ Component });
         });
     }
-    render(): JSX.Element {
+
+    render() {
         /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-        const { Component } = this.state as any;
+        const { Component } = this.state;
         const { moduleProvider, ...props } = this.props;
         return (
-            Component && <Component {...props} />
+            (Component === undefined) ? null : <Component {...(props as P & WithConditionalCSSProp<P>)} />
         );
     }
 }

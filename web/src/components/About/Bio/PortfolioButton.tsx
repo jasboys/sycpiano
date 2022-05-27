@@ -50,7 +50,7 @@ const StyledText = styled.span({
 
 const StyledImg = styled.img({ flex: '0 1 auto', marginRight: '0.2rem' });
 
-const PortfolioButton: React.FC<Record<string, unknown>> = () => (
+const PortfolioButton: React.FC<unknown> = () => (
     <StyledDiv>
         <StyledLink href="https://www.dropbox.com/sh/zv4q9qchzn83i4q/AABecbr-vlVemO-nrHeHyCVQa?dl=0" target="_blank" rel="noopener">
             <StyledText>Repertoire</StyledText>
@@ -59,4 +59,6 @@ const PortfolioButton: React.FC<Record<string, unknown>> = () => (
     </StyledDiv>
 );
 
-export default PortfolioButton;
+const MemoizedButton = React.memo(PortfolioButton, () => true);
+
+export default MemoizedButton;

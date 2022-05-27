@@ -1,7 +1,7 @@
 import { calendar } from 'models/calendar';
-import * as moment from 'moment';
 
 import * as forest from 'forest-express-sequelize';
+import { formatInTimeZone } from 'date-fns-tz';
 
 forest.collection('calendar', {
     actions: [
@@ -13,15 +13,15 @@ forest.collection('calendar', {
         type: 'String',
         get: (cal: calendar) => {
             if (cal.dateTime) {
-                return moment(cal.dateTime).tz(cal.timezone).format('YYYY-MM-DD HH:mm');
+                return formatInTimeZone(cal.dateTime, cal.timezone, 'yyyy-MM-dd HH:mm');
             } else {
                 return '';
             }
         },
-        set: (cal: calendar, input: string) => {
+        set: (cal: calendar, _input: string) => {
             // Creates moment in UTC from input by passing in null
             // This is necessary because of how forest/sequelize detects changes in values.
-            cal.dateTime = moment.tz(input, null).toDate();
+            // cal.dateTime = moment.tz(input, null).toDate();
             return cal;
         },
     }],

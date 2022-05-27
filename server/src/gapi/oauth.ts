@@ -1,6 +1,6 @@
 import { JWT } from 'google-auth-library';
-import { Sequelize } from 'sequelize/types';
-import { ModelMap } from 'types';
+import { token } from 'models/token';
+import Sequelize, { ModelStatic } from 'sequelize';
 
 /* eslint-disable-next-line @typescript-eslint/no-var-requires*/
 const authInfo = require('../../gapi-key.json');
@@ -8,10 +8,10 @@ const authInfo = require('../../gapi-key.json');
 const authorize = async () => {
     const jwt = new JWT(
         authInfo.client_email,
-        null,
+        undefined,
         authInfo.private_key,
         ['https://www.googleapis.com/auth/calendar'],
-        null,
+        undefined,
     );
 
     try {
@@ -22,16 +22,26 @@ const authorize = async () => {
     }
 };
 
-export const getToken = async (sequelize: Sequelize): Promise<string> => {
-    const tokenModel = (sequelize.models as ModelMap).token;
+export const getToken = async (sequelize: Sequelize.Sequelize): Promise<string> => {
+    const tokenModel = sequelize.models.token as ModelStatic<token>;
     const tokenInstance = await tokenModel.findByPk('access_token');
     if (tokenInstance) {
-        const expired = Date.now() > tokenInstance.expires.valueOf();
-        if (!expired) {
+        const expired = (tokenInstance.expires === undefined) ? undefined : Date.now() > tokenInstance.expires.valueOf();
+        if (expired !== undefined && !expired) {
             return tokenInstance.token;
         }
     }
     const credentials = await authorize();
+    // appease the strict gods
+    if (
+        credentials === undefined ||
+        credentials.access_token === undefined ||
+        credentials.access_token === null ||
+        credentials.expiry_date === undefined ||
+        credentials.expiry_date === null
+    ) {
+        throw new Error('Not authorized, or no expiry date');
+    }
     await tokenModel.upsert({
         id: 'access_token',
         token: credentials.access_token,

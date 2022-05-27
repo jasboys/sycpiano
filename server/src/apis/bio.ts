@@ -1,5 +1,5 @@
+import { differenceInCalendarYears } from 'date-fns';
 import { Response, Request, NextFunction } from 'express';
-import * as moment from 'moment-timezone';
 
 import db from '../models';
 const models = db.models;
@@ -10,7 +10,8 @@ const getBio = async (_: Request, res: Response, __: NextFunction): Promise<void
         order: [['paragraph', 'ASC']],
     });
 
-    const age = moment().diff('1988-08-27', 'year');
+    const age = differenceInCalendarYears(new Date(), new Date(1988, 7, 27));
+
 
     const [, ...rest] = bio;
     const first = { paragraph: bio[0].paragraph, text: bio[0].text.replace('##', age.toString()) };

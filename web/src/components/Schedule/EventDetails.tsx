@@ -1,9 +1,7 @@
 import startCase from 'lodash-es/startCase';
-import { Moment } from 'moment-timezone';
 import mix from 'polished/lib/color/mix';
 import * as React from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import { RouteComponentProps, withRouter } from 'react-router';
 
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
@@ -16,28 +14,34 @@ import { getGoogleMapsSearchUrl } from 'src/components/Schedule/utils';
 import { lightBlue, logoBlue, magenta, textGrey } from 'src/styles/colors';
 import { lato2 } from 'src/styles/fonts';
 
-import { TweenLite } from 'gsap';
+import { gsap } from 'gsap';
 import { screenXSorPortrait } from 'src/styles/screens';
+import { format, getDate, parseISO } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 
 const locationIconDimension = '30px';
 
 interface EventDateTimeProps {
-    dateTime: Moment;
+    dateTime: string;
+    timezone: string;
     className?: string;
-    isMobile?: boolean;
-    rounded?: 'top' | 'bottom' | 'both';
+    isMobile: boolean;
+    rounded: 'top' | 'bottom' | 'both';
 }
 
-let EventDate: React.FC<EventDateTimeProps> = (props) => (
-    <div className={props.className}>
-        <div css={css({ fontSize: '2.2em' })}>
-            {parseInt(props.dateTime.format('D'), 10)}
+let EventDate: React.FC<EventDateTimeProps> = (props) => {
+    const date = parseISO(props.dateTime);
+    return (
+        <div className={props.className}>
+            <div css={css({ fontSize: '2.2em' })}>
+                {getDate(date)}
+            </div>
+            <div css={css({ fontSize: '1.4em' })}>
+                {format(date, 'EEE')}
+            </div>
         </div>
-        <div css={css({ fontSize: '1.4em' })}>
-            {props.dateTime.format('ddd')}
-        </div>
-    </div>
-);
+    );
+};
 
 const radii: {
     [key: string]: string;
@@ -86,39 +90,38 @@ const eventNameStyle = css`
     }
 `;
 
-class EventName extends React.Component<EventNameProps & RouteComponentProps<unknown>> {
-    copiedSpan: React.RefObject<HTMLSpanElement> = React.createRef();
-    onCopy = () => {
-        TweenLite.fromTo(this.copiedSpan.current, 0.2, { autoAlpha: 1 }, { autoAlpha: 0, delay: 0.5 });
-    }
+const EventName: React.FC<EventNameProps> = (props) => {
+    const copiedSpan = React.useRef<HTMLSpanElement>(null);
 
-    render() {
-        return (
-            <CopyToClipboard onCopy={this.onCopy} text={`${window.location.host}${this.props.permaLink}`}>
-                <div css={eventNameStyle}>
-                    <span>{this.props.name}</span>
-                    {this.props.eventType === 'masterclass' && <span>{`: Masterclass`}</span>}
-                    <LinkIconInstance css={linkIconStyle} />
-                    <span
-                        css={css`
+    const onCopy = () => {
+        if (copiedSpan.current) {
+            gsap.fromTo(copiedSpan.current, { autoAlpha: 1, duration: 0.2 }, { autoAlpha: 0, delay: 0.5 });
+        }
+    };
+
+    return (
+        <CopyToClipboard onCopy={onCopy} text={`${window.location.host}${props.permaLink}`}>
+            <div css={eventNameStyle}>
+                <span>{props.name}</span>
+                {props.eventType === 'masterclass' && <span>{`: Masterclass`}</span>}
+                <LinkIconInstance css={linkIconStyle} />
+                <span
+                    ref={copiedSpan}
+                    css={css`
                             visibility: hidden;
                             font-size: 0.5em;
                         `}
-                        ref={this.copiedSpan}
-                    >
-                        copied
-                    </span>
-                </div>
-            </CopyToClipboard>
-        );
-    }
+                >
+                    copied
+                </span>
+            </div>
+        </CopyToClipboard>
+    );
 }
 
-const EventNameWithRouter = withRouter(EventName);
-
-let EventTime: React.FC<EventDateTimeProps> = ({ className, dateTime }) => (
+let EventTime: React.FC<Omit<EventDateTimeProps, 'rounded'>> = ({ className, dateTime, timezone }) => (
     <div className={className}>
-        {dateTime.format('h:mm a z')}
+        {formatInTimeZone(parseISO(dateTime), timezone, 'h:mm a z')}
     </div>
 );
 
@@ -252,7 +255,7 @@ export {
     EventCollaborators,
     EventDate,
     EventLocation,
-    EventNameWithRouter,
+    EventName,
     EventProgram,
     EventTime,
     EventWebsiteButton,

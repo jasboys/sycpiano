@@ -1,21 +1,32 @@
-import { DataTypes, HasManyGetAssociationsMixin, Sequelize } from 'sequelize';
-import { Model } from '../types';
+import { DataTypes, HasManyGetAssociationsMixin, Model, Sequelize } from 'sequelize';
+import { ModelExport, ModelMap } from '../types';
 import { discLink } from './discLink';
 
-export class disc extends Model {
-    readonly id?: string;
-    readonly title: string;
-    readonly description: string;
-    readonly label: string;
-    readonly releaseDate: Date | string;
-    readonly thumbnailFile: string;
-    readonly createdAt?: Date | string;
-    readonly updatedAt?: Date | string;
-
-    readonly getDiscLinks: HasManyGetAssociationsMixin<discLink>;
+export interface DiscAttributes {
+    id?: string;
+    title: string;
+    description: string;
+    label: string;
+    releaseDate: Date | string;
+    thumbnailFile: string;
 }
 
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof disc => {
+export interface DiscCreationAttributes extends Omit<DiscAttributes, 'id'> {}
+
+export class disc extends Model<DiscAttributes, DiscCreationAttributes> implements DiscAttributes {
+    declare id: string;
+    declare title: string;
+    declare description: string;
+    declare label: string;
+    declare releaseDate: Date | string;
+    declare thumbnailFile: string;
+    declare readonly createdAt?: Date | string;
+    declare readonly updatedAt?: Date | string;
+
+    declare readonly getDiscLinks: HasManyGetAssociationsMixin<discLink>;
+}
+
+export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<disc> => {
     disc.init({
         id: {
             type: dataTypes.UUID,
@@ -40,9 +51,12 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof disc 
         tableName: 'disc',
     });
 
-    disc.associate = (models) => {
+    const associate = (models: ModelMap) => {
         disc.hasMany(models.discLink);
     };
 
-    return disc;
+    return {
+        model: disc,
+        associate,
+    };
 };

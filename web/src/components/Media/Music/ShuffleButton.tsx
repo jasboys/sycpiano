@@ -19,7 +19,7 @@ const upClass = css`
     transform: translateX(calc(100% * 2 / 3)) translateY(-1px) scale(1.05);
 `;
 
-const baseClass = (on: boolean) => css`
+const baseClass = (on?: boolean) => css`
     position: fixed;
     bottom: 25px;
     right: calc(${playlistWidth.desktop} / 3);

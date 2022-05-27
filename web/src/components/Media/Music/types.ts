@@ -5,7 +5,7 @@ export interface MusicItem {
     readonly contributors?: string;
     readonly type: MusicCategories;
     readonly year?: number;
-    readonly musicFiles?: MusicFileItem[];
+    readonly musicFiles: MusicFileItem[];
 }
 
 export interface MusicFileItem {
@@ -15,7 +15,7 @@ export interface MusicFileItem {
     readonly waveformFile: string;
     readonly durationSeconds: number;
     readonly musicId: string;
-    readonly musicItem?: MusicItem;
+    readonly musicItem: Omit<MusicItem, 'musicFiles'>;
     readonly hash: string;
 }
 

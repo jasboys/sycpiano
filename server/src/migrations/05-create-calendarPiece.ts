@@ -1,8 +1,7 @@
 import { DataTypes, QueryInterface } from 'sequelize';
-import { calendarPiece } from 'models/calendarPiece';
 
 export const up = async (queryInterface: QueryInterface, dataTypes: typeof DataTypes): Promise<void> => {
-    await queryInterface.createTable<calendarPiece>('calendar_piece', {
+    await queryInterface.createTable('calendar_piece', {
         id: {
             allowNull: false,
             defaultValue: dataTypes.UUIDV4,

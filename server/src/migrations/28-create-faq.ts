@@ -1,8 +1,7 @@
 import { DataTypes, QueryInterface } from 'sequelize';
-import { faq } from '../models/faq';
 
 export const up = async (queryInterface: QueryInterface, dataTypes: typeof DataTypes): Promise<void> => {
-    await queryInterface.createTable<faq>('faq', {
+    await queryInterface.createTable('faq', {
         id: {
             type: dataTypes.UUID,
             defaultValue: dataTypes.UUIDV4,

@@ -1,7 +1,3 @@
-import { Moment } from 'moment-timezone';
-
-import { SortedArraySet } from 'collections/sorted-array-set';
-
 export type EventType = 'concerto' | 'chamber' | 'solo' | 'masterclass';
 
 export type EventListName = 'upcoming' | 'archive' | 'search' ;
@@ -39,17 +35,18 @@ export interface DayItem {
     readonly name: string;
     readonly collaborators: Collaborators;
     readonly eventType: EventType;
-    readonly dateTime: Moment;
-    readonly endDate: Moment;
+    readonly dateTime: string;
+    readonly endDate?: string;
     readonly allDay: boolean;
     readonly location: string;
     readonly program: Pieces;
     readonly website?: string;
+    readonly timezone: string;
 }
 
 export interface MonthItem {
     readonly type: 'month';
-    readonly dateTime: Moment;
+    readonly dateTime: string;
     readonly month: string;
     readonly year: number;
 }
@@ -76,35 +73,32 @@ export const itemNotLoading = (item: EventItemType | LoadingItem): item is DayIt
     item.type !== 'loading'
 );
 
-export interface ScheduleStateShape {
-    upcoming: EventItemsStateShape;
-    archive: EventItemsStateShape;
-    [key: string]: EventItemsStateShape;
-}
+export type ScheduleStateShape = Record<EventListName, EventItemsStateShape>;
 
 export interface EventItemsStateShape {
-    readonly itemArray: EventItemType[];
-    readonly items: SortedArraySet<EventItemType>;
-    readonly currentItem: DayItem;
-    readonly currentLatLng: LatLngLiteral;
-    readonly hasEventBeenSelected: boolean;
-    readonly isFetchingList: boolean;
-    readonly isFetchingLatLng: boolean;
-    readonly minDate: Moment;
-    readonly maxDate: Moment;
-    readonly setOfMonths: Set<string>;
-    readonly hasMore: boolean;
-    readonly lastQuery?: string;
+    items: EventItemType[];
+    currentItem?: DayItem;
+    currentLatLng: LatLngLiteral;
+    hasEventBeenSelected: boolean;
+    isFetchingList: boolean;
+    isFetchingLatLng: boolean;
+    minDate?: string;
+    maxDate?: string;
+    setOfMonths: string[];
+    hasMore: boolean;
+    lastQuery?: string;
 }
 
 export interface SearchEventsArguments {
+    name: 'search';
     q: string;
 }
 
 export interface FetchEventsArguments {
-    date?: Moment;
-    after?: Moment;
-    before?: Moment;
+    name: EventListName;
+    date?: Date;
+    after?: Date;
+    before?: Date;
     scrollTo?: boolean;
 }
 

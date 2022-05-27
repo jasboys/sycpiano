@@ -1,4 +1,4 @@
-import * as moment from 'moment-timezone';
+import { isValid, parse } from 'date-fns';
 import { ModelMap } from 'types';
 
 export const up = async (models: ModelMap): Promise<void> => {
@@ -8,9 +8,12 @@ export const up = async (models: ModelMap): Promise<void> => {
     });
     try {
         await Promise.each(acclaims, async (acclaim) => {
-            const oldDate = acclaim.oldDate;
+            const oldDate = acclaim.oldDate!;
             let hasFullDate = true;
-            const newDate = moment(oldDate, ['MMMM YYYY', 'MM/DD/YYYY']);
+            let newDate = parse(oldDate, 'MMMM yyyy', new Date());
+            if (!isValid(newDate)) {
+                newDate = parse(oldDate, 'MM/dd/yyyy', new Date());
+            }
             if (oldDate.indexOf(' ') !== -1) {
                 hasFullDate = false;
             }

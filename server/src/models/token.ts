@@ -1,15 +1,23 @@
-import { DataTypes, Sequelize } from 'sequelize';
-import { Model } from '../types';
+import { DataTypes, Model, Sequelize } from 'sequelize';
+import { ModelExport } from '../types';
 
-export class token extends Model {
-    readonly id: string;
-    readonly token: string;
-    readonly expires: Date | string;
-    readonly createdAt?: Date | string;
-    readonly updatedAt?: Date | string;
+export interface TokenAttributes {
+    id: string;
+    token: string;
+    expires?: Date | string;
 }
 
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof token => {
+export interface TokenCreationAttributes extends TokenAttributes {}
+
+export class token extends Model<TokenAttributes, TokenCreationAttributes> implements TokenAttributes {
+    declare id: string;
+    declare token: string;
+    declare expires?: Date | string;
+    declare readonly createdAt?: Date | string;
+    declare readonly updatedAt?: Date | string;
+}
+
+export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<token> => {
     token.init({
         id: {
             type: dataTypes.STRING,
@@ -26,5 +34,5 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof token
         tableName: 'token',
     });
 
-    return token;
+    return { model: token };
 };

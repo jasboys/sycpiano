@@ -1,16 +1,25 @@
-import { DataTypes, Sequelize } from 'sequelize';
-import { Model } from '../types';
+import { DataTypes, Model, Sequelize } from 'sequelize';
+import { ModelExport, ModelMap } from '../types';
 
-export class discLink extends Model {
-    readonly id?: string;
-    readonly type: string;
-    readonly url: string;
-    readonly discId: string;
-    readonly createdAt?: Date | string;
-    readonly updatedAt?: Date | string;
+export interface DiscLinkAttributes {
+    id: string;
+    type: string;
+    url: string;
+    discId: string;
 }
 
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof discLink => {
+export interface DiscLinkCreationAttributes extends Omit<DiscLinkAttributes, 'id'> {}
+
+export class discLink extends Model<DiscLinkAttributes, DiscLinkCreationAttributes> implements DiscLinkAttributes {
+    declare id: string;
+    declare type: string;
+    declare url: string;
+    declare discId: string;
+    declare readonly createdAt?: Date | string;
+    declare readonly updatedAt?: Date | string;
+}
+
+export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<discLink> => {
     discLink.init({
         id: {
             type: dataTypes.UUID,
@@ -30,9 +39,12 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof discL
         tableName: 'disc_link',
     });
 
-    discLink.associate = (models) => {
+    const associate = (models: ModelMap) => {
         discLink.belongsTo(models.disc);
     };
 
-    return discLink;
+    return {
+        model: discLink,
+        associate,
+    };
 };

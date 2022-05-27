@@ -1,6 +1,5 @@
 import * as React from 'react';
-
-import { default as moment, Moment } from 'moment-timezone';
+import { add, getISODay, isSameDay, isSameMonth, startOfMonth, sub } from 'date-fns';
 
 export const DateIconSVG: React.FC<Record<string, unknown>> = () => {
     return (
@@ -13,16 +12,16 @@ export const DateIconSVG: React.FC<Record<string, unknown>> = () => {
 };
 
 interface DateIconProps extends React.SVGAttributes<unknown> {
-    readonly date: Moment;
+    readonly date: Date;
 }
 
 export const DateIconInstance: React.FC<DateIconProps> = ({ date, ...props }) => {
-    const startOfMonth = moment(date).startOf('month');
-    const startDay = startOfMonth.isoWeekday() % 7;
-    const firstDayOfCalendar = moment(startOfMonth).subtract({ days: startDay });
-    const calendarArray: Moment[] = new Array(42);
+    const monthStart = startOfMonth(date);
+    const startDay = getISODay(monthStart) % 7;
+    const firstDayOfCalendar = sub(monthStart, { days: startDay });
+    const calendarArray: Date[] = new Array(42);
     for (let i = 0; i < 42; i++) {
-        calendarArray[i] = moment(firstDayOfCalendar).add({ days: i });
+        calendarArray[i] = add(firstDayOfCalendar, { days: i });
     }
     return (
         <svg {...props} xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
@@ -31,8 +30,8 @@ export const DateIconInstance: React.FC<DateIconProps> = ({ date, ...props }) =>
                 calendarArray.map((element, index) => {
                     const x = 118 + 3 + index % 7 * 52;
                     const y = 224 + 3 + Math.floor(index / 7) * 42;
-                    if (date.isSame(element, 'month')) {
-                        const className = (date.isSame(element, 'day')) ? 'active' : 'inactive';
+                    if (isSameMonth(date, element)) {
+                        const className = (isSameDay(date, element)) ? 'active' : 'inactive';
                         return <rect key={index} className={className} stroke="none" x={x} y={y} width="46" height="36" />;
                     }
                 })

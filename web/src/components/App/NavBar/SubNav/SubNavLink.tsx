@@ -29,9 +29,9 @@ const StyledSubNavLink = styled(NavLink, {
     boxShadow: '0 6px 11px -5px rgba(0, 0, 0, 0.3)',
     transition: 'all 0.25s',
     lineHeight: '2rem',
-    '&.active': {
-        color: lightBlue,
-    },
+    // '&.active': {
+    //     color: lightBlue,
+    // },
     '&:hover': {
         color: 'white',
         backgroundColor: lightBlue,
@@ -62,7 +62,7 @@ const SubNavLink: React.FC<SubNavLinkProps> = ({ basePath, link, onClick, isHome
             to={`${basePath.path}${link.path}`}
             isMobile={isMobile}
             isHome={isHome}
-            activeClassName={'active'}
+            style={({ isActive }) => ({ color: isActive ? lightBlue : '' })}
             onClick={() => { setTimeout(() => onClick(), 250); }}
         >
             {link.name}

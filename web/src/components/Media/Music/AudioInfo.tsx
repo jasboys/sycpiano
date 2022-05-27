@@ -16,7 +16,7 @@ import { navBarHeight, playlistContainerWidth } from 'src/styles/variables';
 import { metaDescriptions, titleStringBase } from 'src/utils';
 
 interface AudioInfoProps {
-    currentTrack: MusicFileItem;
+    currentTrack?: MusicFileItem;
     duration: number;
     currentPosition: number;
     isMobile: boolean;
@@ -99,33 +99,35 @@ const ContributingOrDuration = styled.div`
 `;
 
 class AudioInfo extends React.PureComponent<AudioInfoProps> {
-    private tween: gsap.core.Tween;
+    private tween: gsap.core.Tween | undefined;
     private titleDiv: React.RefObject<HTMLDivElement> = React.createRef();
     private marquee: React.RefObject<HTMLDivElement> = React.createRef();
     private secondSpan: React.RefObject<HTMLSpanElement> = React.createRef();
 
     recalculateMarquee = () => {
         this.tween && this.tween.kill();
-        this.marquee.current.removeAttribute('style');
-        this.titleDiv.current.removeAttribute('style');
-        const divWidth = this.titleDiv.current.offsetWidth;
-        const spanWidth = (this.marquee.current.children[0] as HTMLDivElement).offsetWidth;
-        if (divWidth > spanWidth) {
-            this.marquee.current.style.left = `${(divWidth - spanWidth) / 2}px`;
-            this.titleDiv.current.style.padding = '0';
-            this.secondSpan.current.style.visibility = 'hidden';
-        } else {
-            const dur = this.marquee.current.offsetWidth / 100;
-            this.tween = gsap.fromTo(this.marquee.current, dur,
-                { x: '0%' },
-                {
-                    x: '-50%',
-                    ease: 'linear',
-                    clearProps: 'transform',
-                    delay: 3,
-                    onComplete: () => this.tween.restart(true),
-                });
-            this.secondSpan.current.style.visibility = 'unset';
+        if (this.marquee.current && this.titleDiv.current && this.secondSpan.current) {
+            this.marquee.current.removeAttribute('style');
+            this.titleDiv.current.removeAttribute('style');
+            const divWidth = this.titleDiv.current.offsetWidth;
+            const spanWidth = (this.marquee.current.children[0] as HTMLDivElement).offsetWidth;
+            if (divWidth > spanWidth) {
+                this.marquee.current.style.left = `${(divWidth - spanWidth) / 2}px`;
+                this.titleDiv.current.style.padding = '0';
+                this.secondSpan.current.style.visibility = 'hidden';
+            } else {
+                const dur = this.marquee.current.offsetWidth / 100;
+                this.tween = gsap.fromTo(this.marquee.current, dur,
+                    { x: '0%' },
+                    {
+                        x: '-50%',
+                        ease: 'linear',
+                        clearProps: 'transform',
+                        delay: 3,
+                        onComplete: () => { this.tween?.restart(true); },
+                    });
+                this.secondSpan.current.style.visibility = 'unset';
+            }
         }
     }
 
@@ -162,7 +164,7 @@ class AudioInfo extends React.PureComponent<AudioInfoProps> {
             name: movement = '',
         } = this.props.currentTrack || {};
 
-        const contribArray = contributors && contributors.split(', ');
+        const contribArray = (contributors === '' || contributors === null) ? undefined : contributors.split(', ');
         const composerTitle = composer + ' ' + piece + (year ? ` (${year})` : '');
         const composerTitleWithMovement = composerTitle + (movement ? ': ' + movement : '');
         const metaTitle = ' | Music | ' + composerTitleWithMovement;
@@ -187,7 +189,7 @@ class AudioInfo extends React.PureComponent<AudioInfoProps> {
                         </Marquee>
                     </ComposerTitle>
                     {!isMobile && movement && <Movement>{movement}</Movement>}
-                    {contributors &&
+                    {contribArray &&
                         (isMobile ?
                             contribArray.map((contributor, index) => (
                                 <ContributingOrDuration key={index}>

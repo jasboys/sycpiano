@@ -1,9 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import Sequelize from 'sequelize';
+import { Sequelize, DataTypes, Model } from 'sequelize';
 
 import sequelize from '../sequelize';
-import { Model, ModelMap } from '../types';
+import { ModelMap, ModelExport, IndexedModelMap } from '../types';
 
 /**
  * Loops through a list of model files, and transforms them into a map that
@@ -14,22 +14,30 @@ const connections = {
     sycpiano: sequelize,
 };
 
-const importModels = (seq: Sequelize.Sequelize): ModelMap => {
-    const modelMap = fs.readdirSync(__dirname).filter((file) => {
+interface Accumulator {
+    models: IndexedModelMap;
+    associations: Array<(models: ModelMap) => void>;
+}
+
+const importModels = (seq: Sequelize): ModelMap => {
+    const { models, associations } = fs.readdirSync(__dirname).filter((file) => {
         return (file.indexOf('.') !== 0) && (file !== 'index.js') && (file.slice(-3) === '.js');
     }).reduce((out, file) => {
         /* eslint-disable-next-line @typescript-eslint/no-var-requires */
-        const model = require(path.join(__dirname, file)).default(seq, Sequelize.DataTypes) as typeof Model;
-        out[model.name] = model;
+        const { model, associate } = require(path.join(__dirname, file)).default(seq, DataTypes) as ModelExport<Model>;
+        out.models[model.name] = model;
+        if (!!associate) {
+            out.associations.push(associate);
+        }
         return out;
-    }, {} as ModelMap);
+    }, { models: {}, associations: [] } as Accumulator);
 
     // execute associations
-    Object.values(modelMap).forEach((model) => {
-        model.associate?.(modelMap);
+    associations.forEach((associateFn) => {
+        associateFn(models as ModelMap);
     });
 
-    return modelMap;
+    return (models as ModelMap);
 };
 
 const db = {

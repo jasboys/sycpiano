@@ -1,39 +1,27 @@
 import * as React from 'react';
-import { connect } from 'react-redux';
 
 import styled from '@emotion/styled';
 
 import AcclaimsList from 'src/components/About/Press/AcclaimsList';
-import { onScroll, scrollFn } from 'src/components/App/NavBar/actions';
+import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
 
-import { container, pushed } from 'src/styles/mixins';
+import { pushed } from 'src/styles/mixins';
 import { screenXSorPortrait } from 'src/styles/screens';
 import { navBarHeight } from 'src/styles/variables';
-import { GlobalStateShape } from 'src/types';
+import { useAppDispatch } from 'src/hooks';
+import { fetchAcclaims } from 'src/components/About/Press/reducers';
 
-interface PressStateToProps {
-    readonly onScroll: (event: React.SyntheticEvent<HTMLElement>) => void;
-}
-
-interface PressDispatchToProps {
-    readonly onScroll: typeof onScroll;
-}
-
-interface PressOwnProps {
+interface PressProps {
     className?: string;
     isMobile?: boolean;
 }
 
-type PressProps = PressStateToProps & PressDispatchToProps & PressOwnProps;
-
 const PressContainer = styled.div(
     pushed,
-    container,
     {
-        boxSizing: 'border-box',
-        position: 'absolute',
         width: '100%',
-        top: 0,
+        overflowY: 'scroll',
+        WebkitOverflowScrolling: 'touch',
         [screenXSorPortrait]: {
             marginTop: 0,
             height: '100%',
@@ -41,25 +29,26 @@ const PressContainer = styled.div(
     },
 );
 
-class Press extends React.PureComponent<PressProps> {
-    render() {
-        return (
-            <PressContainer onScroll={this.props.isMobile ? scrollFn(navBarHeight.mobile, this.props.onScroll) : null}>
-                <AcclaimsList isMobile={this.props.isMobile} />
-            </PressContainer>
-        );
-    }
-}
+const Press: React.FC<PressProps> = (props) => {
+    const dispatch = useAppDispatch();
 
-const mapStateToProps = ({ navbar }: GlobalStateShape): PressStateToProps => ({
-    onScroll: navbar.onScroll,
-});
+    React.useEffect(() => {
+        dispatch(fetchAcclaims());
+    });
 
-const ConnectedPress = connect<PressStateToProps, PressDispatchToProps>(
-    mapStateToProps,
-    { onScroll },
-)(Press);
+    const onScrollDispatch = (triggerHeight: number, scrollTop: number) => {
+        dispatch(onScroll({ triggerHeight, scrollTop }));
+    };
 
-export type PressType = React.Component<PressProps>;
-export type RequiredProps = PressOwnProps;
-export default ConnectedPress;
+    return (
+        <PressContainer onScroll={props.isMobile ? scrollFn(navBarHeight.mobile, onScrollDispatch) : undefined}>
+            <AcclaimsList isMobile={props.isMobile} />
+        </PressContainer>
+    );
+};
+
+const MemoizedPress = React.memo(Press, (prev, next) => prev.isMobile === next.isMobile)
+
+export type PressType = typeof MemoizedPress;
+export type RequiredProps = PressProps;
+export default MemoizedPress;

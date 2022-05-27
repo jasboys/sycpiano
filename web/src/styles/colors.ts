@@ -1,6 +1,5 @@
 // Color defines.
-
-import { createMuiTheme } from '@material-ui/core/styles';
+import { createTheme } from '@mui/material/styles';
 
 export const lightBlue = '#4e86a4';
 export const logoBlue = '#0a4260';
@@ -13,7 +12,7 @@ export const navFontColor = 'rgba(0, 0, 0, 0.7)';
 
 export const playlistBackground = 'rgb(248, 248, 248)';
 
-export const theme = createMuiTheme({
+export const theme = createTheme({
     palette: {
         primary: {
             main: lightBlue,

@@ -1,6 +1,6 @@
-import { DataTypes, Sequelize, CreateOptions, UpdateOptions } from 'sequelize';
-import { createProduct, updateProduct } from '../stripe';
-import { Model } from '../types';
+import { DataTypes, Sequelize, CreateOptions, Optional, InstanceUpdateOptions, Model } from 'sequelize';
+import { createProduct, deleteProduct, updateProduct } from '../stripe';
+import { ModelExport, ModelMap } from '../types';
 
 export const ProductTypes = ['arrangement', 'cadenza', 'original'] as const;
 
@@ -18,20 +18,22 @@ export interface ProductAttributes {
     type: typeof ProductTypes[number];
 }
 
-export class product extends Model implements ProductAttributes {
-    id: string;
-    file: string;
-    name: string;
-    permalink: string;
-    description: string;
-    sample: string;
-    images: string[];
-    pages: number;
-    price: number; // in cents
-    priceID: string;
-    type: typeof ProductTypes[number];
-    createdAt?: Date | string;
-    updatedAt?: Date | string;
+export interface ProductCreationAttributes extends Optional<ProductAttributes, 'sample' | 'images'> {}
+
+export class product extends Model<ProductAttributes, ProductCreationAttributes> implements ProductAttributes {
+    declare id: string;
+    declare file: string;
+    declare name: string;
+    declare permalink: string;
+    declare description: string;
+    declare sample: string;
+    declare images: string[];
+    declare pages: number;
+    declare price: number; // in cents
+    declare priceID: string;
+    declare type: typeof ProductTypes[number];
+    declare readonly createdAt?: Date | string;
+    declare readonly updatedAt?: Date | string;
 }
 
 const beforeCreateHook = async (p: product, _: CreateOptions) => {
@@ -44,7 +46,7 @@ const beforeCreateHook = async (p: product, _: CreateOptions) => {
     }
 };
 
-const beforeUpdateHook = async (p: product, _: UpdateOptions) => {
+const beforeUpdateHook = async (p: product, _: InstanceUpdateOptions<ProductAttributes>) => {
     try {
         const [productID, priceID] = await updateProduct(p);
         p.id = productID;
@@ -54,7 +56,15 @@ const beforeUpdateHook = async (p: product, _: UpdateOptions) => {
     }
 };
 
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof product => {
+const beforeDestroyHook = async (p: product) => {
+    try {
+        await deleteProduct(p.id);
+    } catch (e) {
+        console.log('Failed to call delete Stripe product API');
+    }
+};
+
+export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<product> => {
     product.init({
             id: {
                 type: dataTypes.STRING,
@@ -85,13 +95,18 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof produ
             hooks: {
                 beforeCreate: beforeCreateHook,
                 beforeUpdate: beforeUpdateHook,
+                beforeDestroy: beforeDestroyHook,
             },
         }
     );
 
-    product.associate = (models) => {
-        product.belongsToMany(models.customer, { through: models.customerProduct });
+    const associate = (models: ModelMap) => {
+        product.hasMany(models.userProduct)
+        product.belongsToMany(models.user, { through: models.userProduct });
     };
 
-    return product;
+    return {
+        model: product,
+        associate,
+    };
 };

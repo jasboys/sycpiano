@@ -75,7 +75,7 @@ const config = () => {
             runtimeChunk: true,
         },
         plugins: [
-            new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /^en$/),
+            // new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /^en$/),
             new webpack.DefinePlugin({
                 BINARY_PATH: JSON.stringify(staticPrefix + '/binary'),
                 IMAGES_PATH: JSON.stringify(staticPrefix + '/images'),

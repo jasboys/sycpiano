@@ -13,7 +13,8 @@ export const HIGH_FREQ_SCALE = 10;
 export const MOBILE_MSPF = 1000 / 30;
 
 export interface AudioVisualizerProps {
-    readonly analyzers: AnalyserNode[];
+    readonly analyzerL?: AnalyserNode;
+    readonly analyzerR?: AnalyserNode;
     readonly currentPosition: number;
     readonly duration: number;
     readonly isPlaying: boolean;
@@ -21,7 +22,7 @@ export interface AudioVisualizerProps {
     readonly volume: number;
     readonly isMobile: boolean;
     readonly isHoverSeekring: boolean;
-    readonly hoverAngle: number;
+    readonly hoverAngle?: number;
     readonly setRadii: (inner: number, outer: number, base: number) => void;
 }
 
@@ -49,4 +50,4 @@ export const VisualizerCanvas = styled.canvas`
     height: 100%;
 `;
 
-export type AudioVisualizerType = new (props: AudioVisualizerProps) => React.Component<AudioVisualizerProps>;
+export type AudioVisualizerType = React.ComponentType<AudioVisualizerProps>;

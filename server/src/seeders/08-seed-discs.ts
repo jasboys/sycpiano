@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { DiscCreationAttributes } from '../models/disc';
 import * as path from 'path';
 import { ModelMap } from 'types';
 
@@ -13,7 +14,7 @@ export const up = async (models: ModelMap): Promise<void> => {
 
         await Promise.each(json, async (item) => {
             try {
-                await model.create(item, {
+                await model.create(item as DiscCreationAttributes, {
                     include: [models.discLink],
                 });
             } catch (e) {

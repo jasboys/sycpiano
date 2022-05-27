@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
@@ -10,16 +9,16 @@ import { Transition } from 'react-transition-group';
 
 import { gsap } from 'gsap';
 
-import { toggleExpanded, toggleSubNav } from 'src/components/App/NavBar/actions';
+import { toggleExpanded, showSubNav } from 'src/components/App/NavBar/reducers';
 import SubNav from 'src/components/App/NavBar/SubNav/SubNav';
 import { LinkShape } from 'src/components/App/NavBar/types';
-import { GlobalStateShape } from 'src/types';
 
 import { lightBlue, logoBlue, navFontColor } from 'src/styles/colors';
 import { lato2, lato3 } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { screenMorPortrait } from 'src/styles/screens';
 import { navBarHeight, navBarMarginTop } from 'src/styles/variables';
+import { useAppSelector, useAppDispatch } from 'src/hooks';
 
 interface HighlightProps {
     readonly active: boolean;
@@ -77,7 +76,7 @@ interface NavBarLinkProps {
     readonly active: boolean;
     readonly isHome: boolean;
     readonly link: LinkShape;
-    readonly subNavLinks: LinkShape[];
+    readonly subNavLinks?: LinkShape[];
     readonly isMobile: boolean;
 }
 
@@ -173,12 +172,13 @@ const StyledLi = styled.li<{ isHome: boolean }>({
     '&:last-child': {
         marginRight: 0,
     },
-}, ({ isHome }) => ({
+}, ({ isHome: _isHome }) => ({
     [screenMorPortrait]: {
         textAlign: 'right',
         visibility: 'hidden',
         opacity: 0,
-        fontFamily: isHome ? lato2 : lato3,
+        // fontFamily: isHome ? lato2 : lato3,
+        // fontWeight: isHome ? 'bold' : 'unset',
     },
 }));
 
@@ -195,8 +195,8 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
     link,
     subNavLinks,
 }) => {
-    const showSubs = useSelector(({ navbar }: GlobalStateShape) => navbar.showSubs);
-    const dispatch = useDispatch();
+    const showSubs = useAppSelector(({ navbar }) => navbar.showSubs);
+    const dispatch = useAppDispatch();
 
     // css attr is common
     const attr: AorLink = {};
@@ -213,12 +213,12 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
         attr.href = link.path;
     } else if (subNavLinks) {
         attr.onClick = () => {
-            dispatch(toggleSubNav(link.name));
+            dispatch(showSubNav({ sub: link.name }));
         };
     } else {
         attr.to = link.path;
         attr.onClick = () => {
-            dispatch(toggleSubNav(''));
+            dispatch(showSubNav());
             isMobile && dispatch(toggleExpanded(false));
         };
     }
@@ -256,7 +256,7 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
                             basePath={link}
                             links={subNavLinks}
                             onClick={() => {
-                                dispatch(toggleSubNav(''));
+                                dispatch(showSubNav());
                                 isMobile && dispatch(toggleExpanded(false));
                             }}
                             isHome={isHome}

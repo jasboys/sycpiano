@@ -10,7 +10,7 @@ export interface PersonalInfoShape {
 export interface PersonalContactShape {
     className?: string;
     phone?: string[];
-    email?: string[];
+    email: string[];
     website?: string;
 }
 
@@ -24,6 +24,6 @@ export type ContactItemShape = (
     & PersonalContactShape
     & ContactSocialMediaShape
     & {
-        isMobile?: boolean;
+        isMobile: boolean;
     }
 );

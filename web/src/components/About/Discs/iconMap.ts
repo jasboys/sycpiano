@@ -14,6 +14,7 @@ const iconMap: {
     tidal: 'tidal.svg',
     spotify: 'spotify-color.svg',
     arkiv: 'arkiv.svg',
+    steinway: 'steinway.svg',
 };
 
 export default iconMap;

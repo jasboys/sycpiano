@@ -81,10 +81,13 @@ export const visibilityChangeApi = (typeof document.hidden !== 'undefined') ?
                 hidden: 'msHidden',
                 visibilityChange: 'msvisibilitychange',
             }
-            : {};
+            : {
+                hidden: '',
+                visibilityChange: '',
+            };
 
-export const getLastName = (name: string): string => {
-    return /([^\s]+)\s?(?:\(.*\))?$/.exec(name)[1];
+export const getLastName = (name: string): string | undefined => {
+    return /([^\s]+)\s?(?:\(.*\))?$/.exec(name)?.[1];
 };
 
 export const normalizeString = (str: string): string => {
@@ -93,6 +96,10 @@ export const normalizeString = (str: string): string => {
 
 export const getPermaLink = (base: string, composer: string, piece: string, movement?: string): string => {
     return path.normalize(`${base}/${getLastName(composer)}/${normalizeString(piece)}${movement ? '/' + normalizeString(movement) : ''}`);
+};
+
+export const getRelativePermaLink = (composer: string, piece: string, movement?: string): string => {
+    return path.normalize(`${getLastName(composer)}/${normalizeString(piece)}${movement ? '/' + normalizeString(movement) : ''}`);
 };
 
 export const modulo = (n: number, m: number): number => {

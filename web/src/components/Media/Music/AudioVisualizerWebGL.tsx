@@ -36,53 +36,53 @@ interface ShaderProgram {
 }
 
 class AudioVisualizer extends React.Component<AudioVisualizerProps> {
-    isRendering: boolean;
+    isRendering!: boolean;
     lastPlayheadPosition = 0;
-    height: number;
-    width: number;
+    height!: number;
+    width!: number;
     visualization: React.RefObject<HTMLCanvasElement> = React.createRef();
     container: React.RefObject<HTMLDivElement> = React.createRef();
-    SCALE: number;
-    RADIUS_SCALE: number;
-    RADIUS_BASE: number;
-    WAVEFORM_HALF_HEIGHT: number;
-    HEIGHT_ADJUST: number;
+    SCALE!: number;
+    RADIUS_SCALE!: number;
+    RADIUS_BASE!: number;
+    WAVEFORM_HALF_HEIGHT!: number;
+    HEIGHT_ADJUST!: number;
 
-    gl: WebGLRenderingContext;
-    cqProgram: ShaderProgram;
-    genProgram: ShaderProgram;
-    lineProgram: ShaderProgram;
+    gl!: WebGLRenderingContext;
+    cqProgram!: ShaderProgram;
+    genProgram!: ShaderProgram;
+    lineProgram!: ShaderProgram;
 
-    viewMatrix: Float32Array;
+    viewMatrix!: Float32Array;
 
-    frequencyData: Uint8Array;
-    FFT_HALF_SIZE: number;
-    CQ_BINS: number;
-    INV_CQ_BINS: number;
+    frequencyData!: Uint8Array;
+    FFT_HALF_SIZE!: number;
+    CQ_BINS!: number;
+    INV_CQ_BINS!: number;
 
-    normalizedL: Float32Array;
-    normalizedR: Float32Array;
-    vizBins: Float32Array;
+    normalizedL!: Float32Array;
+    normalizedR!: Float32Array;
+    vizBins!: Float32Array;
 
-    MAX_BIN: number;
-    HIGH_PASS_BIN: number;
-    LOW_PASS_BIN: number;
+    MAX_BIN!: number;
+    HIGH_PASS_BIN!: number;
+    LOW_PASS_BIN!: number;
 
-    NUM_CROSSINGS: number;
-    SAMPLES_PER_CROSSING: number;
-    HALF_CROSSINGS: number;
-    FILTER_SIZE: number;
+    NUM_CROSSINGS!: number;
+    SAMPLES_PER_CROSSING!: number;
+    HALF_CROSSINGS!: number;
+    FILTER_SIZE!: number;
 
-    STEP_SIZE: number;
+    STEP_SIZE!: number;
     lastIsHover = false;
-    lastHover = 0;
+    lastHover?: number = 0;
     lastCurrentPosition = 0;
     idleStart = 0;
     requestId = 0;
-    lastCallback: number;
+    lastCallback!: number;
 
-    internalOffset: number;
-    deviceRatio: number;
+    internalOffset!: number;
+    deviceRatio!: number;
 
     adjustHeight = (): void => {
         this.HEIGHT_ADJUST = this.props.isMobile ? HEIGHT_ADJUST_MOBILE : HEIGHT_ADJUST_DESKTOP;
@@ -90,7 +90,15 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
     }
 
     initializeVisualizer = async (): Promise<void> => {
+        if (!this.visualization.current) {
+            console.error('visualization element does not exist.');
+            return;
+        }
         const gl = this.visualization.current.getContext('webgl');
+        if (!gl) {
+            console.error('no WebGL context.');
+            return;
+        }
         gl.getExtension('GL_OES_standard_derivatives');
         gl.getExtension('OES_standard_derivatives');
         this.gl = gl;
@@ -99,16 +107,21 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
         const genShader = initShader(gl, genVert, genFrag);
         const lineShader = initShader(gl, lineVert, genFrag);
 
+        if (!cqShader || !genShader || !lineShader) {
+            console.error('error creating shaders.');
+            return;
+        }
+
         this.cqProgram = {
             shader: cqShader,
             buffers: {
-                vertices: gl.createBuffer(),
+                vertices: gl.createBuffer()!,
             },
             uniforms: {
-                globalColor: gl.getUniformLocation(cqShader, 'uGlobalColor'),
-                radius: gl.getUniformLocation(cqShader, 'uRadius'),
-                center: gl.getUniformLocation(cqShader, 'uCenter'),
-                viewMatrix: gl.getUniformLocation(cqShader, 'uMatrix'),
+                globalColor: gl.getUniformLocation(cqShader, 'uGlobalColor')!,
+                radius: gl.getUniformLocation(cqShader, 'uRadius')!,
+                center: gl.getUniformLocation(cqShader, 'uCenter')!,
+                viewMatrix: gl.getUniformLocation(cqShader, 'uMatrix')!,
             },
             attributes: {
                 vertexPosition: gl.getAttribLocation(cqShader, 'aVertexPosition'),
@@ -118,11 +131,11 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
         this.genProgram = {
             shader: genShader,
             buffers: {
-                vertices: gl.createBuffer(),
+                vertices: gl.createBuffer()!,
             },
             uniforms: {
-                globalColor: gl.getUniformLocation(genShader, 'uGlobalColor'),
-                viewMatrix: gl.getUniformLocation(genShader, 'uMatrix'),
+                globalColor: gl.getUniformLocation(genShader, 'uGlobalColor')!,
+                viewMatrix: gl.getUniformLocation(genShader, 'uMatrix')!,
             },
             attributes: {
                 vertexPosition: gl.getAttribLocation(genShader, 'aVertexPosition'),
@@ -132,12 +145,12 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
         this.lineProgram = {
             shader: lineShader,
             buffers: {
-                vertices: gl.createBuffer(),
+                vertices: gl.createBuffer()!,
             },
             uniforms: {
-                globalColor: gl.getUniformLocation(lineShader, 'uGlobalColor'),
-                thickness: gl.getUniformLocation(lineShader, 'uThickness'),
-                viewMatrix: gl.getUniformLocation(lineShader, 'uMatrix'),
+                globalColor: gl.getUniformLocation(lineShader, 'uGlobalColor')!,
+                thickness: gl.getUniformLocation(lineShader, 'uThickness')!,
+                viewMatrix: gl.getUniformLocation(lineShader, 'uMatrix')!,
             },
             attributes: {
                 position: gl.getAttribLocation(lineShader, 'aPosition'),
@@ -191,7 +204,9 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
         // don't render anything if analyzers are null, i.e. audio not set up yet
         // also limit 30fps on mobile =).
         const timestamp = performance.now();
-        if (!this.props.analyzers[0] || !this.props.analyzers[1] ||
+        if (
+            !this.props.analyzerL ||
+            !this.props.analyzerR ||
             this.props.isMobile && this.lastCallback && (timestamp - this.lastCallback) < MOBILE_MSPF
         ) {
             return;
@@ -237,7 +252,7 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
             };
 
             // get byte data, and store into normalized[L,R], while accumulating
-            this.props.analyzers[0].getByteFrequencyData(this.frequencyData);
+            this.props.analyzerL.getByteFrequencyData(this.frequencyData);
             this.normalizedL.forEach((_, index, arr) => {
                 const temp = this.frequencyData[index] / 255;
                 arr[index] = temp;
@@ -248,7 +263,7 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
                 }
             });
 
-            this.props.analyzers[1].getByteFrequencyData(this.frequencyData);
+            this.props.analyzerR.getByteFrequencyData(this.frequencyData);
             this.normalizedR.forEach((_, index, arr) => {
                 const temp = this.frequencyData[index] / 255;
                 arr[index] = temp;
@@ -276,6 +291,9 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
     }
 
     drawConstantQBins = (gl: WebGLRenderingContext, values: Float32Array, radius: number, color: Float32Array): void => {
+        if (!this.visualization.current) {
+            return;
+        }
         let currentInput = 0;
         let currentSample = 0;
         let currentFraction = 0;
@@ -352,7 +370,7 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
         // going through mins from start to end
         for (let j = 0; j < waveformLength; j++) {
             let scale = centerAxis + waveform[j * 2] * volumeHeightScale;
-            const { x, y } = angles[j];
+            const { x, y } = angles?.[j] || { x: 0, y: 0 };
 
             vertices[j * 4] = x * scale;
             vertices[j * 4 + 1] = y * scale;
@@ -431,7 +449,7 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
             WAVEFORM_CENTER_AXIS + this.props.volume * this.WAVEFORM_HALF_HEIGHT,
             new Float32Array([1.0, 1.0, 1.0, 1.0]),
         );
-        if (this.props.isHoverSeekring) {
+        if (this.props.isHoverSeekring && this.props.hoverAngle !== undefined) {
             this.drawPlaybackHead(
                 gl,
                 this.props.hoverAngle,
@@ -443,6 +461,10 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
     }
 
     drawVisualization = (gl: WebGLRenderingContext, lowFreq: number, values: Float32Array, lightness: number, timestamp: number): void => {
+        if (!this.visualization.current) {
+            return;
+        }
+
         // beware! we are rotating the whole thing by -half_pi so, we need to swap width and height values
         // context.clearRect(-this.height / 2 + this.HEIGHT_ADJUST, -this.width / 2, this.height, this.width);
         // hsl derived from @light-blue: #4E86A4;
@@ -465,6 +487,13 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
     onResize = (): void => {
         this.idleStart = performance.now();
         this.adjustHeight();
+
+        if (
+            !this.container.current ||
+            !this.visualization.current
+        ) {
+            return;
+        }
 
         const devicePixelRatio = window.devicePixelRatio || 1;
 
@@ -533,16 +562,6 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
         gsap.ticker.remove(this.onAnalyze);
         this.isRendering = false;
     }
-
-    // dunno why it doens't work without this. onResize should be called anyways
-    // componentDidUpdate(prevProps: AudioVisualizerProps): void {
-    //     this.idleStart = performance.now();
-    //     gsap.ticker.remove(this.onAnalyze);
-    //     gsap.ticker.add(this.onAnalyze);
-    //     if (prevProps.isMobile !== this.props.isMobile) {
-    //         this.onResize();
-    //     }
-    // }
 
     shouldComponentUpdate(nextProps: AudioVisualizerProps): boolean {
         if (nextProps.isMobile !== this.props.isMobile ||

@@ -25,13 +25,13 @@ interface MediaQueryBounds {
 }
 
 const mediaQuery = (mediaQueryBounds: MediaQueryBounds): string => {
-    const widthQueries = Object
-        .keys(mediaQueryBounds)
-        .map((dimension: DimensionName) => (
-            dimension
-                ? `(${dimensionNameMap[dimension]} : ${mediaQueryBounds[dimension]})`
-                : ''
-        ));
+    const widthQueries =
+        (Object.keys(mediaQueryBounds) as DimensionName[])
+            .map((dimension: DimensionName) => (
+                dimension
+                    ? `(${dimensionNameMap[dimension]} : ${mediaQueryBounds[dimension]})`
+                    : ''
+            ));
 
     return widthQueries.reduce((accumulator, curr, idx) => (
         `${accumulator}${idx > 0 ? ` and ${curr}` : curr}`

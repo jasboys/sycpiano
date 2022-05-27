@@ -1,42 +1,71 @@
-import { Reducer } from 'redux';
-import PHOTO_ACTIONS from 'src/components/Media/Photos/actionTypeKeys';
-import { PhotoActions } from 'src/components/Media/Photos/actionTypes';
-import { PhotoListReducerShape, PhotoViewerReducerShape } from 'src/components/Media/Photos/types';
+import { PhotoItem, PhotoListReducerShape, PhotoViewerReducerShape } from 'src/components/Media/Photos/types';
+import { createSlice, createAsyncThunk, createAction, ThunkAction, AnyAction } from '@reduxjs/toolkit';
+import { ThunkAPIType } from 'src/types';
+import axios from 'axios';
+import { GlobalStateShape } from 'src/store';
 
-export const photoListReducer: Reducer<PhotoListReducerShape, PhotoActions> = (state = {
+const initialListState: PhotoListReducerShape = {
     items: [],
     isFetching: false,
-}, action) => {
-    switch (action.type) {
-        case PHOTO_ACTIONS.FETCH_PHOTOS_REQUEST:
-            return {
-                ...state,
-                isFetching: true,
-            };
-        case PHOTO_ACTIONS.FETCH_PHOTOS_ERROR:
-            return {
-                ...state,
-                isFetching: false,
-            };
-        case PHOTO_ACTIONS.FETCH_PHOTOS_SUCCESS:
-            return {
-                ...state,
-                items: action.items,
-            };
-        default:
-            return state;
+}
+
+export const fetchPhotos = createAsyncThunk<PhotoItem[], void, ThunkAPIType>(
+    'photos/fetch',
+    async (_, thunkAPI) => {
+        const { data: photo } = await axios.get<void, { data: PhotoItem[] }>('/api/photos');
+        thunkAPI.dispatch(selectPhoto(photo[0]));
+        return photo;
+    },
+    {
+        condition: (_, { getState }) => {
+            return !getState().photoList.isFetching && !getState().photoList.items.length;
+        }
     }
+);
+
+const photoListSlice = createSlice({
+    name: 'photoList',
+    initialState: initialListState,
+    reducers: {},
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchPhotos.pending, (state, _) => {
+                state.isFetching = true;
+            })
+            .addCase(fetchPhotos.rejected, (state, _) => {
+                state.isFetching = false;
+            })
+            .addCase(fetchPhotos.fulfilled, (state, action) => {
+                state.isFetching = false;
+                state.items = action.payload;
+            })
+            .addDefaultCase(state => state);
+    }
+});
+
+const initialViewerState: PhotoViewerReducerShape = {
+    currentItem: undefined,
 };
 
-export const photoViewerReducer: Reducer<PhotoViewerReducerShape, PhotoActions> = (state = {
-    currentItem: null,
-}, action) => {
-    switch (action.type) {
-        case PHOTO_ACTIONS.SELECT_PHOTO:
-            return {
-                currentItem: action.item,
-            };
-        default:
-            return state;
+export const selectPhoto = createAction<PhotoItem>('photoViewer/selectPhoto');
+export const selectFirstPhoto = (): ThunkAction<void, GlobalStateShape, void, AnyAction> =>
+    (dispatch, getState) => {
+        dispatch(selectPhoto(getState().photoList.items[0]));
     }
-};
+
+
+const photoViewerSlice = createSlice({
+    name: 'photoViewer',
+    initialState: initialViewerState,
+    reducers: {},
+    extraReducers: (builder) => {
+        builder
+            .addCase(selectPhoto, (state, action) => {
+                state.currentItem = action.payload;
+            })
+            .addDefaultCase(state => state);
+    }
+})
+
+export const photoListReducer = photoListSlice.reducer;
+export const photoViewerReducer = photoViewerSlice.reducer;

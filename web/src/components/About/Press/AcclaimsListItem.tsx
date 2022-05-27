@@ -1,6 +1,5 @@
-import moment from 'moment-timezone';
 import * as React from 'react';
-
+import { format, parseISO } from 'date-fns';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
@@ -40,9 +39,9 @@ Quote = styled(Quote)`
 
 interface AuthorProps {
     author: string;
-    date: moment.Moment;
+    date: Date;
     hasFullDate: boolean;
-    website: string;
+    website?: string;
     className?: string;
 }
 
@@ -84,7 +83,7 @@ const Link = styled('a')`
     text-shadow: ${getRepeatCSS(20, '0 0 1px white')};
 `;
 
-let Author: React.FC<AuthorProps> = ({ author, date, hasFullDate, website, className }) => {
+const Author: React.FC<AuthorProps> = ({ author, date, hasFullDate, website, className }) => {
     const Container = website ? Link : 'span';
     const attributes = website ? { href: website, target: '_blank' } : {};
     return (
@@ -93,8 +92,8 @@ let Author: React.FC<AuthorProps> = ({ author, date, hasFullDate, website, class
                 <span>{`— ${author} `}</span>
                 <span css={css` display: inline-block; `}>
                     {`(${hasFullDate ?
-                        date.format('MMMM DD, YYYY') :
-                        date.format('MMMM YYYY')})`
+                        format(date, 'MMMM dd, yyyy') :
+                        format(date, 'MMMM yyyy')})`
                     }
                 </span>
             </Container>
@@ -102,18 +101,17 @@ let Author: React.FC<AuthorProps> = ({ author, date, hasFullDate, website, class
     );
 };
 
-Author = styled(Author)`
+const StyledAuthor = styled(Author)`
     font-family: ${lato1};
     text-align: center;
 `;
 
 interface AcclaimsListItemProps {
     acclaim: AcclaimItemShape;
-    style: React.CSSProperties;
     className?: string;
 }
 
-const AcclaimsListItem: React.FC<AcclaimsListItemProps> = ({ className, style, acclaim }) => (
+const AcclaimsListItem: React.FC<AcclaimsListItemProps> = ({ className, acclaim }) => (
     <div
         css={css`
             padding: 2rem 0;
@@ -123,13 +121,12 @@ const AcclaimsListItem: React.FC<AcclaimsListItemProps> = ({ className, style, a
             }
         `}
         className={className}
-        style={style}
     >
         <AcclaimContainer>
             <Quote quote={acclaim.quote} />
-            <Author
+            <StyledAuthor
                 author={acclaim.author}
-                date={moment(acclaim.date)}
+                date={parseISO(acclaim.date)}
                 hasFullDate={acclaim.hasFullDate}
                 website={acclaim.website}
             />

@@ -1,33 +1,31 @@
 import * as React from 'react';
-import { connect } from 'react-redux';
 
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import Playlist from 'src/components/Media/Playlist';
-import { playVideo, togglePlaylistAction } from 'src/components/Media/Videos/actions';
-import { VideoItemShape } from 'src/components/Media/Videos/types';
+import { playVideo, togglePlaylist } from 'src/components/Media/Videos/reducers';
 import VideoPlaylistItem from 'src/components/Media/Videos/VideoPlaylistItem';
 
 import { screenXSorPortrait } from 'src/styles/screens';
-import { GlobalStateShape } from 'src/types';
+import { useAppDispatch, useAppSelector } from 'src/hooks';
 
-interface VideoPlaylistStateToProps {
-    readonly videos: VideoItemShape[];
-    readonly videoId: string;
-    readonly isShow: boolean;
-}
+// interface VideoPlaylistStateToProps {
+//     readonly videos: VideoItemShape[];
+//     readonly videoId: string;
+//     readonly isShow: boolean;
+// }
 
-interface VideoPlaylistDispatchToProps {
-    readonly playVideo: typeof playVideo;
-    readonly togglePlaylistAction: typeof togglePlaylistAction;
-}
+// interface VideoPlaylistDispatchToProps {
+//     readonly playVideo: typeof playVideo;
+//     readonly togglePlaylistAction: typeof togglePlaylistAction;
+// }
 
-interface VideoOwnProps {
+interface VideoPlaylistProps {
     readonly isMobile: boolean;
 }
 
-type VideoPlaylistProps = VideoOwnProps & VideoPlaylistStateToProps & VideoPlaylistDispatchToProps;
+// type VideoPlaylistProps = VideoOwnProps & VideoPlaylistStateToProps & VideoPlaylistDispatchToProps;
 
 const StyledPlaylistContainer = styled.div`
     width: fit-content;
@@ -54,48 +52,42 @@ const videoPlaylistStyle = css`
     }
 `;
 
-const VideoPlaylist: React.FC<VideoPlaylistProps> = ({
-    isShow,
-    togglePlaylistAction: togglePlaylist,
-    videos,
-    videoId,
-    isMobile,
-    playVideo: play,
-}) => (
+const VideoPlaylist: React.FC<VideoPlaylistProps> = (props) => {
+    const isShow = useAppSelector(({ videoPlaylist }) => videoPlaylist.isShow);
+    const videos = useAppSelector(({ videoPlaylist }) => videoPlaylist.items);
+    const videoId = useAppSelector(({ videoPlayer }) => videoPlayer.videoId);
+    const dispatch = useAppDispatch();
+
+    const toggleDispatch = (show?: boolean) => {
+        dispatch(togglePlaylist(show));
+    };
+
+    const playDispatch = (isMobile: boolean, videoId: string) => {
+        dispatch(playVideo(isMobile, videoId));
+    };
+
+    return (
         <StyledPlaylistContainer>
             <Playlist
                 extraStyles={{ div: videoPlaylistStyle }}
                 isShow={isShow}
-                hasToggler={!isMobile}
-                togglePlaylist={togglePlaylist}
+                hasToggler={!props.isMobile}
+                togglePlaylist={toggleDispatch}
                 shouldAppear={false}
-                isMobile={isMobile}
+                isMobile={props.isMobile}
             >
                 {videos.map((video) => (
                     <VideoPlaylistItem
                         key={video.id}
                         item={video}
                         currentItemId={videoId}
-                        onClick={play}
-                        isMobile={isMobile}
+                        onClick={playDispatch}
+                        isMobile={props.isMobile}
                     />
                 ))}
             </Playlist>
         </StyledPlaylistContainer>
     );
-
-const mapStateToProps = (state: GlobalStateShape): VideoPlaylistStateToProps => ({
-    videos: state.videoPlaylist.items,
-    videoId: state.videoPlayer.videoId,
-    isShow: state.videoPlaylist.isShow,
-});
-
-const mapDispatchToProps: VideoPlaylistDispatchToProps = {
-    playVideo,
-    togglePlaylistAction,
 };
 
-export default connect<VideoPlaylistStateToProps, VideoPlaylistDispatchToProps, VideoOwnProps>(
-    mapStateToProps,
-    mapDispatchToProps,
-)(VideoPlaylist);
+export default VideoPlaylist;

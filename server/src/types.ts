@@ -1,5 +1,4 @@
-import * as moment from 'moment';
-import { default as Sequelize } from 'sequelize';
+import { default as Sequelize, Model, ModelStatic } from 'sequelize';
 import { acclaim } from './models/acclaim';
 import { bio } from './models/bio';
 import { calendar } from './models/calendar';
@@ -14,49 +13,50 @@ import { photo } from './models/photo';
 import { piece } from './models/piece';
 import { token } from './models/token';
 import { product } from './models/product';
-import { customer } from 'models/customer';
+import { user } from './models/user';
+import { userProduct } from './models/userProduct'
 import { faq } from 'models/faq';
-
-type Moment = moment.Moment;
 
 export interface GCalEvent {
     readonly description: any;
     readonly id: string;
     readonly location: string;
     readonly start: {
-        readonly dateTime?: Moment;
-        readonly date?: Moment;
+        readonly dateTime?: Date;
+        readonly date?: Date;
         readonly timeZone?: string;
     };
     readonly summary: string;
     readonly [key: string]: any; // other params
 }
 
-export type ModelCtor<M extends Model> = typeof Sequelize.Model & (new () => M);
-
-export class Model<T extends unknown = any, T2 extends unknown = any> extends Sequelize.Model<T, T2> {
-    static associate?(db: {[key: string]: ModelCtor<any>}): void;
-    readonly dataValues: T;
+export type ModelExport<M extends Model> = {
+    model: ModelStatic<M>;
+    associate?: (models: ModelMap) => void;
 }
 
 export interface ModelMap {
-    acclaim: typeof acclaim;
-    bio: typeof bio;
-    calendar: typeof calendar;
-    calendarCollaborator: typeof calendarCollaborator;
-    calendarPiece: typeof calendarPiece;
-    collaborator: typeof collaborator;
-    disc: typeof disc;
-    discLink: typeof discLink;
-    music: typeof music;
-    musicFile: typeof musicFile;
-    photo: typeof photo;
-    piece: typeof piece;
-    token: typeof token;
-    product: typeof product;
-    customer: typeof customer;
-    faq: typeof faq;
-    [key: string]: typeof Model;
+    acclaim: ModelStatic<acclaim>;
+    bio: ModelStatic<bio>;
+    calendar: ModelStatic<calendar>;
+    calendarCollaborator: ModelStatic<calendarCollaborator>;
+    calendarPiece: ModelStatic<calendarPiece>;
+    collaborator: ModelStatic<collaborator>;
+    disc: ModelStatic<disc>;
+    discLink: ModelStatic<discLink>;
+    music: ModelStatic<music>;
+    musicFile: ModelStatic<musicFile>;
+    photo: ModelStatic<photo>;
+    piece: ModelStatic<piece>;
+    token: ModelStatic<token>;
+    product: ModelStatic<product>;
+    user: ModelStatic<user>;
+    userProduct: ModelStatic<userProduct>;
+    faq: ModelStatic<faq>;
+}
+
+export interface IndexedModelMap extends Partial<ModelMap> {
+    [key: string]: ModelStatic<Model> | undefined;
 }
 
 export interface DB {

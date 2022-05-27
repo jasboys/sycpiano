@@ -1,22 +1,31 @@
-import * as Promise from 'bluebird';
-
-import { DataTypes, HasManyGetAssociationsMixin, HasManySetAssociationsMixin, Sequelize } from 'sequelize';
-import { Model } from '../types';
+import { DataTypes, HasManyGetAssociationsMixin, HasManySetAssociationsMixin, Model, Optional, Sequelize } from 'sequelize';
+import { ModelExport, ModelMap } from '../types';
 import { musicFile } from './musicFile';
 
-export class music extends Model {
-    readonly id: string;
-    readonly composer: string;
-    readonly piece: string;
-    readonly contributors: string;
-    readonly type: string;
-    readonly year: number;
-    readonly musicFiles: musicFile[];
-    readonly createdAt?: Date | string;
-    readonly updatedAt?: Date | string;
+export interface MusicAttributes {
+    id: string;
+    composer: string;
+    piece: string;
+    contributors: string;
+    type: string;
+    year: number;
+}
 
-    readonly getMusicFiles: HasManyGetAssociationsMixin<musicFile>;
-    readonly setMusicFiles: HasManySetAssociationsMixin<musicFile, musicFile['id']>;
+export interface MusicCreationAttributes extends Optional<Omit<MusicAttributes, 'id'>, 'contributors' | 'year'> {}
+
+export class music extends Model<MusicAttributes, MusicCreationAttributes> implements MusicAttributes {
+    declare id: string;
+    declare composer: string;
+    declare piece: string;
+    declare contributors: string;
+    declare type: string;
+    declare year: number;
+    declare readonly musicFiles: musicFile[];
+    declare readonly createdAt?: Date | string;
+    declare readonly updatedAt?: Date | string;
+
+    declare readonly getMusicFiles: HasManyGetAssociationsMixin<musicFile>;
+    declare readonly setMusicFiles: HasManySetAssociationsMixin<musicFile, musicFile['id']>;
 }
 
 const hookFn = async (m: music, _: any) => {
@@ -30,7 +39,7 @@ const hookFn = async (m: music, _: any) => {
     console.log(`[End Hook]\n`);
 };
 
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof music => {
+export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<music> => {
     music.init({
         id: {
             allowNull: false,
@@ -53,9 +62,12 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof music
         tableName: 'music',
     });
 
-    music.associate = (models) => {
+    const associate = (models: ModelMap) => {
         music.hasMany(models.musicFile);
     };
 
-    return music;
+    return {
+        model: music,
+        associate,
+    };
 };

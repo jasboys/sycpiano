@@ -1,7 +1,5 @@
-import { ReferenceObject } from 'popper.js';
 import * as React from 'react';
 import { useMedia } from 'react-media';
-import { useDispatch, useSelector } from 'react-redux';
 
 import styled from '@emotion/styled';
 
@@ -12,14 +10,13 @@ import NavBarLogo from 'src/components/App/NavBar/NavBarLogo';
 
 import { screenBreakPoints } from 'src/styles/screens';
 import { navBarHeight } from 'src/styles/variables';
-import { GlobalStateShape } from 'src/types';
-import { toggleExpanded } from 'src/components/App/NavBar/actions';
+import { toggleExpanded } from 'src/components/App/NavBar/reducers';
+import { useAppDispatch, useAppSelector } from 'src/hooks';
 
 interface NavBarProps {
     readonly currentBasePath: string;
     readonly className?: string;
-    readonly specificRouteName: string;
-    setReferenceElement: React.Dispatch<React.SetStateAction<ReferenceObject>>;
+    readonly specificRouteName?: string;
 }
 
 const StyledNavBar = styled.div<{ isMobile: boolean; isHome: boolean }>(
@@ -55,14 +52,13 @@ const StyledNavAndCart = styled.div<{ isMobile: boolean }>({
     justifyContent: 'center',
 }));
 
-const NavBar: React.FC<NavBarProps> = ({
+const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
     currentBasePath,
     specificRouteName,
-    setReferenceElement,
-}) => {
-    const isExpanded = useSelector(({ navbar }: GlobalStateShape) => navbar.isExpanded);
+}, ref) => {
+    const isExpanded = useAppSelector(({ navbar }) => navbar.isExpanded);
     const { xs, medium } = useMedia({ queries: screenBreakPoints });
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
     React.useEffect(() => {
         if (!xs && !medium) {
@@ -86,7 +82,7 @@ const NavBar: React.FC<NavBarProps> = ({
                     <StyledNavAndCart isMobile={medium}>
                         <CartButton
                             isHome={isHome}
-                            setReferenceElement={medium ? () => { } : setReferenceElement}   /* eslint-disable-line @typescript-eslint/no-empty-function */
+                            ref={medium ? () => {} : ref}   /* eslint-disable-line @typescript-eslint/no-empty-function */
                         />
                         <HamburgerNav
                             currentBasePath={currentBasePath}
@@ -102,13 +98,13 @@ const NavBar: React.FC<NavBarProps> = ({
                         />
                         <CartButton
                             isHome={isHome}
-                            setReferenceElement={medium ? () => { } : setReferenceElement}   /* eslint-disable-line @typescript-eslint/no-empty-function */
+                            ref={medium ? () => {} : ref}   /* eslint-disable-line @typescript-eslint/no-empty-function */
                         />
                     </StyledNavAndCart>
                 )
             }
         </StyledNavBar >
     );
-};
+});
 
 export default NavBar;

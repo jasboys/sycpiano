@@ -1,19 +1,31 @@
-import { DataTypes, Sequelize } from 'sequelize';
-import { Model } from '../types';
+import { DataTypes, Model, Sequelize } from 'sequelize';
+import { ModelExport } from '../types';
 
-export class photo extends Model {
-    readonly id?: string;
-    readonly file: string;
-    readonly credit: string;
-    readonly width: number;
-    readonly height: number;
-    readonly thumbnailWidth: number;
-    readonly thumbnailHeight: number;
-    readonly createdAt?: Date | string;
-    readonly updatedAt?: Date | string;
+export interface PhotoAttributes {
+    id: string;
+    file: string;
+    credit?: string;
+    width: number;
+    height: number;
+    thumbnailWidth: number;
+    thumbnailHeight: number;
 }
 
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof photo => {
+export interface PhotoCreationAttributes extends Omit<PhotoAttributes, 'id'> {}
+
+export class photo extends Model<PhotoAttributes, PhotoCreationAttributes> implements PhotoAttributes {
+    declare id: string;
+    declare file: string;
+    declare credit?: string;
+    declare width: number;
+    declare height: number;
+    declare thumbnailWidth: number;
+    declare thumbnailHeight: number;
+    declare readonly createdAt?: Date | string;
+    declare readonly updatedAt?: Date | string;
+}
+
+export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<photo> => {
     photo.init({
         id: {
             type: dataTypes.UUID,
@@ -39,5 +51,5 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof photo
         tableName: 'photo',
     });
 
-    return photo;
+    return { model: photo };
 };

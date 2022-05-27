@@ -2,7 +2,7 @@ import * as React from 'react';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
-import { TweenLite } from 'gsap';
+import { gsap } from 'gsap';
 import { LoadingInstance } from 'src/components/LoadingSVG';
 import { PauseButton, PauseIcon, PlayButton, PlayIcon, SkipButton } from 'src/components/Media/Music/Buttons';
 import { cartesianToPolar } from 'src/components/Media/Music/utils';
@@ -32,7 +32,7 @@ interface AudioUIOwnProps {
     };
     readonly setMouseMove: (move: boolean) => void;
     readonly setRadii: (inner: number, outer: number, base: number) => void;
-    readonly setHoverSeekring: (isHover: boolean, angle: number) => void;
+    readonly setHoverSeekring: (isHover: boolean, angle?: number) => void;
 }
 
 type AudioUIProps = AudioUIOwnProps;
@@ -51,7 +51,7 @@ const loadingInstanceStyle = css`
     fill: none;
     stroke: ${lightBlue};
 
-    ${ screenXSorPortrait} {
+    ${screenXSorPortrait} {
         top: calc(50% + ${HEIGHT_ADJUST_MOBILE}px);
     }
 `;
@@ -94,38 +94,42 @@ const StyledSeekRing = styled.canvas`
     -webkit-tap-highlight-color: transparent;
 `;
 
+const flipped = css({
+    transform: 'scaleX(-1)'
+});
+
 class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
     state = {
         isHoverPlaypause: false,
         isHoverNext: false,
         isHoverPrev: false,
     };
-    playButton: HTMLDivElement;
-    pauseButton: HTMLDivElement;
+    playButton: HTMLDivElement | null = null;
+    pauseButton: HTMLDivElement | null = null;
 
-    height: number;
-    width: number;
-    centerX: number;
-    centerY: number;
-    timerId: NodeJS.Timer;
+    height!: number;
+    width!: number;
+    centerX!: number;
+    centerY!: number;
+    timerId!: NodeJS.Timer;
 
-    prevPercentage: number;
+    prevPercentage!: number;
 
-    isDragging: boolean;
+    isDragging!: boolean;
 
-    seekRing: HTMLCanvasElement;
-    visualizationCtx: CanvasRenderingContext2D;
+    seekRing: HTMLCanvasElement | null = null;
+    visualizationCtx: CanvasRenderingContext2D | null = null;
 
-    setPlayButtonRef = (ref: HTMLDivElement): void => {
+    setPlayButtonRef = (ref: HTMLDivElement | null): void => {
         this.playButton = ref;
     }
 
-    setPauseButtonRef = (ref: HTMLDivElement): void => {
+    setPauseButtonRef = (ref: HTMLDivElement | null): void => {
         this.pauseButton = ref;
     }
 
-    togglePlaying = (event: React.KeyboardEvent<HTMLElement> | React.MouseEvent<HTMLElement> | KeyboardEvent | MouseEvent): void => {
-        if ((event as React.KeyboardEvent<HTMLElement> | KeyboardEvent).key === ' ' || (event as React.MouseEvent<HTMLElement> | MouseEvent).button === 0) {
+    togglePlaying = <E extends Element>(event: React.KeyboardEvent<E> | React.MouseEvent<E> | KeyboardEvent | MouseEvent): void => {
+        if ((event as React.KeyboardEvent<E> | KeyboardEvent).key === ' ' || (event as React.MouseEvent<E> | MouseEvent).button === 0) {
             if (this.props.isPlaying) {
                 this.props.pause();
             } else {
@@ -136,29 +140,39 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
     }
 
     onResize = (): void => {
-        this.height = this.seekRing.offsetHeight;
-        this.width = this.seekRing.offsetWidth;
-        this.seekRing.height = this.height;
-        this.seekRing.width = this.width;
-        this.centerX = this.width / 2;
-        this.centerY = this.height / 2 + (this.props.isMobile ? HEIGHT_ADJUST_MOBILE : HEIGHT_ADJUST_DESKTOP);
+        if (this.seekRing) {
+            this.height = this.seekRing.offsetHeight;
+            this.width = this.seekRing.offsetWidth;
+            this.seekRing.height = this.height;
+            this.seekRing.width = this.width;
+            this.centerX = this.width / 2;
+            this.centerY = this.height / 2 + (this.props.isMobile ? HEIGHT_ADJUST_MOBILE : HEIGHT_ADJUST_DESKTOP);
+        }
     }
 
     initializeUI = (): void => {
-        this.onResize();
-        this.visualizationCtx = this.seekRing.getContext('2d');
-        this.isDragging = false;
-        this.props.setMouseMove(false);
-        this.setState({
-            isHoverPlaypause: false,
-        });
+        if (this.seekRing) {
+            this.onResize();
+            this.visualizationCtx = this.seekRing.getContext('2d');
+            this.isDragging = false;
+            this.props.setMouseMove(false);
+            this.setState({
+                isHoverPlaypause: false,
+            });
+        }
     }
 
-    isMouseEvent = (event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>): event is React.MouseEvent<HTMLElement> => {
+    isMouseEvent = <E extends Element>(event: React.MouseEvent<E> | React.TouchEvent<E>): event is React.MouseEvent<E> => {
         return event.type.match(/(m|M)ouse/) !== null;
     }
 
-    getMousePositionInCanvas = (event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>): { x: number; y: number } => {
+    getMousePositionInCanvas = <E extends Element>(event: React.MouseEvent<E> | React.TouchEvent<E>): { x: number; y: number } => {
+        if (!this.seekRing) {
+            return {
+                x: 0,
+                y: 0
+            };
+        }
         const mouseX = (this.isMouseEvent(event)) ? event.clientX : event.touches[0].clientX;
         const mouseY = (this.isMouseEvent(event)) ? event.clientY : event.touches[0].clientY;
         const boundingRect = this.seekRing.getBoundingClientRect();
@@ -170,13 +184,16 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
 
     isPointInCircle = (point: [number, number], radius: number, center: [number, number]): boolean => {
         const context = this.visualizationCtx;
+        if (!context) {
+            return false;
+        }
         context.beginPath();
         context.arc(center[0], center[1], radius, 0, 2 * Math.PI);
         context.closePath();
         return context.isPointInPath(point[0], point[1]);
     }
 
-    isEventInSeekRing = (event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>): boolean => {
+    isEventInSeekRing = <E extends Element>(event: React.MouseEvent<E> | React.TouchEvent<E>): boolean => {
         const { inner, outer } = this.props.radii;
         const canvasPos = this.getMousePositionInCanvas(event);
         const isInOuter = this.isPointInCircle([canvasPos.x, canvasPos.y], outer, [this.centerX, this.centerY]);
@@ -184,8 +201,11 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
         return isInOuter && !isInInner;
     }
 
-    handleMousemove = (event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>): void => {
+    handleMousemove = <E extends Element>(event: React.MouseEvent<E> | React.TouchEvent<E>): void => {
         const prevMoving = this.props.isMouseMove;
+        if (!this.seekRing) {
+            return;
+        }
         if (this.isDragging) {
             this.prevPercentage = this.mousePositionToPercentage(event);
             this.props.onDrag(this.prevPercentage);
@@ -205,7 +225,7 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
                 }
             } else {
                 this.seekRing.style.cursor = 'default';
-                this.props.setHoverSeekring(false, null);
+                this.props.setHoverSeekring(false);
                 if (this.timerId) {
                     clearTimeout(this.timerId);
                 }
@@ -215,7 +235,7 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
         }
     }
 
-    handleMouseup = (event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>): void => {
+    handleMouseup = <E extends Element>(event: React.MouseEvent<E> | React.TouchEvent<E>): void => {
         const prevMoving = this.props.isMouseMove;
         if (this.isDragging) {
             this.props.seekAudio(this.prevPercentage);
@@ -228,17 +248,17 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
                 }
                 this.timerId = setTimeout(() => this.props.setMouseMove(false), 1000);
             }
-            if (this.isMouseEvent(event) && !this.isEventInSeekRing(event)) {
+            if (this.isMouseEvent(event) && !this.isEventInSeekRing(event) && this.seekRing) {
                 this.seekRing.style.cursor = 'default';
             }
         }
     }
 
-    mousePositionToPercentage = (event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>): number => {
+    mousePositionToPercentage = <E extends Element>(event: React.MouseEvent<E> | React.TouchEvent<E>): number => {
         return this.mousePositionToAngle(event) / (2 * Math.PI);
     }
 
-    mousePositionToAngle = (event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>): number => {
+    mousePositionToAngle = <E extends Element>(event: React.MouseEvent<E> | React.TouchEvent<E>): number => {
         const mousePos = this.getMousePositionInCanvas(event);
         const polar = cartesianToPolar(mousePos.x - this.centerX, mousePos.y - this.centerY);
         let angle = polar.angle + Math.PI / 2;
@@ -248,7 +268,7 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
         return angle;
     }
 
-    handleMousedown = (event: React.MouseEvent<HTMLElement> | React.TouchEvent<HTMLElement>): void => {
+    handleMousedown = <E extends Element>(event: React.MouseEvent<E> | React.TouchEvent<E>): void => {
         if (this.isEventInSeekRing(event)) {
             this.isDragging = true;
             this.prevPercentage = this.mousePositionToPercentage(event);
@@ -278,17 +298,15 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
         }
         if (prevProps.isPlaying !== this.props.isPlaying && !this.isDragging) {
             if (this.props.isPlaying) {
-                TweenLite.fromTo(
+                gsap.fromTo(
                     this.playButton,
-                    0.25,
-                    { opacity: 1, scale: 1 },
+                    { opacity: 1, scale: 1, duration: 0.25 },
                     { opacity: 0, scale: 5, delay: 0.1, force3D: true, clearProps: 'transform' },
                 );
             } else {
-                TweenLite.fromTo(
+                gsap.fromTo(
                     this.pauseButton,
-                    0.25,
-                    { opacity: 1, scale: 1 },
+                    { opacity: 1, scale: 1, duration: 0.25 },
                     { opacity: 0, scale: 5, delay: 0.1, force3D: true, clearProps: 'transform' },
                 );
             }
@@ -333,6 +351,7 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
                     verticalOffset={verticalOffset}
                 />
                 <SkipButton
+                    key="prev-button"
                     onClick={this.props.prev}
                     isHovering={this.state.isHoverPrev}
                     onMouseMove={this.handleMousemove}
@@ -342,10 +361,11 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
                     width={buttonLength * 4 / 5}
                     height={buttonLength * 8 / 15}
                     verticalOffset={verticalOffset}
-                    css={css` transform: scaleX(-1); `}
+                    css={flipped}
                 />
                 {(this.props.isPlaying) ? (
                     <PauseButton
+                        key="pause-button"
                         onClick={this.togglePlaying}
                         isHovering={this.state.isHoverPlaypause}
                         onMouseMove={this.handleMousemove}
@@ -358,6 +378,7 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
                     />
                 ) : (
                         <PlayButton
+                            key="play-button"
                             onClick={this.togglePlaying}
                             isHovering={this.state.isHoverPlaypause}
                             onMouseMove={this.handleMousemove}
@@ -370,6 +391,7 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
                         />
                     )}
                 <SkipButton
+                    key="next-button"
                     onClick={this.props.next}
                     isHovering={this.state.isHoverNext}
                     onMouseMove={this.handleMousemove}

@@ -20,9 +20,9 @@ declare global {
 }
 
 class YouTube {
-    private player: YT.Player = undefined;
-    private playerReady: Promise<unknown> = undefined;
-    private apiReady: Promise<unknown> = undefined;
+    private player: YT.Player | undefined = undefined;
+    private playerReady: Promise<void> | undefined = undefined;
+    private apiReady: Promise<void> | undefined = undefined;
 
     constructor() {
         this.apiReady = new Promise((resolve) => {
@@ -31,6 +31,7 @@ class YouTube {
             // load youtube api
             const body = document.body;
             const script = document.createElement('script');
+            // script.src = `${window.location.protocol}//www.youtube.com/iframe_api?enablejsapi=1&origin=${window.location.protocol}//${window.location.host}`;
             script.src = 'https://www.youtube.com/iframe_api';
             body.insertBefore(script, body.firstChild);
         });
@@ -45,9 +46,9 @@ class YouTube {
         func();
     }
 
-    public initializePlayerOnElement(el: HTMLElement, id = 'player') {
+    public async initializePlayerOnElement(el: HTMLElement, id = 'player') {
         // reinitiaize playerReady deferred
-        this.playerReady = this.apiReady.then(() => new Promise((resolve) => {
+        this.playerReady = this.apiReady?.then(() => new Promise((resolve) => {
 
             // For now, only allow one player at a time.
             this.destroyPlayer();
@@ -59,36 +60,40 @@ class YouTube {
 
             // create youtube player
             this.player = new YT.Player(id, {
+                host: `${window.location.protocol}//www.youtube.com`,
                 events: {
-                    onReady: () => resolve(),
+                    onReady: () => {
+                        resolve();
+                    },
                 },
                 playerVars: {
                     rel: 0,
+                    origin: `${window.location.protocol}//${window.location.host}`,
                 },
-                videoId: undefined,
             });
         }));
+        return this.playerReady;
     }
 
     public async loadVideoById(videoId: string, autoplay?: boolean) {
         await this.playerReady;
         if (autoplay) {
-            this.player.loadVideoById(videoId);
+            this.player?.loadVideoById(videoId);
         } else {
-            this.player.cueVideoById(videoId);
+            this.player?.cueVideoById(videoId);
         }
     }
 
     public playVideo() {
-        if (this.player.getPlayerState() === 5) {
-            this.player.playVideo();
+        if (this.player?.getPlayerState() === 5) {
+            this.player?.playVideo();
         } else {
             console.error('No video cued, please use loadVideoById');
         }
     }
 
     public getPlaylistItems() {
-        return axios.get(PLAYLIST_ITEMS_URL, {
+        return axios.get<void, { data: { items: Youtube.PlaylistItem[] } }>(PLAYLIST_ITEMS_URL, {
             params: {
                 key: API_KEY,
                 maxResults: MAX_PLAYLIST_ITEMS,
@@ -99,7 +104,7 @@ class YouTube {
     }
 
     public getVideos(listOfIds: string[]) {
-        return axios.get(VIDEOS_URL, {
+        return axios.get<void, { data: { items: Youtube.Video[] } }>(VIDEOS_URL, {
             params: {
                 id: listOfIds.join(','),
                 key: API_KEY,
@@ -111,8 +116,8 @@ class YouTube {
     public destroyPlayer() {
         if (this.player) {
             this.player.destroy();
-            this.player = null;
-            this.playerReady = null;
+            this.player = undefined;
+            this.playerReady = undefined;
         }
     }
 }

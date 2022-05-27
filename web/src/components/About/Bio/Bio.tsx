@@ -1,18 +1,14 @@
 import * as React from 'react';
 import ReactMarkdown from 'react-markdown';
-import { connect } from 'react-redux';
-import { Action } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
-
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
-import { fetchBioAction } from 'src/components/About/Bio/actions';
+import { fetchBio } from 'src/components/About/Bio/reducers';
 import { Blurb } from 'src/components/About/Bio/types';
-import { onScroll, scrollFn } from 'src/components/App/NavBar/actions';
+import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
 
 import { easeQuadOut } from 'd3-ease';
-import { TweenLite } from 'gsap';
+import { gsap } from 'gsap';
 
 import PortfolioButton from 'src/components/About/Bio/PortfolioButton';
 import { LazyImage } from 'src/components/LazyImage';
@@ -23,7 +19,8 @@ import { generateSrcsetWidths, resizedImage, sycWithPianoBW } from 'src/styles/i
 import { pushed } from 'src/styles/mixins';
 import { screenLengths, screenM, screenWidths, screenXSorPortrait } from 'src/styles/screens';
 import { navBarHeight } from 'src/styles/variables';
-import { GlobalStateShape } from 'src/types';
+import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { isImageElement } from 'src/utils';
 
 const pictureHeight = 250;
 
@@ -88,39 +85,33 @@ const NameSpan = styled.span({
 });
 
 interface BioTextProps {
-    bio?: Blurb[];
+    bio: Blurb[];
 }
 
-class BioText extends React.Component<BioTextProps> {
-    shouldComponentUpdate(nextProps: BioTextProps) {
-        if (this.props.bio.length === nextProps.bio.length) {
-            return false;
-        }
-        return true;
-    }
+const BioText: React.FunctionComponent<BioTextProps> = (props) => {
+    return (
+        <TextContainer>
+            <SpaceFiller />
+            <TextGroup>
+                {props.bio.map(({ text }, i) => {
+                    return (
+                        <ReactMarkdown
+                            key={i}
+                            components={{
+                                p: props => <Paragraph {...props} />,
+                                strong: props => <NameSpan {...props} />,
+                            }}
+                        >
+                            {text}
+                        </ReactMarkdown>
+                    );
+                })}
+            </TextGroup>
+        </TextContainer>
+    );
+};
 
-    render() {
-        return (
-            <TextContainer>
-                <SpaceFiller />
-                <TextGroup>
-                    {this.props.bio.map(({ text }, i) => {
-                        return (
-                            <ReactMarkdown
-                                key={i}
-                                source={text}
-                                renderers={{
-                                    paragraph: props => <Paragraph {...props} />,
-                                    strong: props => <NameSpan {...props} />,
-                                }}
-                            />
-                        );
-                    })}
-                </TextGroup>
-            </TextContainer>
-        );
-    }
-}
+const MemoizedBioText = React.memo(BioText, (prev, next) => { return prev.bio.length === next.bio.length; });
 
 interface ImageContainerProps { bgImage?: string }
 
@@ -174,22 +165,8 @@ const srcWidths = screenLengths.map((value) => (
     Math.round(value * 1736 / 2560)
 ));
 
-interface BioOwnProps {
+interface BioProps {
     readonly isMobile: boolean;
-}
-
-interface BioState {
-    readonly bgImage: string;
-}
-
-interface BioStateToProps {
-    readonly scrollTop: number;
-    readonly bio: Blurb[];
-}
-
-interface BioDispatchToProps {
-    readonly onScroll: (triggerHeight: number, scrollTop: number) => void;
-    readonly fetchBioAction: () => Promise<void>;
 }
 
 const imageLoaderStyle = css({
@@ -197,100 +174,96 @@ const imageLoaderStyle = css({
     position: 'absolute',
 });
 
-type BioProps = BioOwnProps & BioStateToProps & BioDispatchToProps;
+const Bio: React.FunctionComponent<BioProps> = (props) => {
+    const [bgImage, setBgImage] = React.useState('');
+    const bgRef = React.useRef<HTMLImageElement>(null);
+    const dispatch = useAppDispatch();
+    const bio = useAppSelector(({ bio }) => bio.bio);
+    const scrollTop = useAppSelector(({ navbar }) => navbar.lastScrollTop);
 
-class About extends React.PureComponent<BioProps, BioState> {
-    state: BioState = { bgImage: '' };
-    private bgRef: React.RefObject<HTMLDivElement> = React.createRef();
+    React.useEffect(() => {
+        dispatch(fetchBio());
+    }, []);
 
-    componentDidMount() {
-        this.props.fetchBioAction();
-    }
+    React.useEffect(() => {
+        if (bgRef.current) {
+            bgRef.current.style.opacity = easeQuadOut(Math.max(1 - scrollTop / pictureHeight, 0)).toString();
+        }
+    }, [scrollTop]);
 
-    onImageLoad = (el: HTMLImageElement) => {
-        this.setState({ bgImage: el.currentSrc }, () => {
-            TweenLite.to(
-                this.bgRef.current,
-                0.3,
-                { autoAlpha: 1, delay: 0.2, clearProps: 'opacity' });
-        });
-    }
+    React.useEffect(() => {
+        if (bgRef.current) {
+            gsap.to(
+                bgRef.current,
+                { autoAlpha: 1, duration: 0.3, delay: 0.2, clearProps: 'opacity' });
+        }
+    }, [bgImage]);
 
-    onImageDestroy = () => {
-        TweenLite.to(
-            this.bgRef.current,
-            0.1,
-            { autoAlpha: 0 },
-        );
-    }
+    const onImageLoad = (el: HTMLImageElement | Element | undefined) => {
+        if (el && isImageElement(el)) {
+            setBgImage(el.currentSrc);
+        }
+    };
 
-    componentDidUpdate() {
-        this.bgRef.current.style.opacity = easeQuadOut(Math.max(1 - this.props.scrollTop / pictureHeight, 0)).toString();
-    }
+    const onImageDestroy = () => {
+        if (bgRef.current) {
+            gsap.to(
+                bgRef.current,
+                { autoAlpha: 0, duration: 0.1 },
+            );
+        }
+    };
 
-    render() {
-        return (
-            <BioContainer onScroll={this.props.isMobile ? scrollFn(pictureHeight + navBarHeight.mobile, this.props.onScroll) : null}>
-                <ImageContainer
-                    bgImage={this.state.bgImage}
-                    ref={this.bgRef}
-                >
-                    <LazyImage
-                        isMobile={this.props.isMobile}
-                        id="about_lazy_image"
-                        csss={{
-                            mobile: imageLoaderStyle,
-                            desktop: imageLoaderStyle,
-                        }}
-                        mobileAttributes={{
-                            webp: {
-                                srcset: generateSrcsetWidths(sycWithPianoBW('webp'), screenWidths),
-                                sizes: '100vw',
-                            },
-                            jpg: {
-                                srcset: generateSrcsetWidths(sycWithPianoBW(), screenWidths),
-                                sizes: '100vw',
-                            },
-                            src: resizedImage(sycWithPianoBW(), { width: 640 }),
-                        }}
-                        desktopAttributes={{
-                            webp: {
-                                srcset: generateSrcsetWidths(sycWithPianoBW('webp'), srcWidths),
-                                sizes: '100vh',
-                            },
-                            jpg: {
-                                srcset: generateSrcsetWidths(sycWithPianoBW(), srcWidths),
-                                sizes: '100vh',
-                            },
-                            src: resizedImage(sycWithPianoBW(), { height: 1080 }),
-                        }}
-                        alt="about background"
-                        successCb={this.onImageLoad}
-                        destroyCb={this.onImageDestroy}
-                    />
-                </ImageContainer>
-                <BioText bio={this.props.bio} />
-                <PortfolioButton />
-            </BioContainer>
-        );
-    }
+    const onScrollDispatch = (triggerHeight: number, scrollTop: number) => {
+        dispatch(onScroll({ triggerHeight, scrollTop }));
+    };
+
+    return (
+        <BioContainer onScroll={props.isMobile ? scrollFn(pictureHeight + navBarHeight.mobile, onScrollDispatch) : undefined}>
+            <ImageContainer
+                bgImage={bgImage}
+                ref={bgRef}
+            >
+                <LazyImage
+                    isMobile={props.isMobile}
+                    id="about_lazy_image"
+                    csss={{
+                        mobile: imageLoaderStyle,
+                        desktop: imageLoaderStyle,
+                    }}
+                    mobileAttributes={{
+                        webp: {
+                            srcset: generateSrcsetWidths(sycWithPianoBW('webp'), screenWidths),
+                            sizes: '100vw',
+                        },
+                        jpg: {
+                            srcset: generateSrcsetWidths(sycWithPianoBW(), screenWidths),
+                            sizes: '100vw',
+                        },
+                        src: resizedImage(sycWithPianoBW(), { width: 640 }),
+                    }}
+                    desktopAttributes={{
+                        webp: {
+                            srcset: generateSrcsetWidths(sycWithPianoBW('webp'), srcWidths),
+                            sizes: '100vh',
+                        },
+                        jpg: {
+                            srcset: generateSrcsetWidths(sycWithPianoBW(), srcWidths),
+                            sizes: '100vh',
+                        },
+                        src: resizedImage(sycWithPianoBW(), { height: 1080 }),
+                    }}
+                    alt="about background"
+                    successCb={onImageLoad}
+                    destroyCb={onImageDestroy}
+                />
+            </ImageContainer>
+            <MemoizedBioText bio={bio} />
+            <PortfolioButton />
+        </BioContainer>
+    );
 }
 
-const mapStateToProps = ({ bio, navbar }: GlobalStateShape) => ({
-    scrollTop: navbar.lastScrollTop,
-    bio: bio.bio,
-});
-
-const mapDispatchToProps = (dispatch: ThunkDispatch<GlobalStateShape, undefined, Action>) => ({
-    onScroll: (triggerHeight: number, scrollTop: number) => dispatch(onScroll(triggerHeight, scrollTop)),
-    fetchBioAction: () => dispatch(fetchBioAction()),
-});
-
-const connectedAbout = connect<BioStateToProps, BioDispatchToProps, BioOwnProps>(
-    mapStateToProps,
-    mapDispatchToProps,
-)(About);
-
-export type BioType = new (props: BioProps) => React.Component<BioProps>;
-export type RequiredProps = BioOwnProps;
-export default connectedAbout;
+export type BioType = typeof Bio;
+export type RequiredProps = BioProps;
+export default Bio;

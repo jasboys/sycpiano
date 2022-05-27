@@ -4,7 +4,7 @@ import * as ReactDOM from 'react-dom';
 global.Promise = bluebird as any; /* eslint-disable-line @typescript-eslint/no-explicit-any */
 
 import { Provider } from 'react-redux';
-import { BrowserRouter, Route } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import store from 'src/store';
 
@@ -14,7 +14,9 @@ function main() {
     ReactDOM.render((
         <Provider store={store}>
             <BrowserRouter>
-                <Route path="/" component={App} />
+                <Routes>
+                    <Route path="*" element={<App />} />
+                </Routes>
             </BrowserRouter>
         </Provider>
     ), document.getElementById('hero-container') as HTMLElement);

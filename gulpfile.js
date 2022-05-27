@@ -5,6 +5,7 @@ const fancyLog = require('fancy-log');
 const PluginError = require('plugin-error');
 const ts = require('gulp-typescript');
 const webpack = require('webpack');
+const format = require('util').format;
 const path = require('path');
 const fs = require('fs');
 const del = require('del');
@@ -209,6 +210,7 @@ const webpackWatch = (done) => {
 // Then after everything is built, we spawn a new node running the app
 const restartApp = async () => {
     try {
+        let stdoutChunks = [], stderrChunks = [];
         child && treeKill(child.pid);
         reporter.addTask('Overall', { type: 'indefinite', barColorFn: chalk.white, index: 0 });
         reporter.updateTask('Overall', { message: 'Compiling' });
@@ -222,7 +224,9 @@ const restartApp = async () => {
         child.stderr.on('data', (data) => console.log(data));
         reporter.done('Overall', { message: chalk.yellow('Waiting for Changes...') });
     } catch (e) {
-        console.error(e);
+        reporter.close();
+        process.stdout.write(e);
+        // console.error(e);
     }
 };
 
@@ -258,6 +262,10 @@ const watchDevServer = gulp.series((done) => {
             ['server/src/**/*'],
             { ignoreInitial: false },
             gulp.series(resetServerPromise, cleanServer, compileServerNoCheck, resolveServerPromise, restartApp),
+        ),
+        gulp.watch(
+            ['app.js'],
+            restartApp,
         )
     );
     done();

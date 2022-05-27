@@ -3,7 +3,7 @@ import * as React from 'react';
 import { css, SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
 
-import { TweenLite } from 'gsap';
+import { gsap } from 'gsap';
 
 import { ContactInfo } from 'src/components/Contact/ContactInfo';
 import { ContactSocialMedia } from 'src/components/Contact/ContactSocialMedia';
@@ -19,6 +19,7 @@ import {
 } from 'src/styles/imageUrls';
 import { pushed } from 'src/styles/mixins';
 import { screenWidths, screenXSorPortrait } from 'src/styles/screens';
+import { isImageElement } from 'src/utils';
 
 const imageInsetShadowColor = '#222';
 const alternateBackgroundColor = '#eee';
@@ -116,23 +117,25 @@ const StyledContactItem = styled.div(
 
 const ContactItem: React.FC<ContactItemShape> = (props) => {
     const [bgImage, setBgImage] = React.useState('');
-    const bgRef = React.useRef<HTMLDivElement>();
+    const bgRef = React.useRef<HTMLDivElement>(null);
 
-    const onImageLoad = React.useCallback((el?: HTMLImageElement) => {
-        TweenLite.to(
+    const onImageLoad = (el?: HTMLImageElement | HTMLElement | Element | undefined) => {
+        if (el && isImageElement(el)) {
+            setBgImage(el?.currentSrc)
+        }
+        gsap.to(
             bgRef.current,
-            0.3,
-            { autoAlpha: 1, delay: 0.2, clearProps: 'opacity' },
+            { autoAlpha: 1, duration: 0.3, delay: 0.2, clearProps: 'opacity' },
         );
-        setBgImage(el?.currentSrc)
-    }, [bgRef]);
+    };
 
     const onImageDestroy = () => {
-        TweenLite.to(
-            bgRef.current,
-            0.1,
-            { autoAlpha: 0 },
-        );
+        if (bgRef.current) {
+            gsap.to(
+                bgRef.current,
+                { autoAlpha: 0, duration: 0.1 },
+            );
+        }
     };
 
     const {
@@ -146,8 +149,8 @@ const ContactItem: React.FC<ContactItemShape> = (props) => {
     }: Partial<ContactItemShape> = props;
 
     const { webp, jpg, svg, imgCss } = photosAttributesMap[name];
-    const webpSrcSet = generateSrcsetWidths(webp, screenWidths);
-    const jpgSrcSet = generateSrcsetWidths(jpg, screenWidths);
+    const webpSrcSet = webp && generateSrcsetWidths(webp, screenWidths);
+    const jpgSrcSet = jpg && generateSrcsetWidths(jpg, screenWidths);
 
     return (
         <StyledContactItem>
@@ -174,7 +177,7 @@ const ContactItem: React.FC<ContactItemShape> = (props) => {
                                     srcset: jpgSrcSet,
                                     sizes: '100vw',
                                 },
-                                src: resizedImage(jpg, { width: 640 }),
+                                src: jpg && resizedImage(jpg, { width: 640 }),
                             }}
                             desktopAttributes={{
                                 webp: {
@@ -185,7 +188,7 @@ const ContactItem: React.FC<ContactItemShape> = (props) => {
                                     srcset: jpgSrcSet,
                                     sizes: '100vh',
                                 },
-                                src: resizedImage(jpg, { height: 1080 }),
+                                src: jpg && resizedImage(jpg, { height: 1080 }),
                             }}
                             alt={`${name}`}
                             successCb={onImageLoad}

@@ -1,7 +1,7 @@
 import { createHash } from 'crypto';
 
 const getLastName = (name: string) => {
-    return /([^\s]+)\s?(?:\(.*\))?$/.exec(name)[1];
+    return /([^\s]+)\s?(?:\(.*\))?$/.exec(name)?.[1];
 };
 
 const normalizeString = (str: string) => {

@@ -3,15 +3,14 @@ import * as React from 'react';
 import styled from '@emotion/styled';
 
 import DiscListItem from 'src/components/About/Discs/DiscListItem';
-import { Disc } from 'src/components/About/Discs/types';
 
 import { lato2 } from 'src/styles/fonts';
 import { screenXSorPortrait } from 'src/styles/screens';
 import { navBarHeight } from 'src/styles/variables';
+import { useAppSelector } from 'src/hooks';
 
 interface DiscListOwnProps {
     isMobile: boolean;
-    items: Disc[];
 }
 
 type DiscListProps = DiscListOwnProps;
@@ -30,24 +29,24 @@ const DiscListUL = styled.ul`
     }
 `;
 
-class DiscList extends React.PureComponent<DiscListProps> {
-    render(): JSX.Element {
-        return (
-            <div>
-                <DiscListUL>
-                    {
-                        this.props.items.map((item, id) => (
-                            <DiscListItem
-                                item={item}
-                                key={id}
-                                currentItemId={id}
-                            />
-                        ))
-                    }
-                </DiscListUL>
-            </div>
-        );
-    }
-}
+const DiscList: React.FunctionComponent<DiscListProps> = (props) => {
+    const items = useAppSelector(({ discs }) => discs.discs);
+
+    return (
+        <div>
+            <DiscListUL>
+                {
+                    items.map((item, id) => (
+                        <DiscListItem
+                            isMobile={props.isMobile}
+                            item={item}
+                            key={id}
+                        />
+                    ))
+                }
+            </DiscListUL>
+        </div>
+    );
+};
 
 export default DiscList;

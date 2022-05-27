@@ -1,8 +1,7 @@
 import { DataTypes, QueryInterface } from 'sequelize';
-import { bio } from 'models/bio';
 
 export const up = async (queryInterface: QueryInterface, dataTypes: typeof DataTypes): Promise<void> => {
-    await queryInterface.createTable<bio>('bio', {
+    await queryInterface.createTable('bio', {
         paragraph: {
             type: dataTypes.INTEGER,
             allowNull: false,

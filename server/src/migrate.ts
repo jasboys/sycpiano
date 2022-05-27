@@ -1,37 +1,40 @@
 import * as Promise from 'bluebird';
 import * as childProcess from 'child_process';
 import * as path from 'path';
-import * as Umzug from 'umzug';
+import * as Sequelize from 'sequelize';
+import { MigrationParams, SequelizeStorage, Umzug, MigrationMeta, MigrateUpOptions, MigrateDownOptions } from 'umzug';
 
 import sequelize, { options } from './sequelize';
 
 const umzug = new Umzug({
-    storage: 'sequelize',
-    storageOptions: {
+    storage: new SequelizeStorage({
         sequelize,
         modelName: 'migrations',
-    },
-
+    }),
     migrations: {
-        params: [
-            sequelize.getQueryInterface(), // queryInterface
-            sequelize.constructor, // DataTypes
-            () => {
-                throw new Error(`Migration tried to use old style 'done' callback. Please upgrade to 'umzug' and return a promise instead.`);
-            },
-        ],
-        path: path.join(__dirname, 'migrations'),
-        pattern: /\.js$/,
+        glob: path.join(__dirname, 'migrations', '*.js'),
+        resolve: ({ name, path, context }) => {
+            if (!path) {
+                throw new Error('no path');
+            }
+            /* eslint-disable-next-line @typescript-eslint/no-var-requires */
+            const migration = require(path);
+            return {
+                // adjust the parameters Umzug will
+                // pass to migration methods when called
+                name,
+                up: async () => migration.up(context, sequelize.constructor),
+                down: async () => migration.down(context, sequelize.constructor),
+            }
+        },
     },
-
-    logging: (message: string) => {
-        console.log(message);
-    },
+    context: sequelize.getQueryInterface(),
+    logger: console,
 });
 
-const logUmzugEvent = (eventName: string) =>
-    (name: string) => {
-        console.log(`${name} ${eventName}`);
+const logUmzugEvent = (name: string) =>
+    (eventData: MigrationParams<Sequelize.QueryInterface>) => {
+        console.log(`${name} ${eventData.name}`);
     };
 
 umzug.on('migrating', logUmzugEvent('migrating'));
@@ -39,35 +42,35 @@ umzug.on('migrated', logUmzugEvent('migrated'));
 umzug.on('reverting', logUmzugEvent('reverting'));
 umzug.on('reverted', logUmzugEvent('reverted'));
 
-interface MigrationWithName extends Umzug.Migration {
-    name?: string;
-}
-
 interface MigrationResult {
-    executed?: MigrationWithName[];
-    pending?: MigrationWithName[];
+    executed?: MigrationMeta[];
+    pending?: MigrationMeta[];
 }
 
 const cmdStatus = async () => {
     const result: MigrationResult = {};
 
-    const executed = await umzug.executed() as MigrationWithName[];
+    const executed = await umzug.executed();
     result.executed = executed;
-    const pending = await umzug.pending() as MigrationWithName[];
+    const pending = await umzug.pending();
     result.pending = pending;
 
     executed.forEach((migration, index, arr) => {
-        arr[index].name = path.basename(migration.file, '.js');
+        if (migration.path) {
+            arr[index].name = path.basename(migration.path, '.js');
+        }
     });
     pending.forEach((migration, index, arr) => {
-        arr[index].name = path.basename(migration.file, '.js');
+        if (migration.path) {
+            arr[index].name = path.basename(migration.path, '.js');
+        }
     });
 
-    const current = executed.length > 0 ? executed[0].file : '<NO_MIGRATIONS>';
+    const current = executed.length > 0 ? executed[0].path : '<NO_MIGRATIONS>';
     const status = {
         current,
-        executed: executed.map((m) => m.file),
-        pending: pending.map((m) => m.file),
+        executed: executed.map((m) => m.path),
+        pending: pending.map((m) => m.path),
     };
 
     console.log(JSON.stringify(status, null, 2));
@@ -75,7 +78,7 @@ const cmdStatus = async () => {
     return { executed, pending };
 };
 
-const cmdMigrate = (migration: string = null) => (
+const cmdMigrate = (migration: MigrateUpOptions) => (
     umzug.up(migration)
 );
 
@@ -83,13 +86,13 @@ const cmdMigrateNext = async () => {
     const { pending } = await cmdStatus();
     if (pending.length === 0) {
         return Promise.reject(new Error('No pending migrations'));
+    } else {
+        const next = pending[0].name!;
+        return umzug.up({ to: next });
     }
-    const next = pending[0].name;
-    return umzug.up({ to: next });
-
 };
 
-const cmdReset = (migration: string = null) => {
+const cmdReset = (migration: MigrateDownOptions) => {
     if (migration) {
         return umzug.down(migration);
     }
@@ -101,7 +104,7 @@ const cmdResetPrev = async () => {
     if (executed.length === 0) {
         return Promise.reject(new Error('Already at initial state'));
     }
-    const prev = executed[executed.length - 1].name;
+    const prev = executed[executed.length - 1].name!;
     return umzug.down({ to: prev });
 };
 
@@ -127,7 +130,9 @@ const cmdHardReset = () => (
 
 const main = async () => {
     const cmd = process.argv[2].trim();
-    const migration = process.argv[3] && process.argv[3].trim();
+    const migration = (process.argv[3] === undefined) ?
+        {} :
+        { migrations: process.argv.slice(3).map((arg) => arg.trim()) };
     let executedCmd: Promise<any>;
 
     console.log(`${cmd.toUpperCase()} BEGIN`);

@@ -4,7 +4,6 @@ import styled from '@emotion/styled';
 
 import iconMap from 'src/components/About/Discs/iconMap';
 import { Disc } from 'src/components/About/Discs/types';
-import { ChildRendererProps } from 'src/components/Media/types';
 
 import { staticImage } from 'src/styles/imageUrls';
 import { screenXSorPortrait } from 'src/styles/screens';
@@ -107,30 +106,33 @@ const LinksContainer = styled.div`
     align-items: flex-end;
 `;
 
-class DiscListItem extends React.PureComponent<ChildRendererProps<Disc>, Record<string, never>> {
-    render(): JSX.Element {
-        return (
-            <li>
-                <DiscItem isMobile={this.props.isMobile}>
-                    <DiscImageContainer bgImage={`/static/images/cd-thumbnails/${this.props.item.thumbnailFile}`} />
-                    <DiscDescription>
-                        <DiscTitle>{this.props.item.title}</DiscTitle>
-                        <DiscLabel>{this.props.item.label}</DiscLabel>
-                        <DiscYear>{this.props.item.releaseDate}</DiscYear>
-                        <p>{this.props.item.description}</p>
-                        <Divider />
-                        <LinksContainer>
-                            {this.props.item.discLinks
-                                .filter((value) => value.type !== 'google')
-                                .map((value) => (
-                                    <DiscLink key={`${this.props.item.id}-${value.type}`} linkUrl={value.url} imageUrl={iconMap[value.type]} />
-                                ))}
-                        </LinksContainer>
-                    </DiscDescription>
-                </DiscItem>
-            </li>
-        );
-    }
+interface DiscListProps {
+    isMobile: boolean;
+    item: Disc;
+}
+
+const DiscListItem: React.FC<DiscListProps> = (props) => {
+    return (
+        <li>
+            <DiscItem isMobile={props.isMobile}>
+                <DiscImageContainer bgImage={`/static/images/cd-thumbnails/${props.item.thumbnailFile}`} />
+                <DiscDescription>
+                    <DiscTitle>{props.item.title}</DiscTitle>
+                    <DiscLabel>{props.item.label}</DiscLabel>
+                    <DiscYear>{props.item.releaseDate}</DiscYear>
+                    <p>{props.item.description}</p>
+                    <Divider />
+                    <LinksContainer>
+                        {props.item.discLinks
+                            .filter((value) => value.type !== 'google')
+                            .map((value) => (
+                                <DiscLink key={`${props.item.id}-${value.type}`} linkUrl={value.url} imageUrl={iconMap[value.type]} />
+                            ))}
+                    </LinksContainer>
+                </DiscDescription>
+            </DiscItem>
+        </li>
+    );
 }
 
 export default DiscListItem;

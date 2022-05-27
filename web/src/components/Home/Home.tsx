@@ -1,4 +1,3 @@
-import moment from 'moment-timezone';
 import * as React from 'react';
 
 import { css } from '@emotion/react';
@@ -18,10 +17,10 @@ import { DesktopBackgroundPreview, MobileBackgroundPreview } from 'src/component
 import Social from 'src/components/Home/Social';
 import { LazyImage } from 'src/components/LazyImage';
 import { screenLengths, screenXSandPortrait, screenXSorPortrait, screenMandPortrait } from 'src/styles/screens';
-import { useSelector } from 'react-redux';
-import { GlobalStateShape } from 'src/types';
 import { Transition } from 'react-transition-group';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
+import { useAppSelector } from 'src/hooks';
+import { format } from 'date-fns';
 
 const textShadowColor = 'rgba(0, 0, 0, 0.75)';
 
@@ -194,18 +193,18 @@ const srcWidths = screenLengths.map((value) => (
 ));
 
 interface HomeProps {
-    // bgLoaded: () => void;
     isMobile: boolean;
 }
 
 const Home: React.FC<HomeProps> = ({ isMobile }) => {
-    const menuExpanded = useSelector(({ navbar }: GlobalStateShape) => navbar.isExpanded);
+    const menuExpanded = useAppSelector(({ navbar }) => navbar.isExpanded);
+    const cartExpanded = useAppSelector(({ cart }) => cart.visible);
 
     return (
         <HomeContainer>
             <BackgroundContainer>
                 <Transition<undefined>
-                    in={isMobile && menuExpanded}
+                    in={isMobile && (menuExpanded || cartExpanded)}
                     onEnter={fadeOnEnter()}
                     onExit={fadeOnExit(0.15)}
                     timeout={400}
@@ -242,16 +241,16 @@ const Home: React.FC<HomeProps> = ({ isMobile }) => {
                     }}
                     loadingComponent={isMobile ? MobileBackgroundPreview : DesktopBackgroundPreview}
                     alt="home background"
-                    successCb={() => { }} /* eslint-disable-line @typescript-eslint/no-empty-function */
+                    successCb={undefined}
                 />
                 <BackgroundCover />
                 <NavBarGradient />
             </BackgroundContainer>
-            <Content menuExpanded={menuExpanded}>
+            <Content menuExpanded={menuExpanded || cartExpanded}>
                 <Name>Sean Chen</Name>
                 <Skills>pianist / composer / arranger</Skills>
                 <Social />
-                <StyledCopyright>Copyright © {moment().format('YYYY')} Sean Chen</StyledCopyright>
+                <StyledCopyright>Copyright © 2015-{format(new Date(), 'yyyy')} Sean Chen</StyledCopyright>
             </Content>
         </HomeContainer>
     );

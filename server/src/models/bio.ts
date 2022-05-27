@@ -1,15 +1,23 @@
-import { DataTypes, Sequelize } from 'sequelize';
-import { Model } from '../types';
+import { DataTypes, Model, Sequelize } from 'sequelize';
+import { ModelExport } from '../types';
 
-export class bio extends Model {
-    readonly id: number;
-    readonly paragraph!: number;
-    readonly text!: string;
-    readonly createdAt?: Date | string;
-    readonly updatedAt?: Date | string;
+export interface BioAttributes {
+    id: number;
+    paragraph: number;
+    text: string;
 }
 
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof bio => {
+export interface BioCreateAttributes extends Omit<BioAttributes, 'id'> {}
+
+export class bio extends Model<BioAttributes, BioCreateAttributes> implements BioAttributes {
+    declare id: number;
+    declare paragraph: number;
+    declare text: string;
+    declare readonly createdAt?: Date | string;
+    declare readonly updatedAt?: Date | string;
+}
+
+export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<bio> => {
     bio.init({
         paragraph: {
             type: dataTypes.INTEGER,
@@ -19,14 +27,6 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof bio =
         text: {
             type: dataTypes.TEXT,
             allowNull: false,
-        },
-        createdAt: {
-            type: dataTypes.DATE,
-            field: 'created_at',
-        },
-        updatedAt: {
-            type: dataTypes.DATE,
-            field: 'updated_at',
         },
         id: {
             type: dataTypes.VIRTUAL,
@@ -41,5 +41,6 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof bio =
             sequelize,
             tableName: 'bio',
         });
-    return bio;
+
+    return { model: bio };
 };

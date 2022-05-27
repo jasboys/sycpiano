@@ -19,7 +19,7 @@ const capitalRatio = 0.7;
 interface NavBarLogoProps {
     isHome: boolean;
     isExpanded: boolean;
-    specificRouteName: string;
+    specificRouteName?: string;
 }
 
 const LogoText = styled.div<{ isMobile: boolean }>(
@@ -104,7 +104,7 @@ const NavBarLogo: React.FC<React.HTMLAttributes<HTMLDivElement> & NavBarLogoProp
     const { xs, medium } = useMedia({ queries: screenBreakPoints })
     const displayName = specificRouteName && ((xs && routeNameMapping[specificRouteName]) || specificRouteName);
     const letterCount = displayName?.length;
-    const estimatedTextWidth = displayName && letterCount * capitalRatio * navBarFontSizeREM * 0.8 + letterSpacing * (letterCount - 1);
+    const estimatedTextWidth = letterCount && letterCount * capitalRatio * navBarFontSizeREM * 0.8 + letterSpacing * (letterCount - 1);
     const otherObjectSizes = (xs || medium) && ((xs ? 120 : 150) + (xs ? 0 : 20) + 111);   // other stuff 56 + 35 + 15 + 5 buffer
     return (
         <StyledLink to="/" isHome={isHome} isExpanded={isExpanded}>

@@ -6,12 +6,15 @@ import {
 } from 'types';
 
 import db from '../models';
+import { CalendarCreationAttributes } from '../models/calendar';
+import { PieceAttributes } from 'models/piece';
+import { CollaboratorAttributes } from 'models/collaborator';
 
 export const up = async (models: ModelMap): Promise<void> => {
     try {
         let responseItems: GCalEvent[] = [];
-        let nextPageToken: string;
-        let syncToken: string;
+        let nextPageToken: string | undefined;
+        let syncToken: string | undefined;
         do {
             const response = await getCalendarEvents(db.sequelize, nextPageToken, syncToken);
             responseItems = responseItems.concat(response.data.items);
@@ -57,16 +60,16 @@ export const up = async (models: ModelMap): Promise<void> => {
             try {
                 const { pieces, collaborators, ...attributes } = item;
 
-                const itemInstance = await calendarModel.create(attributes);
+                const itemInstance = await calendarModel.create(attributes as CalendarCreationAttributes);
                 currentItem = itemInstance;
-                await Promise.each(pieces, async ({ composer, piece }, index: number) => {
+                await Promise.each<PieceAttributes>(pieces, async ({ composer, piece }, index: number) => {
                     currentItem = { composer, piece };
                     const [ pieceInstance ] = await pieceModel.findOrCreate({
                         where: { composer, piece },
                     });
                     await itemInstance.addPiece(pieceInstance, { through: { order: index }});
                 });
-                await Promise.each(collaborators, async ({ name, instrument }, index: number) => {
+                await Promise.each<CollaboratorAttributes>(collaborators, async ({ name, instrument }, index: number) => {
                     currentItem = { name, instrument };
                     const [collaboratorInstance] = await collaboratorModel.findOrCreate({
                         where: { name, instrument },
@@ -79,7 +82,7 @@ export const up = async (models: ModelMap): Promise<void> => {
             }
         });
 
-        await tokenModel.create({ id: 'calendar_sync', token: syncToken, expires: null });
+        await tokenModel.create({ id: 'calendar_sync', token: syncToken, expires: undefined });
     } catch (e) {
         console.log(e);
         return;

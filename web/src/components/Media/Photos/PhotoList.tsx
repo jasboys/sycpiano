@@ -1,10 +1,9 @@
 import * as React from 'react';
-import { connect } from 'react-redux';
 
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
-import { onScroll, scrollFn } from 'src/components/App/NavBar/actions';
+import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
 
 import DropboxButton from 'src/components/Media/Photos/DropboxButton';
 import PhotoListItem from 'src/components/Media/Photos/PhotoListItem';
@@ -13,6 +12,7 @@ import { idFromItem } from 'src/components/Media/Photos/utils';
 import Playlist from 'src/components/Media/Playlist';
 import { screenXSorPortrait } from 'src/styles/screens';
 import { navBarHeight } from 'src/styles/variables';
+import { useAppDispatch } from 'src/hooks';
 
 const photoListStyle = css`
     padding-left: 5px;
@@ -56,56 +56,51 @@ const StyledPhotoListContainer = styled.div`
     }
 `;
 
-interface PhotoListOwnProps {
-    isMobile?: boolean;
+interface PhotoListProps {
+    isMobile: boolean;
     items: PhotoItem[];
-    currentItem: PhotoItem;
+    currentItem?: PhotoItem;
     selectPhoto: (item: PhotoItem) => void;
 }
 
-interface PhotoListDispatchToProps {
-    onScroll: typeof onScroll;
-}
+const PhotoList: React.FC<PhotoListProps> = (props) => {
+    const dispatch = useAppDispatch();
 
-type PhotoListProps = PhotoListOwnProps & PhotoListDispatchToProps;
+    const onScrollDispatch = (triggerHeight: number, scrollTop: number) => {
+        dispatch(onScroll({ triggerHeight, scrollTop }));
+    };
 
-class PhotoList extends React.PureComponent<PhotoListProps> {
-    render() {
-        const {
-            isMobile,
-            items,
-            currentItem,
-            selectPhoto,
-            onScroll: propOnScroll,
-        } = this.props;
-        return (
-            <StyledPhotoListContainer>
-                <Playlist
-                    id="photos_ul"
-                    extraStyles={playlistExtraStyles}
-                    hasToggler={false}
-                    isShow={true}
-                    shouldAppear={false}
-                    isMobile={isMobile}
-                    onScroll={isMobile ? scrollFn(navBarHeight.mobile, propOnScroll) : null}
-                >
-                    {items.map((item) => (
-                        <PhotoListItem
-                            key={item.file}
-                            item={item}
-                            currentItemId={isMobile ? null : idFromItem(currentItem)}
-                            onClick={isMobile ? null : selectPhoto}
-                            isMobile={isMobile}
-                        />
-                    ))}
-                </Playlist>
-                <DropboxButton />
-            </StyledPhotoListContainer>
-        );
-    }
-}
 
-export default connect<unknown, PhotoListDispatchToProps, PhotoListOwnProps>(
-    null,
-    { onScroll },
-)(PhotoList);
+    const {
+        isMobile,
+        items,
+        currentItem,
+        selectPhoto,
+    } = props;
+    return (
+        <StyledPhotoListContainer>
+            <Playlist
+                id="photos_ul"
+                extraStyles={playlistExtraStyles}
+                hasToggler={false}
+                isShow={true}
+                shouldAppear={false}
+                isMobile={isMobile}
+                onScroll={isMobile ? scrollFn(navBarHeight.mobile, onScrollDispatch) : undefined}
+            >
+                {items.map((item) => (
+                    <PhotoListItem
+                        key={item.file}
+                        item={item}
+                        currentItemId={isMobile ? undefined : idFromItem(currentItem)}
+                        onClick={isMobile ? undefined : selectPhoto}
+                        isMobile={isMobile}
+                    />
+                ))}
+            </Playlist>
+            <DropboxButton />
+        </StyledPhotoListContainer>
+    );
+};
+
+export default PhotoList;

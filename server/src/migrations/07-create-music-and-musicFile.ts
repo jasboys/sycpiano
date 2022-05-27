@@ -1,10 +1,8 @@
 import { DataTypes, QueryInterface } from 'sequelize';
-import { music } from 'models/music';
-import { musicFile } from 'models/musicFile';
 
 export const up = async (queryInterface: QueryInterface, dataTypes: typeof DataTypes): Promise<void> => {
     try {
-        await queryInterface.createTable<music>('music', {
+        await queryInterface.createTable('music', {
             id: {
                 allowNull: false,
                 defaultValue: dataTypes.UUIDV4,
@@ -28,7 +26,7 @@ export const up = async (queryInterface: QueryInterface, dataTypes: typeof DataT
         console.log(e);
     }
     try {
-        await queryInterface.createTable<musicFile>('music_file', {
+        await queryInterface.createTable('music_file', {
             id: {
                 allowNull: false,
                 defaultValue: dataTypes.UUIDV4,

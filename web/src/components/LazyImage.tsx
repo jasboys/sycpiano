@@ -9,7 +9,7 @@ import { LoadingInstance } from 'src/components/LoadingSVG';
 import { lightBlue } from 'src/styles/colors';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
 
-const StyledLoadingInstance = styled(LoadingInstance) `
+const StyledLoadingInstance = styled(LoadingInstance)`
     position: absolute;
     height: 100px;
     top: 50%;
@@ -32,8 +32,8 @@ interface PictureGroupAttributes {
 }
 
 interface LazyImageProps {
-    readonly isMobile?: boolean;
-    readonly id: string;
+    readonly isMobile: boolean;
+    readonly id?: string;
     readonly offset?: number;
     readonly container?: string;
     readonly mobileAttributes?: PictureGroupAttributes;
@@ -45,122 +45,126 @@ interface LazyImageProps {
     };
     readonly loadingComponent?: React.ReactNode | 'default';
     readonly alt: string;
-    readonly successCb?: (el?: HTMLImageElement) => void;
+    readonly successCb?: (el?: Element | HTMLElement | HTMLImageElement) => void;
     readonly destroyCb?: () => void;
 }
 
-interface LazyImageState {
-    isLoaded: boolean;
-}
+export const LazyImage: React.FC<LazyImageProps> = (props) => {
+    const [isLoaded, setIsLoaded] = React.useState(false);
+    const blazy = React.useRef<BlazyInstance>();
+    const mounted = React.useRef<boolean>(false);
+    const timeout = React.useRef<NodeJS.Timeout>();
 
-class LazyImageClass extends React.Component<LazyImageProps, LazyImageState> {
-    private blazy: BlazyInstance;
-    private timeout: NodeJS.Timer;
-    private mounted = false;
-    state = {
-        isLoaded: false,
-    };
-
-    activateBlazy = (): void => {
-        this.blazy = new Blazy({
-            selector: `#${this.props.id}`,
-            offset: this.props.offset || Infinity,
-            container: this.props.container ? `#${this.props.container}` : 'window',
+    const activateBlazy = React.useCallback(() => {
+        blazy.current = new Blazy({
+            selector: `#${props.id}`,
+            offset: props.offset || Infinity,
+            container: props.container ? `#${props.container}` : 'window',
             loadInvisible: true,
-            success: (el: HTMLImageElement) => {
-                if (this.mounted) {
-                    this.timeout = setTimeout(() => this.setState({ isLoaded: true }), 250);
-                    this.props.successCb?.(el);
+            success: (el: Element | HTMLElement) => {
+                if (mounted.current) {
+                    timeout.current = setTimeout(() => setIsLoaded(true), 250);
+                    setIsLoaded(true);
+                    props.successCb?.(el);
                 }
             },
         });
-    }
+    }, [props.id, props.offset, props.container, props.successCb]);
 
-    componentDidMount(): void {
-        this.mounted = true;
-        this.activateBlazy();
-    }
-
-    componentWillUnmount(): void {
-        this.mounted = false;
-        clearTimeout(this.timeout);
-        this.blazy.destroy();
-    }
-
-    componentDidUpdate(prevProps: LazyImageProps): void {
-        if (prevProps.isMobile !== this.props.isMobile) {
-            this.setState({ isLoaded: false });
-            this.blazy.revalidate();
+    React.useEffect(() => {
+        if (mounted.current) {
+            setIsLoaded(false);
+            blazy.current?.revalidate();
         }
-    }
+    }, [props.isMobile]);
 
-    render(): JSX.Element {
-        const {
-            mobileAttributes,
-            desktopAttributes,
-            csss,
+    React.useEffect(() => {
+        mounted.current = true;
+        activateBlazy();
+        return function unmount() {
+            mounted.current = false;
+            if (timeout.current) {
+                clearTimeout(timeout.current);
+            }
+            blazy.current?.destroy();
+        }
+    }, []);
+
+
+
+    // const onError = React.useCallback(() => {
+    //     if (mounted.current) {
+    //         console.log('error');
+    //         setIsLoaded(false);
+    //         blazy.current?.revalidate();
+    //     }
+    // }, [])
+
+    const {
+        mobileAttributes,
+        desktopAttributes,
+        csss,
+        id,
+        isMobile,
+        alt,
+        loadingComponent,
+    } = props;
+    const Loading = (loadingComponent as typeof React.Component);
+    const sourceProps = isMobile ?
+        {
+            'data-srcset': mobileAttributes?.webp?.srcset,
+            sizes: mobileAttributes?.webp?.srcset,
+            type: 'image/webp',
+        } :
+        {
+            'data-srcset': desktopAttributes?.webp?.srcset,
+            sizes: desktopAttributes?.webp?.srcset,
+            type: 'image/webp',
+        };
+
+    const imgProps = isMobile ?
+        {
             id,
-            isMobile,
-            alt,
-            loadingComponent,
-        } = this.props;
-        const Loading = (loadingComponent as typeof React.Component);
-        return (
-            <React.Fragment>
-                <Transition<undefined>
-                    in={loadingComponent && !this.state.isLoaded}
-                    mountOnEnter={true}
-                    unmountOnExit={true}
-                    onEnter={fadeOnEnter()}
-                    onExit={fadeOnExit()}
-                    timeout={250}
-                >
-                    <div css={csss.loading}>
-                        {loadingComponent === 'default'
-                            ? <StyledLoadingInstance />
-                            : loadingComponent
-                                ? <Loading isMobile={isMobile} />
-                                : null
-                        }
-                    </div>
-                </Transition>
-                {isMobile ? (
-                    <picture key="mobile">
-                        <source
-                            data-srcset={mobileAttributes.webp.srcset}
-                            sizes={mobileAttributes.webp.sizes}
-                            type="image/webp"
-                        />
-                        <img
-                            id={id}
-                            css={csss.mobile}
-                            data-srcset={mobileAttributes.jpg.srcset}
-                            data-src={mobileAttributes.src}
-                            sizes={mobileAttributes.jpg.sizes}
-                            alt={alt}
-                        />
-                    </picture>
-                ) : (
-                        <picture key="desktop">
-                            <source
-                                data-srcset={desktopAttributes.webp.srcset}
-                                sizes={desktopAttributes.webp.sizes}
-                                type="image/webp"
-                            />
-                            <img
-                                id={id}
-                                css={csss.desktop}
-                                data-srcset={desktopAttributes.jpg.srcset}
-                                data-src={desktopAttributes.src}
-                                sizes={desktopAttributes.jpg.sizes}
-                                alt={alt}
-                            />
-                        </picture>
-                    )
-                }
-            </React.Fragment>
-        );
-    }
-}
+            css: csss?.mobile,
+            'data-srcset': mobileAttributes?.jpg?.srcset,
+            'data-src': mobileAttributes?.src,
+            sizes: mobileAttributes?.jpg?.sizes,
+            alt: alt,
+        } :
+        {
+            id,
+            css: csss?.desktop,
+            'data-srcset': desktopAttributes?.jpg?.srcset,
+            'data-src': desktopAttributes?.src,
+            sizes: desktopAttributes?.jpg?.sizes,
+            alt: alt,
+        };
 
-export const LazyImage = LazyImageClass;
+
+    return (
+        <React.Fragment>
+            <Transition<undefined>
+                in={!!loadingComponent && !isLoaded}
+                mountOnEnter={true}
+                unmountOnExit={true}
+                onEnter={fadeOnEnter()}
+                onExit={fadeOnExit()}
+                timeout={250}
+            >
+                <div css={csss?.loading}>
+                    {loadingComponent === 'default'
+                        ? <StyledLoadingInstance />
+                        : loadingComponent
+                            ? <Loading isMobile={isMobile} />
+                            : null
+                    }
+                </div>
+            </Transition>
+
+            <picture key="mobile">
+                <source {...sourceProps} />
+                <img {...imgProps} />
+            </picture>
+        </React.Fragment>
+    );
+};

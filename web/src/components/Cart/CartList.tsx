@@ -1,25 +1,24 @@
 import styled from '@emotion/styled';
 import * as React from 'react';
 import ReactMarkdown from 'react-markdown';
-import { useSelector, useDispatch } from 'react-redux';
-import { GlobalStateShape } from 'src/types';
 import {
     checkoutAction,
-    toggleCartListAction,
-    checkoutErrorAction,
-} from 'src/components/Cart/actions';
-
-import TextField from '@material-ui/core/TextField';
-import { ThemeProvider } from '@material-ui/core/styles';
+    clearErrors,
+    toggleCartList,
+} from 'src/components/Cart/reducers';
 
 import { cartWidth } from 'src/styles/variables';
 import { lato2, lato3 } from 'src/styles/fonts';
 import { theme, lightBlue, logoBlue } from 'src/styles/colors';
 import { mix } from 'polished';
-import { formatPrice, validateEmail } from 'src/utils';
+import { formatPrice } from 'src/utils';
+import validator from 'validator';
 import { CartItem } from 'src/components/Cart/CartItem';
-import { Product } from 'src/components/Shop/types';
+import { Product } from 'src/components/Shop/ShopList/types';
 import { noHighlight } from 'src/styles/mixins';
+import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { ThemeProvider } from '@mui/material/styles';
+import TextField from '@mui/material/TextField';
 
 const ARROW_SIDE = 32;
 
@@ -30,6 +29,7 @@ const CartListDiv = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
     margin: isMobile ? 'unset' : `${ARROW_SIDE / 2}px 1.5rem`,
     fontFamily: lato2,
     fontSize: '0.8rem',
+    borderRadius: '4px',
 }));
 
 const StyledItemList = styled.div({
@@ -42,6 +42,7 @@ const StyledHeading = styled.div({
     position: 'relative',
     backgroundColor: lightBlue,
     color: 'white',
+    borderRadius: '4px 4px 0 0',
 });
 
 const CloseSVG = styled.svg({
@@ -95,7 +96,7 @@ const StyledCheckoutButton = styled.button<{ disabled: boolean; isMouseDown: boo
 );
 
 const ErrorMessage = styled.div({
-    color: 'red',
+    color: 'darkred',
     fontSize: '0.8rem',
     margin: '1rem',
 });
@@ -141,7 +142,8 @@ const StripeDiv = styled.div({
     padding: '0.5rem',
     backgroundColor: lightBlue,
     direction: 'rtl',
-})
+    borderRadius: '0 0 4px 4px',
+});
 
 const StripeIcon = styled.img({
     height: '100%',
@@ -158,7 +160,7 @@ interface CartListProps {
 }
 
 const Heading: React.FC<Record<string, unknown>> = () => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
     return (
         <StyledHeading>
@@ -168,7 +170,7 @@ const Heading: React.FC<Record<string, unknown>> = () => {
                 viewBox="0 0 120 120"
                 height="42"
                 width="42"
-                onClick={() => dispatch(toggleCartListAction(false))}
+                onClick={() => dispatch(toggleCartList(false))}
             >
                 <path d="M40 40L80 80M40 80L80 40" strokeLinecap="square" strokeWidth="6" />
             </CloseSVG>
@@ -177,11 +179,20 @@ const Heading: React.FC<Record<string, unknown>> = () => {
 };
 
 const CheckoutForm: React.FC<{ cartLength: number }> = ({ cartLength }) => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const [isMouseDown, setIsMouseDown] = React.useState(false);
-    const savedEmail = useSelector(({ cart }: GlobalStateShape) => cart.email);
-    const [email, setEmail] = React.useState(savedEmail);
+    const savedEmail = useAppSelector(({ cart }) => cart.email);
+    const [email, setEmail] = React.useState('');
     const [error, setError] = React.useState(false);
+
+    React.useEffect(() => {
+        setEmail(savedEmail);
+    }, [savedEmail]);
+
+    const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setEmail(event.target.value);
+        setError(event.target.value !== '' && !validator.isEmail(event.target.value));
+    }
 
     return (
         <ThemeProvider theme={theme}>
@@ -204,10 +215,7 @@ const CheckoutForm: React.FC<{ cartLength: number }> = ({ cartLength }) => {
                     error={error}
                     id="email-text"
                     value={email}
-                    onChange={(event) => {
-                        setEmail(event.target.value);
-                        setError(event.target.value !== '' && !validateEmail(event.target.value));
-                    }}
+                    onChange={onChange}
                     variant="outlined"
                     margin="dense"
                     type="email"
@@ -239,42 +247,44 @@ const CheckoutForm: React.FC<{ cartLength: number }> = ({ cartLength }) => {
 export const CartList: React.FC<CartListProps> = ({
     isMobile,
 }) => {
-    const shopItems = useSelector(({ shop }: GlobalStateShape) => shop.items);
-    const cart = useSelector(({ cart }: GlobalStateShape) => cart.items);
-    const checkoutError = useSelector(({ cart }: GlobalStateShape) => cart.checkoutError);
+    const shopItems = useAppSelector(({ shop }) => shop.items);
+    const cart = useAppSelector(({ cart }) => cart.items);
+    const checkoutError = useAppSelector(({ cart }) => cart.checkoutError);
 
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
     let subtotal = 0;
     const clearError = checkoutError.message !== '' && cart.every((val) => !checkoutError.data?.includes(val));
     if (clearError) {
-        dispatch(checkoutErrorAction({
-            message: '',
-            data: [],
-        }));
+        dispatch(clearErrors());
     }
 
     return (
         <CartListDiv isMobile={isMobile}>
             <Heading />
-            {cart.length !== 0 && Object.keys(shopItems).length !== 0 ?
+            {cart.length !== 0 && shopItems && Object.keys(shopItems).length !== 0 ?
                 (
                     <StyledItemList>
                         {checkoutError.message !== '' &&
                             (
                                 <ErrorMessage>
-                                    <ReactMarkdown
-                                        source={checkoutError.message} />
+                                    <ReactMarkdown>{checkoutError.message}</ReactMarkdown>
                                 </ErrorMessage>
                             )
                         }
                         {cart.map((item: string) => {
+                            // item = cart item
+                            // reduce over all categories of shop items { arrangement: Product[]; cadenza: Product[]; original: Product[] },
+                            // accumulate starting with undefined
+                            // if accumulator is falsy, then return
+                            // within all items in that category find the one where id === item
+                            // null coalesce
                             const currentItem = Object.values(shopItems)
-                                .reduce((acc, prods) => acc || prods.find(el => el.id === item), undefined as Product);
+                                .reduce((acc: Product | undefined, prods) => (acc !== undefined) ? acc : prods?.find(el => el.id === item), undefined);
                             subtotal += currentItem ? currentItem.price : 0;
-                            const error = checkoutError.message !== '' && checkoutError.data.includes(item);
-                            return (
-                                <CartItem key={item} item={currentItem} error={!!error} />
+                            const error = checkoutError.message !== '' && !!checkoutError.data && checkoutError.data?.includes(item);
+                            return currentItem && (
+                                <CartItem key={item} item={currentItem} error={error} />
                             );
                         })}
                     </StyledItemList>

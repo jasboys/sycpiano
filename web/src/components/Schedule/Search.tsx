@@ -1,9 +1,6 @@
 import { rgba } from 'polished';
-import { stringify } from 'qs';
 import * as React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router';
 
-import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import { SearchIconInstance, SearchIconSVG } from 'src/components/Schedule/SearchIconSVG';
@@ -12,6 +9,8 @@ import { lightBlue } from 'src/styles/colors';
 import { lato1 } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { screenXSandPortrait } from 'src/styles/screens';
+import { createSearchParams, useMatch, useNavigate, useSearchParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
 
 const focusedBlue = rgba(lightBlue, 0.6);
 const unfocusedGray = rgba(180, 180, 180, 0.4);
@@ -19,9 +18,7 @@ const unfocusedGray = rgba(180, 180, 180, 0.4);
 type SearchProps = {
     className?: string;
     isMobile?: boolean;
-    search: string;
-    setSearch: (search: string) => void;
-} & RouteComponentProps<unknown>;
+};
 
 const Container = styled.div<{ focused: boolean }>`
     width: 90%;
@@ -83,82 +80,82 @@ const ResetButton = styled.div<{ focused: boolean }>`
     }
 `;
 
-class Search extends React.Component<SearchProps, { focused: boolean }> {
-    constructor(props: SearchProps) {
-        super(props);
-        this.state = {
-            focused: false,
-        };
-    }
+const SubmitButton = styled.button({
+    flex: '0 0 auto',
+    background: 'none',
+	color: 'inherit',
+	border: 'none',
+	padding: 0,
+	font: 'inherit',
+	cursor: 'pointer',
+	outline: 'inherit',
+});
 
-    onInputChange = (event: React.FormEvent<HTMLInputElement>) => {
-        this.props.setSearch(event.currentTarget.value);
-    }
+export const Search: React.FC<SearchProps> = () => {
+    const [searchParams] = useSearchParams();
+    const [focused, setFocused] = React.useState(false);
+    const match = useMatch('/schedule/search');
+    const [showCancel, setShowCancel] = React.useState(!!searchParams.get('q'));
+    const { register, handleSubmit, reset } = useForm<{ search: string }>({
+        defaultValues: {
+            search: searchParams.get('q') ?? '',
+        },
+    });
+    const navigate = useNavigate();
 
-    onReset = (event: React.SyntheticEvent<HTMLDivElement>) => {
-        this.props.setSearch('');
-        this.props.history.push('/schedule/upcoming');
-        event.preventDefault();
-    }
-
-    onSubmit = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter') {
-            this.props.history.push(`/schedule/search${stringify({ q: this.props.search }, { addQueryPrefix: true })}`);
+    const onReset = (event: React.SyntheticEvent<HTMLDivElement>) => {
+        if (!!match) {
+            navigate('/schedule/upcoming');
+        } else {
+            reset();
+            setShowCancel(false);
             event.preventDefault();
         }
-    }
+    };
 
-    onFocus = () => {
-        this.setState({
-            focused: true,
-        });
-    }
+    const onSubmit = (data: { search: string }) => {
+        navigate(`/schedule/search?${createSearchParams({ q: data.search })}`);
+    };
 
-    onBlur = () => {
-        this.setState({
-            focused: false,
-        });
-    }
+    const onFocus = () => setFocused(true);
+    const onBlur = () => setFocused(false);
+    const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.value !== '' && showCancel === false) {
+            setShowCancel(true);
+        } else if (e.target.value === '' && showCancel === true) {
+            setShowCancel(false);
+        }
+    };
 
-    render() {
-        return (
-            <form>
-                <Container focused={this.state.focused}>
-                    <SearchIconSVG />
-                    <Label focused={this.state.focused} htmlFor="search">Search</Label>
-                    <Span focused={this.state.focused}>
-                        <Input
-                            id="search"
-                            type="text"
-                            placeholder={`try 'Mozart'`}
-                            value={this.props.search}
-                            onChange={this.onInputChange}
-                            onFocus={this.onFocus}
-                            onBlur={this.onBlur}
-                            onKeyPress={this.onSubmit}
-                        />
-                        {(this.props.search !== '') && (
-                            <ResetButton
-                                focused={this.state.focused}
-                                onClick={this.onReset}
-                            >
-                                {'\u00D7'}
-                            </ResetButton>
-                        )}
-                    </Span>
-                    <a
-                        href={`/schedule/search${stringify(
-                            { q: this.props.search },
-                            { addQueryPrefix: true },
-                        )}`}
-                        css={css` flex: 0 0 auto; `}
-                    >
-                        <SearchIconInstance />
-                    </a>
-                </Container>
-            </form>
-        );
-    }
-}
-
-export const SearchWithHistory = withRouter(Search);
+    return (
+        <form onSubmit={handleSubmit(onSubmit)}>
+            <Container focused={focused}>
+                <SearchIconSVG />
+                <Label focused={focused} htmlFor="search">Search</Label>
+                <Span focused={focused}>
+                    <Input
+                        id="search"
+                        type="text"
+                        placeholder={`try 'Mozart'`}
+                        onFocus={onFocus}
+                        {...register('search', {
+                            onBlur,
+                            onChange,
+                        })}
+                    />
+                    {(showCancel) && (
+                        <ResetButton
+                            focused={focused}
+                            onClick={onReset}
+                        >
+                            {'\u00D7'}
+                        </ResetButton>
+                    )}
+                </Span>
+                <SubmitButton>
+                    <SearchIconInstance />
+                </SubmitButton>
+            </Container>
+        </form>
+    );
+};

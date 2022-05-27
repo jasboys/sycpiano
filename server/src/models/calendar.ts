@@ -1,23 +1,27 @@
-import * as moment from 'moment';
+import { startOfDay } from 'date-fns';
+import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
 import {
     BelongsToManyAddAssociationMixin,
     BelongsToManyAddAssociationsMixin,
     BelongsToManyCountAssociationsMixin,
+    BelongsToManyCreateAssociationMixin,
     BelongsToManyGetAssociationsMixin,
     BelongsToManyRemoveAssociationMixin,
     BelongsToManyRemoveAssociationsMixin,
     BelongsToManySetAssociationsMixin,
     DataTypes,
+    Model,
+    Optional,
     Sequelize,
 } from 'sequelize';
+import { ModelExport, ModelMap } from '../types';
 
 import { createCalendarEvent, deleteCalendarEvent, getLatLng, getTimeZone, updateCalendar } from '../gapi/calendar';
-import { Model } from '../types';
 import { collaborator } from './collaborator';
 import { piece } from './piece';
 
-export class calendar extends Model {
-    id?: string;
+export interface CalendarAttributes {
+    id: string;
     name: string;
     dateTime: Date;
     allDay: boolean;
@@ -26,26 +30,42 @@ export class calendar extends Model {
     location: string;
     type: string;
     website: string;
-    readonly collaborators?: collaborator[];
-    readonly pieces?: piece[];
-    readonly createdAt?: Date | string;
-    readonly updatedAt?: Date | string;
+}
 
-    getPieces: BelongsToManyGetAssociationsMixin<piece>;
-    setPieces: BelongsToManySetAssociationsMixin<piece, piece['id']>;
-    addPiece: BelongsToManyAddAssociationMixin<piece, piece['id']>;
-    addPieces: BelongsToManyAddAssociationsMixin<piece, piece['id']>;
-    removePiece: BelongsToManyRemoveAssociationMixin<piece, piece['id']>;
-    removePieces: BelongsToManyRemoveAssociationsMixin<piece, piece['id']>;
-    countPieces: BelongsToManyCountAssociationsMixin;
+export interface CalendarCreationAttributes extends Optional<CalendarAttributes, 'id' | 'endDate' | 'website'> {}
 
-    getCollaborators: BelongsToManyGetAssociationsMixin<collaborator>;
-    setCollaborators: BelongsToManySetAssociationsMixin<collaborator, collaborator['id']>;
-    addCollaborator: BelongsToManyAddAssociationMixin<collaborator, collaborator['id']>;
-    addCollaborators: BelongsToManyAddAssociationsMixin<collaborator, collaborator['id']>;
-    removeCollaborator: BelongsToManyRemoveAssociationMixin<collaborator, collaborator['id']>;
-    removeCollaborators: BelongsToManyRemoveAssociationsMixin<collaborator, collaborator['id']>;
-    countCollaborators: BelongsToManyCountAssociationsMixin;
+export class calendar extends Model<CalendarAttributes, CalendarCreationAttributes> implements CalendarAttributes {
+    declare id: string;
+    declare name: string;
+    declare dateTime: Date;
+    declare allDay: boolean;
+    declare endDate: Date;
+    declare timezone: string;
+    declare location: string;
+    declare type: string;
+    declare website: string;
+    declare readonly collaborators?: collaborator[];
+    declare readonly pieces?: piece[];
+    declare readonly createdAt?: Date | string;
+    declare readonly updatedAt?: Date | string;
+
+    declare getPieces: BelongsToManyGetAssociationsMixin<piece>;
+    declare setPieces: BelongsToManySetAssociationsMixin<piece, piece['id']>;
+    declare addPiece: BelongsToManyAddAssociationMixin<piece, piece['id']>;
+    declare addPieces: BelongsToManyAddAssociationsMixin<piece, piece['id']>;
+    declare removePiece: BelongsToManyRemoveAssociationMixin<piece, piece['id']>;
+    declare removePieces: BelongsToManyRemoveAssociationsMixin<piece, piece['id']>;
+    declare countPieces: BelongsToManyCountAssociationsMixin;
+    declare createPiece: BelongsToManyCreateAssociationMixin<piece>;
+
+    declare getCollaborators: BelongsToManyGetAssociationsMixin<collaborator>;
+    declare setCollaborators: BelongsToManySetAssociationsMixin<collaborator, collaborator['id']>;
+    declare addCollaborator: BelongsToManyAddAssociationMixin<collaborator, collaborator['id']>;
+    declare addCollaborators: BelongsToManyAddAssociationsMixin<collaborator, collaborator['id']>;
+    declare removeCollaborator: BelongsToManyRemoveAssociationMixin<collaborator, collaborator['id']>;
+    declare removeCollaborators: BelongsToManyRemoveAssociationsMixin<collaborator, collaborator['id']>;
+    declare countCollaborators: BelongsToManyCountAssociationsMixin;
+    declare createCollaborator: BelongsToManyCreateAssociationMixin<collaborator>;
 }
 
 const transformModelToGoogle = async (c: calendar) => {
@@ -88,7 +108,7 @@ const beforeCreateHook = async (c: calendar, _: any) => {
     } = c;
 
     console.log(`Fetching coord and tz.`);
-    let timezone = null;
+    let timezone = 'America/Chicago';
     if (location) {
         const { latlng } = await getLatLng(location);
         timezone = await getTimeZone(latlng.lat, latlng.lng, dateTime);
@@ -103,13 +123,16 @@ const beforeCreateHook = async (c: calendar, _: any) => {
 
     // dateTime passed to hooks are in UTC. So we create a null-timezone moment with dateTime,
     // so that we can extract HH:mm that was put in on the GUI.
-    const dateString = moment.tz(c.dateTime, null).format('YYYY-MM-DD HH:mm');
+    // const dateString = moment.tz(c.dateTime, null).format('YYYY-MM-DD HH:mm');
     // Using the extract string, now create that time in the actual desired timezone.
-    const dateWithTz = moment.tz(dateString, timezone).toDate();
+    // const dateWithTz = moment.tz(dateString, timezone).toDate();
+    console.log(c.dateTime);
+    const dateWithTz = zonedTimeToUtc(utcToZonedTime(c.dateTime, c.timezone), timezone);
 
     if (allDay && c.endDate) {
-        const endDateString = moment(c.endDate).format('YYYY-MM-DD');
-        const endDateWithTz = moment.tz(endDateString, timezone).toDate();
+        // const endDateString = moment(c.endDate).format('YYYY-MM-DD');
+        // const endDateWithTz = moment.tz(endDateString, timezone).toDate();
+        const endDateWithTz = zonedTimeToUtc(startOfDay(utcToZonedTime(c.endDate, c.timezone)), timezone);
         /* eslint-disable-next-line require-atomic-updates */
         c.endDate = endDateWithTz;
     }
@@ -139,41 +162,56 @@ const beforeCreateHook = async (c: calendar, _: any) => {
 const beforeUpdateHook = async (c: calendar, _: any) => {
     console.log(`[Calendar Hook beforeUpdate]`);
 
-    const dateTimeChanged = c.changed('dateTime');
-    const locationChanged = c.changed('location');
+    const dateTimeChanged = c.changed('dateTime') || c.timezone === null;
+    const locationChanged = c.changed('location') || c.timezone === null;
 
     let timezone = c.timezone;
     // If location has changed, fetch the new timezone.
-    if (locationChanged || timezone === null) {
+    if (locationChanged || timezone === undefined) {
         console.log(`Fetching new coord and tz.`);
         const location = c.location;
         const { latlng } = await getLatLng(location);
         timezone = await getTimeZone(latlng.lat, latlng.lng, c.dateTime);
+        console.log(timezone);
     }
 
     // See create hook for dateTime parsing logic.
     if (dateTimeChanged) {
         console.log(`New dateTime.`);
         console.log(c.dateTime);
-        const dateString = moment.tz(c.dateTime, null).format('YYYY-MM-DD HH:mm');
-        const dateWithTz = moment.tz(dateString, timezone).toDate();
+        // const dateString = moment.tz(c.dateTime, c.previous('timezone')).format('YYYY-MM-DD HH:mm');
+        // const dateWithTz = moment.tz(dateString, timezone).toDate();
+        const previous = c.previous('timezone') || 'America/Chicago';
+        const dateWithTz = zonedTimeToUtc(utcToZonedTime(c.dateTime, previous), timezone);
         /* eslint-disable require-atomic-updates */
         c.dateTime = dateWithTz;
         c.timezone = timezone;
         /* eslint-enable require-atomic-updates */
+        console.log(c);
     } else {
         // Here, since dateTime was unchanged, we're not being fed an input number, forced into UTC.
         // Instead, we have a time in a destination timezone. So, we extract the number we want, then
         // create a new time in the new timezone.
         if (locationChanged) {
             console.log(`Updating dateTime with new tz.`);
-            const dateString = moment(c.dateTime).tz(c.timezone).format('YYYY-MM-DD HH:mm');
-            const dateWithTz = moment.tz(dateString, timezone).toDate();
+            // const dateString = moment(c.dateTime).tz(c.timezone).format('YYYY-MM-DD HH:mm');
+            // const dateWithTz = moment.tz(dateString, timezone).toDate();
+            const previous = c.previous('timezone') || 'America/Chicago';
+            const dateWithTz = zonedTimeToUtc(utcToZonedTime(c.dateTime, previous), timezone);
             /* eslint-disable require-atomic-updates */
             c.dateTime = dateWithTz;
             c.timezone = timezone;
             /* eslint-enable require-atomic-updates */
+            console.log(c);
         }
+    }
+
+    if (c.allDay && c.endDate && c.changed('endDate')) {
+        // const endDateString = moment(c.endDate).format('YYYY-MM-DD');
+        // const endDateWithTz = moment.tz(endDateString, timezone).toDate();
+        const endDateWithTz = zonedTimeToUtc(startOfDay(utcToZonedTime(c.endDate, c.timezone)), timezone);
+        /* eslint-disable-next-line require-atomic-updates */
+        c.endDate = endDateWithTz;
     }
 
     if (c.changed()) {
@@ -184,7 +222,7 @@ const beforeUpdateHook = async (c: calendar, _: any) => {
     console.log(`[End Hook]\n`);
 };
 
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof calendar => {
+export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<calendar> => {
     calendar.init({
         id: {
             autoIncrement: false,
@@ -223,12 +261,15 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof calen
             tableName: 'calendar',
         });
 
-    calendar.associate = (models) => {
+    const associate = (models: ModelMap) => {
         calendar.hasMany(models.calendarPiece);
         calendar.hasMany(models.calendarCollaborator);
         calendar.belongsToMany(models.piece, { through: models.calendarPiece });
         calendar.belongsToMany(models.collaborator, { through: models.calendarCollaborator });
     };
 
-    return calendar;
+    return {
+        model: calendar,
+        associate,
+    };
 };

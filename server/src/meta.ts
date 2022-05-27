@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { createHash } from 'crypto';
+import { add, differenceInCalendarYears, format, isValid, parse, startOfDay } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import * as dotenv from 'dotenv';
 import { startCase } from 'lodash';
-import * as moment from 'moment-timezone';
 import * as regexp from 'path-to-regexp';
 
 import { Op } from 'sequelize';
@@ -19,7 +20,7 @@ const { gte, lt } = Op;
 
 const regex = regexp.pathToRegexp('/:first/:second?/(.*)?');
 const baseString = 'Sean Chen: Pianist, Composer, Arranger | ';
-const age = moment().diff('1988-08-27', 'year');
+const getAge = () => differenceInCalendarYears(new Date(), new Date(1988, 7, 27));
 const descriptions: {
     home: string;
     biography: string;
@@ -39,7 +40,7 @@ const descriptions: {
     [key: string]: any;
 } = {
     home: 'Welcome to the official website of pianist, composer, and arranger Sean Chen. Third Prize at the 2013 Van Cliburn, Christel DeHaan Classical Fellow of the 2013 American Pianists Awards, and Artist-in-Residence at University of Missouri, Kansas City.',
-    biography: `Hailed as a charismatic rising star with “an exceptional ability to connect with an audience combined with an easy virtuosity” (Huffington Post), ${age.toString()}-year-old American pianist Sean Chen, third prize winner at the 2013 Van Cliburn International Piano Competition and recipient of the DeHaan Classical Fellowship as the winner of the 2013 American Pianists Awards, has continued to earn accolades for “alluring, colorfully shaded renditions” (New York Times) and “genuinely sensitive” (LA Times) playing.`,
+    biography: `Hailed as a charismatic rising star with “an exceptional ability to connect with an audience combined with an easy virtuosity” (Huffington Post), ${getAge}-year-old American pianist Sean Chen, third prize winner at the 2013 Van Cliburn International Piano Competition and recipient of the DeHaan Classical Fellowship as the winner of the 2013 American Pianists Awards, has continued to earn accolades for “alluring, colorfully shaded renditions” (New York Times) and “genuinely sensitive” (LA Times) playing.`,
     discography: 'Complete discography of Sean Chen',
     contact: `Contact information for Sean Chen and for booking performances.`,
     upcoming: 'Upcoming recitals, concerti, and masterclasses.',
@@ -56,7 +57,7 @@ const descriptions: {
 };
 
 const validFirst = ['', 'about', 'contact', 'schedule', 'media', 'press', 'store', 'shop'];
-const validSecond = ['', 'biography', 'discography', 'press', 'music', 'videos', 'photos', 'upcoming', 'archive', 'scores', 'FAQs', 'checkout'];
+const validSecond = ['', 'biography', 'discography', 'press', 'music', 'videos', 'photos', 'upcoming', 'archive', 'search', 'scores', 'FAQs', 'checkout'];
 
 interface Meta {
     title: string;
@@ -172,21 +173,21 @@ export const getMetaFromPathAndSanitize = async (url: string): Promise<Meta> => 
     }
     if (parsed[1] === 'schedule') {
         try {
-            const date = moment(parsed[3]);
-            if (!date.isValid()) {
+            const date = parse(parsed[3], 'yyyy-MM-dd', new Date());
+            if (!isValid(date)) {
                 throw new Error('invalid date');
             }
             const event = (await models.calendar.findAll({
                 where: {
                     dateTime: {
-                        [gte]: date.startOf('day').format('YYYY-MM-DD'),
-                        [lt]: date.add({ days: 1 }).format('YYYY-MM-DD'),
+                        [gte]: format(startOfDay(date), 'yyyy-MM-dd'),
+                        [lt]: format(add(date, { days: 1 }), 'yyyy-MM-dd'),
                     },
                 },
                 attributes: ['dateTime', 'name', 'type'],
             }))[0];
             return {
-                title: baseString + moment(event.dateTime).format('MMM DD, YYYY, HH:mm zz'),
+                title: baseString + formatInTimeZone(event.dateTime, event.timezone, 'MMM dd, yyyy, HH:mm zzz'),
                 description: startCase(parsed[2]) + ' ' + event.type + ': ' + event.name,
             };
         } catch (e) {
@@ -210,4 +211,9 @@ export const getMetaFromPathAndSanitize = async (url: string): Promise<Meta> => 
             };
         }
     }
+    // Default, but shouldn't need it (just to make typescript happy).
+    return {
+        title: baseString + 'Home',
+        description: descriptions.home,
+    };
 };

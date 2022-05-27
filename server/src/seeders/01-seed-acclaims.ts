@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import { omit } from 'lodash';
+import { AcclaimCreationAttributes } from '../models/acclaim';
 import * as path from 'path';
 import { ModelMap } from 'types';
 
@@ -14,7 +15,7 @@ export const up = async (models: ModelMap): Promise<void> => {
         }> = JSON.parse(content);
 
         const items = json.map((obj) => omit(obj, ['ID']));
-        await model.bulkCreate(items);
+        await model.bulkCreate(items as AcclaimCreationAttributes[]);
     } catch (e) {
         console.log(e);
     }

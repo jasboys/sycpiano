@@ -18,14 +18,19 @@ const shopRouter = express.Router();
 shopRouter.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
     const sig = req.headers['stripe-signature'];
 
+    if (sig === undefined) {
+        return res.status(400).send(`Webhook Error: no stripe signature header.`);
+    }
+
     let event;
-    console.log(req.body, sig);
+    // console.log(req.body, sig);
 
     try {
         event = stripeClient.constructEvent(req.body, sig);
     } catch (e) {
         console.error(e);
-        return res.status(400).send(`Webhook Error: ${e.message}`);
+        const err = e as Error;
+        return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
     if (event.type === 'checkout.session.completed') {
@@ -35,10 +40,13 @@ shopRouter.post('/webhook', bodyParser.raw({ type: 'application/json' }), async 
             const productIDs = await stripeClient.getProductIDsFromPaymentIntent(session.payment_intent as string);
             const email = await stripeClient.getEmailFromCustomer(customerID);
             // Add associations to local model
-            const customer = await db.models.customer.findOne({ where: { id: customerID } });
+            const customer = await db.models.user.findOne({ where: { id: customerID } });
+            if (customer === null) {
+                throw new Error('no customer found');
+            }
             customer.addProducts(productIDs);
 
-            await emailPDFs(productIDs, email, session.client_reference_id);
+            await emailPDFs(productIDs, email, session.client_reference_id!);
         } catch (e) {
             console.error('Failed to send email: ', e);
         }
@@ -56,10 +64,13 @@ shopRouter.get('/items', async (_, res) => {
             const prods =
                 products
                     .filter(({ type: t }) => t === type)
-                    .map(({ dataValues: { createdAt, updatedAt, ...prod } }) => ({
-                        ...prod,
-                        format: 'pdf',
-                    }));
+                    .map((product) => {
+                        const prod = product.get();
+                        return {
+                            ...prod,
+                            format: 'pdf',
+                        };
+                    });
             return {
                 ...acc,
                 [type]: prods,
@@ -76,18 +87,16 @@ shopRouter.get('/faqs', async (_, res) => {
 const getOrCreateLocalCustomer = async (email: string) => {
     try {
         const stripeCustomer = await stripeClient.getOrCreateCustomer(email);
-        const localCustomer = await db.models.customer.findAll({
-            where: {
-                id: stripeCustomer.id,
-            },
-        });
+        const localCustomer = await db.models.user.findByPk(stripeCustomer.id);
 
-        if (localCustomer.length === 0) {
-            return await db.models.customer.create({
+        if (localCustomer === null) {
+            return await db.models.user.create({
                 id: stripeCustomer.id,
-            })
+                email,
+                role: 'customer',
+            });
         } else {
-            return localCustomer[0];
+            return localCustomer;
         }
     } catch (e) {
         console.log(e);
@@ -121,6 +130,9 @@ shopRouter.post('/checkout', async (req, res) => {
 
     try {
         const customer = await getOrCreateLocalCustomer(email);
+        if (customer === undefined) {
+            throw new Error('customer not found');
+        }
 
         const previouslyPurchased = await customer.getProducts();
         const previouslyPurchasedIDs = previouslyPurchased.map((prod) => prod.id);
@@ -131,7 +143,7 @@ shopRouter.post('/checkout', async (req, res) => {
             } else {
                 return acc;
             }
-        }, []);
+        }, [] as string[]);
 
         if (duplicates.length !== 0) {
             res.status(422).json({
@@ -155,7 +167,7 @@ shopRouter.post('/checkout', async (req, res) => {
             customer.id,
         );
         res.json({
-            sessionId
+            sessionId,
         });
     } catch (e) {
         console.error('Checkout error', e);
@@ -170,7 +182,7 @@ shopRouter.post('/get-purchased', async (req, res) => {
 
     try {
         const stripeCustomer = await stripeClient.getCustomer(email);
-        const localCustomer = await db.models.customer.findAll({ where: { id: stripeCustomer.id } });
+        const localCustomer = await db.models.user.findAll({ where: { id: stripeCustomer.id } });
         const purchased = await localCustomer[0].getProducts();
         const purchasedIDs = purchased.map((prod) => prod.id);
         res.json({
@@ -190,7 +202,7 @@ shopRouter.post('/resend-purchased', async (req, res) => {
 
     try {
         const stripeCustomer = await stripeClient.getCustomer(email);
-        const localCustomer = await db.models.customer.findAll({ where: { id: stripeCustomer.id } });
+        const localCustomer = await db.models.user.findAll({ where: { id: stripeCustomer.id } });
         const purchased = await localCustomer[0].getProducts();
         const purchasedIDs = purchased.map((prod) => prod.id);
         await emailPDFs(purchasedIDs, email);

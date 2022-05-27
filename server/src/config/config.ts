@@ -24,6 +24,10 @@ const config = () => {
     const dbUrl = process.env.DATABASE_URL;
     if (dbUrl) {
         let portString;
+        const match = dbUrl.match(/postgres:\/\/(.+):(.+)@(.+):(.+)\/(.+)/);
+        if (match === null) {
+            throw new Error('database url is improperly formed');
+        }
         [
             ,
             username,
@@ -32,7 +36,7 @@ const config = () => {
             portString,
             /* tslint:disable-next-line:trailing-comma */
             database
-        ] = dbUrl.match(/postgres:\/\/(.+):(.+)@(.+):(.+)\/(.+)/);
+        ] = match;
         port = parseInt(portString, 10);
     } else {
         username = process.env.DB_USER;

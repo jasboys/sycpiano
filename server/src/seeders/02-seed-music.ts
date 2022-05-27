@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { MusicCreationAttributes } from '../models/music';
 import * as path from 'path';
 import { ModelMap } from 'types';
 
@@ -15,7 +16,7 @@ export const up = async (models: ModelMap): Promise<void> => {
 
         json.forEach(async (item) => {
             try {
-                await model.create(item, {
+                await model.create(item as MusicCreationAttributes, {
                     include: [models.musicFile],
                 });
             } catch (e) {

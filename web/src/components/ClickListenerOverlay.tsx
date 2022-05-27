@@ -13,7 +13,6 @@ const ClickDiv = styled.div({
 });
 
 export const ClickListenerOverlay: React.FC<ClickListenerProps> = ({ onClick }) => {
-
     return (
         <ClickDiv onClick={onClick} />
     );

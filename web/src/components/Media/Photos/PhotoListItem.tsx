@@ -3,7 +3,7 @@ import * as React from 'react';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
-import { TweenLite } from 'gsap';
+import { gsap } from 'gsap';
 
 import { LazyImage } from 'src/components/LazyImage';
 import { PhotoItem } from 'src/components/Media/Photos/types';
@@ -13,6 +13,7 @@ import { ChildRendererProps } from 'src/components/Media/types';
 import { lightBlue } from 'src/styles/colors';
 import { generateSrcsetWidths, resizedImage } from 'src/styles/imageUrls';
 import { screenWidths, screenXSorPortrait } from 'src/styles/screens';
+import { isImageElement } from 'src/utils';
 
 const PhotoRow = styled.div<{ isMobile: boolean; isLoaded: boolean }>`
     position: relative;
@@ -64,70 +65,70 @@ const loadingStyle = css`
     position: absolute;
 `;
 
-class PhotoListItem extends React.Component<ChildRendererProps<PhotoItem>, { isLoaded: boolean }> {
-    state = { isLoaded: false };
+const PhotoListItem: React.FC<ChildRendererProps<PhotoItem>> = (props) => {
+    const [isLoaded, setIsLoaded] = React.useState(false);
 
-    successCb = (el: HTMLImageElement): void => {
-        this.setState({isLoaded: true});
-        TweenLite.to(el, 0.2, { autoAlpha: 1 });
+    const successCb = (el: HTMLImageElement | HTMLElement | Element | undefined) => {
+        setIsLoaded(true);
+        if (el && isImageElement(el)) {
+            gsap.to(el, { duration: 0.2, autoAlpha: 1 });
+        }
     };
 
-    render(): JSX.Element {
-        const { item, currentItemId, isMobile, onClick } = this.props;
-        const isActive = currentItemId === idFromItem(item);
-        const mobileUrl = resizedPathFromItem(item, { gallery: true });
-        const desktopUrl = staticPathFromItem(item, { gallery: true, thumbnail: true });
-        const mobileWebP = resizedPathFromItem(item, { gallery: true, webp: true });
-        const desktopWebP = resizedPathFromItem(item, { gallery: true, thumbnail: true, webp: true });
-        const photoRow = (
-            <PhotoRow onClick={() => onClick && onClick(item)} isMobile={isMobile} isLoaded={this.state.isLoaded}>
-                <LazyImage
-                    id={idFromItem(item)}
-                    offset={500}
-                    container="photos_ul"
-                    alt={item.file}
-                    isMobile={isMobile}
-                    loadingComponent="default"
-                    csss={{
-                        mobile: css({ visibility: 'hidden' }),
-                        desktop: css({ visibility: 'hidden' }),
-                        loading: loadingStyle,
-                    }}
-                    mobileAttributes={{
-                        webp: {
-                            srcset: generateSrcsetWidths(mobileWebP, screenWidths),
-                            sizes: '100vw',
-                        },
-                        jpg: {
-                            srcset: generateSrcsetWidths(mobileUrl, screenWidths),
-                            sizes: '100vw',
-                        },
-                        src: resizedImage(mobileUrl, { width: 640 }),
-                    }}
-                    desktopAttributes={{
-                        webp: {
-                            srcset: resizedImage(desktopWebP, { width: 400 }),
-                            sizes: '400px',
-                        },
-                        jpg: {
-                            srcset: `${desktopUrl} 400w`,
-                            sizes: '400px',
-                        },
-                        src: desktopUrl,
-                    }}
-                    successCb={this.successCb}
-                />
-            </PhotoRow>
-        );
-        // Only wrap with Highlight component in non-mobile width/layout,
-        // since photos aren't selectable in mobile width/layout
-        // (i.e. the user doesn't need to know which photo is currently selected).
-        return isMobile ? photoRow : (
-            <Highlight active={isActive}>
-                {photoRow}
-            </Highlight>
-        );
-    }
+    const { item, currentItemId, isMobile, onClick } = props;
+    const isActive = currentItemId === idFromItem(item);
+    const mobileUrl = resizedPathFromItem(item, { gallery: true });
+    const desktopUrl = staticPathFromItem(item, { gallery: true, thumbnail: true });
+    const mobileWebP = resizedPathFromItem(item, { gallery: true, webp: true });
+    const desktopWebP = resizedPathFromItem(item, { gallery: true, thumbnail: true, webp: true });
+    const photoRow = (
+        <PhotoRow onClick={() => onClick && onClick(item)} isMobile={isMobile} isLoaded={isLoaded}>
+            <LazyImage
+                id={idFromItem(item)}
+                offset={500}
+                container="photos_ul"
+                alt={item.file}
+                isMobile={isMobile}
+                loadingComponent="default"
+                csss={{
+                    mobile: css({ visibility: 'hidden' }),
+                    desktop: css({ visibility: 'hidden' }),
+                    loading: loadingStyle,
+                }}
+                mobileAttributes={{
+                    webp: {
+                        srcset: generateSrcsetWidths(mobileWebP, screenWidths),
+                        sizes: '100vw',
+                    },
+                    jpg: {
+                        srcset: generateSrcsetWidths(mobileUrl, screenWidths),
+                        sizes: '100vw',
+                    },
+                    src: resizedImage(mobileUrl, { width: 640 }),
+                }}
+                desktopAttributes={{
+                    webp: {
+                        srcset: resizedImage(desktopWebP, { width: 400 }),
+                        sizes: '400px',
+                    },
+                    jpg: {
+                        srcset: `${desktopUrl} 400w`,
+                        sizes: '400px',
+                    },
+                    src: desktopUrl,
+                }}
+                successCb={successCb}
+            />
+        </PhotoRow>
+    );
+    // Only wrap with Highlight component in non-mobile width/layout,
+    // since photos aren't selectable in mobile width/layout
+    // (i.e. the user doesn't need to know which photo is currently selected).
+    return isMobile ? photoRow : (
+        <Highlight active={isActive}>
+            {photoRow}
+        </Highlight>
+    );
 }
 
 export default PhotoListItem;

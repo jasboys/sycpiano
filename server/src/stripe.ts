@@ -28,6 +28,7 @@ export const getPricesAndProducts = async (): Promise<Stripe.Price[]> => {
         return result.data;
     } catch (e) {
         console.error(e);
+        throw e;
     }
 };
 
@@ -36,6 +37,16 @@ export const getCustomer = async (email: string): Promise<Stripe.Customer> => {
         return (await stripe.customers.list({ email })).data[0];
     } catch (e) {
         console.error(e);
+        throw e;
+    }
+};
+
+export const createCustomer = async (email: string): Promise<Stripe.Customer> => {
+    try {
+        return await stripe.customers.create({ email });
+    } catch (e) {
+        console.error(e);
+        throw e;
     }
 };
 
@@ -54,6 +65,7 @@ export const getOrCreateCustomer = async (email: string): Promise<Stripe.Custome
         }
     } catch (e) {
         console.error("Stripe create/get customer failed.", e);
+        throw e;
     }
 };
 
@@ -84,6 +96,7 @@ export const createCheckoutSession = async (productIDs: string[], priceIDs: stri
         return session.id;
     } catch (e) {
         console.error('Checkout session creation failed.', e);
+        throw e;
     }
 }
 
@@ -94,17 +107,21 @@ export const getProductIDsFromPaymentIntent = async (paymentIntent: string): Pro
         return metadata;
     } catch (e) {
         console.error(`Couldn't get skus from paymentIntent.`, e);
+        throw e;
     }
 };
 
 export const getEmailFromCustomer = async (cid: string): Promise<string> => {
     try {
         const customer = await stripe.customers.retrieve(cid);
-        if (stripeCustomerActive(customer)) {
+        if (stripeCustomerActive(customer) && customer.email) {
             return customer.email;
+        } else {
+            throw new Error('Customer not active, or email is empty');
         }
     } catch (e) {
         console.error(`Couldn't get email from customer.`, e);
+        throw e;
     }
 };
 
@@ -136,6 +153,16 @@ export const createProduct = async (attributes: Omit<ProductAttributes, 'created
         return [product.id, price.id];
     } catch (e) {
         console.error(`Couldn't create product.`, e);
+        throw e;
+    }
+};
+
+export const deleteProduct = async (id: string): Promise<Stripe.Response<Stripe.DeletedProduct>> => {
+    try {
+        return await stripe.products.del(id);
+    } catch (e) {
+        console.error(`Couldn't delete product. `, e);
+        throw e;
     }
 };
 
@@ -172,6 +199,7 @@ export const updateProduct = async (attributes: Omit<ProductAttributes, 'created
         return [product.id, attributes.priceID];
     } catch (e) {
         console.error(`Couldn't update product.`, e);
+        throw e;
     }
 };
 
@@ -187,5 +215,6 @@ export const getCheckoutSession = async (sessionId: string): Promise<{ session: 
         };
     } catch (e) {
         console.error(`Could not retrieve session with id ${sessionId}`);
+        throw e;
     }
 }

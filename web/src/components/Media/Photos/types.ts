@@ -5,7 +5,7 @@ export interface PhotoListReducerShape {
 }
 
 export interface PhotoViewerReducerShape {
-    currentItem: PhotoItem;
+    currentItem?: PhotoItem;
 }
 
 export interface PhotoItem {

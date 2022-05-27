@@ -2,9 +2,7 @@
     "compileOnSave": false,
     "compilerOptions": {
         "lib": [
-            "es2015",
-            "es2016",
-            "es2017"
+            "esnext"
         ],
         "paths": {
             "*": [
@@ -25,6 +23,7 @@
         "target": "es2017",
         "allowJs": true,
         "moduleResolution": "node",
+        "strict": true,
         "noImplicitAny": true,
         "noUnusedLocals": true,
         "noUnusedParameters": true,

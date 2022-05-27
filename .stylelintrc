@@ -2,13 +2,13 @@
     "processors": ["stylelint-processor-styled-components"],
     "extends": [
         "stylelint-config-standard",
-        "stylelint-config-styled-components"
+        "stylelint-config-styled-components",
+        "stylelint-config-standard-scss"
     ],
     "rules": {
         "indentation": 4,
         "value-keyword-case": ["lower", {
-            ignoreKeywords: ["dummyValue"]
+            "ignoreKeywords": ["dummyValue"]
         }]
-    },
-    "syntax": "scss"
+    }
 }

@@ -63,7 +63,7 @@ const LinksDiv = styled.div<{ isHome: boolean }>(
 const NavBarLinks: React.FC<NavBarLinksProps> = (props) => (
     <LinksDiv isHome={props.currentBasePath === '/'}>
         <StyledUL>
-            {links.map((link: LinkShape, i: number): JSX.Element => {
+            {links.map((link: LinkShape, i: number) => {
                 return (
                     <NavBarLink
                         key={i}
@@ -79,4 +79,6 @@ const NavBarLinks: React.FC<NavBarLinksProps> = (props) => (
     </LinksDiv>
 );
 
-export default NavBarLinks;
+const MemoizedLinks = React.memo(NavBarLinks);
+
+export default MemoizedLinks;

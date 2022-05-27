@@ -6,7 +6,7 @@ import styled from '@emotion/styled';
 import { Link } from 'react-router-dom';
 
 import { categoryMap, isMusicItem, MusicFileItem, MusicItem as MusicItemType, MusicListItem } from 'src/components/Media/Music/types';
-import { formatTime, getPermaLink } from 'src/components/Media/Music/utils';
+import { formatTime, getRelativePermaLink } from 'src/components/Media/Music/utils';
 
 import { lightBlue, playlistBackground } from 'src/styles/colors';
 
@@ -14,7 +14,6 @@ interface MusicPlaylistItemProps {
     readonly play: () => void;
     readonly item: MusicListItem;
     readonly currentItemId: number | string;
-    readonly baseRoute: string;
     readonly onClick: (item: MusicFileItem) => void;
     readonly userInteracted: boolean;
 }
@@ -109,7 +108,7 @@ const StyledCategory = styled.div({
     boxShadow: '0 2px 6px -2px rgba(0, 0, 0, 0.5)',
 });
 
-const getComposerTitleYear = (composer: string, piece: string, year: number) => {
+const getComposerTitleYear = (composer: string, piece: string, year?: number) => {
     const compStr = composer === 'Sean Chen' ? '' : `${composer} `;
     const yearStr = year ? ` (${year})` : '';
     return `${compStr}${piece}${yearStr}`;
@@ -124,7 +123,6 @@ const MusicItem: React.FC<MusicItemProps> = ({
     item,
     currentItemId,
     onClick,
-    baseRoute,
     userInteracted,
 }) => {
 
@@ -132,7 +130,7 @@ const MusicItem: React.FC<MusicItemProps> = ({
     return (
         <StyledMusicItem id={musicFile.id}>
             <Link
-                to={getPermaLink(baseRoute, item.composer, item.piece, musicFile.name)}
+                to={getRelativePermaLink(item.composer, item.piece, musicFile.name)}
                 onClick={async () => {
                     if (!userInteracted) {
                         play();
@@ -165,7 +163,6 @@ const MusicCollectionItem: React.FC<MusicItemProps & { index: number, musicFile:
     item,
     currentItemId,
     onClick,
-    baseRoute,
     userInteracted,
     index,
     musicFile,
@@ -177,7 +174,7 @@ const MusicCollectionItem: React.FC<MusicItemProps & { index: number, musicFile:
             id={musicFile.id}
         >
             <Link
-                to={getPermaLink(baseRoute, item.composer, item.piece, musicFile.name)}
+                to={getRelativePermaLink(item.composer, item.piece, musicFile.name)}
                 onClick={async () => {
                     if (!userInteracted) {
                         play();
@@ -254,4 +251,6 @@ const MusicPlaylistItem: React.FC<MusicPlaylistItemProps> = (props) => {
     }
 };
 
-export default MusicPlaylistItem;
+const MemoizedPlaylistItem = React.memo(MusicPlaylistItem);
+
+export default MemoizedPlaylistItem;

@@ -1,5 +1,5 @@
 export const storageAvailable = (): boolean => {
-    let storage: Storage;
+    let storage: Storage | undefined = undefined;
     try {
         storage = window.localStorage;
         const x = '__storage_test__';
@@ -18,6 +18,6 @@ export const storageAvailable = (): boolean => {
             // Firefox
             e.name === 'NS_ERROR_DOM_QUOTA_REACHED') &&
             // acknowledge QuotaExceededError only if there's something already stored
-            (storage && storage.length !== 0);
+            ((storage !== undefined) && storage.length !== 0);
     }
 };

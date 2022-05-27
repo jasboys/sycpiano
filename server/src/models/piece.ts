@@ -1,17 +1,29 @@
-import { BelongsToManyCountAssociationsMixin, DataTypes, Sequelize } from 'sequelize';
-import { Model } from '../types';
+import { BelongsToManyCountAssociationsMixin, BelongsToManyGetAssociationsMixin, DataTypes, Model, Sequelize } from 'sequelize';
+import { ModelExport, ModelMap } from '../types';
+import { calendar } from './calendar';
+import { calendarPiece } from './calendarPiece';
 
-export class piece extends Model {
-    public readonly id: string;
-    public readonly composer: string;
-    public readonly piece: string;
-    public readonly createdAt?: Date | string;
-    public readonly updatedAt?: Date | string;
-
-    countCalendars: BelongsToManyCountAssociationsMixin;
+export interface PieceAttributes {
+    id: string;
+    composer: string;
+    piece: string;
 }
 
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof piece => {
+export interface PieceCreationAttributes extends Omit<PieceAttributes, 'id'> {}
+
+export class piece extends Model<PieceAttributes, PieceCreationAttributes> implements PieceAttributes {
+    declare id: string;
+    declare composer: string;
+    declare piece: string;
+    declare readonly createdAt?: Date | string;
+    declare readonly updatedAt?: Date | string;
+    declare readonly calendarPiece?: calendarPiece;
+
+    declare countCalendars: BelongsToManyCountAssociationsMixin;
+    declare getCalendars: BelongsToManyGetAssociationsMixin<calendar>;
+}
+
+export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<piece> => {
     piece.init({
         id: {
             allowNull: false,
@@ -27,10 +39,13 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof piece
             tableName: 'piece',
         });
 
-    piece.associate = (models) => {
+    const associate = (models: ModelMap) => {
         piece.hasMany(models.calendarPiece);
         piece.belongsToMany(models.calendar, { through: models.calendarPiece });
     };
 
-    return piece;
+    return {
+        model: piece,
+        associate,
+    };
 };

@@ -1,32 +1,31 @@
 import styled from '@emotion/styled';
 import { gsap } from 'gsap';
 import * as React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { Transition } from 'react-transition-group';
 
-import { toggleExpanded } from 'src/components/App/NavBar/actions';
+import { toggleExpanded } from 'src/components/App/NavBar/reducers';
 import HamburgerMenu from 'src/components/App/NavBar/HamburgerMenu';
 import NavBarLinks from 'src/components/App/NavBar/NavBarLinks';
 import { NavBarLinksProps } from 'src/components/App/NavBar/types';
 
-import { GlobalStateShape } from 'src/types';
 import { logoBlue } from 'src/styles/colors';
+import { useAppDispatch, useAppSelector } from 'src/hooks';
 
 const MenuContainer = styled.div` margin: auto 0; `;
 
-const onEnter = (el: HTMLDivElement) => {
+const onEnter = (el: HTMLElement) => {
     gsap.to(el, { autoAlpha: 1, duration: 0.3 });
     gsap.fromTo('.navlink-entry', { autoAlpha: 0, x: 80 }, { autoAlpha: 1, x: 0, stagger: 0.08, duration: 0.3 });
 };
 
-const onExit = (el: HTMLDivElement) => {
+const onExit = (el: HTMLElement) => {
     gsap.to('.navlink-entry', { autoAlpha: 0, x: 80, stagger: 0.05, duration: 0.25, });
     gsap.to(el, { autoAlpha: 0, duration: 0.3, delay: 0.15 });
 }
 
 const HamburgerNav: React.FC<NavBarLinksProps> = ({ currentBasePath, isMobile }) => {
-    const isExpanded = useSelector(({ navbar }: GlobalStateShape) => navbar.isExpanded);
-    const dispatch = useDispatch();
+    const isExpanded = useAppSelector(({ navbar }) => navbar.isExpanded);
+    const dispatch = useAppDispatch();
 
     return (
         <MenuContainer>

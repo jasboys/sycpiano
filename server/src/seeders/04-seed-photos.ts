@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { PhotoCreationAttributes } from '../models/photo';
 import * as path from 'path';
 import { ModelMap } from 'types';
 
@@ -11,7 +12,7 @@ export const up = async (models: ModelMap): Promise<void> => {
             [key: string]: any;
         }> = JSON.parse(content);
 
-        await model.bulkCreate(json);
+        await model.bulkCreate(json as PhotoCreationAttributes[]);
     } catch (e) {
         console.log(e);
     }

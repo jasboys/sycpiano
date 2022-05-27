@@ -1,12 +1,12 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Product } from 'src/components/Shop/types';
+import { Product } from 'src/components/Shop/ShopList/types';
 import styled from '@emotion/styled'
 import isPropValid from '@emotion/is-prop-valid';
 import { formatPrice } from 'src/utils';
-import { useDispatch } from 'react-redux';
-import { removeFromCartAction } from 'src/components/Cart/actions';
+import { removeItemFromCart } from 'src/components/Cart/reducers';
 import { staticImage } from 'src/styles/imageUrls';
+import { useAppDispatch } from 'src/hooks';
 
 const ItemContainer = styled.div({
     display: 'flex',
@@ -47,10 +47,16 @@ const ItemName = styled(Link, {
         textDecoration: 'underline',
     },
     ['&:visited']: {
-        color: 'unset',
+        color: '',
     }
 }, ({ error }) => error && ({
-    color: 'red',
+    color: 'darkred',
+    ['&:visited']: {
+        color: 'darkred',
+    },
+    ['&:hover']: {
+        color: 'darkred',
+    },
 }));
 
 const ItemPrice = styled.div({
@@ -67,7 +73,7 @@ interface CartProps {
 }
 
 export const CartItem: React.FC<CartProps> = ({ item, error }) => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
     return (
         <ItemContainer>
@@ -82,7 +88,7 @@ export const CartItem: React.FC<CartProps> = ({ item, error }) => {
                         >
                             {item.name}
                         </ItemName>
-                        <a css={{ flex: '0 0 auto' }} role="button" tabIndex={0} onClick={() => dispatch(removeFromCartAction(item.id))}>Remove</a>
+                        <a css={{ flex: '0 0 auto' }} role="button" tabIndex={0} onClick={() => dispatch(removeItemFromCart(item.id))}>Remove</a>
                     </div>
                     <div css={{ marginTop: '0.5rem' }}>
                         <ItemPrice>{formatPrice(item.price)}</ItemPrice>

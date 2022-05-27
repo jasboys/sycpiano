@@ -1,21 +1,16 @@
 import startCase from 'lodash-es/startCase';
-import { parse } from 'qs';
 import * as React from 'react';
 import { Helmet } from 'react-helmet';
-import { connect } from 'react-redux';
-import { RouteComponentProps } from 'react-router';
-import { AutoSizer } from 'react-virtualized/dist/es/AutoSizer';
-import { CellMeasurer, CellMeasurerCache } from 'react-virtualized/dist/es/CellMeasurer';
-import { List, ListRowRenderer } from 'react-virtualized/dist/es/List';
+import { useNavigate, useParams } from 'react-router';
+import { createCachedSelector } from 're-reselect';
 
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import debounce from 'lodash-es/debounce';
-import { default as moment, Moment } from 'moment-timezone';
 
 import { LoadingInstance } from 'src/components/LoadingSVG';
-import { createFetchEventsAction, createSearchEventsAction, selectEvent } from 'src/components/Schedule/actions';
+import { fetchEvents, searchEvents, selectEvent } from 'src/components/Schedule/reducers';
 import EventItem from 'src/components/Schedule/EventItem';
 import EventMonthItem from 'src/components/Schedule/EventMonthItem';
 import {
@@ -30,37 +25,16 @@ import {
 import { lightBlue } from 'src/styles/colors';
 import { lato2 } from 'src/styles/fonts';
 import { screenXSorPortrait } from 'src/styles/screens';
-import { GlobalStateShape } from 'src/types';
+import { GlobalStateShape } from 'src/store';
 import { metaDescriptions, titleStringBase } from 'src/utils';
+import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { parseISO, parse as parseDate, startOfDay, isSameDay, isBefore } from 'date-fns';
+import { format, formatInTimeZone } from 'date-fns-tz';
+import { useSearchParams } from 'react-router-dom';
 
-interface EventListStateToProps {
-    readonly eventItems: EventItemType[];
-    readonly hasEventBeenSelected: boolean;
-    readonly minDate: Moment;
-    readonly maxDate: Moment;
-    readonly currentItem: DayItem;
-    readonly isFetchingList: boolean;
-    readonly hasMore: boolean;
-}
-
-interface EventListDispatchToProps {
-    readonly selectEvent: typeof selectEvent;
-    readonly createFetchEventsAction: typeof createFetchEventsAction;
-    readonly createSearchEventsAction: typeof createSearchEventsAction;
-}
-
-interface EventListOwnProps {
-    readonly date?: string;
+interface EventListProps {
     readonly type: EventListName;
-    readonly isMobile?: boolean;
-    readonly search?: string;
-}
-
-type EventListProps = RouteComponentProps<ParamProps> & EventListOwnProps & EventListStateToProps & EventListDispatchToProps;
-
-interface ParamProps {
-    readonly date?: string;
-    readonly search?: string;
+    readonly isMobile: boolean;
 }
 
 interface OnScrollProps {
@@ -81,6 +55,7 @@ const StyledLoadingInstance = styled(LoadingInstance)`
 const fullWidthHeight = css`
     width: 100%;
     height: 100%;
+    overflow-y: scroll;
 `;
 
 const placeholderStyle = css`
@@ -109,295 +84,288 @@ const firstElementStyle = css`
     min-height: 4.5rem;
 `;
 
-class EventList extends React.Component<EventListProps> {
-    private List: React.RefObject<List> = React.createRef();
-    private updatedCurrent = true;
-    private currentQuery: {
-        q: string;
-    } = {
-            q: undefined,
-        };
+const fetchDateParam = (type: string) => type === 'upcoming' ? 'after' : 'before';
 
-    constructor(props: EventListProps) {
-        super(props);
+const scheduleListSelector = createCachedSelector(
+    (state: GlobalStateShape) => state.scheduleEventItems,
+    (_: GlobalStateShape, type: EventListName) => type,
+    (state, type) => ({
+        eventItems: state[type].items,
+        eventItemsLength: state[type].items.length,
+        currentItem: state[type].currentItem,
+        minDate: state[type].minDate,
+        maxDate: state[type].maxDate,
+        hasMore: state[type].hasMore,
+        isFetchingList: state[type].isFetchingList,
+        lastQuery: state[type].lastQuery,
+    }),
+)(
+    (_, type) => type
+);
+
+interface EventItemComponent {
+    item: EventItemType;
+    type: EventListName;
+    isMobile: boolean;
+}
+
+const MonthOrDayItem: React.FC<EventItemComponent> = ({
+    item,
+    type,
+    isMobile,
+}) => {
+    if (itemIsMonth(item)) {
+        return (
+            <EventMonthItem
+                month={item.month}
+                year={item.year}
+            />
+        );
+    } else {
+        const permaLink = `/schedule/${format(parseISO(item.dateTime), 'yyyy-MM-dd')}`;
+        return (
+            <EventItem
+                listType={type}
+                isMobile={isMobile}
+                permaLink={permaLink}
+                {...item}
+            />
+        );
     }
+};
 
-    fetchDateParam = (type: string) => type === 'upcoming' ? 'after' : 'before';
+interface PrevProps {
+    currentItem?: DayItem;
+    type?: EventListName;
+}
 
-    // we are inserting an item at the front and one at the back of the list
-    // total length of List will be eventItems.length + 2
-    keyMapper = (rowIndex: number) => {
-        const temp =
-            rowIndex ?
-                (this.props.eventItems.length && this.props.eventItems[rowIndex - 1] ?
-                    this.props.type + '_' + this.props.eventItems[rowIndex - 1].dateTime.format() :
-                    this.props.type + '_loading'
-                ) :
-                'placeholder_' + decodeURI(this.props.location.search);
-        return temp;
-    }
+export const EventList: React.FC<EventListProps> = (props) => {
+    const updatedCurrent = React.useRef(true);
+    const _eventItems = React.useRef<EventItemType[]>([]);
+    const prevProps = React.useRef<PrevProps>({ currentItem: undefined, type: undefined });
+    const {
+        eventItems,
+        currentItem,
+        minDate,
+        maxDate,
+        hasMore,
+        isFetchingList,
+        eventItemsLength,
+        lastQuery,
+    } = useAppSelector((state) => scheduleListSelector(state, props.type));
+    const navigate = useNavigate();
+    const { date: dateParam } = useParams();
+    const dispatch = useAppDispatch();
+    const searchQ = useSearchParams()[0].get('q');
 
-    cache = new CellMeasurerCache({ fixedWidth: true, keyMapper: this.keyMapper });
+    const [firstEffectRan, setFirstEffectRan] = React.useState(false);
 
-    onMountOrUpdate() {
-        const date = moment(this.props.match.params.date, 'YYYY-MM-DD');
-        this.currentQuery.q = parse(this.props.location.search, { ignoreQueryPrefix: true }).q as string;
-        if (this.currentQuery.q) {
-            this.props.createSearchEventsAction('search', { q: this.currentQuery.q });
+    const onMountOrUpdate = React.useCallback(() => {
+        const date = dateParam === undefined ? undefined : startOfDay(parseDate(dateParam, 'yyyy-MM-dd', new Date()));
+        if (searchQ) {
+            dispatch(searchEvents({
+                name: 'search',
+                q: searchQ
+            }));
         } else {
-            if (this.props.eventItems.length === 0) {
-                let params: FetchEventsArguments;
-                if (this.props.match.params.date) {
-                    params = {
-                        date,
+            if (eventItemsLength === 0) {
+                let fetchParams: FetchEventsArguments;
+                if (date) {
+                    fetchParams = {
+                        name: props.type,
+                        date: date,
                         scrollTo: true,
                     };
                 } else {
-                    params = {
-                        [this.fetchDateParam(this.props.type)]: moment(),
+                    fetchParams = {
+                        name: props.type,
+                        [fetchDateParam(props.type)]: new Date(),
                         scrollTo: false,
                     };
                 }
-                this.props.createFetchEventsAction(this.props.type, params);
+                dispatch(fetchEvents(fetchParams));
                 return;
             } else if (
-                this.props.match.params.date &&
-                !this.props.eventItems.find(
-                    (value) => itemNotLoading(value) && value.dateTime.utc().isSame(date.utc(), 'day'),
+                date &&
+                !eventItems.find(
+                    (value) => itemNotLoading(value) && isSameDay(parseISO(value.dateTime), date),
                 )
             ) {
-                const params: FetchEventsArguments = {
-                    date,
+                const fetchParams: FetchEventsArguments = {
+                    name: props.type,
+                    date: date,
                     scrollTo: true,
                 };
-                this.props.createFetchEventsAction(this.props.type, params);
+                dispatch(fetchEvents(fetchParams));
                 return;
             }
         }
-    }
+    }, [dateParam, searchQ, props.type, eventItemsLength]);
 
-    componentDidMount() {
-        // enforce if date is after now, use upcoming
-        // or if date is before now, use archive
-        const strDate = this.props.match.params.date;
-        const date = moment(this.props.match.params.date, 'YYYY-MM-DD');
-        if (strDate) {
-            if (date.isSameOrAfter(moment(), 'day') && this.props.type === 'archive') {
-                this.props.history.replace(`/schedule/upcoming/${strDate}`);
+    React.useEffect(() => {
+        const strDate = dateParam;
+        const date = dateParam === undefined ? undefined : startOfDay(parseDate(dateParam, 'yyyy-MM-dd', new Date()));
+        if (date) {
+            if (isBefore(date, new Date()) && props.type === 'upcoming') {
+                navigate(`archive/${strDate}`);
                 return;
-            } else if (date.isBefore(moment(), 'day') && this.props.type === 'upcoming') {
-                this.props.history.replace(`/schedule/archive/${strDate}`);
+            } else if (!isBefore(date, new Date()) && props.type === 'archive') {
+                navigate(`upcoming/${strDate}`);
                 return;
             }
         }
 
-        this.onMountOrUpdate();
-    }
+        onMountOrUpdate();
+        prevProps.current = {
+            currentItem,
+            type: props.type
+        };
+        setFirstEffectRan(true);
+    }, []);
 
-    componentDidUpdate(prevProps: EventListProps) {
-        this.onMountOrUpdate();
-        if (prevProps.currentItem !== this.props.currentItem) {
-            this.updatedCurrent = true;
-        }
-        if (prevProps.type !== this.props.type) {
-            this.props.currentItem && this.props.selectEvent(this.props.type, undefined);
-            this.cache.clearAll();
-        }
-    }
+    React.useEffect(() => {
+        _eventItems.current = eventItems;
+    }, [eventItems])
 
-    getScrollFetchParams: {
+    React.useEffect(() => {
+        if (firstEffectRan) {
+            onMountOrUpdate();
+        }
+    }, [currentItem, props.type]);
+
+    React.useEffect(() => {
+        if (firstEffectRan) {
+            updatedCurrent.current = true;
+        }
+    }, [currentItem]);
+
+    React.useEffect(() => {
+        if (firstEffectRan) {
+            currentItem && selectEvent({ name: props.type, event: undefined });
+        }
+    }, [props.type, currentItem]);
+
+    const getScrollFetchParams: {
         [key: string]: () => FetchEventsArguments;
     } = {
-            upcoming: () => ({
-                after: this.props.maxDate,
-            }),
-            archive: () => ({
-                before: this.props.minDate,
-            }),
-        };
+        upcoming: () => ({
+            name: props.type,
+            after: maxDate ? parseISO(maxDate) : undefined,
+        }),
+        archive: () => ({
+            name: props.type,
+            before: minDate ? parseISO(minDate) : undefined,
+        }),
+    };
 
-    onScroll = ({ clientHeight, scrollTop, scrollHeight }: OnScrollProps) => {
+    const onScroll = ({ clientHeight, scrollTop, scrollHeight }: OnScrollProps) => {
         if (scrollTop + clientHeight > scrollHeight - 600 &&
-            this.props.hasMore &&
-            !this.props.isFetchingList &&
-            this.props.maxDate &&
-            this.props.minDate
+            hasMore &&
+            !isFetchingList &&
+            !!maxDate &&
+            !!minDate
         ) {
-            if (this.props.type !== 'search') {
-                this.props.createFetchEventsAction(this.props.type, this.getScrollFetchParams[this.props.type]());
+            if (props.type !== 'search') {
+                dispatch(fetchEvents(getScrollFetchParams[props.type]()));
             }
         }
-    }
+    };
 
-    debouncedFetch = debounce(this.onScroll, 500, { leading: true });
+    const debouncedFetch = React.useMemo(
+        () => debounce(onScroll, 100, { leading: true })
+        , [props.type, hasMore, isFetchingList, maxDate, minDate]);
 
-    getScrollTarget = () => {
-        if (this.updatedCurrent && this.props.eventItems.length) {
-            if (this.props.currentItem) {
-                this.updatedCurrent = false;
-                return this.getScrollIndex(this.props.currentItem);
+    const getScrollTarget = React.useCallback(() => {
+        if (updatedCurrent.current && eventItemsLength) {
+            if (currentItem) {
+                updatedCurrent.current = false;
+                return getScrollIndex(currentItem);
             } else {
-                this.updatedCurrent = false;
+                updatedCurrent.current = false;
                 return 0;
             }
         } else {
             return -1;
         }
-    }
+    }, [currentItem, eventItemsLength]);
 
-    render() {
-        const item: DayItem = this.props.eventItems.length && this.props.eventItems.find((event) =>
-            itemIsDay(event) && moment(this.props.match.params.date).isSame(event.dateTime, 'day'),
-        ) as DayItem;
-
-        const title = `${titleStringBase} | Schedule` + (item
-            ? ` | ${item.dateTime.format('dddd MMMM DD, YYYY, HH:mm zz')}`
-            : ` | ${this.props.type === 'archive' ? 'Archived' : startCase(this.props.type)} Events${
-            this.props.location.search ? ': ' + decodeURI(this.currentQuery.q) : ''
-            }`);
-
-        const description = item
-            ? `${startCase(this.props.type)} ${startCase(item.eventType)}: ${item.name}`
-            : metaDescriptions[this.props.type];
-
-        return (
-            <React.Fragment>
-                <Helmet
-                    title={title}
-                    meta={[
-                        {
-                            name: 'description',
-                            content: description,
-                        },
-                    ]}
-                />
-                <div css={fullWidthHeight}>
-                    {(
-                        <AutoSizer>
-                            {({ height, width }) => (
-                                <List
-                                    ref={this.List}
-                                    height={height}
-                                    width={width}
-                                    rowCount={this.props.eventItems.length + 2}
-                                    rowHeight={this.cache.rowHeight}
-                                    deferredMeasurementCache={this.cache}
-                                    rowRenderer={this.rowItemRenderer}
-                                    scrollToAlignment="center"
-                                    noRowsRenderer={() => <div />}
-                                    estimatedRowSize={200}
-                                    onScroll={this.debouncedFetch}
-                                    scrollToIndex={this.getScrollTarget()}
-                                />
-                            )}
-                        </AutoSizer>
-                    )}
-                </div>
-            </React.Fragment>
-        );
-    }
-
-    private getScrollIndex = (currentItem: DayItem) => (
-        Math.max(0, this.props.eventItems.findIndex(
+    const getScrollIndex = React.useCallback((currentItem: DayItem) => (
+        Math.max(0, eventItems.findIndex(
             (item) => (
                 item && itemIsDay(item) &&
-                // in case we change parameter format, compare using moment
-                item.dateTime.isSame(currentItem.dateTime, 'day')
+                isSameDay(parseISO(item.dateTime), parseISO(currentItem.dateTime))
             ),
         ))
-    )
+    ), [eventItems]);
 
-    public renderEventItem = (
-        index: number,
-        style: React.CSSProperties,
-        measure: () => void,
-    ) => {
-        if (index === this.props.eventItems.length + 1) {
-            return (
-                <div style={style} >
-                    {this.props.hasMore && this.props.isFetchingList ?
+    const item: DayItem | undefined = (eventItemsLength && dateParam !== undefined) ? eventItems.find((event) =>
+        itemIsDay(event) && isSameDay(parseDate(dateParam, 'yyyy-MM-dd', new Date()), parseISO(event.dateTime)),
+    ) as DayItem : undefined;
+
+    const title = `${titleStringBase} | Schedule` + (item
+        ? ` | ${formatInTimeZone(parseISO(item.dateTime), item.timezone, 'EEEE MMMM dd, yyyy, HH:mm zzz')}`
+        : ` | ${props.type === 'archive' ? 'Archived' : startCase(props.type)} Events${searchQ ? ': ' + searchQ : ''
+        }`);
+
+    const description = item
+        ? `${startCase(props.type)} ${startCase(item.eventType)}: ${item.name}`
+        : metaDescriptions[props.type];
+
+    const count = eventItems.filter((ev) => itemIsDay(ev)).length;
+
+    return (
+        <React.Fragment>
+            <Helmet
+                title={title}
+                meta={[
+                    {
+                        name: 'description',
+                        content: description,
+                    },
+                ]}
+            />
+            <div css={fullWidthHeight} onScroll={(ev) => {
+                ev.persist();
+                const {
+                    scrollTop,
+                    scrollHeight,
+                    clientHeight
+                } = ev.currentTarget;
+                debouncedFetch({ scrollTop, scrollHeight, clientHeight });
+            }}
+            >
+                <div>
+                    {eventItemsLength ?
+                        <div css={firstElementStyle}>
+                            {props.type === 'search' ?
+                                `Search results for "${lastQuery}": ${count} results` :
+                                ''
+                            }
+                        </div> :
+                        <div css={firstElementStyle} />
+                    }
+                    {eventItemsLength ?
+                        eventItems.map((eventItem, idx) =>
+                            <MonthOrDayItem
+                                key={`${props.type}-${lastQuery!}-${idx}`}
+                                item={eventItem}
+                                type={props.type}
+                                isMobile={props.isMobile}
+                            />)
+                        : <div />
+                    }
+                    {hasMore && isFetchingList ?
                         <StyledLoadingInstance width={80} height={80} />
                         : (
                             <div css={placeholderStyle}>
-                                {this.props.eventItems.length === 0 ? 'No Events Fetched' : ''}
+                                {eventItemsLength === 0 ? 'No Events Fetched' : ''}
                             </div>
-                        )}
+                        )
+                    }
                 </div>
-            );
-        }
-        if (index === 0) {
-            const count = this.props.eventItems.filter((ev) => itemIsDay(ev)).length;
-            return (
-                <div style={style}>
-                    <div css={firstElementStyle}>
-                        {this.props.type === 'search' ?
-                            `Search results for "${decodeURI(this.currentQuery.q)}": ${count} results` :
-                            ''
-                        }
-                    </div>
-                </div>
-            );
-        }
-        const item = this.props.eventItems[index - 1];
-        if (itemIsMonth(item)) {
-            return (
-                <EventMonthItem
-                    measure={measure}
-                    month={item.month}
-                    year={item.year}
-                    style={style}
-                />
-            );
-        } else {
-            const permaLink = `/schedule/${item.dateTime.format('YYYY-MM-DD')}`;
-            return (
-                <EventItem
-                    measure={measure}
-                    event={item}
-                    style={style}
-                    handleSelect={() => this.props.selectEvent(this.props.type, item)}
-                    type={this.props.type}
-                    active={this.props.currentItem && item.id === this.props.currentItem.id}
-                    isMobile={this.props.isMobile}
-                    permaLink={permaLink}
-                />
-            );
-        }
-    }
-
-    private rowItemRenderer: ListRowRenderer = ({ index, key, parent, style }) => (
-        <CellMeasurer
-            cache={this.cache}
-            columnIndex={0}
-            key={`${key}_${this.props.type}`}
-            rowIndex={index}
-            parent={parent}
-        >
-            {({ measure }) => this.renderEventItem(index, style, measure)}
-        </CellMeasurer>
-    )
-}
-
-const mapStateToProps = (state: GlobalStateShape, ownProps: EventListOwnProps): EventListStateToProps => {
-    const reducer = state.scheduleEventItems[ownProps.type];
-    return {
-        eventItems: reducer.itemArray,
-        hasEventBeenSelected: reducer.hasEventBeenSelected,
-        minDate: reducer.minDate,
-        maxDate: reducer.maxDate,
-        currentItem: reducer.currentItem,
-        isFetchingList: reducer.isFetchingList,
-        hasMore: reducer.hasMore,
-    };
+            </div>
+        </React.Fragment>
+    );
 };
 
-const mapDispatchToProps: EventListDispatchToProps = {
-    selectEvent,
-    createFetchEventsAction,
-    createSearchEventsAction,
-};
-
-export default connect<EventListStateToProps, EventListDispatchToProps, EventListOwnProps>(
-    mapStateToProps,
-    mapDispatchToProps,
-)(EventList);
+export default EventList;

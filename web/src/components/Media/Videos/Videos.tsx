@@ -1,44 +1,30 @@
 import * as React from 'react';
 import { Helmet } from 'react-helmet';
-import { connect } from 'react-redux';
-import { RouteComponentProps } from 'react-router';
+import { useMatch } from 'react-router';
 import { Transition } from 'react-transition-group';
+import youTube from 'src/services/YouTube';
 
 import styled from '@emotion/styled';
 
-import { TweenLite } from 'gsap';
+import { gsap } from 'gsap';
 
 import { LoadingInstance } from 'src/components/LoadingSVG';
 import PreviewOverlay from 'src/components/Media/Videos/PreviewOverlay';
 import VideoPlaylist from 'src/components/Media/Videos/VideoPlaylist';
 
-import { createFetchPlaylistAction, initializeYoutubeElement, playVideo, resetPlayer } from 'src/components/Media/Videos/actions';
-import { VideoItemShape } from 'src/components/Media/Videos/types';
-import { GlobalStateShape } from 'src/types';
+import { fetchVideoPlaylist, playerIsReady, playVideo, resetPlayer } from 'src/components/Media/Videos/reducers';
 
 import { pushed } from 'src/styles/mixins';
 import { screenXSorPortrait } from 'src/styles/screens';
 import { navBarHeight } from 'src/styles/variables';
 import { titleStringBase } from 'src/utils';
-
-interface VideosStateToProps {
-    readonly videoId: string;
-    readonly videos: VideoItemShape[];
-    readonly isPlayerReady: boolean;
-}
-
-interface VideosDispatchToProps {
-    readonly createFetchPlaylistAction: typeof createFetchPlaylistAction;
-    readonly initializeYoutubeElement: typeof initializeYoutubeElement;
-    readonly resetPlayer: typeof resetPlayer;
-    readonly playVideo: typeof playVideo;
-}
+import { useAppDispatch, useAppSelector } from 'src/hooks';
 
 interface VideosOwnProps {
     readonly isMobile: boolean;
 }
 
-type VideosProps = VideosStateToProps & VideosDispatchToProps & VideosOwnProps & RouteComponentProps<{ videoId?: string }>;
+type VideosProps = VideosOwnProps;
 
 const StyledVideos = styled.div`
     ${pushed}
@@ -80,74 +66,74 @@ const LoadingOverlayDiv = styled.div`
     justify-content: center;
 `;
 
-class Videos extends React.Component<VideosProps> {
-    domElement: React.RefObject<HTMLDivElement> = React.createRef();
+const Videos: React.FC<VideosProps> = (props) => {
+    const match = useMatch('media/videos/:videoId');
+    const domElement = React.useRef<HTMLDivElement>(null);
+    const initialized = React.useRef<boolean>(false);
+    const dispatch = useAppDispatch();
+    const videos = useAppSelector(({ videoPlaylist }) => videoPlaylist.items);
+    const isPlayerReady = useAppSelector(({ videoPlayer }) => videoPlayer.isPlayerReady);
 
-    componentDidMount() {
-        this.props.createFetchPlaylistAction(this.props.isMobile, this.props.match.params.videoId);
-        this.props.initializeYoutubeElement(this.domElement.current, this.props.match.params.videoId, this.props.isMobile);
-    }
+    React.useEffect(() => {
+        async function callDispatch() {
+            if (domElement.current) {
+                // if (!initialized.current) {
+                    // initialized.current = true;
+                    await Promise.all([
+                        dispatch(fetchVideoPlaylist()),
+                        youTube.initializePlayerOnElement(domElement.current)
+                    ]);
+                    dispatch(playerIsReady());
+                // }
+                if (match?.params.videoId !== undefined) {
+                    dispatch(playVideo(props.isMobile, match.params.videoId));
+                }
+            }
+        }
 
-    componentWillUnmount() {
-        this.props.resetPlayer();
-    }
+        callDispatch();
+        return function cleanup() {
+            dispatch(resetPlayer());
+        }
+    }, []);
 
-    render() {
-        const video = this.props.match.params.videoId && this.props.videos.find((item) => item.id === this.props.match.params.videoId);
-        const description = video && video.snippet.description;
-        return (
-            <>
-                {video && (
-                    <Helmet
-                        title={`${titleStringBase} | Videos | ${video.snippet.title}`}
-                        meta={[
-                            {
-                                name: 'description',
-                                content: description,
-                            },
-                        ]}
-                    />
-                )}
-                <StyledVideos
-                    ref={this.domElement}
+    const videoId = match?.params.videoId;
+    const video = videoId !== undefined ? videos.find((item) => item.id === videoId) : undefined;
+    const description = video?.snippet?.description;
+    return (
+        <>
+            {(video !== undefined) && (
+                <Helmet
+                    title={`${titleStringBase} | Videos | ${video.snippet?.title}`}
+                    meta={[
+                        {
+                            name: 'description',
+                            content: description,
+                        },
+                    ]}
+                />
+            )}
+            <StyledVideos
+                ref={domElement}
+            >
+                <PreviewOverlay isMobile={props.isMobile} />
+                <Transition<undefined>
+                    in={!isPlayerReady}
+                    onExit={(el) => gsap.to(el, { duration: 0.3, autoAlpha: 0 })}
+                    timeout={300}
+                    mountOnEnter={true}
+                    unmountOnExit={true}
                 >
-                    <PreviewOverlay isMobile={this.props.isMobile} />
-                    <Transition<undefined>
-                        in={!this.props.isPlayerReady}
-                        onExit={(el) => TweenLite.to(el, 0.3, { autoAlpha: 0 })}
-                        timeout={300}
-                        mountOnEnter={true}
-                        unmountOnExit={true}
-                    >
-                        <LoadingOverlayDiv>
-                            <LoadingInstance width={120} height={120} />
-                        </LoadingOverlayDiv>
-                    </Transition>
-                    <VideoPlaylist isMobile={this.props.isMobile} />
-                </StyledVideos>
-            </>
-        );
-    }
-}
-
-const mapStateToProps = ({ videoPlayer, videoPlaylist }: GlobalStateShape): VideosStateToProps => ({
-    videos: videoPlaylist.items,
-    videoId: videoPlayer.videoId,
-    isPlayerReady: videoPlayer.isPlayerReady,
-});
-
-const mapDispatchToProps: VideosDispatchToProps = {
-    initializeYoutubeElement,
-    createFetchPlaylistAction,
-    resetPlayer,
-    playVideo,
+                    <LoadingOverlayDiv>
+                        <LoadingInstance width={120} height={120} />
+                    </LoadingOverlayDiv>
+                </Transition>
+                <VideoPlaylist isMobile={props.isMobile} />
+            </StyledVideos>
+        </>
+    );
 };
 
-const ConnectedVideos = connect<VideosStateToProps, VideosDispatchToProps, VideosOwnProps>(
-    mapStateToProps,
-    mapDispatchToProps,
-)(Videos);
-
-export type VideosType = React.Component<VideosProps>;
-export type RequiredProps = VideosOwnProps;
-export default ConnectedVideos;
+export type VideosType = typeof Videos;
+export type RequiredProps = VideosProps;
+export default Videos;

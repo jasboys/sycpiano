@@ -1,8 +1,9 @@
-import moment from 'moment-timezone';
+import { addMilliseconds, intervalToDuration, format, parseISO } from 'date-fns';
+import parseDuration from 'parse-iso-duration';
 import { lighten } from 'polished';
 import * as React from 'react';
 import ClampLines from 'react-clamp-lines';
-import { RouteComponentProps, withRouter } from 'react-router';
+import { useNavigate } from 'react-router';
 
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
@@ -14,10 +15,15 @@ import { lato1, lato2 } from 'src/styles/fonts';
 // Helper functions
 
 function videoDurationToDisplay(durationString: string) {
-    const duration = moment.duration(durationString);
-    const s = duration.seconds();
-    const m = duration.minutes();
-    const h = duration.hours();
+    const helperDate = new Date();
+    const nextDate = addMilliseconds(helperDate, parseDuration(durationString));
+    const duration = intervalToDuration({
+        start: helperDate,
+        end: nextDate,
+    });
+    const s = duration.seconds || 0;
+    const m = duration.minutes || 0;
+    const h = duration.hours || 0;
 
     const sString = `${s < 10 ? '0' : ''}${s}`;
     const mString = `${m < 10 ? '0' : ''}${m}`;
@@ -27,13 +33,13 @@ function videoDurationToDisplay(durationString: string) {
 }
 
 function publishedDateToDisplay(publishedAt: string) {
-    return moment(publishedAt).format('MMM D, YYYY');
+    return format(parseISO(publishedAt), 'MMM d, yyyy');
 }
 
-type VideoPlaylistItemProps = RouteComponentProps<unknown> & {
+type VideoPlaylistItemProps = {
     readonly item: VideoItemShape;
     readonly currentItemId: number | string;
-    readonly onClick: (isMobile: boolean, id?: string) => void;
+    readonly onClick: (isMobile: boolean, id: string) => void;
     readonly isMobile: boolean;
 };
 
@@ -127,41 +133,54 @@ const TextBottom = styled.h4`
     font-size: 0.8rem;
 `;
 
-const VideoPlaylistItem: React.FC<VideoPlaylistItemProps> = ({ item, currentItemId, onClick, isMobile, history }) => {
+const VideoPlaylistItem: React.FC<VideoPlaylistItemProps> = ({ item, currentItemId, onClick, isMobile }) => {
+    const navigate = useNavigate();
     const thumbnailUrl =
-        item.snippet.thumbnails.standard?.url ||
-        item.snippet.thumbnails.high?.url ||
-        item.snippet.thumbnails.medium?.url ||
-        item.snippet.thumbnails.standard?.url;
+        item?.snippet?.thumbnails && (
+            item.snippet.thumbnails.standard?.url ||
+            item.snippet.thumbnails.high?.url ||
+            item.snippet.thumbnails.medium?.url ||
+            item.snippet.thumbnails.standard?.url
+        );
     return (
         <StyledVideoItem
             active={currentItemId === item.id}
             onClick={() => {
-                history.push(`/media/videos/${item.id}`);
-                onClick(isMobile, item.id);
+                navigate(`/media/videos/${item.id}`);
+                if (item.id !== undefined) {
+                    onClick(isMobile, item.id);
+                }
             }}
         >
             <ImageContainer>
                 <img alt="Sean Chen Piano Video" src={thumbnailUrl} />
                 <Duration active={currentItemId === item.id}>
-                    {videoDurationToDisplay(item.contentDetails.duration)}
+                    {
+                        (item?.contentDetails?.duration === undefined) ?
+                            '' :
+                            videoDurationToDisplay(item.contentDetails.duration)
+                    }
                 </Duration>
             </ImageContainer>
             <VideoInfo>
                 <TextTop
                     id={`${item.id}-info`}
-                    text={item.snippet.title}
+                    text={item?.snippet?.title || ''}
                     lines={2}
                     ellipsis="..."
                     buttons={false}
                 />
                 <TextBottom>
-                    {item.statistics.viewCount} views
-                        | published on {publishedDateToDisplay(item.snippet.publishedAt)}
+                    {item?.statistics?.viewCount || '--'} views
+                        | published on {
+                        (item?.snippet?.publishedAt === undefined) ?
+                            '--' :
+                            publishedDateToDisplay(item.snippet.publishedAt)
+                    }
                 </TextBottom>
             </VideoInfo>
         </StyledVideoItem>
     );
 }
 
-export default withRouter(VideoPlaylistItem);
+export default VideoPlaylistItem;

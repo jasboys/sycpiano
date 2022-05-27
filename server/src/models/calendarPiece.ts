@@ -1,16 +1,29 @@
-import { DataTypes, Sequelize } from 'sequelize';
-import { Model } from '../types';
+import { BelongsToGetAssociationMixin, BelongsToSetAssociationMixin, DataTypes, Model, Sequelize } from 'sequelize';
+import { ModelExport, ModelMap } from '../types';
+import { calendar } from './calendar';
+import { piece } from './piece';
 
-export class calendarPiece extends Model {
-    readonly id?: string;
-    readonly CalendarId?: string;
-    readonly PieceId?: string;
-    readonly order?: number;
-    readonly createdAt?: Date | string;
-    readonly updatedAt?: Date | string;
+export interface CalendarPieceAttributes {
+    id?: string;
+    calendarId?: string;
+    pieceId?: string;
+    order?: number;
 }
 
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof calendarPiece => {
+export class calendarPiece extends Model<CalendarPieceAttributes, CalendarPieceAttributes> implements CalendarPieceAttributes {
+    declare id?: string;
+    declare calendarId?: string;
+    declare pieceId?: string;
+    declare order?: number;
+    declare readonly createdAt?: Date | string;
+    declare readonly updatedAt?: Date | string;
+
+    declare getCalendar: BelongsToGetAssociationMixin<calendar>;
+    declare setPiece: BelongsToSetAssociationMixin<piece, piece['id']>;
+    declare getPiece: BelongsToGetAssociationMixin<piece>;
+}
+
+export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<calendarPiece> => {
     calendarPiece.init({
         id: {
             allowNull: false,
@@ -29,14 +42,17 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof calen
         },
         order: dataTypes.INTEGER,
     }, {
-            sequelize,
-            tableName: 'calendar_piece',
-        });
+        sequelize,
+        tableName: 'calendar_piece',
+    });
 
-    calendarPiece.associate = (models) => {
+    const associate = (models: ModelMap) => {
         calendarPiece.belongsTo(models.calendar);
         calendarPiece.belongsTo(models.piece);
     };
 
-    return calendarPiece;
+    return {
+        model: calendarPiece,
+        associate,
+    };
 };

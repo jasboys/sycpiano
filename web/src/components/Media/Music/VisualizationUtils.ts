@@ -58,6 +58,14 @@ interface Binary extends jBinary {
     read(type: any, offset?: number): any;
 }
 
+interface WaveformHeader {
+    version: number;
+    flags: number;
+    sampleRate: number;
+    samplesPerPixel: number;
+    length: number;
+}
+
 export class WaveformLoader {
     headerStructure = {
         version: 'int32',
@@ -66,16 +74,10 @@ export class WaveformLoader {
         samplesPerPixel: 'int32',
         length: 'uint32',
     };
-    header: {
-        version: number;
-        flags: number;
-        sampleRate: number;
-        samplesPerPixel: number;
-        length: number;
-    } = undefined;
-    waveform: Float32Array = undefined;
-    angles: Array<{ x: number; y: number }>;
-    loaded: Promise<void>;
+    header?: WaveformHeader;
+    waveform?: Float32Array ;
+    angles?: Array<{ x: number; y: number }>;
+    loaded?: Promise<void>;
 
     reset = (): void => {
         this.header = undefined;
@@ -90,7 +92,7 @@ export class WaveformLoader {
             /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             jBinary.loadData(filename).then((data: any) => {
                 const j: Binary = new jBinary(new jDataView(data, 0, data.byteLength, true), {});
-                const header = j.read(this.headerStructure);
+                const header: WaveformHeader = j.read(this.headerStructure);
                 const type = header.flags ? 'int8' : 'int16';
                 const body = j.read({
                     values: ['array', type],
@@ -113,6 +115,13 @@ export class WaveformLoader {
 
 export const waveformLoader = new WaveformLoader();
 
+interface FIRHeader {
+    numCrossings: number;
+    samplesPerCrossing: number;
+    cutoffcycle: number;
+    kaiserBeta: number;
+}
+
 class FIRLoader {
     headerStructure = {
         numCrossings: 'uint32',
@@ -120,21 +129,15 @@ class FIRLoader {
         cutoffcycle: 'float32',
         kaiserBeta: 'float32',
     };
-    numCrossings: number;
-    samplesPerCrossing: number;
-    filterSize: number;
-    halfCrossings: number;
+    numCrossings!: number;
+    samplesPerCrossing!: number;
+    filterSize!: number;
+    halfCrossings!: number;
     loaded: Promise<void>;
-    coeffs: Float32Array;
-    deltas: Float32Array;
+    coeffs!: Float32Array;
+    deltas!: Float32Array;
 
     constructor() {
-        this.numCrossings = undefined;
-        this.samplesPerCrossing = undefined;
-        this.filterSize = undefined;
-        this.coeffs = undefined;
-        this.deltas = undefined;
-        this.halfCrossings = undefined;
         this.loaded = this.loadFIRFile();
     }
 
@@ -143,9 +146,9 @@ class FIRLoader {
             /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             jBinary.loadData(`${BINARY_PATH}/fir.dat`).then((data: any) => {
                 const j: Binary = new jBinary(new jDataView(data, 0, data.byteLength, true), {});
-                const header = j.read(this.headerStructure);
-                this.numCrossings = header.numCrossings;
-                this.samplesPerCrossing = header.samplesPerCrossing;
+                const header: FIRHeader = j.read(this.headerStructure);
+                this.numCrossings = header.numCrossings as number;
+                this.samplesPerCrossing = header.samplesPerCrossing as number;
                 this.halfCrossings = (this.numCrossings - 1) / 2;
                 this.filterSize = this.samplesPerCrossing * (this.numCrossings - 1) - 1;
                 const body = j.read({
@@ -173,7 +176,7 @@ class ConstantQ {
         outerPtrSize: 'uint32',
     };
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    matrix: Matrix;
+    matrix?: Matrix;
     input = matrix([], 'dense', 'number');
     loaded: Promise<void>;
     minF = 0;
@@ -181,10 +184,10 @@ class ConstantQ {
     numRows = 0;
     numCols = 0;
     sampleRate: number;
-    angles: Array<{ x: number; y: number }>;
+    angles!: Array<{ x: number; y: number }>;
 
     constructor(sampleRate: number) {
-        this.matrix = undefined;
+        this.matrix;
         this.loaded = this.loadMatrix(`${BINARY_PATH}/CQ_${sampleRate}.dat`);
         this.sampleRate = sampleRate;
     }

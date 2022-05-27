@@ -15,6 +15,11 @@ DB_USER=<username>
 DB_PASS=<password>
 DB_PORT=<database port, needed on prod>
 PORT=<http port number, needed on prod>
+ADMIN_PORT=<admin port number, needed on prod>
+ADMIN_USER=<username for admin access>
+ADMIN_PASS=<bcrypt encrypted password>
+CORS_ORIGINS=<comma separated list of allowed origins for backend requests>
+COOKIE_SECRET=<for signing session cookies>
 FOREST_ENV_SECRET=<secret for using forest admin>
 FOREST_AUTH_SECRET=<secret for auth forest admin>
 GAPI_KEY_SERVER=<from google developer console>
@@ -22,11 +27,14 @@ GAPI_KEY_APP=<from google developer console>
 STRIPE_SECRET_KEY=<from stripe dashboard>
 STRIPE_PUBLIC_KEY=<from stripe dashboard>
 STRIPE_WEBHOOK_KEY=<from stripe dashboard>
-EMAIL_PASSWORD=<your smtp password for nodemailer>
 PRODUCTS_DIR=<absolute path to emailable assets>
 SEED_DATA_DIR=<absolute path to seeding data, only for first run of database>
 IMAGE_ASSETS_DIR=<absolute path to image assets folder>
 MUSIC_ASSETS_DIR=<absolute path to music assets folder>
+SMTP_HOST=<smtp server>
+SMTP_PORT=<465, 587, or 25>
+SMTP_USERNAME=<smtp user>
+SMTP_PASSWORD=<smtp pass>
 DKIM_PRIVATE_KEY=<path to private PEM formatted key, should be at least 1024bit rsa>
 ```
 

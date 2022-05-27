@@ -1,18 +1,19 @@
 import styled from '@emotion/styled';
 import * as React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import { Transition } from 'react-transition-group';
-import { initCartAction, syncLocalStorage } from './actions';
-import { GlobalStateShape } from 'src/types';
+import { initCartAction, syncLocalStorage } from 'src/components/Cart/reducers';
 import { CartList } from 'src/components/Cart/CartList';
 import { LoadingInstance } from 'src/components/LoadingSVG';
+import isEqual from 'react-fast-compare';
 
 import { gsap } from 'gsap';
 
 import { navBarHeight } from 'src/styles/variables';
 import { lightBlue } from 'src/styles/colors';
+import { useAppDispatch, useAppSelector } from 'src/hooks';
 
-const Arrow = styled.div<{ transform: string }>({
+const Arrow = styled.div({
+    position: 'absolute',
     top: -15,
     width: 0,
     height: 0,
@@ -20,9 +21,7 @@ const Arrow = styled.div<{ transform: string }>({
     borderRight: '24px solid transparent',
     borderBottom: `24px solid ${lightBlue}`,
     zIndex: 10,
-}, ({ transform }) => ({
-    transform,
-}));
+});
 
 const LoadingDiv = styled.div({
     position: 'absolute',
@@ -46,7 +45,9 @@ const CartContainer = styled.div<{ isMobile: boolean }>({
     zIndex: 5001,
     filter: `drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.5))`,
     overflow: 'hidden',
-    height: 0,
+    height: 'auto',
+    visibility: 'hidden',
+    opacity: 0,
 }, ({ isMobile }) => isMobile && ({
     position: 'absolute',
     top: navBarHeight.mobile,
@@ -55,25 +56,27 @@ const CartContainer = styled.div<{ isMobile: boolean }>({
 }));
 
 interface CartProps {
-    styles: {
-        [key: string]: React.CSSProperties;
+    position: {
+        x: number | null;
+        y: number | null;
     };
-    attributes: {
-        [key: string]: {
-            [key: string]: string;
-        };
-    };
-    setPopperElement: (el: HTMLDivElement) => void;
-    setArrowElement: (el: HTMLDivElement) => void;
+    arrow?: {
+        x?: number;
+        y?: number;
+        centerOffset: number;
+    }
+    strategy: 'absolute' | 'fixed';
+    floatingRef: (node: HTMLElement | null) => void;
+    arrowRef: React.Ref<HTMLDivElement>;
     isMobile: boolean;
 }
 
-export const Cart: React.FC<CartProps> = ({ styles, attributes, isMobile, setPopperElement, setArrowElement }) => {
-    const dispatch = useDispatch();
-    const visible = useSelector(({ cart }: GlobalStateShape) => cart.visible);
-    const isCheckingOut = useSelector(({ cart }: GlobalStateShape) => cart.isCheckingOut);
-    const cartLength = useSelector(({ cart }: GlobalStateShape) => cart.items.length);
-    const tl = React.useRef<gsap.core.Timeline>(null);
+const Cart: React.FC<CartProps> = ({ position, strategy, isMobile, floatingRef, arrowRef, arrow }) => {
+    const dispatch = useAppDispatch();
+    const visible = useAppSelector(({ cart }) => cart.visible);
+    const isCheckingOut = useAppSelector(({ cart }) => cart.isCheckingOut);
+    const cartLength = useAppSelector(({ cart }) => cart.items.length);
+    const tl = React.useRef<gsap.core.Timeline>();
     const firstRun = React.useRef(true);
 
     React.useEffect(() => {
@@ -87,30 +90,30 @@ export const Cart: React.FC<CartProps> = ({ styles, attributes, isMobile, setPop
         }
     }, [cartLength]);
 
-    const popperStyles = isMobile ? {} : { style: styles.popper };
-    const popperAttributes = isMobile ? {} : attributes.popper;
-    const { transform: arrowTransform = '', ...arrowStyles } = styles.arrow ?? {};
-
     return (
         <Transition<undefined>
             in={visible}
             timeout={250}
-            onEnter={(el: HTMLDivElement) => {
+            onEnter={(el: HTMLElement) => {
                 if (!tl.current) {
                     tl.current = gsap.timeline({ reversed: true, paused: true })
-                        .to(el, { height: 'auto', duration: 0.30, ease: 'quad.inOut' });
+                        // .to(el, { height: 'auto', duration: 0.30, ease: 'quad.inOut' });
+                        .to(el, { autoAlpha: 1, duration: 0.12, ease: 'quad.inOut' });
                 }
                 tl.current.pause().play();
             }}
             onExit={() => {
-                tl.current.pause().reverse();
+                tl.current?.pause().reverse();
             }}
         >
             <CartContainer
-                {...popperStyles}
+                style={{
+                    left: position.x !== null ? position.x : '',
+                    top: position.y !== null ? position.y : '',
+                    position: strategy,
+                }}
                 isMobile={isMobile}
-                ref={isMobile ? () => { } : setPopperElement}    /* eslint-disable-line @typescript-eslint/no-empty-function */
-                {...popperAttributes}
+                ref={isMobile ? () => { } : floatingRef}    /* eslint-disable-line @typescript-eslint/no-empty-function */
             >
                 {isCheckingOut &&
                     <LoadingDiv>
@@ -119,10 +122,12 @@ export const Cart: React.FC<CartProps> = ({ styles, attributes, isMobile, setPop
                 }
                 <CartFilterGroup isCheckingOut={isCheckingOut}>
                     {!isMobile && (
-                        < Arrow
-                            ref={isMobile ? () => { } : setArrowElement}     /* eslint-disable-line @typescript-eslint/no-empty-function */
-                            style={arrowStyles}
-                            transform={arrowTransform}
+                        <Arrow
+                            ref={isMobile ? () => { } : arrowRef}     /* eslint-disable-line @typescript-eslint/no-empty-function */
+                            style={{
+                                left: arrow?.x !== undefined ? arrow?.x : '',
+                                top: arrow?.y !== undefined ? arrow?.y : '',
+                            }}
                         />
                     )}
                     <CartList isMobile={isMobile} />
@@ -132,4 +137,11 @@ export const Cart: React.FC<CartProps> = ({ styles, attributes, isMobile, setPop
     );
 };
 
-export type CartType = typeof Cart;
+const MemoizedCart = React.memo(
+    Cart,
+    (prev, next) => isEqual(prev, next)
+);
+
+export default MemoizedCart;
+export type RequiredProps = CartProps;
+export type MemoizedCart = typeof MemoizedCart;

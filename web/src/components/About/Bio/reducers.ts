@@ -1,29 +1,44 @@
-import { Reducer } from 'redux';
-import BIO_ACTIONS from 'src/components/About/Bio/actionTypeKeys';
-import { ActionTypes } from 'src/components/About/Bio/actionTypes';
-import { BioStateShape } from 'src/components/About/Bio/types';
+import { BioStateShape, Blurb } from 'src/components/About/Bio/types';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { ThunkAPIType } from 'src/types';
+import axios from 'axios';
 
-export const bioReducer: Reducer<BioStateShape, ActionTypes> = (state = {
+const initialState: BioStateShape = {
     isFetching: false,
     bio: [],
-}, action) => {
-    switch (action.type) {
-        case BIO_ACTIONS.FETCH_BIO_REQUEST:
-            return {
-                ...state,
-                isFetching: true,
-            };
-        case BIO_ACTIONS.FETCH_BIO_ERROR:
-            return {
-                ...state,
-                isFetching: false,
-            };
-        case BIO_ACTIONS.FETCH_BIO_SUCCESS:
-            return {
-                isFetching: false,
-                bio: action.bio,
-            };
-        default:
-            return state;
-    }
 };
+
+export const fetchBio = createAsyncThunk<Blurb[], void, ThunkAPIType>(
+    'bio/fetch',
+    async () => {
+        const { data: bio } = await axios.get<void, { data: Blurb[] }>('/api/bio');
+        return bio;
+    },
+    {
+        condition: (_, { getState }) => {
+            return !getState()?.bio?.isFetching && !getState()?.bio?.bio.length;
+        }
+    }
+);
+
+const bioSlice = createSlice({
+    name: 'bio',
+    initialState,
+    reducers: {},
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchBio.pending, (state, _) => {
+                state.isFetching = true;
+            })
+            .addCase(fetchBio.rejected, (state, _) => {
+                state.isFetching = false;
+            })
+            .addCase(fetchBio.fulfilled, (state, action) => {
+                state.isFetching = false;
+                state.bio = action.payload;
+            })
+            .addDefaultCase(state => state ? state : initialState);
+    }
+});
+
+export const bioReducer = bioSlice.reducer;

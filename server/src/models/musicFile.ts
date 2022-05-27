@@ -1,22 +1,34 @@
-import { BelongsToGetAssociationMixin, BelongsToSetAssociationMixin, DataTypes, Sequelize } from 'sequelize';
+import { BelongsToGetAssociationMixin, BelongsToSetAssociationMixin, DataTypes, Model, Optional, Sequelize } from 'sequelize';
 import { getHash } from '../hash';
-import { Model } from '../types';
+import { ModelExport, ModelMap } from '../types';
 import { music } from './music';
 
-export class musicFile extends Model {
-    readonly id?: string;
+export interface MusicFileAttributes {
+    id: string;
     name: string;
-    readonly audioFile: string;
-    readonly waveformFile: string;
-    readonly durationSeconds: number;
-    readonly musicId?: string;
-    hash?: string;
-    readonly createdAt?: Date | string;
-    readonly updatedAt?: Date | string;
+    audioFile: string;
+    waveformFile: string;
+    durationSeconds: number;
+    musicId: string;
+    hash: string;
+}
 
-    readonly getMusic: BelongsToGetAssociationMixin<music>;
-    readonly setMusic: BelongsToSetAssociationMixin<music, music['id']>;
-    readonly music: music;
+export interface MusicFileCreationAttributes extends Optional<Omit<MusicFileAttributes, 'id'>, 'hash'> { }
+
+export class musicFile extends Model<MusicFileAttributes, MusicFileCreationAttributes> implements MusicFileAttributes {
+    declare id: string;
+    declare name: string;
+    declare audioFile: string;
+    declare waveformFile: string;
+    declare durationSeconds: number;
+    declare musicId: string;
+    declare hash: string;
+    declare readonly createdAt?: Date | string;
+    declare readonly updatedAt?: Date | string;
+
+    declare readonly getMusic: BelongsToGetAssociationMixin<music>;
+    declare readonly setMusic: BelongsToSetAssociationMixin<music, music['id']>;
+    declare readonly music: music;
 }
 
 const hookFn = async (mFile: musicFile, _: any) => {
@@ -34,7 +46,7 @@ const hookFn = async (mFile: musicFile, _: any) => {
     console.log(`[End Hook]\n`);
 };
 
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof musicFile => {
+export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<musicFile> => {
     musicFile.init({
         id: {
             allowNull: false,
@@ -62,17 +74,20 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof music
         },
         hash: dataTypes.STRING,
     }, {
-            hooks: {
-                beforeCreate: hookFn,
-                beforeUpdate: hookFn,
-            },
-            sequelize,
-            tableName: 'music_file',
-        });
+        hooks: {
+            beforeCreate: hookFn,
+            beforeUpdate: hookFn,
+        },
+        sequelize,
+        tableName: 'music_file',
+    });
 
-    musicFile.associate = (models) => {
+    const associate = (models: ModelMap) => {
         musicFile.belongsTo(models.music);
     };
 
-    return musicFile;
+    return {
+        model: musicFile,
+        associate,
+    };
 };

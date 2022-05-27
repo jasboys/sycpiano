@@ -1,15 +1,25 @@
-import { DataTypes, Sequelize } from 'sequelize';
-import { Model } from '../types';
+import { DataTypes, Model, Sequelize } from 'sequelize';
+import { ModelExport } from '../types';
 
-export class faq extends Model {
-    readonly id?: string;
-    readonly question: string;
-    readonly answer: string;
-    readonly createdAt?: Date | string;
-    readonly updatedAt?: Date | string;
+export interface FaqAttributes {
+    id: string;
+    order: number;
+    question: string;
+    answer: string;
 }
 
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof faq => {
+export interface FaqCreationAttributes extends Omit<FaqAttributes, 'id'> {}
+
+export class faq extends Model<FaqAttributes, FaqCreationAttributes> implements FaqAttributes {
+    declare id: string;
+    declare order: number;
+    declare question: string;
+    declare answer: string;
+    declare readonly createdAt?: Date | string;
+    declare readonly updatedAt?: Date | string;
+}
+
+export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<faq> => {
     faq.init({
         id: {
             type: dataTypes.UUID,
@@ -18,6 +28,7 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof faq =
             allowNull: false,
             unique: true,
         },
+        order: dataTypes.INTEGER,
         question: dataTypes.TEXT,
         answer: dataTypes.TEXT,
     }, {
@@ -25,5 +36,5 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof faq =
         tableName: 'faq',
     });
 
-    return faq;
+    return { model: faq };
 };

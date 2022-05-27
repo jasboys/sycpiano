@@ -7,37 +7,48 @@
  * We make sure to namespace the states by their corresponding reducers.
  */
 
-import { applyMiddleware, combineReducers, createStore } from 'redux';
-import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
+import { combineReducers } from 'redux';
+import { configureStore } from '@reduxjs/toolkit';
 import thunk from 'redux-thunk';
 
 import { navBarReducer } from 'src/components/App/NavBar/reducers';
 import { cartReducer } from 'src/components/Cart/reducers';
-import { shopReducer } from 'src/components/Shop/reducers';
+import { shopReducer } from 'src/components/Shop/ShopList/reducers';
 
-import { AsyncStore, GlobalStateShape, Reducers } from 'src/types';
+import { AsyncStore, Reducers } from 'src/types';
 
-const createReducer = (reducers?: Reducers) => {
-    return combineReducers<GlobalStateShape>({
-        navbar: navBarReducer,
-        cart: cartReducer,
-        shop: shopReducer,
-        ...reducers,
-    });
+const staticReducers = {
+    navbar: navBarReducer,
+    cart: cartReducer,
+    shop: shopReducer,
+}
+
+const createReducer = (reducers: Partial<Reducers>) => {
+    return combineReducers(
+        {
+            ...staticReducers,
+            ...reducers
+        }
+    );
 };
 
-export default (() => {
-    const store: AsyncStore = createStore(
-        createReducer(),
-        composeWithDevTools(
-            applyMiddleware(thunk),
-        ),
-    );
-    store.async = {};
+const store = (() => {
+    const store = configureStore({
+        reducer: createReducer({}),
+        middleware: (getDefaultMiddleware) =>
+            getDefaultMiddleware({}).concat(thunk),
+    });
+    (store as AsyncStore).async = {};
     return store;
 })();
 
-export const registerReducer = (store: AsyncStore, reducers: Reducers): void => {
+export const registerReducer = (store: AsyncStore, reducers: Partial<Reducers>): void => {
     store.async = { ...store.async, ...reducers };
-    store.replaceReducer(createReducer(store.async));
+    if (store.async !== undefined) {
+        store.replaceReducer(createReducer(store.async));
+    }
 };
+
+export type AppDispatch = typeof store.dispatch
+export type GlobalStateShape = ReturnType<typeof store.getState>
+export default store;

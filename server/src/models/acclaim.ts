@@ -1,19 +1,35 @@
-import { DataTypes, Sequelize } from 'sequelize';
-import { Model } from '../types';
+import { DataTypes, Model, Sequelize } from 'sequelize';
+import { ModelExport } from '../types';
 
-export class acclaim extends Model {
-    readonly id?: string;
+export interface AcclaimAttributes {
+    readonly id: string;
     readonly quote: string;
-    readonly short: string;
+    readonly short?: string;
     readonly author: string;
-    readonly shortAuthor: string;
+    readonly shortAuthor?: string;
     readonly date: Date | string;
     readonly oldDate?: string;
     readonly hasFullDate?: boolean;
-    readonly website: string;
+    readonly website?: string;
 }
 
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof acclaim => {
+export interface AcclaimCreationAttributes extends Omit<AcclaimAttributes, 'id'> {}
+
+export class acclaim extends Model<AcclaimAttributes, AcclaimCreationAttributes> implements AcclaimAttributes {
+    declare id: string;
+    declare quote: string;
+    declare short?: string;
+    declare author: string;
+    declare shortAuthor?: string;
+    declare date: Date | string;
+    declare oldDate?: string;
+    declare hasFullDate?: boolean;
+    declare website?: string;
+    declare readonly createdAt?: Date | string;
+    declare readonly updatedAt?: Date | string;
+}
+
+export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<acclaim> => {
     acclaim.init({
         id: {
             type: dataTypes.INTEGER,
@@ -44,5 +60,7 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof accla
             tableName: 'acclaim',
         });
 
-    return acclaim;
+    return {
+        model: acclaim,
+    };
 };

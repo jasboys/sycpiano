@@ -1,16 +1,23 @@
-import { DataTypes, Sequelize } from 'sequelize';
-import { Model } from '../types';
+import { DataTypes, Model, Sequelize } from 'sequelize';
+import { ModelMap, ModelExport } from '../types';
 
-export class calendarCollaborator extends Model {
-    readonly id?: string;
-    readonly calendarId?: string;
-    readonly collaboratorId?: string;
-    readonly order?: number;
+export interface CalendarCollaboratorAttributes {
+    id?: string;
+    calendarId?: string;
+    collaboratorId?: string;
+    order?: number;
+}
+
+export class calendarCollaborator extends Model<CalendarCollaboratorAttributes, CalendarCollaboratorAttributes> implements CalendarCollaboratorAttributes {
+    declare id?: string;
+    declare calendarId?: string;
+    declare collaboratorId?: string;
+    declare order?: number;
     readonly createdAt?: Date | string;
     readonly updatedAt?: Date | string;
 }
 
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof calendarCollaborator => {
+export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<calendarCollaborator> => {
     calendarCollaborator.init({
         id: {
             allowNull: false,
@@ -33,10 +40,13 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): typeof calen
             tableName: 'calendar_collaborator',
         });
 
-    calendarCollaborator.associate = (models) => {
+    const associate = (models: ModelMap) => {
         calendarCollaborator.belongsTo(models.calendar);
         calendarCollaborator.belongsTo(models.collaborator);
     };
 
-    return calendarCollaborator;
+    return {
+        model: calendarCollaborator,
+        associate,
+    };
 };

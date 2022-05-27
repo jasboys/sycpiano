@@ -1,12 +1,12 @@
-import { SerializedStyles } from '@emotion/css';
+import { SerializedStyles } from '@emotion/react';
 
 export interface ChildRendererProps<T> {
     readonly key: number | string;
-    readonly currentItemId: number | string;
+    readonly currentItemId?: number | string;
     readonly item: T;
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     readonly onClick?: (...args: any[]) => void;
-    readonly isMobile?: boolean;
+    readonly isMobile: boolean;
 }
 
 export interface PlaylistProps {

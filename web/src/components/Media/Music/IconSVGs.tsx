@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 interface SVGProps {
-    readonly onMouseOver?: () => void;
-    readonly onMouseOut?: () => void;
-    readonly width: number;
-    readonly height: number;
+    readonly onMouseOver?: (event: React.MouseEvent<SVGElement, MouseEvent>) => void;
+    readonly onMouseOut?: (event: React.MouseEvent<SVGElement, MouseEvent>) => void;
+    readonly width?: number;
+    readonly height?: number;
 }
 
 export const PlaySVG: React.FC<SVGProps & React.SVGAttributes<unknown>> = ({ onMouseOver, onMouseOut, width, height, onClick, ...props }) => (

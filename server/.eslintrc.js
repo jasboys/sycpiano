@@ -27,6 +27,7 @@ module.exports = {
         '@typescript-eslint/class-name-casing': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-empty-interface': 'off',
+        '@typescript-eslint/no-non-null-assertion': 'off',
         // These rules don't add much value, are better covered by TypeScript and good definition files
         'react/no-direct-mutation-state': 'off',
         'react/no-deprecated': 'off',

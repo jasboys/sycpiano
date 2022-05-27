@@ -25,10 +25,10 @@ export const links: ReadonlyArray<LinkShape> = [
     },
     { name: 'contact', path: '/contact' },
     // UNCOMMENT WHEN FINISHING TESTING ON PROD
-    // {
-    //     name: 'shop', path: '/shop', subLinks: [
-    //         { name: 'scores', path: '/scores' },
-    //         { name: 'faqs', path: '/faqs' }
-    //     ]
-    // },
+    {
+        name: 'shop', path: '/shop', subLinks: [
+            { name: 'scores', path: '/scores' },
+            { name: 'faqs', path: '/faqs' }
+        ]
+    },
 ];

@@ -1,5 +1,5 @@
-import { default as moment } from 'moment-timezone';
-
+import { isValid, parseISO, startOfMonth } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { CachedEvent, EventItemType, MonthItem } from 'src/components/Schedule/types';
 
 const GOOGLE_MAPS_SEARCH_URL = 'https://www.google.com/maps/search/?api=1';
@@ -22,41 +22,41 @@ export const transformCachedEventsToListItems = (
 ): { events: EventItemType[]; monthsSeen: Set<string> } => {
     const monthsSet = new Set<string>(monthsSeen);
     const eventsList = events.reduce((runningEventsArr: EventItemType[], event) => {
-        let eventDateTime = moment(event.dateTime);
-        if (event.timezone) {
-            eventDateTime = eventDateTime.tz(event.timezone);
-        }
+        const eventDateTime = parseISO(event.dateTime);
+        console.log(eventDateTime, event.timezone);
 
-        const month = eventDateTime.format('MMMM');
-        const year = eventDateTime.year();
+        const monthString = formatInTimeZone(eventDateTime, event.timezone ?? 'America/Chicago', 'LLLL');
+        const yearString = formatInTimeZone(eventDateTime, event.timezone ?? 'America/Chicago', 'y');
+        const monthYearString = `${monthString} ${yearString}`
 
         const nextEventsArr: EventItemType[] = [];
-        const monthYearString = `${month} ${year}`;
         if (!monthsSet.has(monthYearString)) {
             monthsSet.add(monthYearString);
-            const monthMoment = moment(monthYearString, 'MMMM YYYY');
+            const monthDate = startOfMonth(eventDateTime);
             nextEventsArr.push({
                 type: 'month',
-                dateTime: monthMoment,
-                month,
-                year,
+                dateTime: monthDate.toISOString(),
+                month: monthString,
+                year: parseInt(yearString, 10),
             } as MonthItem);
         }
 
-        const endDate = moment(event.endDate).isValid() ? moment(event.endDate) : undefined;
+        const parsedEndDate = parseISO(event.endDate);
+        const endDate = isValid(parsedEndDate) ? parsedEndDate : undefined;
 
         nextEventsArr.push({
             type: 'day',
             id: event.id,
             name: event.name,
-            dateTime: eventDateTime,
-            endDate,
+            dateTime: eventDateTime.toISOString(),
+            endDate: endDate?.toISOString(),
             allDay: event.allDay,
             collaborators: event.collaborators,
             eventType: event.type,
             location: event.location,
             program: event.pieces,
             website: event.website,
+            timezone: event.timezone,
         });
 
         return [ ...runningEventsArr, ...nextEventsArr ];

@@ -2,6 +2,7 @@ import * as Promise from 'bluebird';
 import * as dotenv from 'dotenv';
 import * as express from 'express';
 import * as stripeClient from './stripe';
+import axios, { AxiosError } from 'axios';
 
 dotenv.config();
 
@@ -55,7 +56,7 @@ actionsRouter.post('/calendar/sync-selected', async (req: RequestWithBody, res: 
                         attributes: ['order'],
                     },
                     include: [{
-                        model: models.CalendarPiece,
+                        model: models.calendarPiece,
                         attributes: ['order'],
                     }],
                 },
@@ -77,13 +78,13 @@ actionsRouter.post('/calendar/sync-selected', async (req: RequestWithBody, res: 
                 allDay: cal.allDay,
                 timeZone: cal.timezone,
                 description: JSON.stringify({
-                    collaborators: cal.collaborators.map((collab) => {
+                    collaborators: cal.collaborators?.map((collab) => {
                         return {
                             name: collab.name,
                             instrument: collab.instrument,
                         };
                     }),
-                    pieces: cal.pieces.map((piece) => {
+                    pieces: cal.pieces?.map((piece) => {
                         return {
                             composer: piece.composer,
                             piece: piece.piece,
@@ -104,19 +105,29 @@ actionsRouter.post('/calendar/sync-selected', async (req: RequestWithBody, res: 
                 console.log(`updated: ${item.id}\n`);
                 updated++;
             } catch (e) {
-                if (e.response.status === 404) {
-                    try {
-                        await createCalendarEvent(db.sequelize, item);
-                        console.log(`created: ${item.id}\n`);
-                        created++;
-                    } catch (e) {
-                        console.log(`error: ${item.id}, ${e.response.status} ${e.response.statusText}\n`);
+                const err = e as Error | AxiosError;
+                if (axios.isAxiosError(err)) {
+                    if (err.response?.status === 404) {
+                        try {
+                            await createCalendarEvent(db.sequelize, item);
+                            console.log(`created: ${item.id}\n`);
+                            created++;
+                        } catch (ee) {
+                            const eerr = ee as Error | AxiosError;
+                            if (axios.isAxiosError(eerr)) {
+                                console.log(`error: ${item.id}, ${eerr.response?.status} ${eerr.response?.statusText}\n`);
+                                errored++;
+                            } else {
+                                throw ee;
+                            }
+                        }
+                    } else {
+                        console.log(`error: ${item.id}, ${err.response?.status} ${err.response?.statusText}\n`);
                         errored++;
+                        throw (e);
                     }
                 } else {
-                    console.log(`error: ${item.id}, ${e.response.status} ${e.response.statusText}\n`);
-                    errored++;
-                    throw (e);
+                    throw e;
                 }
             }
         });
@@ -204,13 +215,13 @@ actionsRouter.post('/calendar/sync', async (_: express.Request, res: express.Res
                     allDay: cal.allDay,
                     timeZone: cal.timezone,
                     description: JSON.stringify({
-                        collaborators: cal.collaborators.map((collab) => {
+                        collaborators: cal.collaborators?.map((collab) => {
                             return {
                                 name: collab.name,
                                 instrument: collab.instrument,
                             };
                         }),
-                        pieces: cal.pieces.map((piece) => {
+                        pieces: cal.pieces?.map((piece) => {
                             return {
                                 composer: piece.composer,
                                 piece: piece.piece,
@@ -231,19 +242,30 @@ actionsRouter.post('/calendar/sync', async (_: express.Request, res: express.Res
                     console.log(`updated: ${item.id}\n`);
                     updated++;
                 } catch (e) {
-                    if (e.response.status === 404) {
-                        try {
-                            await createCalendarEvent(db.sequelize, item);
-                            console.log(`created: ${item.id}\n`);
-                            created++;
-                        } catch (e) {
-                            console.log(`error: ${item.id}, ${e.response.status} ${e.response.statusText}\n`);
+                    const err = e as Error | AxiosError;
+                    if (axios.isAxiosError(err)) {
+                        if (err.response?.status === 404) {
+                            try {
+                                await createCalendarEvent(db.sequelize, item);
+                                console.log(`created: ${item.id}\n`);
+                                created++;
+                            } catch (ee) {
+                                const eerr = ee as Error | AxiosError;
+                                if (axios.isAxiosError(eerr)) {
+                                    console.log(`error: ${item.id}, ${eerr.response?.status} ${eerr.response?.statusText}\n`);
+                                    errored++;
+                                } else {
+                                    throw e;
+                                }
+                            }
+
+                        } else {
+                            console.log(`error: ${item.id}, ${err.response?.status} ${err.response?.statusText}\n`);
                             errored++;
+                            throw (e);
                         }
                     } else {
-                        console.log(`error: ${item.id}, ${e.response.status} ${e.response.statusText}\n`);
-                        errored++;
-                        throw (e);
+                        throw e;
                     }
                 }
             });
@@ -298,11 +320,9 @@ actionsRouter.post('/product/populate-test-data', async (_: express.Request, res
                     price_id: pp.id,
                 };
             } catch (e) {
-                console.log(e);
+                throw e;
             }
-        }), {
-
-        });
+        }));
         res.sendStatus(200);
     } catch (e) {
         respondWithError(e, res);

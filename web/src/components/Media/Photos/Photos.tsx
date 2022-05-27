@@ -1,38 +1,24 @@
 import * as React from 'react';
-import { connect } from 'react-redux';
-import { Action } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
 
 import styled from '@emotion/styled';
 
 import PhotoFader from 'src/components/Media/Photos/PhotoFader';
 import PhotoList from 'src/components/Media/Photos/PhotoList';
 
-import { createFetchPhotosAction, selectPhoto } from 'src/components/Media/Photos/actions';
+import { fetchPhotos, selectFirstPhoto, selectPhoto } from 'src/components/Media/Photos/reducers';
 import { PhotoItem } from 'src/components/Media/Photos/types';
 import { idFromItem } from 'src/components/Media/Photos/utils';
-import { GlobalStateShape } from 'src/types';
 
 import { lato1 } from 'src/styles/fonts';
 import { pushed } from 'src/styles/mixins';
 import { screenM, screenXSorPortrait } from 'src/styles/screens';
 import { playlistContainerWidth } from 'src/styles/variables';
+import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { TransitionGroup } from 'react-transition-group';
 
-interface PhotosStateToProps {
-    readonly items: PhotoItem[];
-    readonly currentItem: PhotoItem;
-}
-
-interface PhotosDispatchToProps {
-    readonly createFetchPhotosAction: () => Promise<void>;
-    readonly selectPhotoAction: typeof selectPhoto;
-}
-
-interface PhotosOwnProps {
+interface PhotosProps {
     readonly isMobile: boolean;
 }
-
-type PhotosProps = PhotosStateToProps & PhotosDispatchToProps & PhotosOwnProps;
 
 const StyledPhotos = styled.div`
     ${pushed}
@@ -76,54 +62,54 @@ const StyledCredit = styled.div`
     padding: 20px;
 `;
 
-class Photos extends React.Component<PhotosProps> {
-    componentDidMount() {
-        this.props.createFetchPhotosAction();
-    }
+const Photos: React.FC<PhotosProps> = (props) => {
+    const dispatch = useAppDispatch();
+    const currentItem = useAppSelector(({ photoViewer }) => photoViewer.currentItem);
+    const items = useAppSelector(({ photoList }) => photoList.items);
 
-    isCurrentItem = (item: PhotoItem) =>
-        idFromItem(item) === idFromItem(this.props.currentItem);
+    React.useEffect(() => {
+        async function callDispatch() {
+            await dispatch(fetchPhotos());
+            dispatch(selectFirstPhoto());
+        }
 
-    selectPhoto = (item: PhotoItem) => this.props.selectPhotoAction(item);
+        callDispatch();
+        // dispatch(fetchPhotos());
+    }, []);
 
-    render() {
-        return (
-            <StyledPhotos>
-                {!this.props.isMobile && (
-                    <StyledPhotoViewer>
-                        {this.props.items.map((item, idx) => {
-                            const isCurrent = this.isCurrentItem(item);
-                            return <PhotoFader key={idx} item={item} isCurrent={isCurrent} />;
+    const selectPhotoCallback = (photo: PhotoItem) => {
+        dispatch(selectPhoto(photo));
+    };
+
+    const isCurrentItem = (item: PhotoItem) =>
+        currentItem && idFromItem(item) === idFromItem(currentItem);
+
+    return (
+        <StyledPhotos>
+            {!props.isMobile && (
+                <StyledPhotoViewer>
+                    <TransitionGroup component={null}>
+                        {items.map((item, idx) => {
+                            const isCurrent = isCurrentItem(item);
+                            return (
+                                <PhotoFader key={idx} idx={idx} item={item} isCurrent={isCurrent} isMobile={props.isMobile} />
+                            );
+
                         })}
-                        {this.props.currentItem && <StyledCredit>{`credit: ${this.props.currentItem.credit}`}</StyledCredit>}
-                    </StyledPhotoViewer>
-                )}
-                <PhotoList
-                    items={this.props.items}
-                    currentItem={this.props.currentItem}
-                    selectPhoto={this.props.selectPhotoAction}
-                    isMobile={this.props.isMobile}
-                />
-            </StyledPhotos>
-        );
-    }
-}
-
-const mapStateToProps = (state: GlobalStateShape): PhotosStateToProps => ({
-    items: state.photoList.items,
-    currentItem: state.photoViewer.currentItem,
-});
-
-const mapDispatchToProps = (dispatch: ThunkDispatch<GlobalStateShape, undefined, Action>): PhotosDispatchToProps => ({
-    createFetchPhotosAction: () => dispatch(createFetchPhotosAction()),
-    selectPhotoAction: (item: PhotoItem) => dispatch(selectPhoto(item)),
-});
-
-const ConnectedPhotos = connect<PhotosStateToProps, PhotosDispatchToProps>(
-    mapStateToProps,
-    mapDispatchToProps,
-)(Photos);
+                    </TransitionGroup>
+                    {currentItem && <StyledCredit>{`credit: ${currentItem.credit}`}</StyledCredit>}
+                </StyledPhotoViewer>
+            )}
+            <PhotoList
+                items={items}
+                currentItem={currentItem}
+                selectPhoto={selectPhotoCallback}
+                isMobile={props.isMobile}
+            />
+        </StyledPhotos>
+    );
+};
 
 export type PhotosType = React.Component<PhotosProps>;
-export type RequiredProps = PhotosOwnProps;
-export default ConnectedPhotos;
+export type RequiredProps = PhotosProps;
+export default Photos;

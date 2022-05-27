@@ -1,17 +1,16 @@
+import { getMinutes, getHours } from 'date-fns';
 import * as React from 'react';
-
-import { Moment } from 'moment-timezone';
 
 import { polarToCartesian } from 'src/components/Media/Music/utils';
 
 const HOUR_LENGTH = 120;
 const MINUTES_LENGTH = 180;
 
-export const ClockIconInstance: React.FC<React.SVGAttributes<unknown> & { readonly date: Moment }> = ({ date, ...props }) => {
-    const minutes = date.minutes();
+export const ClockIconInstance: React.FC<React.SVGAttributes<unknown> & { readonly date: Date }> = ({ date, ...props }) => {
+    const minutes = getMinutes(date);
     const minutesAngle = -Math.PI / 2 + Math.PI * minutes / 30;
 
-    const hour = date.hour() + minutes / 60;
+    const hour = getHours(date) + minutes / 60;
     const hourAngle = -Math.PI / 2 + Math.PI * hour / 6;
 
     const [minutesX, minutesY] = polarToCartesian(MINUTES_LENGTH, minutesAngle, [300, 300]);

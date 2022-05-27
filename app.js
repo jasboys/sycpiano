@@ -7,11 +7,15 @@ const ApiRouter = require('./server/build/api-router.js').ApiRouter;
 const AdminRest = require('./server/build/rest.js').AdminRest;
 const Resized = require('./server/build/resized.js').Resized;
 const getMetaFromPathAndSanitize = require('./server/build/meta.js').getMetaFromPathAndSanitize;
+const { AuthRouter, authAndGetRole, checkAdmin } = require('./server/build/authorization.js');
+const { createProxyMiddleware } = require('http-proxy-middleware');
+const cookieParser = require('cookie-parser');
+const csurf = require('csurf');
+const cors = require('cors');
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-const port = isProduction ? process.env.PORT : 8000;
-const listenAddr = isProduction ? '0.0.0.0' : '127.0.0.1';
+const port = process.env.PORT;
 
 const app = express();
 const logger = () => {
@@ -29,35 +33,120 @@ const logger = () => {
     }
 };
 
+// Stupid favicon
+if (!isProduction) {
+    const fav = require('serve-favicon');
+    app.use(fav(path.resolve(path.join(process.env.IMAGE_ASSETS_DIR, 'favicon.png'))));
+}
+
 app.use(logger());
 
 // helmet will add HSTS to force HTTPS connections, remove x-powered-by non-standard header,
 // sets x-frame-options header to disallow our content to be rendered in iframes.
-app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            'script-src': [
+                "'self'",
+                "'unsafe-inline'",
+                "'unsafe-eval'",
+                "https://js.stripe.com/v3/",
+                "https://www.youtube.com/iframe_api",
+                "https://www.youtube.com/s/player/",
+            ],
+            'default-src': [
+                "'self'",
+                "https://js.stripe.com/v3/",
+                "https://www.googleapis.com/youtube/v3/",
+                "https://www.youtube.com/embed/",
+            ],
+            'img-src': [
+                "'self'",
+                "data:",
+                "https://i.ytimg.com/vi/",
+            ],
+        },
+    },
+    // crossOriginResourcePolicy: {
+    //     policy: 'cross-origin'
+    // },
+    crossOriginEmbedderPolicy: false
+}));
 
 // Non-admin routes.
 // Don't inject bodyParser unless needed
+// and non-admin routes don't need POST
 app.use(/\/api/, ApiRouter);
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json())
+// app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.json())
 
 // only for dev
 // prod uses nginx to serve static files
-app.use('/static/music', express.static(path.resolve(process.env.MUSIC_ASSETS_DIR)));
-app.use('/static/images', express.static(path.resolve(process.env.IMAGE_ASSETS_DIR)));
-app.use('/static', express.static(path.join(__dirname, '/web/assets')));
-app.use('/static', express.static(path.join(__dirname, '/web/build')));
+if (!isProduction) {
+    app.use('/static/music', express.static(path.resolve(process.env.MUSIC_ASSETS_DIR)));
+    app.use('/static/images', express.static(path.resolve(process.env.IMAGE_ASSETS_DIR)));
+    app.use('/static', express.static(path.join(__dirname, '/web/assets')));
+    app.use('/static', express.static(path.join(__dirname, '/web/build')));
+}
+
 
 app.engine('html', mustacheExpress());
 app.set('view engine', 'html');
 app.set('views', path.join(__dirname, '/web/build'));
 
-// Custom
-app.use(/\/rest/, AdminRest);
+const csrfHandler = csurf({
+    cookie: {
+        signed: true,
+        secure: true,
+        httpOnly: true,
+        sameSite: 'strict',
+    },
+});
 
-// Resize images.
+let allowedOrigins = [/localhost:\d{4}$/];
+if (process.env.CORS_ORIGINS) {
+    allowedOrigins = allowedOrigins.concat(process.env.CORS_ORIGINS.split(','));
+}
+
+const corsOptions = {
+    origin: allowedOrigins,
+    allowedHeaders: ['Authorization', 'X-Requested-With', 'Content-Type', 'X-Total-Count'],
+    optionsSuccessStatus: 204,
+    maxAge: 86400,
+    credentials: true,
+};
+
+const adminMiddlewares = [
+    cors(corsOptions),
+    cookieParser(process.env.COOKIE_SECRET),
+    csrfHandler,
+    bodyParser.urlencoded({ extended: true }),
+    bodyParser.json(),
+];
+
+app.use(/\/auth/, adminMiddlewares, AuthRouter);
+
+// Custom api endpoint
+app.use(/\/rest/, adminMiddlewares, authAndGetRole, checkAdmin, AdminRest);
+
+// Resize images
 app.use(/\/resized/, Resized);
+
+// Admin
+app.use(
+    /\/admin/,
+    cors(corsOptions),
+    cookieParser(process.env.COOKIE_SECRET),
+    csrfHandler,
+    createProxyMiddleware({
+        target: `http://127.0.0.1:${process.env.ADMIN_PORT}`,
+        ws: true,
+        onProxyReq: (proxyReq, req) => {
+            proxyReq.setHeader('csrf-inject', req.csrfToken());
+        }
+    }),
+);
 
 // Health-check endpoint.
 app.get('/health-check', (req, res) => res.sendStatus(200));
@@ -75,31 +164,37 @@ Object.keys(oldRoutesToRedirectsMap).forEach(key => (
 ));
 
 // We catch any route first, and then let our front-end routing do the work.
-app.get(/\//, async (req, res) => {
-    if (isProduction && req.get('host').match(/^www\..*/i) === null) {
-        res.redirect(301, `https://www.${req.get('host')}${req.originalUrl}`);
-    }
-    delete req.query.fbclid;    // NO FACEBOOK
-    const { sanitize = '', notFound = false, ...meta } = await getMetaFromPathAndSanitize(req.path);
-    if (notFound) {
-        res.status(404);
-    }
-    if (sanitize) {
-        res.redirect(req.url.replace(`/${sanitize}`, ''));
-        res.end();
-    } else {
-        if (!meta.image) {
-            meta.image = 'https://www.seanchenpiano.com/static/images/syc_chair_meta.jpg';
+app.get(
+    /\//,
+    cookieParser(process.env.COOKIE_SECRET),
+    csrfHandler,
+    async (req, res) => {
+        if (isProduction && req.get('host').match(/^www\..*/i) === null) {
+            res.redirect(301, `https://www.${req.get('host')}${req.originalUrl}`);
         }
-        res.render('index', {
-            twitter: meta,
-            facebook: {
-                ...meta,
-                image: meta.image.replace('https', 'http'),
-                secure_image: meta.image,
-                url: 'https://' + req.get('host') + req.originalUrl },
-        });
-    }
-});
+        delete req.query.fbclid;    // NO FACEBOOK
+        const { sanitize = '', notFound = false, ...meta } = await getMetaFromPathAndSanitize(req.path);
+        if (notFound) {
+            res.status(404);
+        }
+        if (sanitize) {
+            res.redirect(req.url.replace(`/${sanitize}`, ''));
+            res.end();
+        } else {
+            if (!meta.image) {
+                meta.image = 'https://www.seanchenpiano.com/static/images/syc_chair_meta.jpg';
+            }
+            res.render('index', {
+                csrf: req.csrfToken(),
+                twitter: meta,
+                facebook: {
+                    ...meta,
+                    image: meta.image.replace('https', 'http'),
+                    secure_image: meta.image,
+                    url: 'https://' + req.get('host') + req.originalUrl
+                },
+            });
+        }
+    });
 
-app.listen(port, listenAddr, () => console.log(`App listening on port ${port}.`));
+app.listen(port, '127.0.0.1', () => console.log(`App listening on port ${port}.`));

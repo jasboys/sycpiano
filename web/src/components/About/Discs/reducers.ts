@@ -1,29 +1,45 @@
-import { Reducer } from 'redux';
-import DISCS_ACTIONS from 'src/components/About/Discs/actionTypeKeys';
-import { ActionTypes } from 'src/components/About/Discs/actionTypes';
-import { DiscsStateShape } from 'src/components/About/Discs/types';
+import { Disc, DiscsStateShape } from 'src/components/About/Discs/types';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
+import { ThunkAPIType } from 'src/types';
 
-export const discsReducer: Reducer<DiscsStateShape, ActionTypes> = (state = {
+const initialState: DiscsStateShape = {
     isFetching: false,
     discs: [],
-}, action) => {
-    switch (action.type) {
-        case DISCS_ACTIONS.FETCH_DISCS_REQUEST:
-            return {
-                ...state,
-                isFetching: true,
-            };
-        case DISCS_ACTIONS.FETCH_DISCS_ERROR:
-            return {
-                ...state,
-                isFetching: false,
-            };
-        case DISCS_ACTIONS.FETCH_DISCS_SUCCESS:
-            return {
-                isFetching: false,
-                discs: action.discs,
-            };
-        default:
-            return state;
-    }
 };
+
+export const fetchDiscs = createAsyncThunk<Disc[], void, ThunkAPIType>(
+    'discs/fetch',
+    async () => {
+        const { data: discs }: { data: Disc[] } = await axios.get('/api/discs');
+        // sort by date descending
+        return discs.sort((a, b) => b.releaseDate - a.releaseDate);
+    },
+    {
+        condition: (_, { getState }) => {
+            return !getState().discs.isFetching && !getState().discs.discs.length;
+        }
+    }
+);
+
+const discsSlice = createSlice({
+    name: 'discs',
+    initialState,
+    reducers: {},
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchDiscs.pending, (state, _) => {
+                state.isFetching = true;
+            })
+            .addCase(fetchDiscs.rejected, (state, _) => {
+                state.isFetching = false;
+            })
+            .addCase(fetchDiscs.fulfilled, (state, action) => {
+                state.isFetching = false;
+                state.discs = action.payload;
+            })
+            .addDefaultCase(() => { });
+    }
+});
+
+export const discsReducer = discsSlice.reducer;

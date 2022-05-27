@@ -10,13 +10,13 @@ import SpotifyButton from 'src/components/Media/Music/SpotifyButton';
 import Playlist from 'src/components/Media/Playlist';
 
 import { MusicFileItem } from 'src/components/Media/Music/types';
-import { GlobalStateShape } from 'src/types';
+import { GlobalStateShape } from 'src/store';
 
 import { playlistBackground } from 'src/styles/colors';
 import { screenXSorPortrait } from 'src/styles/screens';
+import { createSelector } from '@reduxjs/toolkit';
 
 interface MusicPlaylistOwnProps {
-    readonly baseRoute: string;
     readonly currentTrackId: string;
     readonly onClick: (item: MusicFileItem) => void;
     readonly play: () => void;
@@ -61,24 +61,28 @@ const PlaylistContainer = styled.div`
     }
 `;
 
+const selectItems = createSelector(
+    (state: GlobalStateShape) => state.audioPlaylist,
+    (audioPlaylist) => audioPlaylist.items
+);
+
 const MusicPlaylist: React.FC<MusicPlaylistProps> = ({
     isMobile,
     // items,
     onClick,
     currentTrackId,
     play,
-    baseRoute,
     userInteracted,
     isShuffle,
     toggleShuffle,
 }) => {
     const didRun = React.useRef<boolean>(false);
-    const items = useSelector(({ audioPlaylist }: GlobalStateShape) => audioPlaylist.items);
+    const items = useSelector(selectItems);
 
     React.useEffect(() => {
         if (didRun.current === false) {
             if (items.length && currentTrackId) {
-                document.getElementById(currentTrackId).scrollIntoView();
+                document.getElementById(currentTrackId)?.scrollIntoView();
                 didRun.current = true;
             }
         }
@@ -100,7 +104,6 @@ const MusicPlaylist: React.FC<MusicPlaylistProps> = ({
                         onClick={onClick}
                         currentItemId={currentTrackId}
                         play={play}
-                        baseRoute={baseRoute}
                         userInteracted={userInteracted}
                     />
                 ))}

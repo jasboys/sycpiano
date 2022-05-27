@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
 
-import { Elastic, TweenLite } from 'gsap';
+import { Elastic, gsap } from 'gsap';
 
 import { lato2i } from 'src/styles/fonts';
 import { staticImage } from 'src/styles/imageUrls';
@@ -10,28 +10,44 @@ import { noHighlight } from 'src/styles/mixins';
 import { screenXSandPortrait, screenXSorPortrait } from 'src/styles/screens';
 
 import socials from 'src/components/Home/socials';
+import { keyframes } from '@emotion/react';
 
 const textShadowColor = 'rgba(0, 0, 0, 0.75)';
+
+const pulse = keyframes({
+    'from, to': {
+        textShadow: `0 0 4px ${textShadowColor}`,
+    },
+    '50%': {
+        textShadow: '0 0 4px rgba(255, 255, 255, 1)',
+    },
+});
 
 const Handle = styled('div')`
     ${noHighlight}
     margin: 15px 0;
-    font-family: ${lato2i};
-    font-size: 30px;
-    color: white;
-    text-shadow: 0 0 6px ${textShadowColor};
-    text-decoration: underline;
     -webkit-tap-highlight-color: transparent;
-
-    &:hover {
-        cursor: pointer;
-    }
 
     ${screenXSorPortrait} {
         width: 100%;
         bottom: 15%;
     }
 `;
+
+const HandleText = styled('span')({
+    fontFamily: lato2i,
+    fontSize: 30,
+    color: 'white',
+    textShadow: `0 0 6px ${textShadowColor}`,
+    textDecoration: 'underline',
+    transition: 'all 0.2s',
+    animation: `${pulse} 4s ease infinite`,
+    '&:hover': {
+        cursor: 'pointer',
+        textShadow: '0 0 4px rgba(255, 255, 255, 1)',
+        animation: 'none',
+    }
+})
 
 const SocialContainer = styled('div')`
     position: absolute;
@@ -113,44 +129,54 @@ class Social extends React.PureComponent<Record<string, unknown>, SocialState> {
         this.setState({ show: !this.state.show });
     }
 
-    onSocialEnter = (id: number) => (el: HTMLLinkElement): void => {
+    onSocialEnter = (id: number) => (el: HTMLElement): void => {
         const relative = id - (Object.keys(socials).length / 2 - 0.5);
-        TweenLite.fromTo(el, 0.25,
+        gsap.fromTo(el,
             {
                 opacity: 0,
                 y: `-50%`,
                 x: `${relative * -100}%`,
-            }, {
+                duration: 0.25
+            },
+            {
                 opacity: 1,
                 y: `0%`,
                 x: `0%`,
                 delay: .05 * id,
                 ease: Elastic.easeOut.config(1, 0.75),
                 clearProps: 'transform',
-            });
+            }
+        );
     }
 
-    onSocialExit = (id: number) => (el: HTMLLinkElement): void => {
+    onSocialExit = (id: number) => (el: HTMLElement): void => {
         const relative = id - Math.floor(Object.keys(socials).length / 2);
-        TweenLite.fromTo(el, 0.25,
+        gsap.fromTo(el,
             {
                 opacity: 1,
                 y: `0%`,
                 x: `0%`,
-            }, {
+                duration: 0.25,
+            },
+            {
                 opacity: 0,
                 y: `-50%`,
                 x: `${relative * -100}%`,
                 delay: .05 * id,
                 ease: Elastic.easeOut.config(1, 0.75),
                 clearProps: 'transform',
-            });
+            }
+        );
         this.setState({ canHover: this.defaultCanHover });
     }
-    render(): JSX.Element {
+    render() {
         return (
             <SocialContainer>
-                <Handle onClick={this.onHandleClick}>@seanchenpiano</Handle>
+                <Handle onClick={this.onHandleClick}>
+                    <HandleText>
+                        @seanchenpiano
+                    </HandleText>
+                </Handle>
                 <SocialIconsContainer>
                     {
                         Object.keys(socials).map((key, idx) => (

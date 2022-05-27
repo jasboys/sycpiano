@@ -1,8 +1,7 @@
 import { DataTypes, QueryInterface } from 'sequelize';
-import { collaborator } from 'models/collaborator';
 
 export const up = async (queryInterface: QueryInterface, dataTypes: typeof DataTypes): Promise<void> => {
-    await queryInterface.createTable<collaborator>('collaborator', {
+    await queryInterface.createTable('collaborator', {
         id: {
             allowNull: false,
             defaultValue: dataTypes.UUIDV4,

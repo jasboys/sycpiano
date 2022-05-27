@@ -1,10 +1,8 @@
 import { DataTypes, QueryInterface } from 'sequelize';
-import { disc } from 'models/disc';
-import { discLink } from 'models/discLink';
 
 export const up = async (queryInterface: QueryInterface, dataTypes: typeof DataTypes): Promise<void> => {
     try {
-        await queryInterface.createTable<disc>('disc', {
+        await queryInterface.createTable('disc', {
             id: {
                 type: dataTypes.UUID,
                 defaultValue: dataTypes.UUIDV4,
@@ -36,7 +34,7 @@ export const up = async (queryInterface: QueryInterface, dataTypes: typeof DataT
         console.log(e);
     }
     try {
-        await queryInterface.createTable<discLink>('disc_link', {
+        await queryInterface.createTable('disc_link', {
             id: {
                 type: dataTypes.UUID,
                 defaultValue: dataTypes.UUIDV4,

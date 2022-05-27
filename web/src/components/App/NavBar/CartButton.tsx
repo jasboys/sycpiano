@@ -1,19 +1,17 @@
 import * as React from 'react';
-import { ReferenceObject } from 'popper.js'
 
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
-import { logoBlue } from 'src/styles/colors';
+import { lightBlue, logoBlue } from 'src/styles/colors';
 import { mix } from 'polished';
 import { noHighlight } from 'src/styles/mixins';
-import { useSelector, useDispatch } from 'react-redux';
-import { GlobalStateShape } from 'src/types';
-import { toggleCartListAction } from 'src/components/Cart/actions';
+import { toggleCartList } from 'src/components/Cart/reducers';
 import { lato4 } from 'src/styles/fonts';
-import { TweenLite } from 'gsap';
+import { gsap } from 'gsap';
 import { useMedia } from 'react-media';
 import { screenBreakPoints } from 'src/styles/screens';
+import { useAppDispatch, useAppSelector } from 'src/hooks';
 
 const cartStyle = (isMobile: boolean) => css({
     noHighlight,
@@ -25,27 +23,26 @@ const cartStyle = (isMobile: boolean) => css({
     paddingBottom: 12,
     marginRight: isMobile ? '1rem' : 'unset',
     fontFamily: lato4,
-    ['&:hover']: {
+    '&:hover': {
         cursor: 'pointer',
         fill: mix(0.5, logoBlue, '#444'),
     },
 });
 
-const cartHomeStyle = css`
-    fill: white;
-    filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.8));
-
-    &:hover {
-        fill: white;
-        filter: drop-shadow(0 0 1px rgba(255, 255, 255, 1));
+const cartHomeStyle = (isMobile: boolean, cartOpened: boolean) => css({
+    fill: (isMobile && cartOpened) ? lightBlue : 'white',
+    filter: (isMobile && cartOpened) ? 'drop-shadow(0 0 1px white)' : 'drop-shadow(0 0 1px rgba(0, 0, 0, 0.8))',
+    '&:hover': {
+        fill: 'white',
+        filter: 'drop-shadow(0 0 1px rgba(255, 255, 255, 1))',
     }
-`;
+});
 
 const circleStyle = (isMobile: boolean) => css({
     stroke: isMobile ? logoBlue : '#4d4d4d',
     transition: 'all 0.5s',
     fill: 'white',
-    ['&:hover']: {
+    '&:hover': {
         stroke: mix(0.5, logoBlue, '#444'),
     },
 });
@@ -53,14 +50,14 @@ const circleStyle = (isMobile: boolean) => css({
 const circleHomeStyle = css({
     stroke: 'white',
     fill: 'none',
-    ['&:hover']: {
+    '&:hover': {
         stroke: 'white',
     },
 });
 
-const StyledCart = styled.div<{ isHome: boolean; isMobile: boolean }>(
+const StyledCart = styled.div<{ isHome: boolean; isMobile: boolean; cartOpened: boolean }>(
     ({ isMobile }) => cartStyle(isMobile),
-    ({ isHome }) => isHome && cartHomeStyle,
+    ({ isHome, isMobile, cartOpened }) => isHome && cartHomeStyle(isMobile, cartOpened),
 );
 
 const StyledCircle = styled.circle<{ isHome: boolean; isMobile: boolean }>(
@@ -74,30 +71,33 @@ const StyledIcon = styled.svg`
 
 const StyledText = styled.text(noHighlight);
 
-function scaleDown() {
-    this.reverse();
-}
+const scaleDown = (tl: gsap.core.Tween) => {
+    tl.reverse();
+};
 
 const scaleUp = (el: HTMLDivElement) => {
-    TweenLite.fromTo(el, 0.1, {
+    const tl = gsap.fromTo(el, {
+        duartion: 0.1,
         transform: 'scale(1)'
     }, {
         transform: 'scale(2)',
-        onComplete: scaleDown,
+        onComplete: () => {
+            scaleDown(tl);
+        }
     });
 };
 
 interface CartButtonProps {
-    isHome?: boolean;
-    setReferenceElement: React.Dispatch<React.SetStateAction<ReferenceObject>>;
+    isHome: boolean;
 }
 
-const CartButton: React.FC<CartButtonProps> = ({ isHome, setReferenceElement }) => {
-    const cartCount = useSelector(({ cart }: GlobalStateShape) => cart.items.length);
-    const cartIsInit = useSelector(({ cart }: GlobalStateShape) => cart.isInit);
-    const cartRef = React.useRef<HTMLDivElement>(null);
+const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(({ isHome }, ref) => {
+    const cartCount = useAppSelector(({ cart }) => cart.items.length);
+    const cartIsInit = useAppSelector(({ cart }) => cart.isInit);
+    const cartOpened = useAppSelector(({ cart }) => cart.visible);
+    const cartRef = React.useRef<HTMLDivElement>();
     const { medium } = useMedia({ queries: screenBreakPoints });
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
     React.useEffect(() => {
         const el = cartRef.current;
@@ -109,13 +109,11 @@ const CartButton: React.FC<CartButtonProps> = ({ isHome, setReferenceElement }) 
 
     return (
         <StyledCart
+            cartOpened={cartOpened}
             isMobile={medium}
-            onClick={() => dispatch(toggleCartListAction())}
+            onClick={() => dispatch(toggleCartList())}
             isHome={isHome}
-            ref={(el) => {
-                cartRef.current = el;
-                setReferenceElement(el);
-            }}
+            ref={ref}
         >
             <StyledIcon
                 xmlns="http://www.w3.org/2000/svg"
@@ -134,6 +132,6 @@ const CartButton: React.FC<CartButtonProps> = ({ isHome, setReferenceElement }) 
 
         </StyledCart>
     );
-};
+});
 
 export default CartButton;

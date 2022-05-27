@@ -30,44 +30,44 @@ declare global {
 }
 
 class AudioVisualizer extends React.Component<AudioVisualizerProps> {
-    isRendering: boolean;
+    isRendering!: boolean;
     lastPlayheadPosition = 0;
-    height: number;
-    width: number;
+    height!: number;
+    width!: number;
     visualization: React.RefObject<HTMLCanvasElement> = React.createRef();
     container: React.RefObject<HTMLDivElement> = React.createRef();
-    SCALE: number;
-    RADIUS_SCALE: number;
-    RADIUS_BASE: number;
-    WAVEFORM_HALF_HEIGHT: number;
-    HEIGHT_ADJUST: number;
-    visualizationCtx: CanvasRenderingContext2D;
+    SCALE!: number;
+    RADIUS_SCALE!: number;
+    RADIUS_BASE!: number;
+    WAVEFORM_HALF_HEIGHT!: number;
+    HEIGHT_ADJUST!: number;
+    visualizationCtx: CanvasRenderingContext2D | null = null;
 
-    frequencyData: Uint8Array;
-    FFT_HALF_SIZE: number;
-    CQ_BINS: number;
-    INV_CQ_BINS: number;
+    frequencyData!: Uint8Array;
+    FFT_HALF_SIZE!: number;
+    CQ_BINS!: number;
+    INV_CQ_BINS!: number;
 
-    normalizedL: Float32Array;
-    normalizedR: Float32Array;
-    vizBins: Float32Array;
+    normalizedL!: Float32Array;
+    normalizedR!: Float32Array;
+    vizBins!: Float32Array;
 
-    MAX_BIN: number;
-    HIGH_PASS_BIN: number;
-    LOW_PASS_BIN: number;
+    MAX_BIN!: number;
+    HIGH_PASS_BIN!: number;
+    LOW_PASS_BIN!: number;
 
-    NUM_CROSSINGS: number;
-    SAMPLES_PER_CROSSING: number;
-    HALF_CROSSINGS: number;
-    FILTER_SIZE: number;
+    NUM_CROSSINGS!: number;
+    SAMPLES_PER_CROSSING!: number;
+    HALF_CROSSINGS!: number;
+    FILTER_SIZE!: number;
 
-    STEP_SIZE: number;
+    STEP_SIZE!: number;
     lastIsHover = false;
-    lastHover = 0;
+    lastHover?: number = 0;
     lastCurrentPosition = 0;
     idleStart = 0;
     requestId = 0;
-    lastCallback: number;
+    lastCallback?: number;
 
     adjustHeight = (): void => {
         this.HEIGHT_ADJUST = this.props.isMobile ? HEIGHT_ADJUST_MOBILE : HEIGHT_ADJUST_DESKTOP;
@@ -75,8 +75,11 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
     }
 
     initializeVisualizer = async (): Promise<void> => {
-        this.visualizationCtx = this.visualization.current.getContext('2d');
-        this.visualizationCtx.save();
+        if (this.visualization.current) {
+            this.visualizationCtx = this.visualization.current.getContext('2d');
+            this.visualizationCtx?.save();
+        }
+
         this.onResize();
 
         try {
@@ -119,9 +122,9 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
         // don't render anything if analyzers are null, i.e. audio not set up yet
         // also limit 30fps on mobile =).
         const timestamp = performance.now();
-        if (!this.props.analyzers[0] || !this.props.analyzers[1] ||
-            this.props.isMobile && this.lastCallback && (timestamp - this.lastCallback) < MOBILE_MSPF
-        ) {
+        if (this.props.isMobile && this.lastCallback && (timestamp - this.lastCallback) < MOBILE_MSPF) {
+            return;
+        } else if (!(this.props.analyzerL && this.props.analyzerR) || !this.visualizationCtx) {
             return;
         } else {
             if (this.props.isMobile) {
@@ -165,25 +168,29 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
             };
 
             // get byte data, and store into normalized[L,R], while accumulating
-            this.props.analyzers[0].getByteFrequencyData(this.frequencyData);
-            this.normalizedL.forEach((_, index, arr) => {
-                const temp = this.frequencyData[index] / 255;
-                arr[index] = temp;
-                // accumulate
-                if (index < this.MAX_BIN) {
-                    index && (lowFreqs.l += temp);
-                    (index >= this.HIGH_PASS_BIN) && (highFreqs.l += temp);
+            this.props.analyzerL.getByteFrequencyData(this.frequencyData);
+            this.normalizedL?.forEach((_, index, arr) => {
+                if (this.frequencyData && this.MAX_BIN && this.HIGH_PASS_BIN) {
+                    const temp = this.frequencyData[index] / 255;
+                    arr[index] = temp;
+                    // accumulate
+                    if (index < this.MAX_BIN) {
+                        index && (lowFreqs.l += temp);
+                        (index >= this.HIGH_PASS_BIN) && (highFreqs.l += temp);
+                    }
                 }
             });
 
-            this.props.analyzers[1].getByteFrequencyData(this.frequencyData);
-            this.normalizedR.forEach((_, index, arr) => {
-                const temp = this.frequencyData[index] / 255;
-                arr[index] = temp;
-                // accumulate
-                if (index < this.MAX_BIN) {
-                    index && (lowFreqs.r += temp);
-                    (index >= this.HIGH_PASS_BIN) && (highFreqs.r += temp);
+            this.props.analyzerR.getByteFrequencyData(this.frequencyData);
+            this.normalizedR?.forEach((_, index, arr) => {
+                if (this.frequencyData && this.MAX_BIN && this.HIGH_PASS_BIN) {
+                    const temp = this.frequencyData[index] / 255;
+                    arr[index] = temp;
+                    // accumulate
+                    if (index < this.MAX_BIN) {
+                        index && (lowFreqs.r += temp);
+                        (index >= this.HIGH_PASS_BIN) && (highFreqs.r += temp);
+                    }
                 }
             });
             // FFT -> CQ
@@ -215,7 +222,7 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
             const integralPart = Math.floor(index);
             const fractionalPart = index - integralPart;
             let sum = 0;
-            for (let i = integralPart, j = this.HALF_CROSSINGS; i < this.FILTER_SIZE; i += this.SAMPLES_PER_CROSSING, j--) {
+            for (let i = integralPart, j = this.HALF_CROSSINGS; i < this.FILTER_SIZE; i += this.SAMPLES_PER_CROSSING, j = j - 1) {
                 let input = currentInput + j;
                 // treat like ring buffer
                 if (input < 0) {
@@ -263,7 +270,7 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
         // going through mins from start to end
         for (let j = 0; j < waveformLength; j++) {
             const scale = centerAxis + waveform[j * 2] * volumeHeightScale;
-            let { x, y } = angles[j];
+            let { x, y } = angles?.[j] || { x: 0, y: 0 };
             x *= scale;
             y *= scale;
 
@@ -277,7 +284,7 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
         // looping around maxes from end to start
         for (let j = waveformLength - 1; j >= 0; j--) {
             const scale = centerAxis + waveform[j * 2 + 1] * volumeHeightScale;
-            let { x, y } = angles[j];
+            let { x, y } = angles?.[j] || { x: 0, y: 0 };
             x *= scale;
             y *= scale;
 
@@ -320,7 +327,7 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
             WAVEFORM_CENTER_AXIS + this.props.volume * this.WAVEFORM_HALF_HEIGHT,
             '#FFF',
         );
-        if (this.props.isHoverSeekring) {
+        if (this.props.isHoverSeekring && this.props.hoverAngle !== undefined) {
             this.drawPlaybackHead(
                 context,
                 this.props.hoverAngle,
@@ -349,13 +356,21 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
         this.idleStart = performance.now();
         this.adjustHeight();
 
-        this.visualizationCtx.restore();
-        this.visualizationCtx.save();
+        this.visualizationCtx?.restore();
+        this.visualizationCtx?.save();
 
         // scale canvas for high-resolution screens
         // code from https://gist.github.com/callumlocke/cc258a193839691f60dd
         const devicePixelRatio = window.devicePixelRatio || 1;
-        const anyCtx: CanvasRenderingContext2D = this.visualizationCtx;
+        const anyCtx: CanvasRenderingContext2D | null = this.visualizationCtx;
+        if (
+            !anyCtx ||
+            !this.container.current ||
+            !this.visualization.current ||
+            !this.visualizationCtx
+        ) {
+            return;
+        }
         const backingStoreRatio = anyCtx.webkitBackingStorePixelRatio ||
             anyCtx.mozBackingStorePixelRatio ||
             anyCtx.msBackingStorePixelRatio ||
@@ -421,16 +436,6 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
         gsap.ticker.remove(this.onAnalyze);
         this.isRendering = false;
     }
-
-    // dunno why it doens't work without this. onResize should be called anyways
-    // componentDidUpdate(prevProps: AudioVisualizerProps): void {
-    //     this.idleStart = performance.now();
-    //     gsap.ticker.remove(this.onAnalyze);
-    //     gsap.ticker.add(this.onAnalyze);
-    //     if (prevProps.isMobile !== this.props.isMobile) {
-    //         this.onResize();
-    //     }
-    // }
 
     shouldComponentUpdate(nextProps: AudioVisualizerProps): boolean {
         if (nextProps.isMobile !== this.props.isMobile ||

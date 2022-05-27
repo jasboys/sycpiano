@@ -1,29 +1,23 @@
 import * as React from 'react';
-import { connect } from 'react-redux';
 
 import styled from '@emotion/styled';
 
-import { onScroll, scrollFn } from 'src/components/App/NavBar/actions';
+import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
 import StyledContactItem from 'src/components/Contact/ContactItem';
 import contacts from 'src/components/Contact/contacts';
 
 import { screenXSorPortrait } from 'src/styles/screens';
 import { navBarHeight } from 'src/styles/variables';
+import { useAppDispatch } from 'src/hooks';
 
-interface ContactOwnProps {
+interface ContactProps {
     isMobile: boolean;
     className?: string;
 }
 
-interface ContactDispatchToProps {
-    onScroll: typeof onScroll;
-}
-
-type ContactProps = ContactOwnProps & ContactDispatchToProps;
-
 const ContactContainer = styled.div({
     display: 'flex',
-    visibilieyt: 'hidden',
+    // visibility: 'hidden',
     flexFlow: 'row wrap',
     justifyContent: 'center',
     height: '100%',
@@ -38,21 +32,24 @@ const ContactContainer = styled.div({
     },
 });
 
-const Contact: React.FC<ContactProps> = ({ isMobile, onScroll: onScrollAction }) => (
-    <ContactContainer
-        onScroll={isMobile ? scrollFn(navBarHeight.mobile, onScrollAction) : null}
-    >
-        {contacts.map((contact, i) => (
-            <StyledContactItem {...contact} key={i} />
-        ))}
-    </ContactContainer>
-);
+const Contact: React.FC<ContactProps> = ({ isMobile }) => {
+    const dispatch = useAppDispatch();
 
-const ConnectedContact = connect<Record<string, never>, ContactDispatchToProps>(
-    null,
-    { onScroll },
-)(Contact);
+    const onScrollDispatch = (triggerHeight: number, scrollTop: number) => {
+        dispatch(onScroll({ triggerHeight, scrollTop }));
+    };
+
+    return (
+        <ContactContainer
+            onScroll={isMobile ? scrollFn(navBarHeight.mobile, onScrollDispatch) : undefined}
+        >
+            {contacts.map((contact, i) => (
+                <StyledContactItem {...contact} key={i} />
+            ))}
+        </ContactContainer>
+    );
+};
 
 export type ContactType = typeof Contact;
-export type RequiredProps = ContactOwnProps;
-export default ConnectedContact;
+export type RequiredProps = ContactProps;
+export default Contact;
