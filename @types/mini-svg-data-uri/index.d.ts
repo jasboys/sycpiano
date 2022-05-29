@@ -1,4 +1,4 @@
-import { string } from "prop-types";
+import { string } from 'prop-types';
 
 declare function svgToMini(svgString: string): string;
 

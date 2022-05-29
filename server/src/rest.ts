@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
 import * as express from 'express';
-import { fn, literal, Model, ModelStatic, Op, Order, ValidationError, where } from 'sequelize';
-import crud, { Actions, sequelizeSearchFields } from 'express-sequelize-crud';
+import { fn, literal, Model, ModelStatic, Op, Order, UUID, ValidationError, where, WhereOptions } from 'sequelize';
+import crud, { Actions } from 'express-crud-router';
 
 dotenv.config();
 
@@ -11,13 +11,13 @@ const models = db.models;
 
 import { calendar } from './models/calendar';
 import { ActionsRouter } from './actions';
-import { isObject, transform } from 'lodash';
+import { flatten, isObject, transform, uniqBy } from 'lodash';
 import { collaborator, CollaboratorAttributes } from './models/collaborator';
-import { piece, PieceAttributes } from 'models/piece';
-import { CalendarPieceAttributes } from 'models/calendarPiece';
-import { CalendarCollaboratorAttributes } from 'models/calendarCollaborator';
-import { music } from 'models/music';
-import { disc } from 'models/disc';
+import { piece, PieceAttributes } from './models/piece';
+import { CalendarPieceAttributes } from './models/calendarPiece';
+import { CalendarCollaboratorAttributes } from './models/calendarCollaborator';
+import { music, MusicAttributes, MusicCreationAttributes } from './models/music';
+import { disc } from './models/disc';
 
 const adminRest = express.Router();
 
@@ -98,7 +98,7 @@ const sequelizeCrud = <I extends string | number, M extends Model, R extends M['
                 limit,
                 offset,
                 order,
-                where: (filter as any)
+                where: filter
             });
             return {
                 count: result.count,
@@ -115,6 +115,92 @@ const sequelizeCrud = <I extends string | number, M extends Model, R extends M['
         },
     }
 }
+
+const sequelizeSearchFields =
+    <M extends Model, R extends M['_attributes']>(
+        model: ModelStatic<M>,
+        searchableFields: (keyof R)[],
+        comparator: symbol = Op.iLike
+    ) =>
+        async (q: string, limit: number, scope: WhereOptions<R> = {}) => {
+            const resultChunks = await Promise.all(
+                prepareQueries<R>(model, searchableFields)(q, comparator).map(
+                    query =>
+                        model.findAll({
+                            limit,
+                            where: { ...query!, ...scope },
+                            raw: true,
+                        })
+                )
+            )
+
+            const rows = uniqBy(flatten(resultChunks).slice(0, limit), 'id')
+
+            return { rows, count: rows.length }
+        }
+
+const getSearchTerm = <Attributes>(
+    model: ModelStatic<Model<Attributes>>,
+    field: keyof Attributes,
+    comparator: symbol,
+    token: string
+) => {
+    if (
+        String(model.rawAttributes[field as string].type) === String(UUID)
+    ) {
+        return { [Op.eq]: token }
+    }
+    return { [comparator]: `%${token}%` }
+}
+
+const prepareQueries =
+    <Attributes>(
+        model: ModelStatic<Model<Attributes>>,
+        searchableFields: (keyof Attributes)[]
+    ) =>
+        (q: string, comparator: symbol = Op.iLike): WhereOptions<Attributes>[] => {
+            if (!searchableFields) {
+                // TODO: we could propose a default behavior based on model rawAttributes
+                // or (maybe better) based on existing indexes. This can be complexe
+                // because we have to deal with column types
+                throw new Error(
+                    'You must provide searchableFields option to use the "q" filter in express-sequelize-crud'
+                )
+            }
+
+            const defaultQuery = {
+                [Op.or]: searchableFields.map(field => ({
+                    [field]: getSearchTerm(model, field, comparator, q),
+                })),
+            }
+
+            const tokens = q.split(/\s+/).filter(token => token !== '')
+            if (tokens.length < 2) return [defaultQuery]
+
+            // query consists of multiple tokens => do multiple searches
+            return [
+                // priority to unsplit match
+                defaultQuery,
+
+                // then search records with all tokens
+                {
+                    [Op.and]: tokens.map(token => ({
+                        [Op.or]: searchableFields.map(field => ({
+                            [field]: getSearchTerm(model, field, comparator, token),
+                        })),
+                    })),
+                },
+
+                // then search records with at least one token
+                {
+                    [Op.or]: tokens.map(token => ({
+                        [Op.or]: searchableFields.map(field => ({
+                            [field]: getSearchTerm(model, field, comparator, token),
+                        })),
+                    })),
+                },
+            ]
+        }
 
 adminRest.use(crud('/bios', {
     ...sequelizeCrud(models.bio),
@@ -628,7 +714,7 @@ adminRest.use(crud('/musics', {
             distinct: true,
         });
     },
-    search: sequelizeSearchFields<music>(models.music, ['composer', 'piece', 'contributors', 'type'])
+    search: sequelizeSearchFields(models.music, ['composer', 'piece', 'contributors', 'type'])
 }));
 
 
@@ -662,7 +748,7 @@ adminRest.use(crud('/discs', {
             distinct: true,
         });
     },
-    search: sequelizeSearchFields<disc>(models.disc, ['title', 'description'])
+    search: sequelizeSearchFields(models.disc, ['title', 'description'])
 }));
 adminRest.use(crud('/disc-links', sequelizeCrud(models.discLink)));
 adminRest.use(crud('/photos', sequelizeCrud(models.photo)));

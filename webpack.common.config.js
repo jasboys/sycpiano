@@ -15,7 +15,7 @@ const sourcePaths = [
 
 const tsxUse = [
     {
-        loader: 'babel-loader',
+        loader: require.resolve('babel-loader'),
         options: {
             presets: [
                 [
