@@ -147,7 +147,7 @@
     "redux-devtools-extension": "^2.13.8",
     "redux-thunk": "^2.3.0",
     "sequelize": "^6.6.4",
-    "sharp": "^0.25.2",
+    "sharp": "^0.30.5",
     "stripe": "^8.118.0",
     "style-loader": "^1.2.1",
     "thread-loader": "^3.0.1",
