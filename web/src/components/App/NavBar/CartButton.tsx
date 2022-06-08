@@ -31,10 +31,10 @@ const cartStyle = (isMobile: boolean) => css({
 
 const cartHomeStyle = (isMobile: boolean, cartOpened: boolean) => css({
     fill: (isMobile && cartOpened) ? lightBlue : 'white',
-    filter: (isMobile && cartOpened) ? 'drop-shadow(0 0 1px white)' : 'drop-shadow(0 0 1px rgba(0, 0, 0, 0.8))',
+    filter: (isMobile && cartOpened) ? 'drop-shadow(0 0 1px white)' : 'drop-shadow(0 0 1px rgba(0 0 0 / 0.8))',
     '&:hover': {
         fill: 'white',
-        filter: 'drop-shadow(0 0 1px rgba(255, 255, 255, 1))',
+        filter: 'drop-shadow(0 0 1px rgba(255 255 255 / 1))',
     }
 });
 

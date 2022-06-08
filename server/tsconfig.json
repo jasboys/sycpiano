@@ -11,9 +11,6 @@
                 "@types/*",
             ]
         },
-        "types": [
-            "bluebird-global"
-        ],
         "typeRoots": [
             "node_modules/@types",
             "@types"
@@ -29,10 +26,9 @@
         "removeComments": false,
         "preserveConstEnums": true,
         "sourceMap": false,
-        "allowSyntheticDefaultImports": true,
         "skipLibCheck": true,
         "outDir": "build",
-        "baseUrl": "..",
+        "baseUrl": ".."
     },
     "exclude": [
         "**/node_modules/*"

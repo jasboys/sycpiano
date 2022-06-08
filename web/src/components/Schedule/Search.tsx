@@ -35,10 +35,10 @@ const Container = styled.div<{ focused: boolean }>`
     border-radius: 30px;
     align-items: center;
     background-color: white;
-    box-shadow: 0 1px 5px -2px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 1px 5px -2px rgba(0 0 0 / 0.4);
 
     svg {
-        fill: ${props => props.focused ? focusedBlue : 'rgba(180, 180, 180, 0.4)'};
+        fill: ${props => props.focused ? focusedBlue : 'rgba(180 180 180 / 0.4)'};
     }
 `;
 

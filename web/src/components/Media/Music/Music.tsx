@@ -266,7 +266,7 @@ class Music extends React.Component<MusicProps, MusicState> {
         ) {
             return Promise.reject(new Error('no clicky'));
         }
-        await new Promise((resolve) => {
+        await new Promise((resolve: (arg: void) => void) => {
             if (this.audio.current) {
                 gsap.fromTo(this.audio.current,
                     { volume: this.audio.current.volume, duration: 0.3 },

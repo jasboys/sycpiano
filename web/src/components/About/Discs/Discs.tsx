@@ -14,7 +14,7 @@ import { useAppDispatch } from 'src/hooks';
 const StyledDiscs = styled.div`
     ${pushed}
     width: 100%;
-    background-color: rgb(238, 238, 238);
+    background-color: rgb(238 238 238);
     overflow-y: scroll;
     -webkit-overflow-scrolling: touch;
 

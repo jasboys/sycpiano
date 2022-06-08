@@ -13,7 +13,7 @@ const StyledDiv = styled.div`
     right: calc(45vw / 2);
     width: fit-content;
     z-index: 50;
-    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 2px 2px rgba(0 0 0 / 0.3));
     transform: translateX(50%);
     background-color: ${lightBlue};
     border-radius: 30px;
@@ -21,7 +21,7 @@ const StyledDiv = styled.div`
 
     &:hover {
         cursor: pointer;
-        filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.3));
+        filter: drop-shadow(0 5px 5px rgba(0 0 0 / 0.3));
         transform: translateX(50%) translateY(-1px) scale(1.05);
     }
 

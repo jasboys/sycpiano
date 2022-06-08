@@ -43,7 +43,7 @@ const CartFilterGroup = styled.div<{ isCheckingOut: boolean }>({
 );
 const CartContainer = styled.div<{ isMobile: boolean }>({
     zIndex: 5001,
-    filter: `drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.5))`,
+    filter: `drop-shadow(0px 4px 8px rgba(0 0 0 / 0.5))`,
     overflow: 'hidden',
     height: 'auto',
     visibility: 'hidden',

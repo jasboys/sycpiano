@@ -1,7 +1,7 @@
 import startCase from 'lodash-es/startCase';
 import * as React from 'react';
 import { Helmet } from 'react-helmet';
-import { useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router-dom';
 import { createCachedSelector } from 're-reselect';
 
 import { css } from '@emotion/react';

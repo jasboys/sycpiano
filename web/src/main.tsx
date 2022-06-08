@@ -1,7 +1,7 @@
 import bluebird from 'bluebird';
 import * as ReactDOM from 'react-dom';
 
-global.Promise = bluebird as any; /* eslint-disable-line @typescript-eslint/no-explicit-any */
+global.Promise = (bluebird as any); /* eslint-disable-line @typescript-eslint/no-explicit-any */
 
 import { Provider } from 'react-redux';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';

@@ -1,6 +1,6 @@
 import { isBefore, parseISO, startOfDay } from 'date-fns';
 import * as express from 'express';
-import sequelize from 'sequelize';
+import * as sequelize from 'sequelize';
 import { Op } from 'sequelize';
 
 import db from '../models';

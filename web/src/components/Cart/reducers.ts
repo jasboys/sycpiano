@@ -5,9 +5,10 @@ import { ThunkAPIType } from 'src/types';
 import { storageAvailable } from 'src/localStorage';
 import { ThunkAction } from 'redux-thunk';
 import { GlobalStateShape } from 'src/store';
+import { loadStripe } from '@stripe/stripe-js';
 
 const LOCAL_STORAGE_KEY = 'seanchenpiano_cart';
-const stripe = Stripe(STRIPE_PUBLIC_KEY);
+const stripe = loadStripe(STRIPE_PUBLIC_KEY);
 
 export const toggleCartList = createAction<boolean | undefined>('cart/toggleCartList');
 const addItemToCart = createAction<string>('cart/addItemToCart');
@@ -82,7 +83,11 @@ export const checkoutAction = createAsyncThunk<void, string, ThunkAPIType & { re
                 email,
                 productIDs: thunkAPI.getState().cart.items,
             });
-            const { error } = await stripe.redirectToCheckout({
+            const loadedStripe = await stripe;
+            if (loadedStripe === null) {
+                throw new Error('Stripe JS failed to load');
+            }
+            const { error } = await loadedStripe.redirectToCheckout({
                 sessionId: response.data.sessionId
             });
             if (error) {

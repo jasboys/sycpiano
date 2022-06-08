@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
 import Stripe from 'stripe';
 import * as uniqid from 'uniqid';
-import { ProductAttributes } from 'models/product';
+import { ProductAttributes } from './models/product';
 
 dotenv.config();
 

@@ -14,7 +14,7 @@ import SubNav from 'src/components/App/NavBar/SubNav/SubNav';
 import { LinkShape } from 'src/components/App/NavBar/types';
 
 import { lightBlue, logoBlue, navFontColor } from 'src/styles/colors';
-import { lato2, lato3 } from 'src/styles/fonts';
+import { lato2 } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { screenMorPortrait } from 'src/styles/screens';
 import { navBarHeight, navBarMarginTop } from 'src/styles/variables';

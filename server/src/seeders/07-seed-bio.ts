@@ -1,4 +1,4 @@
-import { ModelMap } from 'types';
+import { ModelMap } from '../types';
 
 export const up = async (models: ModelMap): Promise<void> => {
     const model = models.bio;

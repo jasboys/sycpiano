@@ -22,7 +22,7 @@ import { fadeOnEnter, fadeOnExit } from 'src/utils';
 import { useAppSelector } from 'src/hooks';
 import { format } from 'date-fns';
 
-const textShadowColor = 'rgba(0, 0, 0, 0.75)';
+const textShadowColor = 'rgba(0 0 0 / 0.75)';
 
 const HomeContainer = styled('div')`
     ${container}
@@ -128,16 +128,16 @@ const BackgroundCover = styled('div')`
     background-image:
         linear-gradient(
             66deg,
-            rgba(0, 0, 0, 0) 70%,
-            rgba(0, 0, 0, 0.2) 75%
+            rgba(0 0 0 / 0) 70%,
+            rgba(0 0 0 / 0.2) 75%
         );
 
     ${screenXSorPortrait} {
         background-image:
             linear-gradient(
                 66deg,
-                rgba(0, 0, 0, 0) 30%,
-                rgba(0, 0, 0, 0.2) 55%
+                rgba(0 0 0 / 0) 30%,
+                rgba(0 0 0 / 0.2) 55%
             );
     }
 `;
@@ -153,11 +153,11 @@ const NavBarGradient = styled('div')`
     background-image:
         linear-gradient(
             122deg,
-            rgba(3, 3, 3, 0.4) 5%,
-            rgba(255, 255, 255, 0.11) 20%,
-            rgba(255, 255, 255, 0.62) 22%,
-            rgba(255, 255, 255, 0.6) 40%,
-            rgba(53, 53, 53, 0.27) 70%
+            rgba(3 3 3 / 0.4) 5%,
+            rgba(255 255 255 / 0.11) 20%,
+            rgba(255 255 255 / 0.62) 22%,
+            rgba(255 255 255 / 0.6) 40%,
+            rgba(53 53 53 / 0.27) 70%
         );
 
     ${screenXSorPortrait} {
@@ -165,11 +165,11 @@ const NavBarGradient = styled('div')`
         background-image:
             linear-gradient(
                 122deg,
-                rgba(3, 3, 3, 0.4) 5%,
-                rgba(255, 255, 255, 0.11) 40%,
-                rgba(255, 255, 255, 0.21) 52%,
-                rgba(255, 255, 255, 0.36) 60%,
-                rgba(53, 53, 53, 0.27) 90%
+                rgba(3 3 3 / 0.4) 5%,
+                rgba(255 255 255 / 0.11) 40%,
+                rgba(255 255 255 / 0.21) 52%,
+                rgba(255 255 255 / 0.36) 60%,
+                rgba(53 53 53 / 0.27) 90%
             );
     }
 `;

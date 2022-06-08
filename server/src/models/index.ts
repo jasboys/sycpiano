@@ -5,6 +5,9 @@ import { Sequelize, DataTypes, Model } from 'sequelize';
 import sequelize from '../sequelize';
 import { ModelMap, ModelExport, IndexedModelMap } from '../types';
 
+import * as Promise from 'bluebird'
+global.Promise = Promise as any;
+
 /**
  * Loops through a list of model files, and transforms them into a map that
  * maps each model name to the corresponding sequelize model.

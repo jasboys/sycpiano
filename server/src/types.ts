@@ -1,4 +1,4 @@
-import { default as Sequelize, Model, ModelStatic } from 'sequelize';
+import * as Sequelize from 'sequelize';
 import { acclaim } from './models/acclaim';
 import { bio } from './models/bio';
 import { calendar } from './models/calendar';
@@ -15,7 +15,10 @@ import { token } from './models/token';
 import { product } from './models/product';
 import { user } from './models/user';
 import { userProduct } from './models/userProduct'
-import { faq } from 'models/faq';
+import { faq } from './models/faq';
+
+type Model = Sequelize.Model<any, any>
+type ModelStatic<T extends Model> = Sequelize.ModelStatic<T>;
 
 export interface GCalEvent {
     readonly description: any;

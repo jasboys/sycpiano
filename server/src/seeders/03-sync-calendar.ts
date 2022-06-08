@@ -3,12 +3,10 @@ import { extractEventDescription, getCalendarEvents } from '../gapi/calendar';
 import {
     GCalEvent,
     ModelMap,
-} from 'types';
+} from '../types';
 
 import db from '../models';
 import { CalendarCreationAttributes } from '../models/calendar';
-import { PieceAttributes } from 'models/piece';
-import { CollaboratorAttributes } from 'models/collaborator';
 
 export const up = async (models: ModelMap): Promise<void> => {
     try {
@@ -55,32 +53,32 @@ export const up = async (models: ModelMap): Promise<void> => {
             };
         });
 
-        await Promise.each(items, async (item) => {
+        for (const item of items) {
             let currentItem: any;
             try {
                 const { pieces, collaborators, ...attributes } = item;
 
                 const itemInstance = await calendarModel.create(attributes as CalendarCreationAttributes);
                 currentItem = itemInstance;
-                await Promise.each<PieceAttributes>(pieces, async ({ composer, piece }, index: number) => {
+                for (const [index, { composer, piece }] of pieces.entries()) {
                     currentItem = { composer, piece };
                     const [ pieceInstance ] = await pieceModel.findOrCreate({
                         where: { composer, piece },
                     });
                     await itemInstance.addPiece(pieceInstance, { through: { order: index }});
-                });
-                await Promise.each<CollaboratorAttributes>(collaborators, async ({ name, instrument }, index: number) => {
+                }
+                for (const [index, { name, instrument }] of collaborators) {
                     currentItem = { name, instrument };
                     const [collaboratorInstance] = await collaboratorModel.findOrCreate({
                         where: { name, instrument },
                     });
                     await itemInstance.addCollaborator(collaboratorInstance, { through: { order: index }}) ;
-                });
+                }
             } catch (e) {
                 console.log(`currentItem: ${currentItem}`);
                 console.log(e);
             }
-        });
+        }
 
         await tokenModel.create({ id: 'calendar_sync', token: syncToken, expires: undefined });
     } catch (e) {

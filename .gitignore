@@ -4,7 +4,6 @@
 .cache-loader
 .resized-cache
 .htaccess
-.vscode
 *.BASE
 *.LOCAL
 *.orig

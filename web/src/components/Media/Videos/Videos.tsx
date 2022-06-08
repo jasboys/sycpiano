@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Helmet } from 'react-helmet';
-import { useMatch } from 'react-router';
+import { useMatch } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
 import youTube from 'src/services/YouTube';
 
@@ -48,7 +48,7 @@ const StyledVideos = styled.div`
             top: ${navBarHeight.mobile}px;
             height: 56.25vw;
             z-index: 5;
-            box-shadow: 0 0 7px 2px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 7px 2px rgba(0 0 0 / 0.5);
         }
     }
 `;
@@ -60,7 +60,7 @@ const LoadingOverlayDiv = styled.div`
     position: absolute;
     top: 0;
     left: 0;
-    background-color: rgba(60, 60, 60, 0.8);
+    background-color: rgba(60 60 60 / 0.8);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -69,7 +69,7 @@ const LoadingOverlayDiv = styled.div`
 const Videos: React.FC<VideosProps> = (props) => {
     const match = useMatch('media/videos/:videoId');
     const domElement = React.useRef<HTMLDivElement>(null);
-    const initialized = React.useRef<boolean>(false);
+    // const initialized = React.useRef<boolean>(false);
     const dispatch = useAppDispatch();
     const videos = useAppSelector(({ videoPlaylist }) => videoPlaylist.items);
     const isPlayerReady = useAppSelector(({ videoPlayer }) => videoPlayer.isPlayerReady);

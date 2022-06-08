@@ -1,0 +1,8 @@
+{
+    "exec": "cd server && eslint src/** && tsc --noEmit",
+    "watch": [
+        "server/src/"
+    ],
+    "ext": "ts",
+    "delay": 1000
+}

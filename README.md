@@ -46,9 +46,9 @@ $ yarn
 ```
 After installing your node dependencies, you're ready to start dev process.
 ```
-$ yarn run watchDevMin
+$ yarn dev
 ```
-This command will run a gulp task that starts the server and watches for changes you make to your code, in which case it will trigger a rebuild as well as reload the main app.
+This command will run a node script that starts the server and watches for changes you make to your code, in which case it will trigger a rebuild as well as reload the main app.
 
 If you would like to also lint and check the typescript of the frontend and backend, you can just run on windows:
 ```
@@ -62,7 +62,7 @@ $ yarn watchAndCheckServer
 
 N.B. on Windows, make sure you add %LocalAppData%\Yarn to your whitelist for antivirus and/or Windows Defender, or else installs take forever!
 
-The app will be served on `localhost:8000` and the webpack-bundle-analyzer will be on `localhost:8888`.
+The app will be served on `localhost:8000` and the webpack-bundle-analyzer (if enabled) will be on `localhost:8888`.
 
 ## Production
 Run:

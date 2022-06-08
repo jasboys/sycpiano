@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import Sequelize from 'sequelize';
+import * as Sequelize from 'sequelize';
 
 import db from '../models';
 const models = db.models;

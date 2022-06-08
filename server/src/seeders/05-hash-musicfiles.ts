@@ -1,4 +1,4 @@
-import { ModelMap } from 'types';
+import { ModelMap } from '../types';
 import { getHash } from '../hash';
 
 export const up = async (models: ModelMap): Promise<void> => {
@@ -7,17 +7,17 @@ export const up = async (models: ModelMap): Promise<void> => {
         attributes: ['id', 'composer', 'piece'],
     });
     try {
-        await Promise.each(musics, async (music) => {
+        for (const music of musics) {
             const {
                 composer,
                 piece,
             } = music;
             const musicFiles = await music.getMusicFiles({ attributes: ['id', 'name'] });
-            await Promise.each(musicFiles, async (musicFile) => {
+            for (const musicFile of musicFiles) {
                 const hash = getHash(composer, piece, musicFile.name);
                 await musicFile.update({ hash });
-            });
-        });
+            }
+        }
     } catch (e) {
         console.log(e);
     }

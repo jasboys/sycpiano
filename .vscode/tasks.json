@@ -1,0 +1,44 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Dev Watch",
+            "type": "shell",
+            "command": "yarn dev",
+            "presentation": {
+                "group": "Dashboard"
+            }
+        },
+        {
+            "label": "Lint and Check Frontend",
+            "type": "shell",
+            "command": "yarn watchAndLintCheckApp",
+            "presentation": {
+                "group": "Dashboard"
+            }
+        },
+        {
+            "label": "Lint and Check Backend",
+            "type": "shell",
+            "command": "yarn watchAndLintCheckServer",
+            "presentation": {
+                "group": "Dashboard"
+            }
+        },
+        {
+            "label": "Mise",
+            "dependsOn": [
+                "Dev Watch",
+                "Lint and Check Frontend",
+                "Lint and Check Backend"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        }
+    ]
+}

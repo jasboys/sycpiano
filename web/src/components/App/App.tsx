@@ -3,7 +3,7 @@ import { parse, stringify } from 'qs';
 import * as React from 'react';
 import { Helmet } from 'react-helmet';
 import ReactMedia from 'react-media';
-import { matchPath, Navigate, PathMatch, Route, Routes, useLocation, useMatch, useNavigate } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useMatch, useNavigate } from 'react-router-dom';
 import { Transition, TransitionGroup } from 'react-transition-group';
 
 import Container from 'src/components/App/Container';
@@ -44,6 +44,7 @@ import { metaDescriptions, titleStringBase, slideOnExit, fadeOnEnter, fadeOnExit
 import { useFloating, offset, arrow, shift, autoUpdate } from '@floating-ui/react-dom';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { format } from 'date-fns';
+import { fetchShopItems } from 'src/components/Shop/ShopList/reducers';
 
 const register = extractModule(store);
 // const About = () => register('about', import(/* webpackChunkName: 'about' */ 'src/components/About'));
@@ -156,6 +157,10 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
             update
         );
     }, [refs.reference, refs.floating, update]);
+
+    React.useEffect(() => {
+        dispatch(fetchShopItems());
+    }, []);
 
     let currentPage = getMostSpecificRouteName(location.pathname);
     currentPage = currentPage ? startCase(currentPage) : 'Home';

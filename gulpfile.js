@@ -9,7 +9,6 @@ const format = require('util').format;
 const path = require('path');
 const fs = require('fs');
 const del = require('del');
-const generateTzData = require('./generateTzData');
 const { Transform } = require('stream');
 const { spawn } = require('child_process');
 const treeKill = require('tree-kill');
@@ -75,8 +74,6 @@ exports.buildApp = buildApp;
 // BUILD SERVER SECTION
 //
 
-exports.generateTzData = generateTzData;
-
 const cleanServer = async (done) => {
     await del([
         'server/build/**/*.js',
@@ -127,7 +124,7 @@ const compileServerNoCheck = () => {
         .on('error', () => { })
         .js
         .pipe(gulp.dest('./server/build'))
-        .on('end', () => {
+        .on('finish', () => {
             reporter.done('Compile Server');
         });
 };
@@ -142,7 +139,7 @@ exports.buildServer = buildServer;
 
 // BUILD PROD
 
-exports.buildProd = gulp.series(buildServer, generateTzData, buildApp);
+exports.buildProd = gulp.series(buildServer, buildApp);
 
 //
 // WATCH SECTION
@@ -246,7 +243,7 @@ const watchDev = gulp.series((done) => {
     );
     watchers.push(
         gulp.watch(
-            ['server/src/**/*', 'web/src/**/*', 'web/partials/*'],
+            ['server/src/**/*', 'web/src/**/*', 'web/partials/*', 'app.js'],
             { ignoreInitial: false },
             restartApp,
         )

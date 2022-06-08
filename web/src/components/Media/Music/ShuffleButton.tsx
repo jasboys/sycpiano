@@ -15,7 +15,7 @@ interface ShuffleButtonProps {
 
 const upClass = css`
     cursor: pointer;
-    filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 5px 5px rgba(0 0 0 / 0.3));
     transform: translateX(calc(100% * 2 / 3)) translateY(-1px) scale(1.05);
 `;
 
@@ -25,7 +25,7 @@ const baseClass = (on?: boolean) => css`
     right: calc(${playlistWidth.desktop} / 3);
     transform: translateX(calc(100% * 2 / 3));
     z-index: 50;
-    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 2px 2px rgba(0 0 0 / 0.3));
     transition: all 0.2s;
     background-color: ${on ? lightBlue : '#999'};
     border-radius: 50%;

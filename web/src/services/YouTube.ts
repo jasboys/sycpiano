@@ -1,3 +1,4 @@
+/// <reference types="youtube" />
 /* global YT, GAPI_KEY */
 import axios from 'axios';
 

@@ -42,6 +42,57 @@ const tsxUse = [
     },
 ];
 
+// const tsxSwcUse = [
+//     {
+//         loader: require.resolve('babel-loader'),
+//         options: {
+//             plugins: [
+//                 '@emotion'
+//             ]
+//         }
+//     },
+//     {
+//         loader: require.resolve('swc-loader'),
+//         options: {
+//             sync: true,
+//             parseMap: true,
+//             jsc: {
+//                 parser: {
+//                     syntax: 'typescript',
+//                     tsx: true,
+//                     dynamicImport: true,
+//                 },
+//                 transform: {
+//                     react: {
+//                         runtime: 'automatic',
+//                         importSource: '@emotion/react'
+//                     }
+//                 },
+//                 paths: {
+//                     "*": [
+//                         "node_modules/*",
+//                         "@types/*",
+//                         "web/*"
+//                     ]
+//                 },
+//                 baseUrl: '.',
+//                 target: 'es2022',
+//             },
+//             sourceMaps: 'inline',
+//             module: {
+//                 type: 'es6',
+//                 noInterop: false,
+//             },
+//             env: {
+//                 targets: "> 0.25%, not dead",
+//                 mode: 'usage',
+//                 coreJs: '3.22',
+//                 shippedProposals: true
+//             }
+//         }
+//     }
+// ];
+
 const config = () => {
     return {
         cache: true,
@@ -59,23 +110,12 @@ const config = () => {
                     include: sourcePaths,
                     use: tsxUse,
                 },
-                // {
-                //     test: /node_modules\/vfile\/core\.js/,
-                //     use: [{
-                //         loader: 'imports-loader',
-                //         options: {
-                //             type: 'commonjs',
-                //             imports: ['single process/browser process'],
-                //         },
-                //     }],
-                // },
             ],
         },
         optimization: {
             runtimeChunk: true,
         },
         plugins: [
-            // new webpack.ContextReplacementPlugin(/moment[\/\\]locale$/, /^en$/),
             new webpack.DefinePlugin({
                 BINARY_PATH: JSON.stringify(staticPrefix + '/binary'),
                 IMAGES_PATH: JSON.stringify(staticPrefix + '/images'),
@@ -84,10 +124,6 @@ const config = () => {
                 GAPI_KEY: JSON.stringify(process.env.GAPI_KEY_APP),
                 STRIPE_PUBLIC_KEY: JSON.stringify(process.env.STRIPE_PUBLIC_KEY),
             }),
-            // new webpack.ProvidePlugin({
-            //     path: require.resolve('path-browserify'),
-            //     process: require.resolve('process/browser'),
-            // }),
             new CleanWebpackPlugin(),
             new HtmlWebpackPlugin({
                 template: path.resolve(__dirname, 'web/partials/index.html'),
@@ -96,7 +132,7 @@ const config = () => {
             }),
         ],
         resolve: {
-            extensions: ['*', '.js', '.jsx', '.ts', '.tsx'],
+            extensions: ['.js', '.jsx', '.ts', '.tsx', '...'],
             alias: {
                 'src': path.resolve(__dirname, 'web/src'),
             },
@@ -114,4 +150,5 @@ module.exports = {
     staticPrefix,
     sourcePaths,
     tsxUse,
+    // tsxSwcUse,
 };

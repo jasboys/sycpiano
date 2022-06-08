@@ -3,7 +3,7 @@ import parseDuration from 'parse-iso-duration';
 import { lighten } from 'polished';
 import * as React from 'react';
 import ClampLines from 'react-clamp-lines';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
@@ -78,12 +78,12 @@ const StyledVideoItem = styled.li<{ active: boolean }>(
         height: ${itemHeight}px;
         padding: ${padding}px 0 ${padding}px 15px;
         border-left: 7px solid transparent;
-        border-bottom: 1px solid rgba(120, 120, 120, 0.3);
+        border-bottom: 1px solid rgba(120 120 120 / 0.3);
         transition: all 0.15s;
         display: flex;
 
         &:hover {
-            background-color: rgba(255, 255, 255, 1);
+            background-color: rgba(255 255 255 / 1);
 
             ${`${ImageContainer} img`} {
                 filter: brightness(60%);
@@ -92,7 +92,7 @@ const StyledVideoItem = styled.li<{ active: boolean }>(
     `,
     props => props.active && css`
         border-left-color: ${lightBlue};
-        background-color: rgba(255, 255, 255, 1);
+        background-color: rgba(255 255 255 / 1);
     `,
 );
 

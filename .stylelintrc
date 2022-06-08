@@ -9,6 +9,8 @@
         "indentation": 4,
         "value-keyword-case": ["lower", {
             "ignoreKeywords": ["dummyValue"]
-        }]
+        }],
+        "no-empty-source": null,
+        "alpha-value-notation": null
     }
 }

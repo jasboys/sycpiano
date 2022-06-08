@@ -25,7 +25,7 @@ const pulse = keyframes({
 
 const Handle = styled('div')`
     ${noHighlight}
-    margin: 15px 0;
+    margin: 1.2rem 0;
     -webkit-tap-highlight-color: transparent;
 
     ${screenXSorPortrait} {
@@ -40,12 +40,10 @@ const HandleText = styled('span')({
     color: 'white',
     textShadow: `0 0 6px ${textShadowColor}`,
     textDecoration: 'underline',
-    transition: 'all 0.2s',
     animation: `${pulse} 4s ease infinite`,
     '&:hover': {
         cursor: 'pointer',
-        textShadow: '0 0 4px rgba(255, 255, 255, 1)',
-        animation: 'none',
+        animationPlayState: 'paused',
     }
 })
 

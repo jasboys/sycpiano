@@ -1,0 +1,8 @@
+{
+    "exec": "stylelint web/src/**/* && eslint web/src/** && tsc --noEmit",
+    "watch": [
+        "web/src/"
+    ],
+    "ext": "ts, tsx",
+    "delay": 1000
+}

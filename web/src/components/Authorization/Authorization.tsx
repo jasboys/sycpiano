@@ -1,16 +1,16 @@
 import styled from '@emotion/styled';
 import * as React from 'react';
-import { fetchShopItems } from 'src/components/Shop/ShopList/reducers'
-import { ShopList } from 'src/components/Shop/ShopList';
+// import { fetchShopItems } from 'src/components/Shop/ShopList/reducers'
+// import { ShopList } from 'src/components/Shop/ShopList';
 
 import { container } from 'src/styles/mixins';
 import { TransitionGroup, Transition } from 'react-transition-group';
 import { Route, Routes, useLocation } from 'react-router-dom';
-import { Location } from 'history';
+// import { Location } from 'history';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
-import { CheckoutSuccess } from 'src/components/Shop/CheckoutSuccess/CheckoutSuccess';
-import { FAQs } from 'src/components/Shop/FAQs/FAQs';
-import { useAppDispatch } from 'src/hooks';
+// import { CheckoutSuccess } from 'src/components/Shop/CheckoutSuccess/CheckoutSuccess';
+// import { FAQs } from 'src/components/Shop/FAQs/FAQs';
+// import { useAppDispatch } from 'src/hooks';
 import Signup from './Signup';
 
 const AuthContainer = styled.div(

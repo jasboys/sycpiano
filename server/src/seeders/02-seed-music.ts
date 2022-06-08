@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import { MusicCreationAttributes } from '../models/music';
 import * as path from 'path';
-import { ModelMap } from 'types';
+import { ModelMap } from '../types';
 
 const isDev = process.env.NODE_ENV !== 'production';
 

@@ -1,5 +1,5 @@
 import { isValid, parse } from 'date-fns';
-import { ModelMap } from 'types';
+import { ModelMap } from '../types';
 
 export const up = async (models: ModelMap): Promise<void> => {
     const model = models.acclaim;
@@ -7,7 +7,7 @@ export const up = async (models: ModelMap): Promise<void> => {
         attributes: ['id', 'oldDate'],
     });
     try {
-        await Promise.each(acclaims, async (acclaim) => {
+        for (const acclaim of acclaims) {
             const oldDate = acclaim.oldDate!;
             let hasFullDate = true;
             let newDate = parse(oldDate, 'MMMM yyyy', new Date());
@@ -21,7 +21,7 @@ export const up = async (models: ModelMap): Promise<void> => {
                 hasFullDate,
                 date: newDate,
             });
-        });
+        }
     } catch (e) {
         console.log(e);
     }

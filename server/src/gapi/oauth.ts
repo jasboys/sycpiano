@@ -1,6 +1,6 @@
 import { JWT } from 'google-auth-library';
-import { token } from 'models/token';
-import Sequelize, { ModelStatic } from 'sequelize';
+import { token } from '../models/token';
+import * as Sequelize from 'sequelize';
 
 /* eslint-disable-next-line @typescript-eslint/no-var-requires*/
 const authInfo = require('../../gapi-key.json');
@@ -23,7 +23,7 @@ const authorize = async () => {
 };
 
 export const getToken = async (sequelize: Sequelize.Sequelize): Promise<string> => {
-    const tokenModel = sequelize.models.token as ModelStatic<token>;
+    const tokenModel = sequelize.models.token as Sequelize.ModelStatic<token>;
     const tokenInstance = await tokenModel.findByPk('access_token');
     if (tokenInstance) {
         const expired = (tokenInstance.expires === undefined) ? undefined : Date.now() > tokenInstance.expires.valueOf();

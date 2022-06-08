@@ -4,16 +4,13 @@
 const { merge } = require('webpack-merge');
 const common = require('./webpack.common.config.js');
 const webpack = require('webpack');
-const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
-const config = (shouldCheck, reporter) => {
+const config = (reporter) => {
     const tsxUse = common.tsxUse;
-    if (shouldCheck) {
-        tsxUse.push({ loader: require.resolve('stylelint-custom-processor-loader') });
-    }
+    // const tsxSwcUse = common.tsxSwcUse;
 
-    const plugins = [
+    const plugins = !!reporter ? [
         // new BundleAnalyzerPlugin({
         //     analyzerMode: 'static',
         //     openAnalyzer: false,
@@ -21,24 +18,15 @@ const config = (shouldCheck, reporter) => {
         // }),
         new webpack.ProgressPlugin({
             handler: (percentage, message, ...args) => {
-                const msg = message
-                    ? message +
-                        ((args.length) ? ': ' + args[0] : '')
-                    : '';
-                reporter.updateTask('Webpack', { percentage, message: msg });
+                if (message === '') {
+                    reporter.updateTask('Webpack', { percentage });
+                } else {
+                    const msg = message + ((args.length) ? ': ' + args[0] : '');
+                    reporter.updateTask('Webpack', { percentage, message: msg });
+                }
             },
         }),
-    ];
-
-    if (shouldCheck) {
-        plugins.push(
-            new ForkTsCheckerWebpackPlugin({
-                eslint: {
-                    files: './web/src/**/*.{ts,tsx,js,jsx}',
-                },
-            })
-        );
-    }
+    ] : [];
 
     return merge(common.config, {
         mode: 'development',
@@ -53,6 +41,9 @@ const config = (shouldCheck, reporter) => {
                 include: common.sourcePaths,
                 use: tsxUse,
             }],
+        },
+        cache: {
+            type: 'filesystem',
         },
         plugins,
     });

@@ -1,10 +1,8 @@
 /* eslint-disable no-var, strict, prefer-arrow-callback */
 'use strict';
 
-const path = require('path');
 const { merge } = require('webpack-merge');
 const common = require('./webpack.common.config.js');
-const webpack = require('webpack');
 
 const config = merge(common.config, {
     mode: 'production',
@@ -21,12 +19,6 @@ const config = merge(common.config, {
             },
         ],
     },
-    // plugins: [
-    //     new webpack.NormalModuleReplacementPlugin(
-    //         /data[\\\/]packed[\\\/]latest.json$/,
-    //         path.resolve(__dirname, 'web/assets/data/tz-data.json'),
-    //     ),
-    // ],
 });
 
 module.exports = config;

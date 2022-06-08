@@ -1,4 +1,4 @@
-import { DataTypes, Sequelize, HasManyGetAssociationsMixin, HasManySetAssociationsMixin, BelongsToManyAddAssociationMixin, BelongsToManyRemoveAssociationMixin, BelongsToManyAddAssociationsMixin, BelongsToManyRemoveAssociationsMixin, BelongsToManyCountAssociationsMixin, Association, Model, BelongsToManyGetAssociationsMixin, BelongsToManySetAssociationsMixin } from 'sequelize';
+import { DataTypes, Sequelize, BelongsToManyAddAssociationMixin, BelongsToManyRemoveAssociationMixin, BelongsToManyAddAssociationsMixin, BelongsToManyRemoveAssociationsMixin, BelongsToManyCountAssociationsMixin, Association, Model, BelongsToManyGetAssociationsMixin, BelongsToManySetAssociationsMixin } from 'sequelize';
 import { ModelExport, ModelMap } from '../types';
 import { product } from './product';
 

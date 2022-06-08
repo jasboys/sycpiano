@@ -4,7 +4,7 @@ import * as express from 'express';
 import { Stripe } from 'stripe';
 import { ParamsDictionary } from 'express-serve-static-core';
 
-import { ShopItem } from 'types';
+import { ShopItem } from '../types';
 import * as stripeClient from '../stripe';
 import { emailPDFs } from '../mailer';
 import db from '../models';

@@ -7,6 +7,6 @@ declare module 'app-root-path' {
         path: string;
     }
 
-    export default AppRootPath
+    export { AppRootPath }
 }
 

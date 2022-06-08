@@ -1,0 +1,28 @@
+{
+    "jsc": {
+        "parser": {
+            "syntax": "typescript",
+            "tsx": true,
+            "dynamicImport": true
+        },
+        "paths": {
+            "*": [
+                "node_modules/*",
+                "@types/*"
+            ]
+        },
+        "baseUrl": "..",
+        "target": "es2017"
+    },
+    "sourceMaps": "inline",
+    "module": {
+        "type": "commonjs",
+        "noInterop": true,
+        "ignoreDynamic": false
+    },
+    "env": {
+        "targets": {
+            "node": "16"
+        }
+    }
+}

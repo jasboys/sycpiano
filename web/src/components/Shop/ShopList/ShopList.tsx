@@ -9,9 +9,8 @@ import { lato2 } from 'src/styles/fonts';
 import { logoBlue } from 'src/styles/colors';
 import { useMedia } from 'react-media';
 import { screenBreakPoints } from 'src/styles/screens';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { useAppSelector } from 'src/hooks';
 import { useParams } from 'react-router-dom';
-import { fetchShopItems } from './reducers';
 
 interface ShopListProps {
     isMobile: boolean;
@@ -62,11 +61,6 @@ const ShopList: React.FC<ShopListProps> = () => {
     const { product } = useParams();
     const categorizedItems = useAppSelector(({ shop }) => shop.items);
     const { xs } = useMedia({ queries: screenBreakPoints });
-    const dispatch = useAppDispatch();
-
-    React.useEffect(() => {
-        dispatch(fetchShopItems());
-    }, []);
 
     React.useEffect(() => {
         if (categorizedItems && Object.keys(categorizedItems).length && product) {

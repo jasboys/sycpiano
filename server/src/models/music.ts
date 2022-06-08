@@ -32,9 +32,9 @@ const hookFn = async (m: music, _: any) => {
     console.log(`[Music Hook afterCreate/Update]\n`);
     const mFiles = await m.getMusicFiles();
     if (mFiles.length !== 0) {
-        await Promise.each(mFiles, async (mFile) => {
-            return await mFile.update({});
-        });
+        for (const mFile of mFiles) {
+            await mFile.update({});
+        }
     }
     console.log(`[End Hook]\n`);
 };

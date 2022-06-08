@@ -16,8 +16,6 @@ import { collaborator, CollaboratorAttributes } from './models/collaborator';
 import { piece, PieceAttributes } from './models/piece';
 import { CalendarPieceAttributes } from './models/calendarPiece';
 import { CalendarCollaboratorAttributes } from './models/calendarCollaborator';
-import { music, MusicAttributes, MusicCreationAttributes } from './models/music';
-import { disc } from './models/disc';
 
 const adminRest = express.Router();
 

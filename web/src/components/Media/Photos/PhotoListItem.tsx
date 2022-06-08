@@ -58,8 +58,8 @@ const Highlight = styled.div<{ active: boolean }>`
 `;
 
 const loadingStyle = css`
-    background-color: rgb(208, 208, 208);
-    fill: rgb(208, 208, 208);
+    background-color: rgb(208 208 208);
+    fill: rgb(208 208 208);
     height: 300px;
     width: 100%;
     position: absolute;

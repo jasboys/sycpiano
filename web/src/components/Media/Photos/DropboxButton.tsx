@@ -12,12 +12,12 @@ const StyledDiv = styled.div`
     right: calc(${playlistWidth.desktop} / 2);
     transform: translateX(50%);
     z-index: 50;
-    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 2px 2px rgba(0 0 0 / 0.3));
     transition: all 0.1s;
 
     &:hover {
         cursor: pointer;
-        filter: drop-shadow(0 5px 5px rgba(0, 0, 0, 0.3));
+        filter: drop-shadow(0 5px 5px rgba(0 0 0 / 0.3));
         transform: translateX(50%) translateY(-1px) scale(1.05);
     }
 

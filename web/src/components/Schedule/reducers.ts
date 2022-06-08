@@ -215,7 +215,7 @@ const scheduleSlice = createSlice({
                 sortedArray.addEach(listItems);
                 state[name].items = sortedArray.toArray();
                 // sortedArray.min() and .max() depend on sorting function, so min might actually be max if it's in descending order
-                const minMaxDates = [parseISO(sortedArray.min().dateTime), parseISO(sortedArray.max().dateTime)];
+                const minMaxDates = [parseISO(sortedArray.min()?.dateTime), parseISO(sortedArray.max()?.dateTime)];
                 state[name] = {
                     ...state[name],
                     isFetchingList: false,

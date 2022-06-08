@@ -19,7 +19,7 @@ const Container = styled.div(
         marginLeft: 'auto',
         marginRight: 'auto',
         alignItems: 'center',
-        padding: '2rem 1rem',
+        padding: '2rem 2rem',
         maxWidth: 500,
     },
 );
