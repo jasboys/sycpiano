@@ -22,11 +22,11 @@ const hamburgerLayerStyles = (backgroundColor: string) => css`
     left: 0;
     transform: rotate(0deg);
     transition:
-        transform 0.25s ease-in-out,
-        left 0.25s ease-in-out,
-        top 0.25s ease-in-out,
-        opacity 0.25s ease-in-out,
-        background-color 0.25s;
+        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+        left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+        top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+        opacity 0.3s ease-in-out,
+        background-color 0.3s;
 `;
 
 interface HamburgerLayerProps {

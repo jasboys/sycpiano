@@ -98,6 +98,8 @@ const flipped = css({
     transform: 'scaleX(-1)'
 });
 
+type AggregateUIEvent<E> = React.MouseEvent<E> | React.TouchEvent<E> | TouchEvent;
+
 class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
     state = {
         isHoverPlaypause: false,
@@ -119,6 +121,8 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
 
     seekRing: HTMLCanvasElement | null = null;
     visualizationCtx: CanvasRenderingContext2D | null = null;
+
+    listenerAdded = false;
 
     setPlayButtonRef = (ref: HTMLDivElement | null): void => {
         this.playButton = ref;
@@ -162,11 +166,11 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
         }
     }
 
-    isMouseEvent = <E extends Element>(event: React.MouseEvent<E> | React.TouchEvent<E>): event is React.MouseEvent<E> => {
+    isMouseEvent = <E extends Element>(event: AggregateUIEvent<E>): event is React.MouseEvent<E> => {
         return event.type.match(/(m|M)ouse/) !== null;
     }
 
-    getMousePositionInCanvas = <E extends Element>(event: React.MouseEvent<E> | React.TouchEvent<E>): { x: number; y: number } => {
+    getMousePositionInCanvas = <E extends Element>(event: AggregateUIEvent<E>): { x: number; y: number } => {
         if (!this.seekRing) {
             return {
                 x: 0,
@@ -193,7 +197,7 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
         return context.isPointInPath(point[0], point[1]);
     }
 
-    isEventInSeekRing = <E extends Element>(event: React.MouseEvent<E> | React.TouchEvent<E>): boolean => {
+    isEventInSeekRing = <E extends Element>(event: AggregateUIEvent<E>): boolean => {
         const { inner, outer } = this.props.radii;
         const canvasPos = this.getMousePositionInCanvas(event);
         const isInOuter = this.isPointInCircle([canvasPos.x, canvasPos.y], outer, [this.centerX, this.centerY]);
@@ -201,7 +205,7 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
         return isInOuter && !isInInner;
     }
 
-    handleMousemove = <E extends Element>(event: React.MouseEvent<E> | React.TouchEvent<E>): void => {
+    handleMousemove = <E extends Element>(event: AggregateUIEvent<E>, passive = true): void => {
         const prevMoving = this.props.isMouseMove;
         if (!this.seekRing) {
             return;
@@ -211,6 +215,9 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
             this.props.onDrag(this.prevPercentage);
             this.seekRing.style.cursor = this.isMouseEvent(event) ? 'pointer' : 'default';
             this.props.setMouseMove(false);
+            if (!passive) {
+                event.preventDefault();
+            }
         } else {
             if (this.isEventInSeekRing(event) && !this.props.isMobile) {
                 this.seekRing.style.cursor = 'pointer';
@@ -235,6 +242,10 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
         }
     }
 
+    handleActiveMousemove = <E extends Element>(event: AggregateUIEvent<E>): void => {
+        this.handleMousemove(event, false);
+    }
+
     handleMouseup = <E extends Element>(event: React.MouseEvent<E> | React.TouchEvent<E>): void => {
         const prevMoving = this.props.isMouseMove;
         if (this.isDragging) {
@@ -254,11 +265,11 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
         }
     }
 
-    mousePositionToPercentage = <E extends Element>(event: React.MouseEvent<E> | React.TouchEvent<E>): number => {
+    mousePositionToPercentage = <E extends Element>(event: AggregateUIEvent<E>): number => {
         return this.mousePositionToAngle(event) / (2 * Math.PI);
     }
 
-    mousePositionToAngle = <E extends Element>(event: React.MouseEvent<E> | React.TouchEvent<E>): number => {
+    mousePositionToAngle = <E extends Element>(event: AggregateUIEvent<E>): number => {
         const mousePos = this.getMousePositionInCanvas(event);
         const polar = cartesianToPolar(mousePos.x - this.centerX, mousePos.y - this.centerY);
         let angle = polar.angle + Math.PI / 2;
@@ -322,6 +333,7 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
     componentWillUnmount(): void {
         window.removeEventListener('keydown', this.togglePlaying);
         window.removeEventListener('resize', this.onResize);
+        this.seekRing?.removeEventListener('touchmove', this.handleActiveMousemove);
     }
 
     render(): JSX.Element {
@@ -403,7 +415,14 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
                     verticalOffset={verticalOffset}
                 />
                 <StyledSeekRing
-                    ref={(canvas) => this.seekRing = canvas}
+                    ref={(canvas) => {
+                        console.log('running ref');
+                        this.seekRing = canvas;
+                        if (this.seekRing && !this.listenerAdded) {
+                            this.seekRing.addEventListener('touchmove', this.handleActiveMousemove, { passive: false });
+                            this.listenerAdded = true;
+                        }
+                    }}
                     onMouseMove={this.handleMousemove}
                     onMouseUp={this.handleMouseup}
                     onMouseDown={this.handleMousedown}

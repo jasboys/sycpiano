@@ -237,10 +237,7 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
     return (
         <StyledLi className="navlink-entry" isHome={isHome}>
             {(subNavLinks || link.name === 'blog') ? (
-                <a css={style} {...attr} onDoubleClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
-                    console.log('double');
-                    e.preventDefault();
-                }}>
+                <a css={style} {...attr}>
                     {HighlightComponent}
                 </a>
             ) : (

@@ -464,13 +464,19 @@ class Music extends React.Component<MusicProps, MusicState> {
     }
 
     setRadii = (inner: number, outer: number, base: number) => {
-        this.setState({
-            radii: {
-                inner,
-                outer,
-                base,
-            },
-        });
+        if (
+            this.state.radii.inner !== inner ||
+            this.state.radii.outer !== outer ||
+            this.state.radii.base !== base
+        ) {
+            this.setState({
+                radii: {
+                    inner,
+                    outer,
+                    base,
+                },
+            });
+        }
     }
 
     async componentDidMount() {

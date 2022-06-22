@@ -56,6 +56,7 @@ const main = async () => {
     app.use(helmet({
         contentSecurityPolicy: {
             directives: {
+                'script-src-attr': null,
                 'script-src': [
                     "'self'",
                     "'unsafe-inline'",
