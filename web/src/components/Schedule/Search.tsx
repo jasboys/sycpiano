@@ -1,4 +1,4 @@
-import { rgba } from 'polished';
+import rgba from 'polished/lib/color/rgba';
 import * as React from 'react';
 
 import styled from '@emotion/styled';

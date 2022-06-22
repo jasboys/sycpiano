@@ -1,5 +1,5 @@
 {
-    "exec": "cd server && eslint src/** && tsc --noEmit",
+    "exec": "cd server && eslint src/** --cache && tsc --noEmit --incremental --tsBuildInfoFile .tsbuildinfo",
     "watch": [
         "server/src/"
     ],

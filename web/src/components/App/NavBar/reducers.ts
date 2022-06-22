@@ -3,22 +3,31 @@ import { createSlice, createAsyncThunk, createAction } from '@reduxjs/toolkit';
 import debounce from 'lodash-es/debounce';
 import { ThunkAPIType } from 'src/types';
 import { AppDispatch } from 'src/store';
+import { findParent } from 'src/components/App/NavBar/links';
+
+const SCROLL_THRESHOLD = 10;
 
 const initialState: NavBarStateShape = {
     isVisible: true,
     isExpanded: false,
     showSubs: [],
     lastScrollTop: 0,
+    visiblePending: false,
+    specificRouteName: '',
 };
 
-const toggleNavAction = createAction<boolean>('navbar/toggleNav');
+const toggleNavAction = createAction<boolean | undefined>('navbar/toggleNav');
 const toggleExpandAction = createAction<boolean>('navbar/toggleExpanded');
 const showSubnavsAction = createAction<string[]>('navbar/showSubnavs');
 const updateLastScroll = createAction<number>('navbar/updateLastScroll');
+export const setSpecificRouteNameAction = createAction<string>('navbar/setSpecificRouteName');
 
 const debouncedToggle = debounce(
-    (dispatch: AppDispatch, correctedShow: boolean) => dispatch(toggleNavAction(correctedShow)
-), 50, { leading: true });
+    (dispatch: AppDispatch, correctedShow: boolean) =>
+        dispatch(toggleNavAction(correctedShow)),
+    50,
+    { leading: true }
+);
 
 export const toggleNavBar = createAsyncThunk<void, boolean, ThunkAPIType>(
     'navbar/callDebouncedToggle',
@@ -34,6 +43,12 @@ export const toggleExpanded = createAsyncThunk<void, boolean | void, ThunkAPITyp
     'navbar/callExpand',
     (show, thunkAPI) => {
         const correctedShow = (typeof show === 'boolean') ? show : !thunkAPI.getState().navbar.isExpanded;
+        const parentToExpand = findParent(thunkAPI.getState().navbar.specificRouteName)?.name;
+        console.log(parentToExpand, thunkAPI.getState().navbar.specificRouteName);
+        // Expand the parent menu of current sub link
+        if (correctedShow) {
+            thunkAPI.dispatch(showSubnavsAction(parentToExpand !== undefined ? [parentToExpand] : []));
+        }
         thunkAPI.dispatch(toggleExpandAction(correctedShow));
     }
 );
@@ -57,6 +72,13 @@ export const showSubNav = createAsyncThunk<void, { sub?: string; isMobile?: bool
             }
         }
         thunkAPI.dispatch(showSubnavsAction(showSubs))
+    },
+    {
+        condition: (_, { getState }) => {
+            if (getState().navbar.visiblePending) {
+                return false;
+            }
+        }
     }
 );
 
@@ -70,10 +92,19 @@ export const onScroll = createAsyncThunk<void, { triggerHeight: number; scrollTo
     'navbar/onScroll',
     ({ triggerHeight, scrollTop }, thunkAPI) => {
         const lastScrollTop = thunkAPI.getState().navbar.lastScrollTop;
-        if (typeof triggerHeight === 'number') {
-            const showNavBar = !(scrollTop > lastScrollTop && scrollTop > triggerHeight)
-            thunkAPI.dispatch(toggleNavAction(showNavBar));
-            thunkAPI.dispatch(updateLastScroll(scrollTop));
+        const showNavBar = !(scrollTop > lastScrollTop && scrollTop > triggerHeight);
+        if (showNavBar !== thunkAPI.getState().navbar.isVisible) {
+            thunkAPI.dispatch(toggleNavAction());
+        }
+        thunkAPI.dispatch(updateLastScroll(scrollTop));
+    },
+    {
+        condition: ({ triggerHeight, scrollTop }, { getState }) => {
+            const lastScrollTop = getState().navbar.lastScrollTop;
+            return (
+                typeof triggerHeight === 'number' &&
+                Math.abs(scrollTop - lastScrollTop) > SCROLL_THRESHOLD
+            );
         }
     }
 );
@@ -84,8 +115,20 @@ export const navBarSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder
+            .addCase(setSpecificRouteNameAction, (state, action) => {
+                state.specificRouteName = action.payload;
+            })
+            .addCase(showSubNav.pending, (state, _) => {
+                state.visiblePending = true;
+            })
+            .addCase(showSubNav.fulfilled, (state, _) => {
+                state.visiblePending = false;
+            })
+            .addCase(showSubNav.rejected, (state, _) => {
+                state.visiblePending = false;
+            })
             .addCase(toggleNavAction, (state, action) => {
-                state.isVisible = action.payload;
+                state.isVisible = action.payload ?? !state.isVisible;
             })
             .addCase(toggleExpandAction, (state, action) => {
                 state.isExpanded = action.payload;

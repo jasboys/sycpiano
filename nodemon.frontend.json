@@ -1,5 +1,5 @@
 {
-    "exec": "stylelint web/src/**/* && eslint web/src/** && tsc --noEmit",
+    "exec": "stylelint web/src/**/* --cache && eslint web/src/** --cache && tsc --noEmit --incremental --tsBuildInfoFile .tsbuildinfo",
     "watch": [
         "web/src/"
     ],

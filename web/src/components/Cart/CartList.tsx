@@ -10,9 +10,9 @@ import {
 import { cartWidth } from 'src/styles/variables';
 import { lato2, lato3 } from 'src/styles/fonts';
 import { theme, lightBlue, logoBlue } from 'src/styles/colors';
-import { mix } from 'polished';
+import mix from 'polished/lib/color/mix';
 import { formatPrice } from 'src/utils';
-import validator from 'validator';
+import isEmail from 'validator/es/lib/isEmail';
 import { CartItem } from 'src/components/Cart/CartItem';
 import { Product } from 'src/components/Shop/ShopList/types';
 import { noHighlight } from 'src/styles/mixins';
@@ -191,7 +191,7 @@ const CheckoutForm: React.FC<{ cartLength: number }> = ({ cartLength }) => {
 
     const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setEmail(event.target.value);
-        setError(event.target.value !== '' && !validator.isEmail(event.target.value));
+        setError(event.target.value !== '' && !isEmail(event.target.value));
     }
 
     return (

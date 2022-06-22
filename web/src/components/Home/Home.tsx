@@ -20,7 +20,7 @@ import { screenLengths, screenXSandPortrait, screenXSorPortrait, screenMandPortr
 import { Transition } from 'react-transition-group';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
 import { useAppSelector } from 'src/hooks';
-import { format } from 'date-fns';
+import format from 'date-fns/format';
 
 const textShadowColor = 'rgba(0 0 0 / 0.75)';
 

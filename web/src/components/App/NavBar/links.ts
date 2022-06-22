@@ -32,3 +32,11 @@ export const links: ReadonlyArray<LinkShape> = [
         ]
     },
 ];
+
+export const findParent = (child: string) =>
+    links.find((v) => {
+        return (v.subLinks !== undefined) &&
+            (v.subLinks.findIndex((sub) => {
+                return sub.name === child;
+            }) !== -1);
+    })

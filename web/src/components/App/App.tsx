@@ -16,7 +16,7 @@ import { RequiredProps as ScheduleProps } from 'src/components/Schedule/Schedule
 import { RequiredProps as ShopListProps } from 'src/components/Shop/ShopList/ShopList';
 import { RequiredProps as RetrievalFormProps } from 'src/components/Shop/RetrievePurchases/RetrievePurchases';
 import { RequiredProps as FAQsProps } from 'src/components/Shop/FAQs/FAQs';
-import { RequiredProps as AuthorizationProps } from 'src/components/Authorization/Authorization';
+// import { RequiredProps as AuthorizationProps } from 'src/components/Authorization/Authorization';
 import { RequiredProps as BioProps } from 'src/components/About/Bio/Bio';
 import { RequiredProps as DiscsProps } from 'src/components/About/Discs/Discs';
 import { RequiredProps as PressProps } from 'src/components/About/Press/Press';
@@ -43,7 +43,7 @@ import { reactMediaMobileQuery } from 'src/styles/screens';
 import { metaDescriptions, titleStringBase, slideOnExit, fadeOnEnter, fadeOnExit, slideOnEnter } from 'src/utils';
 import { useFloating, offset, arrow, shift, autoUpdate } from '@floating-ui/react-dom';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { format } from 'date-fns';
+import format from 'date-fns/format';
 import { fetchShopItems } from 'src/components/Shop/ShopList/reducers';
 
 const register = extractModule(store);
@@ -53,7 +53,7 @@ const Home = () => register('home', import(/* webpackChunkName: 'home' */ 'src/c
 // const Media = () => register('media', import(/* webpackChunkName: 'media' */ 'src/components/Media'));
 const Schedule = () => register('schedule', import(/* webpackChunkName: 'schedule' */ 'src/components/Schedule'));
 const Page404 = () => register('page404', import(/* webpackChunkName: 'page404' */ 'src/components/Error'));
-const Authorization = () => register('authorization', import(/* webpackChunkName: 'authorization' */ 'src/components/Authorization'));
+// const Authorization = () => register('authorization', import(/* webpackChunkName: 'authorization' */ 'src/components/Authorization'));
 
 const Bio = () => register('bio', import(/* webpackChunkName: 'bio' */ 'src/components/About/Bio'));
 const Press = () => register('press', import(/* webpackChunkName: 'press' */ 'src/components/About/Press'));
@@ -279,9 +279,9 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
                                                     <Navigate replace to={'scores'} />
                                                 } /> */}
                                             </Route>
-                                            <Route path="auth/*" element={
+                                            {/* <Route path="auth/*" element={
                                                 <AsyncComponent<AuthorizationProps> moduleProvider={Authorization} isMobile={matches} />
-                                            } />
+                                            } /> */}
                                             <Route index element={
                                                 <AsyncComponent<HomeProps> moduleProvider={Home} isMobile={matches} />
                                             } />

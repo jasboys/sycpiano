@@ -17,9 +17,9 @@ import {
     seanChenContactPhotoUrl,
     staticImage,
 } from 'src/styles/imageUrls';
-import { pushed } from 'src/styles/mixins';
 import { screenWidths, screenXSorPortrait } from 'src/styles/screens';
 import { isImageElement } from 'src/utils';
+import { navBarHeight } from 'src/styles/variables';
 
 const imageInsetShadowColor = '#222';
 const alternateBackgroundColor = '#eee';
@@ -92,30 +92,31 @@ const imageLoaderStyle = css`
     position: absolute;
 `;
 
-const StyledContactItem = styled.div(
-    pushed,
-    {
-        display: 'flex',
-        flexDirection: 'column',
-        backgroundColor: 'white',
-        flex: '0 1 600px',
-        width: '100%',
+const StyledContactItem = styled.div({
+    display: 'flex',
+    flexDirection: 'column',
+    backgroundColor: 'white',
+    flex: '0 1 600px',
+    width: '100%',
 
-        '&:nth-of-type(2n)': {
-            backgroundColor: alternateBackgroundColor,
+
+    '&:nth-of-type(2n)': {
+        backgroundColor: alternateBackgroundColor,
+    },
+
+    [screenXSorPortrait]: {
+        height: 'fit-content',
+        paddingBottom: '3em',
+        marginTop: 0,
+        '&:first-of-type': {
+            marginTop: navBarHeight.mobile,
         },
+    },
+});
 
-        [screenXSorPortrait]: {
-            height: 'fit-content',
-            paddingBottom: '3em',
+type ContactItemProps = ContactItemShape & { isMobile: boolean };
 
-            '&:not(:first-of-type)': {
-                marginTop: 0,
-            },
-        },
-    });
-
-const ContactItem: React.FC<ContactItemShape> = (props) => {
+const ContactItem: React.FC<ContactItemProps> = (props) => {
     const [bgImage, setBgImage] = React.useState('');
     const bgRef = React.useRef<HTMLDivElement>(null);
 
@@ -146,7 +147,7 @@ const ContactItem: React.FC<ContactItemShape> = (props) => {
         social,
         isMobile,
         website,
-    }: Partial<ContactItemShape> = props;
+    }: Partial<ContactItemProps> = props;
 
     const { webp, jpg, svg, imgCss } = photosAttributesMap[name];
     const webpSrcSet = webp && generateSrcsetWidths(webp, screenWidths);

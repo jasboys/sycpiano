@@ -7,6 +7,8 @@ import { lightBlue, navFontColor } from 'src/styles/colors';
 import { noHighlight } from 'src/styles/mixins';
 
 import { LinkShape } from 'src/components/App/NavBar/types';
+import darken from 'polished/lib/color/darken';
+import saturate from 'polished/lib/color/saturate';
 
 interface SubNavLinkProps {
     readonly isHome: boolean;
@@ -29,12 +31,15 @@ const StyledSubNavLink = styled(NavLink, {
     boxShadow: '0 6px 11px -5px rgba(0, 0, 0, 0.3)',
     transition: 'all 0.25s',
     lineHeight: '2rem',
-    // '&.active': {
-    //     color: lightBlue,
-    // },
+    '&.active': {
+        color: lightBlue,
+    },
     '&:hover': {
         color: 'white',
         backgroundColor: lightBlue,
+    },
+    '&.active:hover': {
+        color: 'white',
     },
 }, (props) => props.isMobile && {
     color: navFontColor,
@@ -42,6 +47,13 @@ const StyledSubNavLink = styled(NavLink, {
     backgroundColor: 'transparent',
     boxShadow: 'none',
     textAlign: 'right',
+    '&:hover': {
+        color: 'unset',
+        backgroundColor: 'transparent',
+    },
+    '&.active:hover': {
+        color: saturate(0.2, darken(0.1, lightBlue)),
+    }
 }, (props) => props.isHome && {
     color: 'white',
     backgroundColor: 'transparent',
@@ -56,18 +68,19 @@ const StyledSubNavLink = styled(NavLink, {
 
 const StyledLi = styled.li(noHighlight);
 
-const SubNavLink: React.FC<SubNavLinkProps> = ({ basePath, link, onClick, isHome, isMobile }) => (
-    <StyledLi className={basePath.name}>
-        <StyledSubNavLink
-            to={`${basePath.path}${link.path}`}
-            isMobile={isMobile}
-            isHome={isHome}
-            style={({ isActive }) => ({ color: isActive ? lightBlue : '' })}
-            onClick={() => { setTimeout(() => onClick(), 250); }}
-        >
-            {link.name}
-        </StyledSubNavLink>
-    </StyledLi>
-);
+const SubNavLink: React.FC<SubNavLinkProps> = ({ basePath, link, onClick, isHome, isMobile }) => {
+    return (
+        <StyledLi className={basePath.name}>
+            <StyledSubNavLink
+                to={`${basePath.path}${link.path}`}
+                isMobile={isMobile}
+                isHome={isHome}
+                onClick={() => { setTimeout(() => onClick(), 250); }}
+            >
+                {link.name}
+            </StyledSubNavLink>
+        </StyledLi>
+    );
+};
 
 export default SubNavLink;

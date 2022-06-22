@@ -111,7 +111,16 @@ const NavBarLogo: React.FC<React.HTMLAttributes<HTMLDivElement> & NavBarLogoProp
             <SycLogo />
             <LogoText isMobile={xs}>
                 {!isHome && !xs && <SeanChenText>{'SEAN CHEN' + (medium ? ' |' : '')}</SeanChenText>}
-                {displayName && !isHome && (xs || medium) && <RouteText css={{ fontSize: `min(${navBarFontSizeREM * 0.8}rem, calc(${navBarFontSizeREM * 0.8} * (100vw - ${otherObjectSizes}px) / ${estimatedTextWidth}))` }}>{displayName}</RouteText>}
+                {
+                    displayName &&
+                    !isHome &&
+                    (xs || medium) &&
+                    <RouteText
+                        css={{ fontSize: `min(${navBarFontSizeREM * 0.8}rem, calc(${navBarFontSizeREM * 0.8} * (100vw - ${otherObjectSizes}px) / ${estimatedTextWidth}))` }}
+                    >
+                        {displayName}
+                    </RouteText>
+                }
             </LogoText>
         </StyledLink>
     );

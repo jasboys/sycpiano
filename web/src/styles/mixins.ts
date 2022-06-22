@@ -1,7 +1,7 @@
 // Various CSS emotion mixins
 
 import { css, SerializedStyles } from '@emotion/react';
-import { mix } from 'polished';
+import mix from 'polished/lib/color/mix';
 import darken from 'polished/lib/color/darken';
 
 import { screenMorPortrait } from 'src/styles/screens';

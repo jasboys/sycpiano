@@ -5,7 +5,7 @@ import { noHighlight, pushed } from 'src/styles/mixins';
 import { lato2, lato3, } from 'src/styles/fonts';
 import { lightBlue, logoBlue, theme } from 'src/styles/colors';
 import { validateEmail } from 'src/utils';
-import { mix } from 'polished';
+import mix from 'polished/lib/color/mix';
 import { Link } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import { ThemeProvider } from '@mui/system';

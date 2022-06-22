@@ -25,19 +25,20 @@ const tsxUse = [
                 [
                     '@babel/preset-env',
                     {
-                        targets: "> 0.25%, not dead",
+                        targets: '> 0.25%, not dead',
                         useBuiltIns: 'usage',
-                        shippedProposals: true,
-                        corejs: '3',
-                    }
+                        corejs: {
+                            version: '3.22',
+                            proposals: true,
+                        },
+                    },
                 ],
                 '@babel/preset-typescript',
             ],
             plugins: [
                 '@emotion/babel-plugin',
                 '@babel/syntax-dynamic-import',
-                ['@babel/transform-runtime', { 'corejs': 3 }]
-            ],
+            ]
         },
     },
 ];

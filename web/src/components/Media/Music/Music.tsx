@@ -335,6 +335,11 @@ class Music extends React.Component<MusicProps, MusicState> {
         if (!this.state.userInteracted) {
             this.play();
         }
+        // Prev Button should scroll to beginning of track unless it's at the beginning
+        if (this.audio.current?.currentTime && this.audio.current.currentTime >= 3) {
+            this.audio.current.currentTime = 0;
+            return;
+        }
         const next = this.getNextTrack('prev', true);
         if (next) {
             this.props.navigate(getRelativePermaLink(next.musicItem.composer, next.musicItem.piece, next.name));

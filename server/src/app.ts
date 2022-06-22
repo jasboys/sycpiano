@@ -80,11 +80,13 @@ const main = async () => {
                 'connect-src': [
                     "'self'",
                     "https://api.stripe.com",
-                    "https://checkout.stripe.com"
+                    "https://checkout.stripe.com",
+                    "https://www.googleapis.com/youtube/v3/"
                 ],
                 'frame-src': [
                     "'self'",
                     "https://js.stripe.com",
+                    "https://www.youtube.com",
                     "https://hooks.stripe.com",
                     "https://checkout.stripe.com"
                 ]

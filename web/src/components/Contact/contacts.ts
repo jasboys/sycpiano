@@ -1,6 +1,6 @@
 import { ContactItemShape } from 'src/components/Contact/types';
 
-const contacts: ContactItemShape[] = [
+const contacts: Omit<ContactItemShape, 'isMobile'>[] = [
     {
         name: 'Sean Chen',
         className: 'seanChen',

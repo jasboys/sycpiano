@@ -34,3 +34,7 @@ sslcert/
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+stats.json
+.tsbuildinfo
+.eslintcache
+.stylelintcache

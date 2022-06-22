@@ -1,5 +1,7 @@
-import { isValid, parseISO, startOfMonth } from 'date-fns';
-import { formatInTimeZone } from 'date-fns-tz';
+import formatInTimeZone from 'date-fns-tz/formatInTimeZone';
+import isValid from 'date-fns/isValid';
+import parseISO from 'date-fns/parseISO';
+import startOfMonth from 'date-fns/startOfMonth';
 import { CachedEvent, EventItemType, MonthItem } from 'src/components/Schedule/types';
 
 const GOOGLE_MAPS_SEARCH_URL = 'https://www.google.com/maps/search/?api=1';
@@ -23,7 +25,6 @@ export const transformCachedEventsToListItems = (
     const monthsSet = new Set<string>(monthsSeen);
     const eventsList = events.reduce((runningEventsArr: EventItemType[], event) => {
         const eventDateTime = parseISO(event.dateTime);
-        console.log(eventDateTime, event.timezone);
 
         const monthString = formatInTimeZone(eventDateTime, event.timezone ?? 'America/Chicago', 'LLLL');
         const yearString = formatInTimeZone(eventDateTime, event.timezone ?? 'America/Chicago', 'y');

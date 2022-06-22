@@ -1,5 +1,5 @@
 import { gsap } from 'gsap';
-import { differenceInCalendarYears } from 'date-fns';
+import differenceInCalendarYears from 'date-fns/differenceInCalendarYears';
 
 export interface FormattedLocationShape {
     venue: string;

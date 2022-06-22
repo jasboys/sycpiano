@@ -16,8 +16,10 @@ import { lato2 } from 'src/styles/fonts';
 
 import { gsap } from 'gsap';
 import { screenXSorPortrait } from 'src/styles/screens';
-import { format, getDate, parseISO } from 'date-fns';
-import { formatInTimeZone } from 'date-fns-tz';
+import formatInTimeZone from 'date-fns-tz/formatInTimeZone';
+import parseISO from 'date-fns/parseISO';
+import getDate from 'date-fns/getDate';
+import format from 'date-fns/format';
 
 const locationIconDimension = '30px';
 

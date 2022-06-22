@@ -77,14 +77,11 @@ const Videos: React.FC<VideosProps> = (props) => {
     React.useEffect(() => {
         async function callDispatch() {
             if (domElement.current) {
-                // if (!initialized.current) {
-                    // initialized.current = true;
-                    await Promise.all([
-                        dispatch(fetchVideoPlaylist()),
-                        youTube.initializePlayerOnElement(domElement.current)
-                    ]);
-                    dispatch(playerIsReady());
-                // }
+                await Promise.all([
+                    dispatch(fetchVideoPlaylist()),
+                    youTube.initializePlayerOnElement(domElement.current)
+                ]);
+                dispatch(playerIsReady());
                 if (match?.params.videoId !== undefined) {
                     dispatch(playVideo(props.isMobile, match.params.videoId));
                 }

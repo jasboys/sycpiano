@@ -28,8 +28,13 @@ import { screenXSorPortrait } from 'src/styles/screens';
 import { GlobalStateShape } from 'src/store';
 import { metaDescriptions, titleStringBase } from 'src/utils';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { parseISO, parse as parseDate, startOfDay, isSameDay, isBefore } from 'date-fns';
-import { format, formatInTimeZone } from 'date-fns-tz';
+import parseISO from 'date-fns/parseISO';
+import parseDate from 'date-fns/parse';
+import startOfDay from 'date-fns/startOfDay';
+import isSameDay from 'date-fns/isSameDay';
+import isBefore from 'date-fns/isBefore';
+import format from 'date-fns-tz/format';
+import formatInTimeZone from 'date-fns-tz/formatInTimeZone';
 import { useSearchParams } from 'react-router-dom';
 
 interface EventListProps {
@@ -275,28 +280,28 @@ export const EventList: React.FC<EventListProps> = (props) => {
         () => debounce(onScroll, 100, { leading: true })
         , [props.type, hasMore, isFetchingList, maxDate, minDate]);
 
-    const getScrollTarget = React.useCallback(() => {
-        if (updatedCurrent.current && eventItemsLength) {
-            if (currentItem) {
-                updatedCurrent.current = false;
-                return getScrollIndex(currentItem);
-            } else {
-                updatedCurrent.current = false;
-                return 0;
-            }
-        } else {
-            return -1;
-        }
-    }, [currentItem, eventItemsLength]);
+    // const getScrollTarget = React.useCallback(() => {
+    //     if (updatedCurrent.current && eventItemsLength) {
+    //         if (currentItem) {
+    //             updatedCurrent.current = false;
+    //             return getScrollIndex(currentItem);
+    //         } else {
+    //             updatedCurrent.current = false;
+    //             return 0;
+    //         }
+    //     } else {
+    //         return -1;
+    //     }
+    // }, [currentItem, eventItemsLength]);
 
-    const getScrollIndex = React.useCallback((currentItem: DayItem) => (
-        Math.max(0, eventItems.findIndex(
-            (item) => (
-                item && itemIsDay(item) &&
-                isSameDay(parseISO(item.dateTime), parseISO(currentItem.dateTime))
-            ),
-        ))
-    ), [eventItems]);
+    // const getScrollIndex = React.useCallback((currentItem: DayItem) => (
+    //     Math.max(0, eventItems.findIndex(
+    //         (item) => (
+    //             item && itemIsDay(item) &&
+    //             isSameDay(parseISO(item.dateTime), parseISO(currentItem.dateTime))
+    //         ),
+    //     ))
+    // ), [eventItems]);
 
     const item: DayItem | undefined = (eventItemsLength && dateParam !== undefined) ? eventItems.find((event) =>
         itemIsDay(event) && isSameDay(parseDate(dateParam, 'yyyy-MM-dd', new Date()), parseISO(event.dateTime)),

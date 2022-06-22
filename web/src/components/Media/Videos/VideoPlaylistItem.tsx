@@ -1,6 +1,5 @@
-import { addMilliseconds, intervalToDuration, format, parseISO } from 'date-fns';
 import parseDuration from 'parse-iso-duration';
-import { lighten } from 'polished';
+import lighten from 'polished/lib/color/lighten';
 import * as React from 'react';
 import ClampLines from 'react-clamp-lines';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +10,10 @@ import styled from '@emotion/styled';
 import { VideoItemShape } from 'src/components/Media/Videos/types';
 import { lightBlue, playlistBackground } from 'src/styles/colors';
 import { lato1, lato2 } from 'src/styles/fonts';
+import addMilliseconds from 'date-fns/addMilliseconds';
+import intervalToDuration from 'date-fns/intervalToDuration';
+import format from 'date-fns/format';
+import parseISO from 'date-fns/parseISO';
 
 // Helper functions
 

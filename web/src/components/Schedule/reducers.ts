@@ -17,7 +17,11 @@ import axios from 'axios';
 import { SortedArraySet } from 'collections/sorted-array-set';
 import { transformCachedEventsToListItems } from './utils';
 import { Optional } from 'sequelize/types';
-import { differenceInDays, endOfMonth, max, min, parseISO } from 'date-fns';
+import endOfMonth from 'date-fns/endOfMonth';
+import parseISO from 'date-fns/parseISO';
+import differenceInDays from 'date-fns/differenceInDays';
+import min from 'date-fns/min';
+import max from 'date-fns/max';
 
 function equals(a: EventItemType, b: EventItemType) {
     // return a.dateTime.isSame(b.dateTime, 'minute');

@@ -98,7 +98,9 @@ const linkStyle = css(
     },
 );
 
-const linkActiveStyle = css({ color: lightBlue });
+const linkActiveStyle = css({
+    color: lightBlue,
+});
 
 const linkHomeStyle = css({
     color: 'white',
@@ -213,7 +215,7 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
         attr.href = link.path;
     } else if (subNavLinks) {
         attr.onClick = () => {
-            dispatch(showSubNav({ sub: link.name }));
+            dispatch(showSubNav({ sub: link.name, isMobile }));
         };
     } else {
         attr.to = link.path;
@@ -235,7 +237,10 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
     return (
         <StyledLi className="navlink-entry" isHome={isHome}>
             {(subNavLinks || link.name === 'blog') ? (
-                <a css={style} {...attr}>
+                <a css={style} {...attr} onDoubleClick={(e: React.MouseEvent<HTMLAnchorElement>) => {
+                    console.log('double');
+                    e.preventDefault();
+                }}>
                     {HighlightComponent}
                 </a>
             ) : (

@@ -10,7 +10,7 @@ import NavBarLogo from 'src/components/App/NavBar/NavBarLogo';
 
 import { screenBreakPoints } from 'src/styles/screens';
 import { navBarHeight } from 'src/styles/variables';
-import { toggleExpanded } from 'src/components/App/NavBar/reducers';
+import { setSpecificRouteNameAction, toggleExpanded } from 'src/components/App/NavBar/reducers';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 
 interface NavBarProps {
@@ -61,6 +61,10 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
     const dispatch = useAppDispatch();
 
     React.useEffect(() => {
+        dispatch(setSpecificRouteNameAction(specificRouteName ?? ''));
+    }, [specificRouteName]);
+
+    React.useEffect(() => {
         if (!xs && !medium) {
             dispatch(toggleExpanded(false));
         }
@@ -77,12 +81,12 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
                 isExpanded={isExpanded}
                 specificRouteName={specificRouteName}
             />
-            {medium ?
+            {(xs || medium) ?
                 (
-                    <StyledNavAndCart isMobile={medium}>
+                    <StyledNavAndCart isMobile={true}>
                         <CartButton
                             isHome={isHome}
-                            ref={medium ? () => {} : ref}   /* eslint-disable-line @typescript-eslint/no-empty-function */
+                            ref={ref}   /* eslint-disable-line @typescript-eslint/no-empty-function */
                         />
                         <HamburgerNav
                             currentBasePath={currentBasePath}
@@ -91,14 +95,14 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
                         />
                     </StyledNavAndCart>
                 ) : (
-                    <StyledNavAndCart isMobile={medium}>
+                    <StyledNavAndCart isMobile={false}>
                         <NavBarLinks
                             currentBasePath={currentBasePath}
                             isMobile={false}
                         />
                         <CartButton
                             isHome={isHome}
-                            ref={medium ? () => {} : ref}   /* eslint-disable-line @typescript-eslint/no-empty-function */
+                            ref={() => {}}   /* eslint-disable-line @typescript-eslint/no-empty-function */
                         />
                     </StyledNavAndCart>
                 )

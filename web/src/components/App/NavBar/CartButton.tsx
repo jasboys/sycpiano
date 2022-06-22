@@ -4,7 +4,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import { lightBlue, logoBlue } from 'src/styles/colors';
-import { mix } from 'polished';
+import mix from 'polished/lib/color/mix';
 import { noHighlight } from 'src/styles/mixins';
 import { toggleCartList } from 'src/components/Cart/reducers';
 import { lato4 } from 'src/styles/fonts';
