@@ -217,7 +217,10 @@
     "trim-newlines": "^3.0.1",
     "fast-glob": "^3.2.11",
     "webpack-bundle-analyzer/ws": "^7.5.8",
-    "hosted-git-info": "^3.0.8"
+    "hosted-git-info": "^3.0.8",
+    "browserslist": "^4.21.1",
+    "gaxios/node-fetch": "^2.6.7",
+    "@mapbox/node-pre-gyp/node-fetch": "^2.6.7"
   },
   "packageManager": "yarn@3.2.1"
 }
