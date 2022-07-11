@@ -162,7 +162,7 @@
     "typescript": "^4.7.3",
     "umzug": "^3.0.0",
     "uniqid": "^5.4.0",
-    "urijs": "^1.19.8",
+    "urijs": "^1.19.11",
     "validator": "^13.7.0",
     "webpack": "^5.69.1",
     "webpack-merge": "^5.8.0",
