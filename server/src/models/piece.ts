@@ -7,14 +7,16 @@ export interface PieceAttributes {
     id: string;
     composer: string;
     piece: string;
+    readonly _search: string;
 }
 
-export interface PieceCreationAttributes extends Omit<PieceAttributes, 'id'> {}
+export interface PieceCreationAttributes extends Omit<PieceAttributes, 'id' | '_search'> {}
 
 export class piece extends Model<PieceAttributes, PieceCreationAttributes> implements PieceAttributes {
     declare id: string;
     declare composer: string;
     declare piece: string;
+    declare readonly _search: string;
     declare readonly createdAt?: Date | string;
     declare readonly updatedAt?: Date | string;
     declare readonly calendarPiece?: calendarPiece;
@@ -34,6 +36,7 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<
         },
         composer: dataTypes.STRING,
         piece: dataTypes.STRING,
+        _search: dataTypes.STRING,
     }, {
             sequelize,
             tableName: 'piece',
