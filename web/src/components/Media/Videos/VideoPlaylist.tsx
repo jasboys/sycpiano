@@ -40,8 +40,6 @@ const StyledPlaylistContainer = styled.div`
         position: relative;
         right: unset;
         z-index: 0;
-        overflow-y: scroll;
-        -webkit-overflow-scrolling: touch;
     }
 `;
 

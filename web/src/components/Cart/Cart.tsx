@@ -67,11 +67,12 @@ interface CartProps {
     }
     strategy: 'absolute' | 'fixed';
     floatingRef: (node: HTMLElement | null) => void;
-    arrowRef: React.Ref<HTMLDivElement>;
+    arrowRef: React.MutableRefObject<HTMLDivElement | null>;
     isMobile: boolean;
+    update: () => void;
 }
 
-const Cart: React.FC<CartProps> = ({ position, strategy, isMobile, floatingRef, arrowRef, arrow }) => {
+const Cart: React.FC<CartProps> = ({ position, strategy, isMobile, floatingRef, arrowRef, arrow, update }) => {
     const dispatch = useAppDispatch();
     const visible = useAppSelector(({ cart }) => cart.visible);
     const isCheckingOut = useAppSelector(({ cart }) => cart.isCheckingOut);
@@ -89,6 +90,11 @@ const Cart: React.FC<CartProps> = ({ position, strategy, isMobile, floatingRef, 
             dispatch(syncLocalStorage());
         }
     }, [cartLength]);
+
+    const arrowCallback = React.useCallback((el) => {
+        arrowRef.current = el;
+        update();
+    }, [update]);
 
     return (
         <Transition<undefined>
@@ -123,7 +129,7 @@ const Cart: React.FC<CartProps> = ({ position, strategy, isMobile, floatingRef, 
                 <CartFilterGroup isCheckingOut={isCheckingOut}>
                     {!isMobile && (
                         <Arrow
-                            ref={isMobile ? () => { } : arrowRef}     /* eslint-disable-line @typescript-eslint/no-empty-function */
+                            ref={isMobile ? () => { } : arrowCallback}     /* eslint-disable-line @typescript-eslint/no-empty-function */
                             style={{
                                 left: arrow?.x !== undefined ? arrow?.x : '',
                                 top: arrow?.y !== undefined ? arrow?.y : '',

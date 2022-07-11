@@ -152,14 +152,16 @@ shopRouter.post('/checkout', async (req, res) => {
             return;
         }
 
-        const priceIDs = (await db.models.product.findAll({
+        const prods = await db.models.product.findAll({
             where: {
                 id: {
                     [Op.or]: productIDs,
                 }
             },
             attributes: ['priceID'],
-        })).map((prod) => prod.priceID);
+        });
+
+        const priceIDs = prods.map((prod) => prod.priceID);
 
         const sessionId = await stripeClient.createCheckoutSession(
             productIDs,

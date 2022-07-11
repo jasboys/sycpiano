@@ -85,6 +85,7 @@ const MusicDiv = styled.div`
         height: 100%;
         overflow-y: scroll;
         -webkit-overflow-scrolling: touch;
+        background-color: white;
     }
 `;
 
@@ -453,14 +454,18 @@ class Music extends React.Component<MusicProps, MusicState> {
     }
 
     setHoverSeekring = (isHoverSeekring: boolean, angle?: number) => {
-        this.setState({
-            isHoverSeekring,
-            angle,
-        });
+        if (this.state.isHoverSeekring !== isHoverSeekring) {
+            this.setState({ isHoverSeekring });
+        }
+        if (this.state.angle !== angle) {
+            this.setState({ angle });
+        }
     }
 
     setMouseMove = (isMouseMove: boolean) => {
-        this.setState({ isMouseMove });
+        if (isMouseMove !== this.state.isMouseMove) {
+            this.setState({ isMouseMove });
+        }
     }
 
     setRadii = (inner: number, outer: number, base: number) => {

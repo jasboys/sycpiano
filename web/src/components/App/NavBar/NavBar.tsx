@@ -15,11 +15,12 @@ import { useAppDispatch, useAppSelector } from 'src/hooks';
 
 interface NavBarProps {
     readonly currentBasePath: string;
+    readonly delayedRouteBase: string;
     readonly className?: string;
     readonly specificRouteName?: string;
 }
 
-const StyledNavBar = styled.div<{ isMobile: boolean; isHome: boolean }>(
+const StyledNavBar = styled.div<{ isMobile: boolean; isHome: boolean; menuExpanded: boolean; cartExpanded: boolean; }>(
     {
         visibility: 'hidden',
         padding: '0 30px 0 0',
@@ -38,9 +39,15 @@ const StyledNavBar = styled.div<{ isMobile: boolean; isHome: boolean }>(
     }, ({ isMobile }) => isMobile && ({
         height: navBarHeight.mobile,
         paddingRight: 15,
-    }), ({ isHome }) => isHome && ({
-        backgroundColor: 'transparent',
-    })
+}), ({ isHome, menuExpanded, cartExpanded }) => isHome &&
+    (
+        (menuExpanded || cartExpanded) ?
+            ({
+                backgroundColor: 'rgba(0, 0, 0, 0.1)',
+            }) : ({
+                backgroundColor: 'transparent',
+            })
+    )
 );
 
 const StyledNavAndCart = styled.div<{ isMobile: boolean }>({
@@ -55,8 +62,10 @@ const StyledNavAndCart = styled.div<{ isMobile: boolean }>({
 const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
     currentBasePath,
     specificRouteName,
+    delayedRouteBase,
 }, ref) => {
     const isExpanded = useAppSelector(({ navbar }) => navbar.isExpanded);
+    const cartIsOpen = useAppSelector(({ cart }) => cart.visible);
     const { xs, medium } = useMedia({ queries: screenBreakPoints });
     const dispatch = useAppDispatch();
 
@@ -70,18 +79,21 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
         }
     }, [xs, medium]);
 
-    const isHome = currentBasePath === '/';
+    const isMobile = xs || medium;
+    const isHome = isMobile ? delayedRouteBase === '/' : currentBasePath === '/';
     return (
         <StyledNavBar
             isHome={isHome}
             isMobile={medium}
+            menuExpanded={isExpanded}
+            cartExpanded={cartIsOpen}
         >
             <NavBarLogo
                 isHome={isHome}
                 isExpanded={isExpanded}
                 specificRouteName={specificRouteName}
             />
-            {(xs || medium) ?
+            {(isMobile) ?
                 (
                     <StyledNavAndCart isMobile={true}>
                         <CartButton
@@ -102,7 +114,7 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
                         />
                         <CartButton
                             isHome={isHome}
-                            ref={() => {}}   /* eslint-disable-line @typescript-eslint/no-empty-function */
+                            ref={ref}   /* eslint-disable-line @typescript-eslint/no-empty-function */
                         />
                     </StyledNavAndCart>
                 )

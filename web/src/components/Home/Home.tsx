@@ -16,11 +16,12 @@ import { navBarHeight } from 'src/styles/variables';
 import { DesktopBackgroundPreview, MobileBackgroundPreview } from 'src/components/Home/PreviewSVGs';
 import Social from 'src/components/Home/Social';
 import { LazyImage } from 'src/components/LazyImage';
-import { screenLengths, screenXSandPortrait, screenXSorPortrait, screenMandPortrait } from 'src/styles/screens';
+import { screenLengths, screenXSandPortrait, screenXSorPortrait, screenMorPortrait, screenBreakPoints } from 'src/styles/screens';
 import { Transition } from 'react-transition-group';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
 import { useAppSelector } from 'src/hooks';
 import format from 'date-fns/format';
+import { useMedia } from 'react-media';
 
 const textShadowColor = 'rgba(0 0 0 / 0.75)';
 
@@ -43,11 +44,8 @@ const Content = styled.div<{ menuExpanded: boolean }>`
     overflow: hidden;
     transition: filter 0.25s;
 
-    ${screenMandPortrait} {
+    ${screenMorPortrait} {
         filter: ${props => props.menuExpanded ? 'blur(8px)' : 'unset'};
-    }
-
-    ${screenXSorPortrait} {
         height: calc(100% - ${navBarHeight.mobile}px);
     }
 `;
@@ -157,10 +155,10 @@ const NavBarGradient = styled('div')`
             rgba(255 255 255 / 0.11) 20%,
             rgba(255 255 255 / 0.62) 22%,
             rgba(255 255 255 / 0.6) 40%,
-            rgba(53 53 53 / 0.27) 70%
+            rgba(53 53 53 / 0.27) 60%
         );
 
-    ${screenXSorPortrait} {
+    ${screenMorPortrait} {
         height: ${navBarHeight.mobile}px;
         background-image:
             linear-gradient(
@@ -188,6 +186,15 @@ const StyledCopyright = styled('div')`
     }
 `;
 
+const MobileBackground = styled.div({
+    visibility: 'hidden',
+    position: 'absolute',
+    top: 0,
+    zIndex: 1,
+    height: '100%',
+    width: '100%',
+});
+
 const srcWidths = screenLengths.map((value) => (
     Math.round(value * 1779 / 2560)
 ));
@@ -196,10 +203,12 @@ interface HomeProps {
     isMobile: boolean;
 }
 
-const Home: React.FC<HomeProps> = ({ isMobile }) => {
+const Home: React.FC<HomeProps> = () => {
     const menuExpanded = useAppSelector(({ navbar }) => navbar.isExpanded);
     const cartExpanded = useAppSelector(({ cart }) => cart.visible);
+    const { xs, medium } = useMedia({ queries: screenBreakPoints });
 
+    const isMobile = xs || medium;
     return (
         <HomeContainer>
             <BackgroundContainer>
@@ -209,7 +218,9 @@ const Home: React.FC<HomeProps> = ({ isMobile }) => {
                     onExit={fadeOnExit(0.15)}
                     timeout={400}
                 >
-                    <div css={{ visibility: 'hidden', position: 'absolute', top: 0, zIndex: 1, height: '100%' }}><MobileBackgroundPreview /></div>
+                    <MobileBackground>
+                        <MobileBackgroundPreview />
+                    </MobileBackground>
                 </Transition>
                 <LazyImage
                     isMobile={isMobile}
@@ -244,7 +255,14 @@ const Home: React.FC<HomeProps> = ({ isMobile }) => {
                     successCb={undefined}
                 />
                 <BackgroundCover />
-                <NavBarGradient />
+                <Transition<undefined>
+                    in={isMobile && !(menuExpanded || cartExpanded)}
+                    onEnter={fadeOnEnter()}
+                    onExit={fadeOnExit(0.15)}
+                    timeout={400}
+                >
+                    <NavBarGradient />
+                </Transition>
             </BackgroundContainer>
             <Content menuExpanded={menuExpanded || cartExpanded}>
                 <Name>Sean Chen</Name>

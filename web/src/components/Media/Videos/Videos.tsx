@@ -33,7 +33,6 @@ const StyledVideos = styled.div`
     position: relative;
 
     ${screenXSorPortrait} {
-        overflow-y: scroll;
         margin-top: 0;
         padding-top: ${navBarHeight.mobile}px;
         height: 100%;

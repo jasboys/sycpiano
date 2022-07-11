@@ -11,17 +11,13 @@ const previewStyle = css`
     object-fit: cover;
 `;
 
-const DesktopImg = styled.img`
-    ${previewStyle} {
-        object-position: 50% 50%;
-    }
-`;
+const DesktopImg = styled.img(previewStyle, {
+    objectPosition: '50% 50%',
+});
 
-const MobileImg = styled.img`
-    ${previewStyle} {
-        object-position: 50% 100%;
-    }
-`;
+const MobileImg = styled.img(previewStyle, {
+    objectPosition: '50% 100%',
+});
 
 const desktopSVGString = ReactDOMServer.renderToStaticMarkup(
     (

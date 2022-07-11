@@ -5,6 +5,7 @@ import styled from '@emotion/styled';
 import { ContactSocialMediaShape } from 'src/components/Contact/types';
 import { staticImage } from 'src/styles/imageUrls';
 import { screenXSorPortrait } from 'src/styles/screens';
+import { lato3 } from 'src/styles/fonts';
 
 const SocialMediaLinkContainer = styled.div` padding-top: 20px; `;
 
@@ -28,6 +29,7 @@ const StyledLink = styled.a`
     flex: 1 0 auto;
     text-align: center;
     display: block;
+    font-family: ${lato3};
 `;
 
 interface SocialMediaLinkProps {
@@ -38,9 +40,13 @@ interface SocialMediaLinkProps {
 
 const SocialMediaLink: React.FC<SocialMediaLinkProps> = (props) => (
     <StyledLink href={props.url} target="_blank" rel="noopener">
-        <SocialMediaImg
-            src={staticImage(`/logos/${props.social}-color.svg`)}
-        />
+        {
+            (props.social === 'web')
+                ? <span>{props.url}</span>
+                : <SocialMediaImg
+                    src={staticImage(`/logos/${props.social}-color.svg`)}
+                />
+        }
     </StyledLink>
 );
 

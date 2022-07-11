@@ -104,7 +104,7 @@ const linkActiveStyle = css({
 
 const linkHomeStyle = css({
     color: 'white',
-    textShadow: '0 0 1px rgba(0, 0, 0, 0.8)',
+    // textShadow: '0 0 1px rgba(0, 0, 0, 0.8)',
     '&:hover': {
         color: 'white',
         textShadow: '0 0 1px rgba(255, 255, 255, 1)',

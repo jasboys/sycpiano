@@ -375,20 +375,21 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
                     verticalOffset={verticalOffset}
                     css={flipped}
                 />
-                {(this.props.isPlaying) ? (
-                    <PauseButton
-                        key="pause-button"
-                        onClick={this.togglePlaying}
-                        isHovering={this.state.isHoverPlaypause}
-                        onMouseMove={this.handleMousemove}
-                        onMouseOver={this.handleMouseover('isHoverPlaypause')}
-                        onMouseOut={this.handleMouseout('isHoverPlaypause')}
-                        onMouseUp={this.handleMouseup}
-                        width={buttonLength}
-                        height={buttonLength}
-                        verticalOffset={verticalOffset}
-                    />
-                ) : (
+                {
+                    (this.props.isPlaying) ? (
+                        <PauseButton
+                            key="pause-button"
+                            onClick={this.togglePlaying}
+                            isHovering={this.state.isHoverPlaypause}
+                            onMouseMove={this.handleMousemove}
+                            onMouseOver={this.handleMouseover('isHoverPlaypause')}
+                            onMouseOut={this.handleMouseout('isHoverPlaypause')}
+                            onMouseUp={this.handleMouseup}
+                            width={buttonLength}
+                            height={buttonLength}
+                            verticalOffset={verticalOffset}
+                        />
+                    ) : (
                         <PlayButton
                             key="play-button"
                             onClick={this.togglePlaying}
@@ -401,7 +402,8 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
                             height={buttonLength}
                             verticalOffset={verticalOffset}
                         />
-                    )}
+                    )
+                }
                 <SkipButton
                     key="next-button"
                     onClick={this.props.next}
@@ -416,7 +418,6 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
                 />
                 <StyledSeekRing
                     ref={(canvas) => {
-                        console.log('running ref');
                         this.seekRing = canvas;
                         if (this.seekRing && !this.listenerAdded) {
                             this.seekRing.addEventListener('touchmove', this.handleActiveMousemove, { passive: false });

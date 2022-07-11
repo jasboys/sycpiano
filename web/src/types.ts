@@ -72,3 +72,8 @@ export interface AsyncModule<P> {
     Component: ComponentType<P>;
     reducers?: Partial<Reducers>;
 }
+
+export interface FloatingRefStructure {
+    readonly arrow: HTMLDivElement | null;
+    readonly floating: HTMLDivElement | null;
+}

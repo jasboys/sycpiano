@@ -9,9 +9,10 @@ type CustomerReturn = Stripe.Customer | Stripe.DeletedCustomer;
 type ProductReturn = string | Stripe.Product | Stripe.DeletedProduct;
 
 const CURRENCY = 'USD';
+const THUMBNAIL_STATIC = '/static/images/products/thumbnails/';
 
-const isDev = process.env.NODE_ENV === 'development';
-const host = isDev ? 'http://localhost:8000' : 'https://seanchenpiano.com'
+// const isDev = process.env.NODE_ENV === 'development';
+const host = process.env.HOST;
 const stripe: Stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2020-08-27' });
 
 const stripeCustomerActive = (cr: CustomerReturn): cr is Stripe.Customer => {
@@ -142,7 +143,7 @@ export const createProduct = async (attributes: Omit<ProductAttributes, 'created
                 permalink: attributes.permalink,
             },
             images: attributes.images.map((img) =>
-                `https://seanchenpiano.com/static/images/products/thumbnails/${img}`
+                `${THUMBNAIL_STATIC}${img}`
             ),
         });
         const price = await stripe.prices.create({
@@ -182,7 +183,7 @@ export const updateProduct = async (attributes: Omit<ProductAttributes, 'created
                     permalink: attributes.permalink,
                 },
                 images: attributes.images.map((img) =>
-                    `https://seanchenpiano.com/static/images/products/thumbnails/${img}`
+                    `${THUMBNAIL_STATIC}${img}`
                 ),
             },
         );

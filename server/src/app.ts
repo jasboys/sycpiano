@@ -45,7 +45,7 @@ const main = async () => {
     await (async () => {
         if (!isProduction) {
             const fav = await import('serve-favicon');
-            app.use(fav(path.resolve(rootPath.toString(), process.env.IMAGE_ASSETS_DIR, 'favicon.png')));
+            app.use(fav(path.resolve(process.env.IMAGE_ASSETS_DIR, 'favicon.png')));
         }
     })();
 
@@ -185,6 +185,10 @@ const main = async () => {
     // Health-check endpoint.
     app.get('/health-check', (_req, res) => res.sendStatus(200));
 
+    if (!isProduction) {
+        app.get('/pianonotes', (_req, res) => res.redirect('https://seanchenpiano.com/pianonotes'));
+    }
+
     // Redirect old URLs that are indexed on google to base route.
     // const oldRoutesToRedirectsMap: Record<string, string> = {
     //     '/home': '/',
@@ -215,7 +219,7 @@ const main = async () => {
                 res.redirect(req.url.replace(`/${sanitize}`, ''));
                 res.end();
             } else {
-                meta.image = meta.image ?? 'https://www.seanchenpiano.com/static/images/syc_chair_meta.jpg';
+                meta.image = meta.image ?? `https://${req.get('host')}/static/images/syc_chair_meta.jpg`;
                 res.render('index', {
                     csrf: req.csrfToken(),
                     twitter: meta,

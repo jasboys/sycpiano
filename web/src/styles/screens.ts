@@ -1,6 +1,6 @@
 // Screen widths for media queries
 const xs = '800px';
-const m = '1024px';
+const m = '1280px';
 const xl = '1280px';
 
 export const reactMediaMobileQuery = `(orientation: portrait), (max-width: ${xs})`;

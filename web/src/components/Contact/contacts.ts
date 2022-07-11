@@ -46,7 +46,7 @@ const contacts: Omit<ContactItemShape, 'isMobile'>[] = [
         phone: ['(301) 277-8205'],
         email: ['martha@jwentworth.com'],
         social: {
-            web: 'https://www.jwentworth.com/contact/',
+            web: 'https://www.jwentworth.com/',
         },
     },
 ];

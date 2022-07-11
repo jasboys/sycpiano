@@ -105,7 +105,7 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
     const menuOpen = useAppSelector(({ navbar }) => navbar.isExpanded);
     const cartOpen = useAppSelector(({ cart }) => cart.visible);
     const [delayedRouteBase, setDelayedRouteBase] = React.useState(getRouteBase(location.pathname));
-    const arrowRef = React.useRef<HTMLDivElement>(null);
+    const arrowRef = React.useRef<HTMLDivElement | null>(null);
     const timerRef = React.useRef<NodeJS.Timeout>();
     const navigate = useNavigate();
     // Make sure to adjust this match array when adding new pages, especially with subpaths
@@ -200,7 +200,8 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
                                 appear={true}
                             >
                                 <NavBar
-                                    currentBasePath={delayedRouteBase}
+                                    delayedRouteBase={delayedRouteBase}
+                                    currentBasePath={getRouteBase(location.pathname)}
                                     specificRouteName={getMostSpecificRouteName(location.pathname)}
                                     ref={reference}
                                 />
@@ -299,6 +300,7 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
                                 strategy={strategy}
                                 position={{ x, y }}
                                 arrow={middlewareData.arrow}
+                                update={update}
                             />
                             {(matches && cartOpen) &&
                                 <ClickListenerOverlay onClick={() => dispatch(toggleCartList(false))} />}

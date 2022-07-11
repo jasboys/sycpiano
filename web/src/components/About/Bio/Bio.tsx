@@ -146,7 +146,6 @@ const ImageContainer = styled.div<ImageContainerProps>({
 const BioContainer = styled.div(
     pushed,
     {
-
         width: '100%',
         backgroundColor: 'black',
         position: 'absolute',
@@ -158,6 +157,7 @@ const BioContainer = styled.div(
             height: '100%',
             overflowY: 'scroll',
             WebkitOverflowScrolling: 'touch',
+            backgroundColor: 'white',
         },
     });
 

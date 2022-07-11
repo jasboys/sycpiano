@@ -29,8 +29,7 @@ const StyledPhotos = styled.div`
     ${screenXSorPortrait} {
         height: 100%;
         margin-top: 0;
-        overflow-y: scroll;
-        -webkit-overflow-scrolling: touch;
+        overflow-y: hidden;
     }
 `;
 

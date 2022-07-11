@@ -9,7 +9,7 @@ export const links: ReadonlyArray<LinkShape> = [
             { name: 'press', path: '/press' },
         ],
     },
-    { name: 'blog', path: '//www.seanchenpiano.com/pianonotes' },
+    { name: 'blog', path: '/pianonotes' },
     {
         name: 'schedule', path: '/schedule', subLinks: [
             { name: 'upcoming', path: '/upcoming' },
