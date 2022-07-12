@@ -1,5 +1,5 @@
 import * as React from 'react';
-import ReactMarkdown from 'react-markdown';
+import Markdown from 'markdown-to-jsx';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
@@ -95,15 +95,17 @@ const BioText: React.FunctionComponent<BioTextProps> = (props) => {
             <TextGroup>
                 {props.bio.map(({ text }, i) => {
                     return (
-                        <ReactMarkdown
+                        <Markdown
                             key={i}
-                            components={{
-                                p: props => <Paragraph {...props} />,
-                                strong: props => <NameSpan {...props} />,
+                            options={{
+                                overrides: {
+                                    p: Paragraph,
+                                    strong: NameSpan,
+                                }
                             }}
                         >
                             {text}
-                        </ReactMarkdown>
+                        </Markdown>
                     );
                 })}
             </TextGroup>

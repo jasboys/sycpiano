@@ -1,6 +1,6 @@
 import axios from 'axios';
 import * as React from 'react';
-import ReactMarkdown from 'react-markdown';
+import Markdown from 'markdown-to-jsx';
 import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { pushed } from 'src/styles/mixins';
@@ -18,6 +18,19 @@ const Container = styled.div(
         paddingTop: '2rem',
     },
 );
+
+const Question = styled.div({
+    fontWeight: 'bold',
+});
+
+const Answer = styled.div({
+    padding: '1rem 0 1rem 1rem',
+});
+
+const Anchor: React.FC<{ href: string; }> = (props) =>
+    props.href?.match('mailto') ?
+        <a css={{ textDecoration: 'underline' }} href={props.href} children={props.children} />
+        : <Link css={{ textDecoration: 'underline' }} to={props.href!} children={props.children} />;
 
 interface FAQ {
     question: string;
@@ -49,20 +62,25 @@ const FAQs: React.FC<Record<string, unknown>> = () => {
                 <ul css={{ paddingRight: '1rem' }}>
                     {faqs.map((faq, idx) => (
                         <li key={idx}>
-                            <ReactMarkdown
-                                components={{
-                                    p: (props) => <div css={{ fontWeight: 'bold' }} {...props} />
+                            <Markdown
+                                options={{
+                                    overrides: {
+                                        p: Question,
+                                    }
                                 }}
-                            >{faq.question}</ReactMarkdown>
-                            <ReactMarkdown
-                                components={{
-                                    p: (props) => <div css={{ padding: '1rem 0 1rem 1rem' }} {...props} />,
-                                    a: (props) => (props.href?.match('mailto') ?
-                                            <a css={{ textDecoration: 'underline' }} href={props.href} children={props.children} />
-                                            : <Link css={{ textDecoration: 'underline' }} to={props.href!} children={props.children} />
-                                    ),
+                            >
+                                {faq.question}
+                            </Markdown>
+                            <Markdown
+                                options={{
+                                    overrides: {
+                                        p: Answer,
+                                        a: Anchor,
+                                    }
                                 }}
-                            >{faq.answer}</ReactMarkdown>
+                            >
+                                {faq.answer}
+                            </Markdown>
                         </li>
                     ))}
                 </ul>

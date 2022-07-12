@@ -18,13 +18,6 @@ async function main() {
         stdio: ['pipe', 'pipe', 'pipe'],
     });
 
-    nodemonProcess.on('message', (event) => {
-        if (event.type === 'start') {
-            reporter.updateTask('Nodemon', { message: 'Nodemon started and watching...' });
-        } else if (event.type === 'crash') {
-            reporter.updateTask('Nodemon', { message: 'Process crashed, watching...' });
-        }
-    });
     nodemonProcess.stdout.setEncoding('utf8');
     nodemonProcess.stderr.setEncoding('utf8');
     nodemonProcess.stdout.on('data', (data) => {

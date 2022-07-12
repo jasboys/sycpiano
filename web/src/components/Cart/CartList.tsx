@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import * as React from 'react';
-import ReactMarkdown from 'react-markdown';
+import Markdown from 'markdown-to-jsx';
 import {
     checkoutAction,
     clearErrors,
@@ -268,7 +268,7 @@ export const CartList: React.FC<CartListProps> = ({
                         {checkoutError.message !== '' &&
                             (
                                 <ErrorMessage>
-                                    <ReactMarkdown>{checkoutError.message}</ReactMarkdown>
+                                    <Markdown>{checkoutError.message}</Markdown>
                                 </ErrorMessage>
                             )
                         }
