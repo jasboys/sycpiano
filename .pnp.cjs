@@ -10091,13 +10091,13 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["http-signature", [\
-        ["npm:1.2.0", {\
-          "packageLocation": "./.yarn/cache/http-signature-npm-1.2.0-ee92426f34-3324598712.zip/node_modules/http-signature/",\
+        ["npm:1.3.6", {\
+          "packageLocation": "./.yarn/cache/http-signature-npm-1.3.6-5b2eff4373-10be2af476.zip/node_modules/http-signature/",\
           "packageDependencies": [\
-            ["http-signature", "npm:1.2.0"],\
+            ["http-signature", "npm:1.3.6"],\
             ["assert-plus", "npm:1.0.0"],\
-            ["jsprim", "npm:1.4.1"],\
-            ["sshpk", "npm:1.16.1"]\
+            ["jsprim", "npm:2.0.2"],\
+            ["sshpk", "npm:1.17.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -11022,10 +11022,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["jsprim", [\
-        ["npm:1.4.1", {\
-          "packageLocation": "./.yarn/cache/jsprim-npm-1.4.1-948d2c9ec3-6bcb20ec26.zip/node_modules/jsprim/",\
+        ["npm:2.0.2", {\
+          "packageLocation": "./.yarn/cache/jsprim-npm-2.0.2-8c40f3719c-d175f6b199.zip/node_modules/jsprim/",\
           "packageDependencies": [\
-            ["jsprim", "npm:1.4.1"],\
+            ["jsprim", "npm:2.0.2"],\
             ["assert-plus", "npm:1.0.0"],\
             ["extsprintf", "npm:1.3.0"],\
             ["json-schema", "npm:0.4.0"],\
@@ -14645,7 +14645,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["forever-agent", "npm:0.6.1"],\
             ["form-data", "npm:2.3.3"],\
             ["har-validator", "npm:5.1.5"],\
-            ["http-signature", "npm:1.2.0"],\
+            ["http-signature", "npm:1.3.6"],\
             ["is-typedarray", "npm:1.0.0"],\
             ["isstream", "npm:0.1.2"],\
             ["json-stringify-safe", "npm:5.0.1"],\
@@ -15700,10 +15700,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["sshpk", [\
-        ["npm:1.16.1", {\
-          "packageLocation": "./.yarn/cache/sshpk-npm-1.16.1-feb759e7e0-5e76afd1ce.zip/node_modules/sshpk/",\
+        ["npm:1.17.0", {\
+          "packageLocation": "./.yarn/cache/sshpk-npm-1.17.0-95f17f597f-ba109f65c8.zip/node_modules/sshpk/",\
           "packageDependencies": [\
-            ["sshpk", "npm:1.16.1"],\
+            ["sshpk", "npm:1.17.0"],\
             ["asn1", "npm:0.2.4"],\
             ["assert-plus", "npm:1.0.0"],\
             ["bcrypt-pbkdf", "npm:1.0.2"],\
