@@ -1,9 +1,9 @@
 # The official web page of pianist Sean Chen.
 
-This website backend is an [express](http://expressjs.com/) app with a PostgreSQL database. The frontend is built with [react](https://facebook.github.io/react/) and bundled with [webpack](https://webpack.github.io/). Use [yarn](https://yarnpkg.com/en/) or npm for package management. Code is in [typescript](https://www.typescriptlang.org/) and styling is done by [emotion](https://github.com/emotion-js/emotion). Admin of the database is administered by [ForestAdmin](https://github.com/ForestAdmin).
+This website backend is an [express](http://expressjs.com/) app with a PostgreSQL database. The frontend is built with [react](https://facebook.github.io/react/) and bundled with [webpack](https://webpack.github.io/). Use [yarn](https://yarnpkg.com/en/) or npm for package management. Code is in [typescript](https://www.typescriptlang.org/) and styling is done by [emotion](https://github.com/emotion-js/emotion). Admin of the database is administered by another repo [sycpiano-admin](https://github.com/jasboys/sycpiano-admin).
 
 ## Getting Started
-Make sure at least version 12 of Node.js is installed.
+Make sure at least version 16 of Node.js is installed.
 
 ### Env file
 
