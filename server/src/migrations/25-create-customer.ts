@@ -6,6 +6,7 @@ export const up = async (queryInterface: QueryInterface, dataTypes: typeof DataT
             type: dataTypes.STRING,
             primaryKey: true,
             unique: true,
+            defaultValue: dataTypes.UUIDV4,
         },
         createdAt: {
             type: dataTypes.DATE,

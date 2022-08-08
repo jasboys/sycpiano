@@ -14,18 +14,17 @@ DB_HOST=<production host, probably localhost/127.0.0.1, needed on prod>
 DB_USER=<username>
 DB_PASS=<password>
 DB_PORT=<database port, needed on prod>
+or
+DB_URL=<database connection url>
+
 PORT=<http port number, needed on prod>
 ADMIN_PORT=<admin port number, needed on prod>
-ADMIN_USER=<username for admin access>
-ADMIN_PASS=<bcrypt encrypted password>
 CORS_ORIGINS=<comma separated list of allowed origins for backend requests>
 COOKIE_SECRET=<for signing session cookies>
-FOREST_ENV_SECRET=<secret for using forest admin>
-FOREST_AUTH_SECRET=<secret for auth forest admin>
 GAPI_KEY_SERVER=<from google developer console>
-GAPI_KEY_APP=<from google developer console>
+GAPI_KEY_APP=<from google developer console, only for dev to build app>
 STRIPE_SECRET_KEY=<from stripe dashboard>
-STRIPE_PUBLIC_KEY=<from stripe dashboard>
+STRIPE_PUBLIC_KEY=<from stripe dashboard, only for dev to build app>
 STRIPE_WEBHOOK_KEY=<from stripe dashboard>
 PRODUCTS_DIR=<absolute path to emailable assets>
 SEED_DATA_DIR=<absolute path to seeding data, only for first run of database>
@@ -65,11 +64,24 @@ N.B. on Windows, make sure you add %LocalAppData%\Yarn to your whitelist for ant
 The app will be served on `localhost:8000` and the webpack-bundle-analyzer (if enabled) will be on `localhost:8888`.
 
 ## Production
+Run the following commands:
+```
+$ yarn
+$ yarn build
+$ yarn bundle
+```
+This bundle can be uploaded to github releases (or scp'd to your server).
+
+Extract.
+
+Move your web/build assets to a publicly served folder.
+
 Run:
 ```
 $ yarn run startProd
 ```
-Automation on the server is done by [pm2](http://pm2.keymetrics.io/). Further, bash scripts for building and running the app are included in `./bin`.
+
+Automation on the server can be done by [pm2](http://pm2.keymetrics.io/).
 
 ## Initializing the database
 The website uses a PostgreSQL database, and connects to it using [sequelize](http://docs.sequelizejs.com/en/v3/).
@@ -88,6 +100,14 @@ postgres=# \connect sycpiano;
 * In the postgres shell, create a new user
 ```
 create role <username> with login password '<quoted password>'
+```
+
+## Admin
+
+There's a separate repo sycpiano_admin for the CRUD interface for the backend. In order for that to work, you need to create an admin user first by (after building server):
+
+```
+$ node ./server/build/createAdmin.js username password
 ```
 
 ## Migrations and Seeding

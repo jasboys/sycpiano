@@ -11,7 +11,6 @@ import db from './models';
 
 import { duplicateEmailNotification, emailRegisterNotification } from './mailer';
 
-
 const models = db.models;
 
 const authRouter = express.Router();
@@ -62,7 +61,7 @@ export const authAndGetRole: express.RequestHandler = async (req, res, next) => 
             token,
             user.pasetoSecret,
             {
-                subject: user.email,
+                subject: user.username,
                 audience: 'seanchenpiano.com',
                 issuer: 'seanchenpiano.com'
             }
@@ -96,21 +95,21 @@ authRouter.post('/register', async (req, res) => {
         return res.status(400).send('Request missing username and/or password.');
     }
 
-    let customer = await models.user.findOne({ where: { email: username } });
+    let customer = await models.user.findOne({ where: { username } });
     if (customer) {
         // Send notification email
         await duplicateEmailNotification(username);
         return res.status(200).end();
     }
 
-    const hash = await argon2.hash(password, { type: argon2.argon2id });
+    const passHash = await argon2.hash(password, { type: argon2.argon2id });
 
     try {
         const stripeCustomer = await stripeClient.createCustomer(username);
         customer = await models.user.create({
             id: stripeCustomer.id,
-            email: username,
-            hash,
+            username,
+            passHash,
             role: 'customer',
         });
         await emailRegisterNotification(username);
@@ -129,14 +128,14 @@ authRouter.post('/login', async (req, res) => {
             throw new Error('no user or pass');
         }
 
-        const user = await models.user.findOne({ where: { email: username } });
+        const user = await models.user.findOne({ where: { username } });
         if (!user) {
             throw new Error('user not found');
         }
 
-        const match = await argon2.verify(user.hash, password);
+        const match = await argon2.verify(user.passHash, password);
         if (match) {
-            const { token, key } = await authorize(user.email);
+            const { token, key } = await authorize(user.username);
             const session = crypto.randomBytes(20).toString('hex');
             user.set('pasetoSecret', key);
             user.set('session', session);

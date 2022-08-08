@@ -1,4 +1,17 @@
-import { DataTypes, Sequelize, BelongsToManyAddAssociationMixin, BelongsToManyRemoveAssociationMixin, BelongsToManyAddAssociationsMixin, BelongsToManyRemoveAssociationsMixin, BelongsToManyCountAssociationsMixin, Association, Model, BelongsToManyGetAssociationsMixin, BelongsToManySetAssociationsMixin } from 'sequelize';
+import {
+    DataTypes,
+    Sequelize,
+    BelongsToManyAddAssociationMixin,
+    BelongsToManyRemoveAssociationMixin,
+    BelongsToManyAddAssociationsMixin,
+    BelongsToManyRemoveAssociationsMixin,
+    BelongsToManyCountAssociationsMixin,
+    Association,
+    Model,
+    BelongsToManyGetAssociationsMixin,
+    BelongsToManySetAssociationsMixin,
+    Optional
+} from 'sequelize';
 import { ModelExport, ModelMap } from '../types';
 import { product } from './product';
 
@@ -6,20 +19,20 @@ export const UserRoles = ['admin', 'customer'] as const;
 
 export interface UserAttributes {
     id: string;
-    email: string;
+    username: string;
     session: string;
-    hash?: string;
+    passHash: string;
     role: typeof UserRoles[number];
-    pasetoSecret?: string | undefined;
-    resetToken?: string | undefined;
+    pasetoSecret?: string;
+    resetToken?: string;
 }
 
-interface UserCreationAttributes extends Omit<UserAttributes, 'pasetoSecret' | 'resetToken' | 'session'> {}
+interface UserCreationAttributes extends Optional<Omit<UserAttributes, 'pasetoSecret' | 'resetToken' | 'session'>, 'id'> {}
 
 export class user extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes{
     declare id: string;
-    declare email: string;
-    declare hash: string;
+    declare username: string;
+    declare passHash: string;
     declare session: string;
     declare role: typeof UserRoles[number];
     declare pasetoSecret?: string;
@@ -49,9 +62,10 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<
                 type: dataTypes.STRING,
                 primaryKey: true,
                 unique: true,
+                defaultValue: dataTypes.UUIDV4,
             },
-            email: dataTypes.TEXT,
-            hash: dataTypes.TEXT,
+            username: dataTypes.TEXT,
+            passHash: dataTypes.TEXT,
             pasetoSecret: {
                 type: dataTypes.TEXT,
                 field: 'paseto_secret',

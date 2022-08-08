@@ -21,7 +21,10 @@
     "watchAndLintCheckApp": "nodemon --config nodemon.frontend.json",
     "watchAndLintCheckServer": "nodemon --config nodemon.backend.json",
     "watchServer": "cd server && cross-env NODE_ENV=development swc src -d build -w",
-    "windowsDev": "powershell contrib/dev.ps1"
+    "windowsDev": "powershell contrib/dev.ps1",
+    "bundle": "run-script-os",
+    "bundle:win32": "del yarn.lock && del sycpiano.zip && yarn cache clean && yarn workspaces focus --production && git archive --format=zip --output ./sycpiano.zip main && 7z a -r sycpiano.zip web/build server/build",
+    "bundle:linux": "rm yarn.lock && rm sycpiano.zip && yarn cache clean && yarn workspaces focus --production && git archive --format=zip --output ./sycpiano.zip main && zip -r sycpiano.zip web/build server/build"
   },
   "resolutions": {
     "@pm2/agent/ws": "^7.5.8",
@@ -70,6 +73,7 @@
     "postcss": "^8.4.14",
     "process": "^0.11.10",
     "qs": "^6.11.0",
+    "run-script-os": "^1.1.6",
     "sequelize": "^6.21.3",
     "sharp": "^0.30.7",
     "stripe": "^9.12.0",
