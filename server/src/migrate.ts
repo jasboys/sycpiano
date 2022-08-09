@@ -3,7 +3,7 @@ import { SequelizeStorage, Umzug } from 'umzug';
 
 import sequelize from './sequelize';
 
-const umzug = new Umzug({
+export const umzug = new Umzug({
     storage: new SequelizeStorage({
         sequelize,
         modelName: 'migrations',
@@ -29,4 +29,6 @@ const umzug = new Umzug({
     logger: console,
 });
 
-umzug.runAsCLI();
+if (require.main === module) {
+    umzug.runAsCLI();
+}

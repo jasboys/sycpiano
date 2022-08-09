@@ -7,6 +7,14 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 require('dotenv').config();
 
+if (!process.env.STRIPE_PUBLIC_KEY) {
+    throw Error('STRIPE_PUBLIC_KEY not defined');
+}
+
+if (!process.env.GAPI_KEY_APP) {
+    throw Error('GAPI_KEY_APP not defined');
+}
+
 const staticPrefix = '/static';
 
 const sourcePaths = [

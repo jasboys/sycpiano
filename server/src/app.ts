@@ -13,12 +13,15 @@ import * as cookieParser from 'cookie-parser';
 import * as csurf from 'csurf';
 import * as cors from 'cors';
 import * as rootPath from 'app-root-path';
+import { precheck } from './precheck';
 
 const main = async () => {
+    await precheck();
+
     const isProduction = process.env.NODE_ENV === 'production';
 
     if (!process.env.PORT) {
-        throw new Error('No port number specified in environmental variables');
+        throw Error('No port number specified in environmental variables');
     }
     const port = parseInt(process.env.PORT, 10);
 
@@ -111,7 +114,7 @@ const main = async () => {
     // prod uses nginx to serve static files
     if (!isProduction) {
         if (!process.env.MUSIC_ASSETS_DIR || !process.env.IMAGE_ASSETS_DIR) {
-            throw new Error('Necessary environmental variables not found');
+            throw Error('Necessary environmental variables not found');
         }
         app.use('/static/music', express.static(path.resolve(rootPath.toString(), process.env.MUSIC_ASSETS_DIR)));
         app.use('/static/images', express.static(path.resolve(rootPath.toString(), process.env.IMAGE_ASSETS_DIR)));
@@ -146,7 +149,7 @@ const main = async () => {
     };
 
     if (!process.env.COOKIE_SECRET) {
-        throw new Error('No cookie secret specified in environmental variables.');
+        throw Error('No cookie secret specified in environmental variables.');
     }
     const adminMiddlewares = [
         cors(corsOptions),
@@ -165,7 +168,7 @@ const main = async () => {
     app.use(/\/resized/, Resized);
 
     if (!process.env.ADMIN_PORT) {
-        throw new Error('No admin port specified in environmental variables.');
+        throw Error('No admin port specified in environmental variables.');
     }
     // Admin
     app.use(
