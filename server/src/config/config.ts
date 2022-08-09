@@ -21,7 +21,7 @@ const config = () => {
     let host: string;
     let database: string;
     let port: number;
-    const dbUrl = process.env.DATABASE_URL;
+    const dbUrl = process.env.DB_URL;
     if (dbUrl) {
         let portString;
         const match = dbUrl.match(/postgres:\/\/(.+):(.+)@(.+):(.+)\/(.+)/);

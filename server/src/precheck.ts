@@ -12,14 +12,12 @@ const required = [
     'STRIPE_WEBHOOK_KEY',
     'COOKIE_SECRET',
     'PRODUCTS_DIR',
-    'IMAGE_ASSETS_DIR',
-    'MUSIC_ASSETS_DIR',
     'DKIM_PRIVATE_KEY_FILE',
     'SMTP_HOST',
     'SMTP_PORT',
     'SMTP_USERNAME',
     'SMTP_PASSWORD'
-]
+];
 
 export const precheck = async () => {
     // Check DB stuff

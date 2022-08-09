@@ -1,3 +1,6 @@
+/* eslint-disable no-var, strict, prefer-arrow-callback */
+'use strict';
+
 module.exports = {
     apps: [
         {
