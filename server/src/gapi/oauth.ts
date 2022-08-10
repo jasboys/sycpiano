@@ -2,14 +2,11 @@ import { JWT } from 'google-auth-library';
 import { token } from '../models/token';
 import * as Sequelize from 'sequelize';
 
-/* eslint-disable-next-line @typescript-eslint/no-var-requires*/
-const authInfo = require('../../gapi-key.json');
-
 const authorize = async () => {
     const jwt = new JWT(
-        authInfo.client_email,
+        process.env.GAPI_CLIENT_EMAIL,
         undefined,
-        authInfo.private_key,
+        process.env.GAPI_PRIVATE_KEY,
         ['https://www.googleapis.com/auth/calendar'],
         undefined,
     );

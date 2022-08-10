@@ -22,5 +22,7 @@ declare namespace Express {
       SEED_DATA_DIR: string;
       STRIPE_SECRET_KEY: string;
       STRIPE_WEBHOOK_KEY: string;
+      GAPI_CLIENT_EMAIL: string;
+      GAPI_PRIVATE_KEY: string;
     }
   }
