@@ -73,6 +73,7 @@ const FAQs: React.FC<Record<string, unknown>> = () => {
                             </Markdown>
                             <Markdown
                                 options={{
+                                    forceBlock: true,
                                     overrides: {
                                         p: Answer,
                                         a: Anchor,

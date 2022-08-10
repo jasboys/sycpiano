@@ -56,7 +56,8 @@ const TextGroup = styled.div({
     [screenXSorPortrait]: {
         backgroundColor: 'white',
         padding: '20px 20px',
-    }
+    },
+    fontFamily: lato2
 });
 
 const TextContainer = styled.div({
@@ -98,6 +99,7 @@ const BioText: React.FunctionComponent<BioTextProps> = (props) => {
                         <Markdown
                             key={i}
                             options={{
+                                forceBlock: true,
                                 overrides: {
                                     p: Paragraph,
                                     strong: NameSpan,
