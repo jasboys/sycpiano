@@ -12,9 +12,6 @@ export const up = async (queryInterface: QueryInterface): Promise<void> => {
         CREATE INDEX customer_product_product_idx ON "public"."customer_product"("product_id");
         CREATE INDEX disc_link_disc_idx ON "public"."disc_link"("disc_id");
         CREATE INDEX music_file_music_idx ON "public"."music_file"("music_id");
-
-        COMMENT ON COLUMN "public"."music_file"."music" IS E'@name music_temp\n@omit many';
-        COMMENT ON CONSTRAINT "music_file_music_id_fkey" ON "public"."music_file" IS E'@fieldName music';
     `);
 };
 
@@ -28,8 +25,5 @@ export const down = async (queryInterface: QueryInterface): Promise<void> => {
         DROP INDEX IF EXISTS customer_product_product_idx;
         DROP INDEX IF EXISTS disc_link_disc_idx;
         DROP INDEX IF EXISTS music_file_music_idx;
-
-        COMMENT ON COLUMN "public"."music_file"."music_id" IS NULL;
-        COMMENT ON CONSTRAINT "music_file_music_id_fkey" ON "public"."music_file" IS NULL;
     `);
 };
