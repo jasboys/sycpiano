@@ -7,6 +7,8 @@ module.exports = {
             name: "sycpiano",
             script: "yarn",
             args: "start",
+            exec_mode: "fork",
+            interpreter: "/bin/bash",
             env: {
                 NODE_ENV: "production",
             },
