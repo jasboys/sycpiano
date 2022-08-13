@@ -2,19 +2,6 @@ import * as dotenv from 'dotenv';
 import { Dialect } from 'sequelize/types';
 dotenv.config();
 
-export const development = {
-    host: '127.0.0.1',
-    database: 'sycpiano',
-    port: 5432,
-    username: process.env.DB_USER,
-    password: process.env.DB_PASS,
-    dialect: 'postgres' as Dialect,
-    logging: (str: string): void => {
-        console.log(str);
-    },
-    define: { freezeTableName: true, underscored: true },
-};
-
 const config = () => {
     let username: string;
     let password: string;
@@ -57,5 +44,11 @@ const config = () => {
     };
 };
 
+export const development = {
+    ...config(),
+    logging: (str: string) => {
+        console.log(str);
+    }
+}
 export const test = config();
 export const production = config();

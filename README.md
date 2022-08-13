@@ -107,7 +107,7 @@ create role <username> with login password '<quoted password>'
 There's a separate repo sycpiano_admin for the CRUD interface for the backend. In order for that to work, you need to create an admin user first by (after building server):
 
 ```
-$ node ./server/build/createAdmin.js username password
+$ yarn node ./server/build/createAdmin.js username password
 ```
 
 ## Migrations and Seeding
