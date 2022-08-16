@@ -9,7 +9,7 @@ type CustomerReturn = Stripe.Customer | Stripe.DeletedCustomer;
 type ProductReturn = string | Stripe.Product | Stripe.DeletedProduct;
 
 const CURRENCY = 'USD';
-const THUMBNAIL_STATIC = '/static/images/products/thumbnails/';
+const THUMBNAIL_STATIC = 'https://seanchenpiano.com/static/images/products/thumbnails/';
 
 // const isDev = process.env.NODE_ENV === 'development';
 const host = process.env.HOST;
