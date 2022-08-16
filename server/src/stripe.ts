@@ -9,7 +9,7 @@ type CustomerReturn = Stripe.Customer | Stripe.DeletedCustomer;
 type ProductReturn = string | Stripe.Product | Stripe.DeletedProduct;
 
 const CURRENCY = 'USD';
-const THUMBNAIL_STATIC = 'https://seanchenpiano.com/static/images/products/thumbnails/';
+export const THUMBNAIL_STATIC = 'https://seanchenpiano.com/static/images/products/thumbnails/';
 
 // const isDev = process.env.NODE_ENV === 'development';
 const host = process.env.HOST;
@@ -23,9 +23,9 @@ export const productIsObject = (pr: ProductReturn): pr is Stripe.Product => {
     return (typeof pr !== 'string') && pr.deleted !== true;
 };
 
-export const getPricesAndProducts = async (): Promise<Stripe.Price[]> => {
+export const getPricesAndProducts = async (): Promise<Stripe.Product[]> => {
     try {
-        const result = await stripe.prices.list({ expand: ['data.product'] });
+        const result = await stripe.products.list({ expand: ['data.default_price'] });
         return result.data;
     } catch (e) {
         console.error(e);
@@ -79,10 +79,10 @@ export const createCheckoutSession = async (productIDs: string[], priceIDs: stri
                 cancel_url: `${host}/shop`,
                 payment_method_types: ['card'],
                 line_items: priceIDs.map((id) =>
-                    ({
-                        price: id,
-                        quantity: 1
-                    })
+                ({
+                    price: id,
+                    quantity: 1
+                })
                 ),
                 customer: customerId,
                 payment_intent_data: {
@@ -138,9 +138,11 @@ export const createProduct = async (attributes: Omit<ProductAttributes, 'created
             description: attributes.description,
             metadata: {
                 format: 'pdf',
+                file: attributes.file,
                 pages: attributes.pages,
                 sample: attributes.sample,
                 permalink: attributes.permalink,
+                type: attributes.type,
             },
             images: attributes.images.map((img) =>
                 `${THUMBNAIL_STATIC}${img}`
@@ -177,6 +179,7 @@ export const updateProduct = async (attributes: Omit<ProductAttributes, 'created
                 description: attributes.description,
                 metadata: {
                     format: 'pdf',
+                    file: attributes.file,
                     pages: attributes.pages,
                     sample: attributes.sample,
                     type: attributes.type,
@@ -204,7 +207,7 @@ export const updateProduct = async (attributes: Omit<ProductAttributes, 'created
     }
 };
 
-export const getCheckoutSession = async (sessionId: string): Promise<{ session: Stripe.Checkout.Session; lineItems: Stripe.LineItem[] } > => {
+export const getCheckoutSession = async (sessionId: string): Promise<{ session: Stripe.Checkout.Session; lineItems: Stripe.LineItem[] }> => {
     try {
         const session = await stripe.checkout.sessions.retrieve(sessionId);
         const lineItems = await stripe.checkout.sessions.listLineItems(sessionId);
@@ -218,4 +221,4 @@ export const getCheckoutSession = async (sessionId: string): Promise<{ session: 
         console.error(`Could not retrieve session with id ${sessionId}`);
         throw e;
     }
-}
+};

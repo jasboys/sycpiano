@@ -16,6 +16,17 @@ import { product } from './models/product';
 import { user } from './models/user';
 import { userProduct } from './models/userProduct'
 import { faq } from './models/faq';
+import { Actions as CrudActions } from 'express-crud-router';
+import { Request, Response } from 'express';
+
+export type UpdateMany<R> = (ids: string[], data: R, opts?: {
+    req: Request;
+    res: Response;
+}) => Promise<any>
+
+export interface Actions<I extends string | number, R> extends CrudActions<I, R> {
+    updateMany: UpdateMany<R>;
+}
 
 type Model = Sequelize.Model<any, any>
 type ModelStatic<T extends Model> = Sequelize.ModelStatic<T>;

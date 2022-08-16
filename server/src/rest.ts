@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
 import * as express from 'express';
-import { fn, literal, Model, ModelStatic, Op, Order, UUID, ValidationError, where, WhereOptions } from 'sequelize';
-import crud, { Actions } from 'express-crud-router';
+import { Attributes, fn, literal, Model, ModelStatic, Op, Order, UUID, ValidationError, where, WhereOptions } from 'sequelize';
+import crud from 'express-crud-router';
 
 dotenv.config();
 
@@ -16,6 +16,7 @@ import { collaborator, CollaboratorAttributes } from './models/collaborator';
 import { piece, PieceAttributes } from './models/piece';
 import { CalendarPieceAttributes } from './models/calendarPiece';
 import { CalendarCollaboratorAttributes } from './models/calendarCollaborator';
+import { Actions } from './types';
 
 const adminRest = express.Router();
 
@@ -59,7 +60,7 @@ const replaceKeysDeep = (obj: { [k: string]: any }, keysMap: { [k: string]: stri
 
 const EXCLUDE_TIMESTAMPS = ['created_at', 'updated_at', 'createdAt', 'updatedAt'];
 
-const sequelizeCrud = <I extends string | number, M extends Model, R extends M['_attributes']>(
+const sequelizeCrud = <I extends string | number, M extends Model, R extends Attributes<M>>(
     model: ModelStatic<M>,
 ): Omit<Actions<I, R>, 'search'> => {
     return {
@@ -75,6 +76,20 @@ const sequelizeCrud = <I extends string | number, M extends Model, R extends M['
                 throw new Error('Record not found');
             }
             return record.update(body)
+        },
+        updateMany: async (ids, body) => {
+            const records = await model.update(body,
+                {
+                    where: {
+                        id: ids as any
+                    },
+                    returning: true,
+                },
+            );
+            return {
+                count: records[0],
+                rows: records[1],
+            };
         },
         getOne: async id => {
             const m = await model.findByPk(id, {

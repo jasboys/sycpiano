@@ -2,6 +2,7 @@ import * as Promise from 'bluebird';
 import * as dotenv from 'dotenv';
 import * as express from 'express';
 import * as stripeClient from './stripe';
+import { ProductTypes } from './models/product';
 import axios, { AxiosError } from 'axios';
 
 dotenv.config();
@@ -13,6 +14,7 @@ import {
 import db from './models';
 import { calendar } from './models/calendar';
 import { RequestWithBody, respondWithError } from './rest';
+import { ProductCreationAttributes } from './models/product';
 
 const actionsRouter = express.Router();
 
@@ -294,9 +296,9 @@ actionsRouter.post('/calendar/sync', async (_: express.Request, res: express.Res
 actionsRouter.post('/product/populate-test-data', async (_: express.Request, res: express.Response) => {
     const pricesAndProducts = await stripeClient.getPricesAndProducts();
     try {
-        await db.sequelize.getQueryInterface().bulkInsert('product', pricesAndProducts.map((pp) => {
+        const prods = await db.models.product.bulkCreate(pricesAndProducts.map((prod): ProductCreationAttributes => {
             try {
-                const product = pp.product
+                const product = prod
                 if (!stripeClient.productIsObject(product)) {
                     throw Error('Product expansion failed, or no product tied to Price.');
                 }
@@ -304,26 +306,45 @@ actionsRouter.post('/product/populate-test-data', async (_: express.Request, res
                     id,
                     name,
                     description,
-                    metadata,
+                    metadata: {
+                        type, sample, pages, permalink, file
+                    },
                     images,
+                    default_price,
                 } = product;
+                if (typeof default_price === 'string' || !default_price) {
+                    throw Error('default_price not expanded');
+                }
                 return {
                     id,
                     name,
-                    description,
-                    price: pp.unit_amount,
-                    pages: parseInt(metadata.pages),
-                    file: metadata.file,
-                    images,
-                    type: metadata.type,
-                    sample: metadata.sample,
-                    price_id: pp.id,
+                    description: description ?? '',
+                    price: default_price.unit_amount ?? 0,
+                    pages: parseInt(pages),
+                    file: file ?? '',
+                    images: images.length ? images.map((v) => v.replace(stripeClient.THUMBNAIL_STATIC, '')) : undefined,
+                    type: type as typeof ProductTypes[number],
+                    sample,
+                    priceID: default_price.id ?? '',
+                    permalink: permalink ?? '',
                 };
             } catch (e) {
                 throw e;
             }
-        }));
-        res.sendStatus(200);
+        }), {
+            hooks: false,
+            individualHooks: false,
+            updateOnDuplicate: [
+                'file', 'name', 'permalink', 'description', 'sample', 'images', 'price', 'priceID', 'type',
+            ],
+        });
+        const reProds = await db.models.product.findAndCountAll({
+            where: {
+                id: prods.map((p) => p.id)
+            },
+        })
+        res.header('x-total-count', reProds.count.toFixed(0));
+        res.sendStatus(200).json(reProds.rows);
     } catch (e) {
         respondWithError(e, res);
     }
