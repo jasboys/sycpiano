@@ -824,7 +824,8 @@ adminRest.post('/actions/products/pull-from-stripe', async (_: express.Request, 
         })
         res
             .header('x-total-count', reProds.count.toFixed(0))
-            .sendStatus(200).json(reProds.rows);
+            .status(200)
+            .json(reProds.rows);
     } catch (e) {
         respondWithError(e, res);
     }
