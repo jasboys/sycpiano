@@ -801,7 +801,7 @@ adminRest.post('/actions/products/pull-from-stripe', async (_: express.Request, 
                     price: default_price.unit_amount ?? 0,
                     pages: parseInt(pages),
                     file: file ?? '',
-                    images: images.length ? images.map((v) => v.replace(stripeClient.THUMBNAIL_STATIC, '')) : undefined,
+                    images: (images.length !== 0) ? images.map((v) => v.replace(stripeClient.THUMBNAIL_STATIC, '')) : undefined,
                     type: type as typeof ProductTypes[number],
                     sample,
                     priceID: default_price.id ?? '',
@@ -822,8 +822,9 @@ adminRest.post('/actions/products/pull-from-stripe', async (_: express.Request, 
                 id: prods.map((p) => p.id)
             },
         })
-        res.header('x-total-count', reProds.count.toFixed(0));
-        res.sendStatus(200).json(reProds.rows);
+        res
+            .header('x-total-count', reProds.count.toFixed(0))
+            .sendStatus(200).json(reProds.rows);
     } catch (e) {
         respondWithError(e, res);
     }
