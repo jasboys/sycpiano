@@ -2,6 +2,8 @@ import * as dotenv from 'dotenv';
 import * as express from 'express';
 import { Attributes, fn, literal, Model, ModelStatic, Op, Order, UUID, ValidationError, where, WhereOptions } from 'sequelize';
 import crud from 'express-crud-router';
+import * as stripeClient from './stripe';
+import { ProductCreationAttributes, ProductTypes } from './models/product';
 
 dotenv.config();
 
@@ -768,5 +770,63 @@ adminRest.use(crud('/photos', sequelizeCrud(models.photo)));
 adminRest.use(crud('/customers', sequelizeCrud(models.user)));
 adminRest.use(crud('/products', sequelizeCrud(models.product)));
 adminRest.use(crud('/faqs', sequelizeCrud(models.faq)));
+
+adminRest.post('/product/populate-test-data', async (_: express.Request, res: express.Response) => {
+    const pricesAndProducts = await stripeClient.getPricesAndProducts();
+    try {
+        const prods = await db.models.product.bulkCreate(pricesAndProducts.map((prod): ProductCreationAttributes => {
+            try {
+                const product = prod
+                if (!stripeClient.productIsObject(product)) {
+                    throw Error('Product expansion failed, or no product tied to Price.');
+                }
+                const {
+                    id,
+                    name,
+                    description,
+                    metadata: {
+                        type, sample, pages, permalink, file
+                    },
+                    images,
+                    default_price,
+                } = product;
+                if (typeof default_price === 'string' || !default_price) {
+                    throw Error('default_price not expanded');
+                }
+                return {
+                    id,
+                    name,
+                    description: description ?? '',
+                    price: default_price.unit_amount ?? 0,
+                    pages: parseInt(pages),
+                    file: file ?? '',
+                    images: images.length ? images.map((v) => v.replace(stripeClient.THUMBNAIL_STATIC, '')) : undefined,
+                    type: type as typeof ProductTypes[number],
+                    sample,
+                    priceID: default_price.id ?? '',
+                    permalink: permalink ?? '',
+                };
+            } catch (e) {
+                throw e;
+            }
+        }), {
+            hooks: false,
+            individualHooks: false,
+            updateOnDuplicate: [
+                'file', 'name', 'permalink', 'description', 'sample', 'images', 'price', 'priceID', 'type',
+            ],
+        });
+        const reProds = await db.models.product.findAndCountAll({
+            where: {
+                id: prods.map((p) => p.id)
+            },
+        })
+        res.header('x-total-count', reProds.count.toFixed(0));
+        res.sendStatus(200).json(reProds.rows);
+    } catch (e) {
+        respondWithError(e, res);
+    }
+});
+
 
 export const AdminRest = adminRest;

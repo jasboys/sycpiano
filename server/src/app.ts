@@ -14,7 +14,6 @@ import * as csurf from 'csurf';
 import * as cors from 'cors';
 import * as rootPath from 'app-root-path';
 import { precheck } from './precheck';
-import { ActionsRouter } from './actions';
 
 const main = async () => {
     await precheck();
@@ -164,7 +163,6 @@ const main = async () => {
 
     // Custom api endpoint
     app.use(/\/rest/, adminMiddlewares, authAndGetRole, checkAdmin, AdminRest);
-    app.use(/\/actions/, adminMiddlewares, authAndGetRole, checkAdmin, ActionsRouter);
 
     // Resize images
     app.use(/\/resized/, Resized);
