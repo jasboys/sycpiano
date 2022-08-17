@@ -26,6 +26,7 @@ adminRest.use(express.json());
 adminRest.use(express.urlencoded({ extended: true }));
 
 export const respondWithError = (error: any, res: express.Response): void => {
+    console.error(error);
     if (error instanceof ValidationError) {
         res.status(400).json({
             error: (error as ValidationError).errors.reduce((reduce, err) => {
@@ -772,11 +773,11 @@ adminRest.use(crud('/products', sequelizeCrud(models.product)));
 adminRest.use(crud('/faqs', sequelizeCrud(models.faq)));
 
 adminRest.post('/actions/products/pull-from-stripe', async (_: express.Request, res: express.Response) => {
-    const pricesAndProducts = await stripeClient.getPricesAndProducts();
     try {
+        const pricesAndProducts = await stripeClient.getPricesAndProducts();
         const prods = await db.models.product.bulkCreate(pricesAndProducts.map((prod): ProductCreationAttributes => {
             try {
-                const product = prod
+                const product = prod;
                 if (!stripeClient.productIsObject(product)) {
                     throw Error('Product expansion failed, or no product tied to Price.');
                 }
@@ -827,6 +828,5 @@ adminRest.post('/actions/products/pull-from-stripe', async (_: express.Request, 
         respondWithError(e, res);
     }
 });
-
 
 export const AdminRest = adminRest;

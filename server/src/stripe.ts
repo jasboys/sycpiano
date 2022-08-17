@@ -147,13 +147,16 @@ export const createProduct = async (attributes: Omit<ProductAttributes, 'created
             images: attributes.images.map((img) =>
                 `${THUMBNAIL_STATIC}${img}`
             ),
+            default_price_data: {
+                currency: CURRENCY,
+                unit_amount: attributes.price,
+            }
         });
-        const price = await stripe.prices.create({
-            currency: CURRENCY,
-            unit_amount: attributes.price,
-            product: product.id,
-        });
-        return [product.id, price.id];
+        const priceId = (typeof product.default_price === 'string') ? product.default_price : product.default_price?.id;
+        if (priceId === undefined) {
+            throw Error('No Price ID');
+        }
+        return [product.id, priceId];
     } catch (e) {
         console.error(`Couldn't create product.`, e);
         throw e;
@@ -171,7 +174,17 @@ export const deleteProduct = async (id: string): Promise<Stripe.Response<Stripe.
 
 export const updateProduct = async (attributes: Omit<ProductAttributes, 'createdAt' | 'updatedAt'>): Promise<string[]> => {
     try {
-        console.log(attributes.id);
+        let price = await stripe.prices.retrieve(attributes.priceID);
+        if (attributes.price !== price.unit_amount) {
+            await stripe.prices.update(attributes.priceID, { active: false });
+            const prodId = typeof price.product === 'string' ? price.product : price.product.id
+            price = await stripe.prices.create({
+                currency: CURRENCY,
+                unit_amount: attributes.price,
+                product: prodId,
+            });
+            // return [product.id, newPrice.id];
+        }
         const product = await stripe.products.update(
             attributes.id,
             {
@@ -188,19 +201,10 @@ export const updateProduct = async (attributes: Omit<ProductAttributes, 'created
                 images: attributes.images.map((img) =>
                     `${THUMBNAIL_STATIC}${img}`
                 ),
+                default_price: price.id,
             },
         );
-        const oldPrice = await stripe.prices.retrieve(attributes.priceID);
-        if (attributes.price !== oldPrice.unit_amount) {
-            await stripe.prices.update(attributes.priceID, { active: false });
-            const newPrice = await stripe.prices.create({
-                currency: CURRENCY,
-                unit_amount: attributes.price,
-                product: product.id,
-            });
-            return [product.id, newPrice.id];
-        }
-        return [product.id, attributes.priceID];
+        return [product.id, price.id];
     } catch (e) {
         console.error(`Couldn't update product.`, e);
         throw e;
