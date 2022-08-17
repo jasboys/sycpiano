@@ -771,7 +771,7 @@ adminRest.use(crud('/customers', sequelizeCrud(models.user)));
 adminRest.use(crud('/products', sequelizeCrud(models.product)));
 adminRest.use(crud('/faqs', sequelizeCrud(models.faq)));
 
-adminRest.post('/product/populate-test-data', async (_: express.Request, res: express.Response) => {
+adminRest.post('/actions/products/pull-from-stripe', async (_: express.Request, res: express.Response) => {
     const pricesAndProducts = await stripeClient.getPricesAndProducts();
     try {
         const prods = await db.models.product.bulkCreate(pricesAndProducts.map((prod): ProductCreationAttributes => {
