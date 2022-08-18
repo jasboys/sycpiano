@@ -77,7 +77,7 @@ const scaleDown = (tl: gsap.core.Tween) => {
 
 const scaleUp = (el: HTMLDivElement) => {
     const tl = gsap.fromTo(el, {
-        duartion: 0.1,
+        duration: 0.1,
         transform: 'scale(1)'
     }, {
         transform: 'scale(2)',
