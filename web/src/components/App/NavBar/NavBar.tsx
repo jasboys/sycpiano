@@ -98,7 +98,7 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
                     <StyledNavAndCart isMobile={true}>
                         <CartButton
                             isHome={isHome}
-                            ref={ref}   /* eslint-disable-line @typescript-eslint/no-empty-function */
+                            ref={ref}
                         />
                         <HamburgerNav
                             currentBasePath={currentBasePath}

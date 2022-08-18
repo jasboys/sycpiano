@@ -43,7 +43,7 @@ interface LazyImageProps {
         readonly desktop?: SerializedStyles;
         readonly loading?: SerializedStyles;
     };
-    readonly loadingComponent?: React.ReactNode | 'default';
+    readonly loadingComponent?: 'default' | React.ComponentType<{ isMobile: boolean }>;
     readonly alt: string;
     readonly successCb?: (el?: Element | HTMLElement | HTMLImageElement) => void;
     readonly destroyCb?: () => void;
@@ -107,9 +107,15 @@ export const LazyImage: React.FC<LazyImageProps> = (props) => {
         id,
         isMobile,
         alt,
-        loadingComponent,
+        loadingComponent: LoadingComponent,
     } = props;
-    const Loading = (loadingComponent as typeof React.Component);
+    let Loading: React.ComponentType<{ isMobile: boolean }> | typeof StyledLoadingInstance | undefined;
+    if (LoadingComponent === 'default') {
+        Loading = StyledLoadingInstance;
+    } else {
+        Loading = LoadingComponent;
+    }
+
     const sourceProps = isMobile ?
         {
             'data-srcset': mobileAttributes?.webp?.srcset,
@@ -144,7 +150,7 @@ export const LazyImage: React.FC<LazyImageProps> = (props) => {
     return (
         <React.Fragment>
             <Transition<undefined>
-                in={!!loadingComponent && !isLoaded}
+                in={!!LoadingComponent && !isLoaded}
                 mountOnEnter={true}
                 unmountOnExit={true}
                 onEnter={fadeOnEnter()}
@@ -152,12 +158,7 @@ export const LazyImage: React.FC<LazyImageProps> = (props) => {
                 timeout={250}
             >
                 <div css={csss?.loading}>
-                    {loadingComponent === 'default'
-                        ? <StyledLoadingInstance />
-                        : loadingComponent
-                            ? <Loading isMobile={isMobile} />
-                            : null
-                    }
+                    {!!Loading ? <Loading isMobile={props.isMobile} /> : null}
                 </div>
             </Transition>
 

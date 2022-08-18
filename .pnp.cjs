@@ -4063,7 +4063,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@types-hoist-non-react-statics-npm-3.3.1-c0081332b2-2c0778570d.zip/node_modules/@types/hoist-non-react-statics/",\
           "packageDependencies": [\
             ["@types/hoist-non-react-statics", "npm:3.3.1"],\
-            ["@types/react", "npm:18.0.17"],\
+            ["@types/react", "npm:17.0.48"],\
             ["hoist-non-react-statics", "npm:3.3.2"]\
           ],\
           "linkType": "HARD"\
@@ -4311,16 +4311,6 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["csstype", "npm:3.1.0"]\
           ],\
           "linkType": "HARD"\
-        }],\
-        ["npm:18.0.17", {\
-          "packageLocation": "./.yarn/cache/@types-react-npm-18.0.17-c4860cbae4-18cae64f5b.zip/node_modules/@types/react/",\
-          "packageDependencies": [\
-            ["@types/react", "npm:18.0.17"],\
-            ["@types/prop-types", "npm:15.7.5"],\
-            ["@types/scheduler", "npm:0.16.2"],\
-            ["csstype", "npm:3.1.0"]\
-          ],\
-          "linkType": "HARD"\
         }]\
       ]],\
       ["@types/react-copy-to-clipboard", [\
@@ -4328,7 +4318,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@types-react-copy-to-clipboard-npm-5.0.4-cc4f7d72b2-c0fe51b79a.zip/node_modules/@types/react-copy-to-clipboard/",\
           "packageDependencies": [\
             ["@types/react-copy-to-clipboard", "npm:5.0.4"],\
-            ["@types/react", "npm:18.0.17"]\
+            ["@types/react", "npm:17.0.48"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -4348,7 +4338,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@types-react-helmet-npm-6.1.5-f6dfe85617-d059cc084d.zip/node_modules/@types/react-helmet/",\
           "packageDependencies": [\
             ["@types/react-helmet", "npm:6.1.5"],\
-            ["@types/react", "npm:18.0.17"]\
+            ["@types/react", "npm:17.0.48"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -4358,7 +4348,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@types-react-is-npm-17.0.3-1deb53884e-6abb7c47d5.zip/node_modules/@types/react-is/",\
           "packageDependencies": [\
             ["@types/react-is", "npm:17.0.3"],\
-            ["@types/react", "npm:18.0.17"]\
+            ["@types/react", "npm:17.0.48"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -4368,7 +4358,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/@types-react-transition-group-npm-4.4.5-8f92107b07-265f1c7406.zip/node_modules/@types/react-transition-group/",\
           "packageDependencies": [\
             ["@types/react-transition-group", "npm:4.4.5"],\
-            ["@types/react", "npm:18.0.17"]\
+            ["@types/react", "npm:17.0.48"]\
           ],\
           "linkType": "HARD"\
         }]\

@@ -77,10 +77,10 @@ const scaleDown = (tl: gsap.core.Tween) => {
 
 const scaleUp = (el: HTMLDivElement) => {
     const tl = gsap.fromTo(el, {
-        duration: 0.1,
-        transform: 'scale(1)'
+        scale: 1
     }, {
-        transform: 'scale(2)',
+        duration: 0.1,
+        scale: 2,
         onComplete: () => {
             scaleDown(tl);
         }
@@ -95,17 +95,26 @@ const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(({ isHome }
     const cartCount = useAppSelector(({ cart }) => cart.items.length);
     const cartIsInit = useAppSelector(({ cart }) => cart.isInit);
     const cartOpened = useAppSelector(({ cart }) => cart.visible);
-    const cartRef = React.useRef<HTMLDivElement>();
+    const cartRef = React.useRef<HTMLDivElement | null>(null);
     const { medium } = useMedia({ queries: screenBreakPoints });
     const dispatch = useAppDispatch();
 
     React.useEffect(() => {
         const el = cartRef.current;
-
+        console.log(el, cartIsInit);
         if (el && cartIsInit) {
             scaleUp(el);
         }
     }, [cartCount]);
+
+    const makeRef = React.useCallback((el: HTMLDivElement) => {
+        cartRef.current = el;
+        if (typeof ref === 'function') {
+            ref(el);
+        } else if (!!ref) {
+            ref.current = el;
+        }
+    }, []);
 
     return (
         <StyledCart
@@ -113,7 +122,7 @@ const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(({ isHome }
             isMobile={medium}
             onClick={() => dispatch(toggleCartList())}
             isHome={isHome}
-            ref={ref}
+            ref={makeRef}
         >
             <StyledIcon
                 xmlns="http://www.w3.org/2000/svg"
