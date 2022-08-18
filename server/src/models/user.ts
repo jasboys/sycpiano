@@ -20,23 +20,25 @@ export const UserRoles = ['admin', 'customer'] as const;
 export interface UserAttributes {
     id: string;
     username: string;
-    session: string;
-    passHash: string;
+    session?: string;
+    passHash?: string;
     role: typeof UserRoles[number];
     pasetoSecret?: string;
     resetToken?: string;
+    lastRequest?: Date;
 }
 
-interface UserCreationAttributes extends Optional<Omit<UserAttributes, 'pasetoSecret' | 'resetToken' | 'session'>, 'id'> {}
+interface UserCreationAttributes extends Optional<Omit<UserAttributes, 'pasetoSecret' | 'resetToken' | 'session' | 'lastRequest'>, 'id'> {}
 
 export class user extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes{
     declare id: string;
     declare username: string;
-    declare passHash: string;
-    declare session: string;
+    declare passHash?: string;
+    declare session?: string;
     declare role: typeof UserRoles[number];
     declare pasetoSecret?: string;
     declare resetToken?: string;
+    declare lastRequest?: Date;
     declare readonly createdAt?: Date | string;
     declare readonly updatedAt?: Date | string;
 
@@ -84,6 +86,11 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<
             resetToken: {
                 type: dataTypes.TEXT,
                 field: 'reset_token',
+                allowNull: true,
+            },
+            lastRequest: {
+                type: dataTypes.DATE,
+                field: 'last_request',
                 allowNull: true,
             }
         },

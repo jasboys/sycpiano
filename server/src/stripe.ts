@@ -75,8 +75,8 @@ export const createCheckoutSession = async (productIDs: string[], priceIDs: stri
         const session = await stripe.checkout.sessions.create(
             {
                 mode: 'payment',
-                success_url: `${host}/shop/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-                cancel_url: `${host}/shop`,
+                success_url: `https://${host}/shop/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `https://${host}/shop`,
                 payment_method_types: ['card'],
                 line_items: priceIDs.map((id) =>
                 ({
@@ -101,6 +101,7 @@ export const createCheckoutSession = async (productIDs: string[], priceIDs: stri
     }
 }
 
+// To be destroyed
 export const getProductIDsFromPaymentIntent = async (paymentIntent: string): Promise<string[]> => {
     try {
         const intent = await stripe.paymentIntents.retrieve(paymentIntent);

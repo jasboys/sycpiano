@@ -11,6 +11,7 @@ import db from '../models';
 import { Op } from 'sequelize';
 import { ProductTypes } from '../models/product';
 import { pick } from 'lodash';
+import { add, isBefore } from 'date-fns';
 
 const shopRouter = express.Router();
 
@@ -86,13 +87,17 @@ shopRouter.get('/faqs', async (_, res) => {
 
 const getOrCreateLocalCustomer = async (email: string) => {
     try {
-        const stripeCustomer = await stripeClient.getOrCreateCustomer(email);
-        const localCustomer = await db.models.user.findByPk(stripeCustomer.id);
+        const localCustomer = await db.models.user.findOne({
+            where: {
+                username: email
+            }
+        });
 
         if (localCustomer === null) {
+            const stripeCustomer = await stripeClient.getOrCreateCustomer(email);
             return await db.models.user.create({
                 id: stripeCustomer.id,
-                email,
+                username: email,
                 role: 'customer',
             });
         } else {
@@ -183,8 +188,7 @@ shopRouter.post('/get-purchased', async (req, res) => {
     } = req.body;
 
     try {
-        const stripeCustomer = await stripeClient.getCustomer(email);
-        const localCustomer = await db.models.user.findAll({ where: { id: stripeCustomer.id } });
+        const localCustomer = await db.models.user.findAll({ where: { username: email } });
         const purchased = await localCustomer[0].getProducts();
         const purchasedIDs = purchased.map((prod) => prod.id);
         res.json({
@@ -203,11 +207,21 @@ shopRouter.post('/resend-purchased', async (req, res) => {
     } = req.body;
 
     try {
-        const stripeCustomer = await stripeClient.getCustomer(email);
-        const localCustomer = await db.models.user.findAll({ where: { id: stripeCustomer.id } });
+        const localCustomer = await db.models.user.findAll({ where: { username: email } });
+        const lastSent = localCustomer[0].lastRequest;
+        if (lastSent) {
+            const threshold = add(lastSent, { hours: 12 });
+            if (isBefore(new Date(), threshold)) {
+                throw Error('Resending too soon.');
+            }
+        }
         const purchased = await localCustomer[0].getProducts();
+        if (purchased.length === 0) {
+            throw Error('No products purchased');
+        }
         const purchasedIDs = purchased.map((prod) => prod.id);
         await emailPDFs(purchasedIDs, email);
+        await localCustomer[0].update('lastRequest', new Date());
         res.sendStatus(200);
     } catch (e) {
         console.error(`Failed to resend purchased pdfs of email: ${email}`, e);
