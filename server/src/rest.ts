@@ -772,7 +772,10 @@ adminRest.use(crud('/customers', {
     ...sequelizeCrud(models.user),
     getOne: async id => models.user.findByPk(id, {
         include: [{
-            model: models.userProduct,
+            model: models.product,
+            through: {
+                attributes: ['id'],
+            },
             attributes: {
                 exclude: EXCLUDE_TIMESTAMPS,
             }
@@ -785,7 +788,10 @@ adminRest.use(crud('/customers', {
                 exclude: EXCLUDE_TIMESTAMPS,
             },
             include: [{
-                model: models.userProduct,
+                model: models.product,
+                through: {
+                    attributes: ['id'],
+                },
                 attributes: {
                     exclude: EXCLUDE_TIMESTAMPS,
                 },
