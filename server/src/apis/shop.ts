@@ -221,7 +221,7 @@ shopRouter.post('/resend-purchased', async (req, res) => {
         }
         const purchasedIDs = purchased.map((prod) => prod.id);
         await emailPDFs(purchasedIDs, email);
-        await localCustomer[0].update('lastRequest', new Date());
+        await localCustomer[0].update({ lastRequest: new Date() });
         res.sendStatus(200);
     } catch (e) {
         console.error(`Failed to resend purchased pdfs of email: ${email}`, e);
