@@ -176,7 +176,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["serve-favicon", "npm:2.5.0"],\
             ["sharp", "npm:0.30.7"],\
             ["smartcrop-gm", "npm:2.0.2"],\
-            ["stripe", "npm:9.16.0"],\
+            ["stripe", "npm:10.2.0"],\
             ["style-loader", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:3.3.1"],\
             ["stylelint", "npm:14.9.1"],\
             ["stylelint-config-standard", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:26.0.0"],\
@@ -13272,7 +13272,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["serve-favicon", "npm:2.5.0"],\
             ["sharp", "npm:0.30.7"],\
             ["smartcrop-gm", "npm:2.0.2"],\
-            ["stripe", "npm:9.16.0"],\
+            ["stripe", "npm:10.2.0"],\
             ["style-loader", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:3.3.1"],\
             ["stylelint", "npm:14.9.1"],\
             ["stylelint-config-standard", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:26.0.0"],\
@@ -14037,10 +14037,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["stripe", [\
-        ["npm:9.16.0", {\
-          "packageLocation": "./.yarn/cache/stripe-npm-9.16.0-a3a8fd4915-d84eb9ef3f.zip/node_modules/stripe/",\
+        ["npm:10.2.0", {\
+          "packageLocation": "./.yarn/cache/stripe-npm-10.2.0-29463a2e40-56e4f44108.zip/node_modules/stripe/",\
           "packageDependencies": [\
-            ["stripe", "npm:9.16.0"],\
+            ["stripe", "npm:10.2.0"],\
             ["@types/node", "npm:18.6.5"],\
             ["qs", "npm:6.11.0"]\
           ],\

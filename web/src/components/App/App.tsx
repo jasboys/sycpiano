@@ -273,12 +273,9 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
                                                 <Route path="faqs" element={
                                                     <AsyncComponent<FAQsProps> moduleProvider={FAQs} isMobile={matches} />
                                                 } />
-                                                <Route path="checkout/success" element={
+                                                <Route path="checkout-success" element={
                                                     <AsyncComponent<CheckoutSuccessProps> moduleProvider={CheckoutSuccess} isMobile={matches} />
                                                 } />
-                                                {/* <Route index element={
-                                                    <Navigate replace to={'scores'} />
-                                                } /> */}
                                             </Route>
                                             {/* <Route path="auth/*" element={
                                                 <AsyncComponent<AuthorizationProps> moduleProvider={Authorization} isMobile={matches} />

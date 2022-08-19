@@ -57,7 +57,7 @@ const descriptions: {
 };
 
 const validFirst = ['', 'about', 'contact', 'schedule', 'media', 'press', 'store', 'shop'];
-const validSecond = ['', 'biography', 'discography', 'press', 'music', 'videos', 'photos', 'upcoming', 'archive', 'search', 'scores', 'FAQs', 'checkout'];
+const validSecond = ['', 'biography', 'discography', 'press', 'music', 'videos', 'photos', 'upcoming', 'archive', 'search', 'scores', 'FAQs', 'checkout-success'];
 
 interface Meta {
     title: string;

@@ -206,7 +206,6 @@ const CheckoutForm: React.FC<{ cartLength: number }> = ({ cartLength }) => {
                         setError(true);
                         return;
                     }
-                    console.log('submitting');
                     dispatch(checkoutAction(email));
                 }}
             >

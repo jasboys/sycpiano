@@ -2143,7 +2143,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@stripe/stripe-js@npm:^1.32.0":
+"@stripe/stripe-js@npm:^1.35.0":
   version: 1.35.0
   resolution: "@stripe/stripe-js@npm:1.35.0"
   checksum: 18322cbb372aefda4b8ae167ff67bf4a0f40d059753b67ff3f12ea0b5cc438ecaa16e0b0200941e1f8912456e9a356434d34f80e4b2d524df851f8482f02eda0
@@ -10200,7 +10200,7 @@ __metadata:
     "@mui/system": ^5.8.7
     "@redux-devtools/extension": ^3.2.2
     "@reduxjs/toolkit": ^1.8.3
-    "@stripe/stripe-js": ^1.32.0
+    "@stripe/stripe-js": ^1.35.0
     "@swc/cli": ^0.1.57
     "@swc/core": ^1.2.212
     "@types/bcrypt": ^5.0.0
@@ -10325,7 +10325,7 @@ __metadata:
     serve-favicon: ^2.5.0
     sharp: ^0.30.7
     smartcrop-gm: ^2.0.2
-    stripe: ^9.12.0
+    stripe: ^10.2.0
     style-loader: ^3.3.1
     stylelint: ^14.9.1
     stylelint-config-standard: ^26.0.0
@@ -11006,13 +11006,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"stripe@npm:^9.12.0":
-  version: 9.16.0
-  resolution: "stripe@npm:9.16.0"
+"stripe@npm:^10.2.0":
+  version: 10.2.0
+  resolution: "stripe@npm:10.2.0"
   dependencies:
     "@types/node": ">=8.1.0"
     qs: ^6.10.3
-  checksum: d84eb9ef3fa0c50e1b62271bf822d3e9da22272ec7364ae8334db7277e42f657c42c10f6fa535c634c36081e17d1c8c5a1efc509b3747f84bfbe4cf2a94ade4b
+  checksum: 56e4f441083e7733ab8bb38e34e1b333c6af8fa5ce821c579714c7ae95750ec0086bbcc14ae9ddc3ca390d1e39df8410afb6e3ed5a9dea9c843169e04c7b2143
   languageName: node
   linkType: hard
 

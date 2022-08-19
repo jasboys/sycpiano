@@ -109,7 +109,6 @@ export const fetchEvents = createAsyncThunk<FetchEventsReturn, FetchEventsArgume
     },
     {
         condition: ({ name }, { getState }) => {
-            console.log('checking');
             const eventItemsReducer = getState().scheduleEventItems[name];
             return !eventItemsReducer.isFetchingList && eventItemsReducer.hasMore;
         }
@@ -138,7 +137,6 @@ export const searchEvents = createAsyncThunk<FetchEventsReturn, SearchEventsArgu
     {
         condition: ({ q }, { getState }) => {
             const state = getState().scheduleEventItems.search;
-            console.log(q, state.lastQuery);
             return (q !== '') && !state.isFetchingList && (state.hasMore || state.lastQuery !== q);
         }
     }
@@ -200,7 +198,6 @@ const scheduleSlice = createSlice({
                 state[name].isFetchingList = true;
             })
             .addMatcher(isAnyOf(fetchEvents.rejected, searchEvents.rejected), (state, action) => {
-                console.log(action);
                 const { name } = action.meta.arg;
                 state[name].isFetchingList = false;
             })

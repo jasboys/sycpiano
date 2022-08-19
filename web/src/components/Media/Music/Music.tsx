@@ -371,7 +371,6 @@ class Music extends React.Component<MusicProps, MusicState> {
     }
 
     onEnded = () => {
-        // console.log('ended');
         this.setState({
             isPlaying: false,
             playbackPosition: 0,

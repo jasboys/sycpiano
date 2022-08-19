@@ -108,7 +108,7 @@ const getOrCreateLocalCustomer = async (email: string) => {
     }
 };
 
-shopRouter.get<ParamsDictionary, any, any, { session_id: string }>('/checkoutSuccess', async (req, res) => {
+shopRouter.get<ParamsDictionary, any, any, { session_id: string }>('/checkout-success', async (req, res) => {
     const {
         session_id: sessionId
     } = req.query;

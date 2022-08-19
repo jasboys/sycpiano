@@ -44,7 +44,6 @@ export const toggleExpanded = createAsyncThunk<void, boolean | void, ThunkAPITyp
     (show, thunkAPI) => {
         const correctedShow = (typeof show === 'boolean') ? show : !thunkAPI.getState().navbar.isExpanded;
         const parentToExpand = findParent(thunkAPI.getState().navbar.specificRouteName)?.name;
-        console.log(parentToExpand, thunkAPI.getState().navbar.specificRouteName);
         // Expand the parent menu of current sub link
         if (correctedShow) {
             thunkAPI.dispatch(showSubnavsAction(parentToExpand !== undefined ? [parentToExpand] : []));

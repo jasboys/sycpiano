@@ -13,7 +13,7 @@ export const THUMBNAIL_STATIC = 'https://seanchenpiano.com/static/images/product
 
 // const isDev = process.env.NODE_ENV === 'development';
 const host = process.env.HOST;
-const stripe: Stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2020-08-27' });
+const stripe: Stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2022-08-01' });
 
 const stripeCustomerActive = (cr: CustomerReturn): cr is Stripe.Customer => {
     return cr.deleted !== true;
@@ -75,8 +75,8 @@ export const createCheckoutSession = async (productIDs: string[], priceIDs: stri
         const session = await stripe.checkout.sessions.create(
             {
                 mode: 'payment',
-                success_url: `https://${host}/shop/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-                cancel_url: `https://${host}/shop`,
+                success_url: `https://${host}/shop/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `https://${host}/shop/scores`,
                 payment_method_types: ['card'],
                 line_items: priceIDs.map((id) =>
                 ({

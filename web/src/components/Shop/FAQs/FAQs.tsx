@@ -49,7 +49,7 @@ const FAQs: React.FC<Record<string, unknown>> = () => {
 
                 setFaqs(data);
             } catch (e) {
-                console.log(`Could not fetch faqs.`);
+                console.error(`Could not fetch faqs.`);
             }
         };
 

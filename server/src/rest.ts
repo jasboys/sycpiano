@@ -768,7 +768,36 @@ adminRest.use(crud('/discs', {
 }));
 adminRest.use(crud('/disc-links', sequelizeCrud(models.discLink)));
 adminRest.use(crud('/photos', sequelizeCrud(models.photo)));
-adminRest.use(crud('/customers', sequelizeCrud(models.user)));
+adminRest.use(crud('/customers', {
+    ...sequelizeCrud(models.user),
+    getOne: async id => models.user.findByPk(id, {
+        include: [{
+            model: models.userProduct,
+            attributes: {
+                exclude: EXCLUDE_TIMESTAMPS,
+            }
+        }]
+    }),
+    getList: async ({ filter, limit, offset, order }) => {
+        order = Array.isArray(order[0][0]) ? order[0] as any : order;
+        return models.user.findAndCountAll({
+            attributes: {
+                exclude: EXCLUDE_TIMESTAMPS,
+            },
+            include: [{
+                model: models.userProduct,
+                attributes: {
+                    exclude: EXCLUDE_TIMESTAMPS,
+                },
+            }],
+            limit,
+            offset,
+            order,
+            where: filter,
+            distinct: true,
+        });
+    },
+}));
 adminRest.use(crud('/products', sequelizeCrud(models.product)));
 adminRest.use(crud('/faqs', sequelizeCrud(models.faq)));
 

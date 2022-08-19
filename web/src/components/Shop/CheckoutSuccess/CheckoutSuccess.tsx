@@ -77,7 +77,7 @@ const CheckoutSuccess: React.FC<CheckoutSuccessProps> = () => {
             try {
                 const {
                     data: { session, lineItems }
-                }: { data: CheckoutSuccessResponse } = await axios.get('/api/shop/checkoutSuccess', {
+                }: { data: CheckoutSuccessResponse } = await axios.get('/api/shop/checkout-success', {
                     params: { session_id: search.get('session_id') }
                 });
 
@@ -85,14 +85,14 @@ const CheckoutSuccess: React.FC<CheckoutSuccessProps> = () => {
                 setClientRef(session.client_reference_id);
                 setItems(lineItems);
             } catch (e) {
-                console.log(`Error trying to fetch checkout session ID.`);
+                console.error(`Error trying to fetch checkout session ID.`);
             }
         };
 
         fetchData();
-    }, [])
+    }, []);
 
-    return email ? null : (
+    return !email ? null : (
         <Container>
             <Thanks>Thank you for your purchase!</Thanks>
             <div css={{ fontSize: '1.2rem' }}>Reference ID: {clientRef}</div>

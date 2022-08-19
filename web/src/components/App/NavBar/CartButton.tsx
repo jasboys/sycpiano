@@ -101,7 +101,6 @@ const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(({ isHome }
 
     React.useEffect(() => {
         const el = cartRef.current;
-        console.log(el, cartIsInit);
         if (el && cartIsInit) {
             scaleUp(el);
         }

@@ -57,7 +57,6 @@ export const initCartAction = createAsyncThunk<{ items: string[]; email: string 
 
 export const syncLocalStorage = (): ThunkAction<void, GlobalStateShape, void, AnyAction> =>
     (_, getState) => {
-        // console.log('syncing');
         if (storageAvailable()) {
             window.localStorage.setItem(
                 LOCAL_STORAGE_KEY,
@@ -104,7 +103,7 @@ export const checkoutAction = createAsyncThunk<void, string, ThunkAPIType & { re
                     data: prevPurchasedData,
                 });
             } else {
-                console.log("Checkout Error.", e);
+                console.error("Checkout Error.", e);
             }
         }
     },

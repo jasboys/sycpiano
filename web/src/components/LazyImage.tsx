@@ -90,16 +90,6 @@ export const LazyImage: React.FC<LazyImageProps> = (props) => {
         }
     }, []);
 
-
-
-    // const onError = React.useCallback(() => {
-    //     if (mounted.current) {
-    //         console.log('error');
-    //         setIsLoaded(false);
-    //         blazy.current?.revalidate();
-    //     }
-    // }, [])
-
     const {
         mobileAttributes,
         desktopAttributes,

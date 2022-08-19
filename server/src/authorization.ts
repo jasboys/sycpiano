@@ -133,6 +133,10 @@ authRouter.post('/login', async (req, res) => {
             throw new Error('user not found');
         }
 
+        if (!user.passHash) {
+            throw new Error('password empty');
+        }
+
         const match = await argon2.verify(user.passHash, password);
         if (match) {
             const { token, key } = await authorize(user.username);
