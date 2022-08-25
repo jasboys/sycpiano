@@ -591,8 +591,8 @@ const ConnectedMusic = connect<MusicStateToProps, void, MusicOwnProps, GlobalSta
 const routerHOC = <T extends MusicOwnProps>(Component: typeof ConnectedMusic) =>
     (props: T) => {
         const matches: PathMatchResult = [
-            useMatch('music/:composer/:piece'),
-            useMatch('music/:composer/:piece/:movement')
+            useMatch('media/music/:composer/:piece'),
+            useMatch('media/music/:composer/:piece/:movement')
         ].reduce((prev, curr) => prev ?? curr, null);
 
         return <Component

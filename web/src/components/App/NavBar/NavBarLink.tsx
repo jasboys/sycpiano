@@ -220,7 +220,7 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
     } else {
         attr.to = link.path;
         attr.onClick = () => {
-            dispatch(showSubNav());
+            !isMobile && dispatch(showSubNav());
             isMobile && dispatch(toggleExpanded(false));
         };
     }
@@ -258,7 +258,7 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
                             basePath={link}
                             links={subNavLinks}
                             onClick={() => {
-                                dispatch(showSubNav());
+                                !isMobile && dispatch(showSubNav());
                                 isMobile && dispatch(toggleExpanded(false));
                             }}
                             isHome={isHome}

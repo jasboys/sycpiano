@@ -74,7 +74,7 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
     }, [specificRouteName]);
 
     React.useEffect(() => {
-        if (!xs && !medium) {
+        if (!xs || !medium) {
             dispatch(toggleExpanded(false));
         }
     }, [xs, medium]);

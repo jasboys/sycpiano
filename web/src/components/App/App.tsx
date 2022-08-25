@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Helmet } from 'react-helmet';
 import ReactMedia from 'react-media';
 import { Navigate, Route, Routes, useLocation, useMatch, useNavigate } from 'react-router-dom';
-import { Transition, TransitionGroup } from 'react-transition-group';
+import { SwitchTransition, Transition } from 'react-transition-group';
 
 import Container from 'src/components/App/Container';
 
@@ -206,12 +206,12 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
                                     ref={reference}
                                 />
                             </Transition>
-                            <TransitionGroup component={null}>
+                            <SwitchTransition>
                                 <Transition<undefined>
                                     key={match?.pathnameBase + location.search}
-                                    onEntering={fadeOnEnter(0.25)}
-                                    onExiting={fadeOnExit(0)}
-                                    timeout={750}
+                                    onEntering={fadeOnEnter(0.2)}
+                                    onExiting={fadeOnExit(0.5)}
+                                    timeout={800}
                                     appear={true}
                                 >
                                     <FadingContainer shouldBlur={matches && (cartOpen || menuOpen) && delayedRouteBase !== '/'}>
@@ -292,7 +292,7 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
                                         </Routes>
                                     </FadingContainer>
                                 </Transition>
-                            </TransitionGroup>
+                            </SwitchTransition>
                             <Cart
                                 floatingRef={floating}
                                 arrowRef={arrowRef}
