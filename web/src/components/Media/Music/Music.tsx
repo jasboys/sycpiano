@@ -209,7 +209,7 @@ class Music extends React.Component<MusicProps, MusicState> {
 
                 // If we're here, that means composer and piece matched
                 // If movement also matches, we're golden.
-                if (movement === normalizeString(item.name)) {
+                if (item.name && movement === normalizeString(item.name)) {
                     return true;
                 }
 
