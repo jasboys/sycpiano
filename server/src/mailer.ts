@@ -3,7 +3,7 @@ import db from './models';
 import { Op } from 'sequelize';
 import * as path from 'path';
 import * as mustache from 'mustache';
-import { promises as fsAsync, readFileSync, createReadStream } from 'fs';
+import { promises as fsAsync, readFileSync } from 'fs';
 import * as root from 'app-root-path';
 import { getYear } from 'date-fns';
 import * as archiver from 'archiver';
@@ -132,7 +132,7 @@ export const emailPDFs = async (productIDs: string[], email: string, clientRef?:
                 ...attachments,
                 {
                     filename: products[0].file,
-                    content: createReadStream(path.resolve(process.env.PRODUCTS_DIR, products[0].file)),
+                    path: path.resolve(process.env.PRODUCTS_DIR, products[0].file),
                 },
             ];
         } else {
@@ -156,7 +156,7 @@ export const emailPDFs = async (productIDs: string[], email: string, clientRef?:
             });
 
             products.forEach((prod) => {
-                zip.append(path.resolve(process.env.PRODUCTS_DIR, prod.file), { name: prod.file });
+                zip.file(path.resolve(process.env.PRODUCTS_DIR, prod.file), { name: prod.file });
             });
             await zip.finalize();
             attachments = [
