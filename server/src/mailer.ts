@@ -6,6 +6,9 @@ import * as mustache from 'mustache';
 import { promises as fsAsync, readFileSync } from 'fs';
 import * as root from 'app-root-path';
 import { getYear } from 'date-fns';
+import * as yazl from 'yazl';
+import { Attachment } from 'nodemailer/lib/mailer';
+import { Readable } from 'stream';
 
 const models = db.models;
 
@@ -117,17 +120,23 @@ export const emailPDFs = async (productIDs: string[], email: string, clientRef?:
         },
     });
 
-    let attachments: {
-        filename: string;
-        path: string;
-        cid?: string;
-    }[] = products.map((prod) => ({
-        filename: prod.file,
-        path: path.resolve(process.env.PRODUCTS_DIR, prod.file),
-    }));
+    const zip = new yazl.ZipFile();
+    products.forEach((prod) => {
+        zip.addFile(path.resolve(process.env.PRODUCTS_DIR, prod.file), prod.file);
+    });
+    zip.end();
 
-    attachments = [
-        ...attachments,
+    const attachments: Attachment[] =
+    // products.map((prod) => ({
+    //     filename: prod.file,
+    //     path: path.resolve(process.env.PRODUCTS_DIR, prod.file),
+    // }));
+
+    [
+        {
+            filename: 'seanchenpiano_scores.zip',
+            content: new Readable().wrap(zip.outputStream),
+        },
         {
             filename: 'logo.png',
             path: path.resolve(process.env.IMAGE_ASSETS_DIR, 'email_logo.png'),

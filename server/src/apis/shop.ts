@@ -58,6 +58,10 @@ shopRouter.post('/webhook', bodyParser.raw({ type: 'application/json' }), async 
 
 shopRouter.use(bodyParser.json());
 
+const productSortPredicate = (a: ShopItem, b: ShopItem) => {
+    return a.name.localeCompare(b.name);
+}
+
 shopRouter.get('/items', async (_, res) => {
     const products = await db.models.product.findAll();
     const storeItems: Partial<Record<typeof ProductTypes[number], ShopItem[]>> =
@@ -71,7 +75,8 @@ shopRouter.get('/items', async (_, res) => {
                             ...prod,
                             format: 'pdf',
                         };
-                    });
+                    })
+                    .sort(productSortPredicate);
             return {
                 ...acc,
                 [type]: prods,

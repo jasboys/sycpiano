@@ -2872,6 +2872,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/yazl@npm:^2.4.2":
+  version: 2.4.2
+  resolution: "@types/yazl@npm:2.4.2"
+  dependencies:
+    "@types/node": "*"
+  checksum: 3be9676f83f2e48e7a2b2ca204cde23f518e65a90d38ff64813804a7d928921c0e9132bb1619077cf19d0d8d86113fa016faf9352813c648e92fef6bf9c960bd
+  languageName: node
+  linkType: hard
+
 "@types/youtube@npm:^0.0.47":
   version: 0.0.47
   resolution: "@types/youtube@npm:0.0.47"
@@ -3925,6 +3934,13 @@ __metadata:
   bin:
     browserslist: cli.js
   checksum: ff512a7bcca1c530e2854bbdfc7be2791d0fb524097a6340e56e1d5924164c7e4e0a9b070de04cdc4c149d15cb4d4275cb7c626ebbce954278a2823aaad2452a
+  languageName: node
+  linkType: hard
+
+"buffer-crc32@npm:~0.2.3":
+  version: 0.2.13
+  resolution: "buffer-crc32@npm:0.2.13"
+  checksum: 06252347ae6daca3453b94e4b2f1d3754a3b146a111d81c68924c22d91889a40623264e95e67955b1cb4a68cbedf317abeabb5140a9766ed248973096db5ce1c
   languageName: node
   linkType: hard
 
@@ -10236,6 +10252,7 @@ __metadata:
     "@types/urijs": ^1.19.19
     "@types/validator": ^13.7.4
     "@types/which": ^2.0.1
+    "@types/yazl": ^2.4.2
     "@types/youtube": ^0.0.47
     "@types/zxcvbn": ^4.4.1
     "@typescript-eslint/eslint-plugin": ^5.30.6
@@ -10347,6 +10364,7 @@ __metadata:
     webpack-cli: ^4.10.0
     webpack-merge: ^5.8.0
     which: ^2.0.2
+    yazl: ^2.5.1
   languageName: unknown
   linkType: soft
 
@@ -12335,6 +12353,15 @@ __metadata:
   version: 20.2.9
   resolution: "yargs-parser@npm:20.2.9"
   checksum: 8bb69015f2b0ff9e17b2c8e6bfe224ab463dd00ca211eece72a4cd8a906224d2703fb8a326d36fdd0e68701e201b2a60ed7cf81ce0fd9b3799f9fe7745977ae3
+  languageName: node
+  linkType: hard
+
+"yazl@npm:^2.5.1":
+  version: 2.5.1
+  resolution: "yazl@npm:2.5.1"
+  dependencies:
+    buffer-crc32: ~0.2.3
+  checksum: daec5154b5485d8621bfea359e905ddca0b2f068430a4aa0a802bf5d67391157a383e0c2767acccbf5964264851da643bc740155a9458e2d8dce55b94c1cc2ed
   languageName: node
   linkType: hard
 

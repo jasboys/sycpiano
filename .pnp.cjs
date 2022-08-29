@@ -87,6 +87,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/urijs", "npm:1.19.19"],\
             ["@types/validator", "npm:13.7.5"],\
             ["@types/which", "npm:2.0.1"],\
+            ["@types/yazl", "npm:2.4.2"],\
             ["@types/youtube", "npm:0.0.47"],\
             ["@types/zxcvbn", "npm:4.4.1"],\
             ["@typescript-eslint/eslint-plugin", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:5.33.0"],\
@@ -197,7 +198,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["webpack-bundle-analyzer", "npm:4.5.0"],\
             ["webpack-cli", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:4.10.0"],\
             ["webpack-merge", "npm:5.8.0"],\
-            ["which", "npm:2.0.2"]\
+            ["which", "npm:2.0.2"],\
+            ["yazl", "npm:2.5.1"]\
           ],\
           "linkType": "SOFT"\
         }]\
@@ -4448,6 +4450,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@types/yazl", [\
+        ["npm:2.4.2", {\
+          "packageLocation": "./.yarn/cache/@types-yazl-npm-2.4.2-1cebd42fdf-3be9676f83.zip/node_modules/@types/yazl/",\
+          "packageDependencies": [\
+            ["@types/yazl", "npm:2.4.2"],\
+            ["@types/node", "npm:18.6.5"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@types/youtube", [\
         ["npm:0.0.47", {\
           "packageLocation": "./.yarn/cache/@types-youtube-npm-0.0.47-a9de8e2f37-837d84ae72.zip/node_modules/@types/youtube/",\
@@ -5839,6 +5851,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["buffer", "npm:5.7.1"],\
             ["base64-js", "npm:1.5.1"],\
             ["ieee754", "npm:1.2.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["buffer-crc32", [\
+        ["npm:0.2.13", {\
+          "packageLocation": "./.yarn/cache/buffer-crc32-npm-0.2.13-c4b6fceac1-06252347ae.zip/node_modules/buffer-crc32/",\
+          "packageDependencies": [\
+            ["buffer-crc32", "npm:0.2.13"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -13183,6 +13204,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/urijs", "npm:1.19.19"],\
             ["@types/validator", "npm:13.7.5"],\
             ["@types/which", "npm:2.0.1"],\
+            ["@types/yazl", "npm:2.4.2"],\
             ["@types/youtube", "npm:0.0.47"],\
             ["@types/zxcvbn", "npm:4.4.1"],\
             ["@typescript-eslint/eslint-plugin", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:5.33.0"],\
@@ -13293,7 +13315,8 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["webpack-bundle-analyzer", "npm:4.5.0"],\
             ["webpack-cli", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:4.10.0"],\
             ["webpack-merge", "npm:5.8.0"],\
-            ["which", "npm:2.0.2"]\
+            ["which", "npm:2.0.2"],\
+            ["yazl", "npm:2.5.1"]\
           ],\
           "linkType": "SOFT"\
         }]\
@@ -15706,6 +15729,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/yargs-parser-npm-20.2.9-a1d19e598d-8bb69015f2.zip/node_modules/yargs-parser/",\
           "packageDependencies": [\
             ["yargs-parser", "npm:20.2.9"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["yazl", [\
+        ["npm:2.5.1", {\
+          "packageLocation": "./.yarn/cache/yazl-npm-2.5.1-07fc697bef-daec5154b5.zip/node_modules/yazl/",\
+          "packageDependencies": [\
+            ["yazl", "npm:2.5.1"],\
+            ["buffer-crc32", "npm:0.2.13"]\
           ],\
           "linkType": "HARD"\
         }]\
