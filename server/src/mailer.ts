@@ -3,7 +3,7 @@ import db from './models';
 import { Op } from 'sequelize';
 import * as path from 'path';
 import * as mustache from 'mustache';
-import { promises as fsAsync, readFileSync } from 'fs';
+import { promises as fsAsync, readFileSync, createReadStream } from 'fs';
 import * as root from 'app-root-path';
 import { getYear } from 'date-fns';
 import * as yazl from 'yazl';
@@ -120,29 +120,35 @@ export const emailPDFs = async (productIDs: string[], email: string, clientRef?:
         },
     });
 
-    const zip = new yazl.ZipFile();
-    products.forEach((prod) => {
-        zip.addFile(path.resolve(process.env.PRODUCTS_DIR, prod.file), prod.file);
-    });
-    zip.end();
-
-    const attachments: Attachment[] =
-    // products.map((prod) => ({
-    //     filename: prod.file,
-    //     path: path.resolve(process.env.PRODUCTS_DIR, prod.file),
-    // }));
-
-    [
-        {
-            filename: 'seanchenpiano_scores.zip',
-            content: new Readable().wrap(zip.outputStream),
-        },
+    let attachments: Attachment[] = [
         {
             filename: 'logo.png',
             path: path.resolve(process.env.IMAGE_ASSETS_DIR, 'email_logo.png'),
             cid: 'logo@seanchenpiano.com',
         },
     ];
+    if (products.length === 1) {
+        attachments = [
+            ...attachments,
+            {
+                filename: products[0].file,
+                content: createReadStream(path.resolve(process.env.PRODUCTS_DIR, products[0].file)),
+            },
+        ];
+    } else {
+        const zip = new yazl.ZipFile();
+        products.forEach((prod) => {
+            zip.addFile(path.resolve(process.env.PRODUCTS_DIR, prod.file), prod.file);
+        });
+        zip.end();
+        attachments = [
+            ...attachments,
+            {
+                filename: 'seanchenpiano_scores.zip',
+                content: new Readable().wrap(zip.outputStream),
+            },
+        ];
+    }
 
     const template = await fsAsync.readFile(path.resolve(root.toString(), 'web/partials', 'purchaseEmail.html'), 'utf8');
 
