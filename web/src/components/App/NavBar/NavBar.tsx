@@ -80,7 +80,7 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
     }, [xs, medium]);
 
     const isMobile = xs || medium;
-    const isHome = isMobile ? delayedRouteBase === '/' : currentBasePath === '/';
+    const isHome = delayedRouteBase === '/';
     return (
         <StyledNavBar
             isHome={isHome}

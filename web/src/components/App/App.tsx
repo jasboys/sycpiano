@@ -105,6 +105,7 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
     const menuOpen = useAppSelector(({ navbar }) => navbar.isExpanded);
     const cartOpen = useAppSelector(({ cart }) => cart.visible);
     const [delayedRouteBase, setDelayedRouteBase] = React.useState(getRouteBase(location.pathname));
+    const [delayedSpecific, setDelayedSpecific] = React.useState(getMostSpecificRouteName(location.pathname));
     const arrowRef = React.useRef<HTMLDivElement | null>(null);
     const timerRef = React.useRef<NodeJS.Timeout>();
     const navigate = useNavigate();
@@ -137,7 +138,10 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
     }, [navigate]);
 
     React.useEffect(() => {
-        timerRef.current = setTimeout(() => { setDelayedRouteBase(getRouteBase(location.pathname)); }, 250);
+        timerRef.current = setTimeout(() => {
+            setDelayedRouteBase(getRouteBase(location.pathname));
+            setDelayedSpecific(getMostSpecificRouteName(location.pathname));
+        }, 700);
         return () => {
             if (timerRef.current) {
                 clearTimeout(timerRef.current);
@@ -202,7 +206,7 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
                                 <NavBar
                                     delayedRouteBase={delayedRouteBase}
                                     currentBasePath={getRouteBase(location.pathname)}
-                                    specificRouteName={getMostSpecificRouteName(location.pathname)}
+                                    specificRouteName={delayedSpecific}
                                     ref={reference}
                                 />
                             </Transition>
