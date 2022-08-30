@@ -23,9 +23,8 @@ const onExit = (el: HTMLElement) => {
     gsap.to(el, { autoAlpha: 0, duration: 0.3, delay: 0.15 });
 }
 
-const HamburgerNav: React.FC<NavBarLinksProps> = ({ currentBasePath, isMobile }) => {
+const HamburgerNav: React.FC<NavBarLinksProps> = ({ currentBasePath, isMobile, specificPath }) => {
     const isExpanded = useAppSelector(({ navbar }) => navbar.isExpanded);
-    const specific = useAppSelector(({ navbar }) => navbar.specificRouteName);
     const dispatch = useAppDispatch();
 
     return (
@@ -33,7 +32,7 @@ const HamburgerNav: React.FC<NavBarLinksProps> = ({ currentBasePath, isMobile })
             <HamburgerMenu
                 isExpanded={isExpanded}
                 onClick={() => dispatch(toggleExpanded())}
-                layerColor={specific === '' ? 'white' : logoBlue}
+                layerColor={specificPath === '' ? 'white' : logoBlue}
             />
             <Transition<undefined>
                 in={isExpanded}
@@ -46,6 +45,7 @@ const HamburgerNav: React.FC<NavBarLinksProps> = ({ currentBasePath, isMobile })
                 <NavBarLinks
                     currentBasePath={currentBasePath}
                     isMobile={isMobile}
+                    specificPath={specificPath}
                 />
             </Transition>
         </MenuContainer>

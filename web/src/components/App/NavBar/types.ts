@@ -13,6 +13,7 @@ export interface NavBarLinksProps {
     readonly className?: string;
     readonly currentBasePath: string;
     readonly isMobile: boolean;
+    readonly specificPath: string;
 }
 
 export interface NavBarStateShape {

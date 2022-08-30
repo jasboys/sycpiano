@@ -61,7 +61,7 @@ const LinksDiv = styled.div<{ isHome: boolean }>(
 );
 
 const NavBarLinks: React.FC<NavBarLinksProps> = (props) => (
-    <LinksDiv isHome={props.currentBasePath === '/'}>
+    <LinksDiv isHome={props.specificPath === ''}>
         <StyledUL>
             {links.map((link: LinkShape, i: number) => {
                 return (
@@ -70,7 +70,7 @@ const NavBarLinks: React.FC<NavBarLinksProps> = (props) => (
                         link={link}
                         subNavLinks={link.subLinks}
                         active={link.path === props.currentBasePath}
-                        isHome={props.currentBasePath === '/'}
+                        isHome={props.specificPath === ''}
                         isMobile={props.isMobile}
                     />
                 );

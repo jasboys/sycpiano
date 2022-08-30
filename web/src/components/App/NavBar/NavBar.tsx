@@ -17,7 +17,7 @@ interface NavBarProps {
     readonly currentBasePath: string;
     readonly delayedRouteBase: string;
     readonly className?: string;
-    readonly specificRouteName?: string;
+    readonly specificRouteName: string;
 }
 
 const StyledNavBar = styled.div<{ isMobile: boolean; isHome: boolean; menuExpanded: boolean; cartExpanded: boolean; }>(
@@ -102,6 +102,7 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
                         />
                         <HamburgerNav
                             currentBasePath={currentBasePath}
+                            specificPath={specificRouteName}
                             isMobile={true}
                             key="hamburger-nav"
                         />
@@ -110,6 +111,7 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
                     <StyledNavAndCart isMobile={false}>
                         <NavBarLinks
                             currentBasePath={currentBasePath}
+                            specificPath={specificRouteName}
                             isMobile={false}
                         />
                         <CartButton

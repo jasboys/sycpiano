@@ -95,7 +95,7 @@ const getRouteBase = (pathname: string) => {
 const getMostSpecificRouteName = (pathname: string) => {
     const matches = pathname.match(/^(\/[^/]+)?(\/[^/]+)?/);
     const match = matches?.[2] || matches?.[1];
-    return (match ? match.slice(1) : '') || undefined;
+    return match ? match.slice(1) : '';
 }
 
 const App: React.FC<Record<string, unknown>> = ({ }) => {
