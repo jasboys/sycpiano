@@ -1,8 +1,6 @@
-import formatInTimeZone from 'date-fns-tz/formatInTimeZone';
 import isValid from 'date-fns/isValid';
 import parseISO from 'date-fns/parseISO';
-import startOfMonth from 'date-fns/startOfMonth';
-import { CachedEvent, EventItemType, MonthItem } from 'src/components/Schedule/types';
+import { CachedEvent, EventItem } from 'src/components/Schedule/types';
 
 const GOOGLE_MAPS_SEARCH_URL = 'https://www.google.com/maps/search/?api=1';
 
@@ -20,53 +18,18 @@ const GOOGLE_MAPS_SEARCH_URL = 'https://www.google.com/maps/search/?api=1';
  */
 export const transformCachedEventsToListItems = (
     events: CachedEvent[],
-    monthsSeen: Set<string>,
-): { events: EventItemType[]; monthsSeen: Set<string> } => {
-    const monthsSet = new Set<string>(monthsSeen);
-    const eventsList = events.reduce((runningEventsArr: EventItemType[], event) => {
-        const eventDateTime = parseISO(event.dateTime);
-
-        const monthString = formatInTimeZone(eventDateTime, event.timezone ?? 'America/Chicago', 'LLLL');
-        const yearString = formatInTimeZone(eventDateTime, event.timezone ?? 'America/Chicago', 'y');
-        const monthYearString = `${monthString} ${yearString}`
-
-        const nextEventsArr: EventItemType[] = [];
-        if (!monthsSet.has(monthYearString)) {
-            monthsSet.add(monthYearString);
-            const monthDate = startOfMonth(eventDateTime);
-            nextEventsArr.push({
-                type: 'month',
-                dateTime: monthDate.toISOString(),
-                month: monthString,
-                year: parseInt(yearString, 10),
-            } as MonthItem);
-        }
-
+): EventItem[] => {
+    const eventsList = events.map((event) => {
         const parsedEndDate = parseISO(event.endDate);
         const endDate = isValid(parsedEndDate) ? parsedEndDate : undefined;
 
-        nextEventsArr.push({
-            type: 'day',
-            id: event.id,
-            name: event.name,
-            dateTime: eventDateTime.toISOString(),
+        return {
+            ...event,
             endDate: endDate?.toISOString(),
-            allDay: event.allDay,
-            collaborators: event.collaborators,
-            eventType: event.type,
-            location: event.location,
-            program: event.pieces,
-            website: event.website,
-            timezone: event.timezone,
-        });
+        };
+    });
 
-        return [ ...runningEventsArr, ...nextEventsArr ];
-    }, []);
-
-    return {
-        events: eventsList,
-        monthsSeen: monthsSet,
-    };
+    return eventsList;
 };
 
 export const getGoogleMapsSearchUrl = (query: string): string => `

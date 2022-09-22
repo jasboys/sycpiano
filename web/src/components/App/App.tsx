@@ -45,6 +45,7 @@ import { useFloating, offset, arrow, shift, autoUpdate } from '@floating-ui/reac
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import format from 'date-fns/format';
 import { fetchShopItems } from 'src/components/Shop/ShopList/reducers';
+import { EventListName } from '../Schedule/types';
 
 const register = extractModule(store);
 // const About = () => register('about', import(/* webpackChunkName: 'about' */ 'src/components/About'));
@@ -98,6 +99,27 @@ const getMostSpecificRouteName = (pathname: string) => {
     return match ? match.slice(1) : '';
 }
 
+const useCustomMatch = () => {
+    const root = useMatch('/');
+    const home = useMatch('home');
+    const about = useMatch('about/:about');
+    const contact = useMatch('contact');
+    const media = useMatch('media/:media/*');
+    const schedule = useMatch('schedule/:type/*');
+    const shop = useMatch('shop/:shop/*');
+    const scheduleWithoutType = useMatch('schedule/*');
+
+    const reducedForRouter = [
+        root, home, about, contact, media, schedule, shop,
+    ].reduce((prev, curr) => prev ?? curr, null);
+
+    const reducedForTransition = [
+        root, home, about, contact, media, scheduleWithoutType, shop,
+    ].reduce((prev, curr) => prev ?? curr, null);
+
+    return [reducedForRouter, reducedForTransition];
+}
+
 const App: React.FC<Record<string, unknown>> = ({ }) => {
     const location = useLocation();
     const dispatch = useAppDispatch();
@@ -110,16 +132,7 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
     const timerRef = React.useRef<NodeJS.Timeout>();
     const navigate = useNavigate();
     // Make sure to adjust this match array when adding new pages, especially with subpaths
-    const match = [
-        useMatch('/'),
-        useMatch('home'),
-        useMatch('about/:about'),
-        useMatch('contact'),
-        useMatch('media/:media/*'),
-        useMatch('schedule/:type/*'),
-        useMatch('shop/:shop/*'),
-        useMatch('auth/*')
-    ].reduce((prev, curr) => prev ?? curr, null);
+    const [routerMatch, transitionMatch] = useCustomMatch();
 
     const { x, y, reference, floating, strategy, middlewareData, update, refs } = useFloating({
         middleware: [
@@ -166,7 +179,10 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
         dispatch(fetchShopItems());
     }, []);
 
+
     let currentPage = getMostSpecificRouteName(location.pathname);
+    const transitionKey = location.pathname.search(/schedule/) !== -1 ? '/schedule' : location.pathname;
+    console.log('t', transitionKey);
     currentPage = currentPage ? startCase(currentPage) : 'Home';
     const description =
         metaDescriptions[toLower(currentPage)] || 'Welcome to the official website of pianist, composer, and arranger Sean Chen';
@@ -194,11 +210,17 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
                         }
                     }
                     return (
-                        <RootContainer isHome={match?.pathnameBase === '/'}>
+                        <RootContainer isHome={location.pathname === '/'}>
                             <LogoSVG />
                             <Transition<undefined>
                                 in={navbarVisible || !matches}
-                                onEntering={match?.pathnameBase === '/' ? fadeOnEnter(0) : slideOnEnter(0)}
+                                onEntering={(el, isAppearing) => {
+                                    if (isAppearing) {
+                                        fadeOnEnter(0)(el, isAppearing);
+                                    } else {
+                                        slideOnEnter(0)(el);
+                                    }
+                                }}
                                 onExiting={slideOnExit(0)}
                                 timeout={250}
                                 appear={true}
@@ -212,14 +234,14 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
                             </Transition>
                             <SwitchTransition>
                                 <Transition<undefined>
-                                    key={match?.pathnameBase + location.search}
+                                    key={transitionMatch?.pathnameBase}
                                     onEntering={fadeOnEnter(0.2)}
                                     onExiting={fadeOnExit(0.5)}
                                     timeout={800}
                                     appear={true}
                                 >
                                     <FadingContainer shouldBlur={matches && (cartOpen || menuOpen) && delayedRouteBase !== '/'}>
-                                        <Routes location={match?.pathnameBase + location.search}>
+                                        <Routes location={routerMatch?.pathnameBase + location.search}>
                                             <Route path="about/*" element={<Container />}>
                                                 <Route path="biography" element={
                                                     <AsyncComponent<BioProps> moduleProvider={Bio} isMobile={matches} />
@@ -229,9 +251,6 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
                                                 } />
                                                 <Route path="discography" element={
                                                     <AsyncComponent<DiscsProps> moduleProvider={Discs} isMobile={matches} />
-                                                } />
-                                                <Route index element={
-                                                    <Navigate replace to="biography" />
                                                 } />
                                             </Route>
                                             <Route path="contact" element={
@@ -247,22 +266,10 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
                                                 <Route path="photos" element={
                                                     <AsyncComponent<PhotosProps> moduleProvider={Photos} isMobile={matches} />
                                                 } />
-                                                <Route index element={
-                                                    <Navigate replace to="videos" />
-                                                } />
                                             </Route>
-                                            <Route path="schedule/*" >
-                                                <Route path="upcoming/*" element={
-                                                    <AsyncComponent<ScheduleProps> moduleProvider={Schedule} isMobile={matches} type="upcoming" />
-                                                } />
-                                                <Route path="archive/*" element={
-                                                    <AsyncComponent<ScheduleProps> moduleProvider={Schedule} isMobile={matches} type="archive" />
-                                                } />
-                                                <Route path="search/*" element={
-                                                    <AsyncComponent<ScheduleProps> moduleProvider={Schedule} isMobile={matches} type="search" />
-                                                } />
-                                                <Route index element={
-                                                    <Navigate replace to={'upcoming'} />
+                                            <Route path="schedule/*">
+                                                <Route path=":type/*" element={
+                                                    <AsyncComponent<ScheduleProps> moduleProvider={Schedule} isMobile={matches} type={routerMatch?.params.type as unknown as EventListName} />
                                                 } />
                                             </Route>
                                             <Route path="shop/*" element={
@@ -280,13 +287,7 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
                                                 <Route path="checkout-success" element={
                                                     <AsyncComponent<CheckoutSuccessProps> moduleProvider={CheckoutSuccess} isMobile={matches} />
                                                 } />
-                                                <Route index element={
-                                                    <Navigate replace to={'scores'} />
-                                                } />
                                             </Route>
-                                            {/* <Route path="auth/*" element={
-                                                <AsyncComponent<AuthorizationProps> moduleProvider={Authorization} isMobile={matches} />
-                                            } /> */}
                                             <Route index element={
                                                 <AsyncComponent<HomeProps> moduleProvider={Home} isMobile={matches} />
                                             } />

@@ -34,7 +34,10 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<
         },
         name: dataTypes.STRING,
         instrument: dataTypes.STRING,
-        _search: dataTypes.STRING,
+        _search: {
+            type: dataTypes.STRING,
+            field: '_search',
+        },
     }, {
         sequelize,
         tableName: 'collaborator',

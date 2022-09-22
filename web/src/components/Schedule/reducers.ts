@@ -1,68 +1,60 @@
 import {
     CachedEvent,
-    DayItem,
+    EventItem,
     EventItemsStateShape,
-    EventItemType,
     EventListName,
     FetchEventsAPIParams,
     FetchEventsArguments,
-    itemIsDay,
     ScheduleStateShape,
     SearchEventsArguments,
+    createMonthGroups,
+    mergeMonthGroups,
+    minOfMonthGroups,
+    maxOfMonthGroups,
 } from 'src/components/Schedule/types';
 import { createSlice, createAsyncThunk, createAction, isAnyOf } from '@reduxjs/toolkit';
 import { ThunkAPIType } from 'src/types';
 import axios from 'axios';
 
-import { SortedArraySet } from 'collections/sorted-array-set';
 import { transformCachedEventsToListItems } from './utils';
-import { Optional } from 'sequelize/types';
-import endOfMonth from 'date-fns/endOfMonth';
 import parseISO from 'date-fns/parseISO';
 import differenceInDays from 'date-fns/differenceInDays';
-import min from 'date-fns/min';
-import max from 'date-fns/max';
 
-function equals(a: EventItemType, b: EventItemType) {
-    // return a.dateTime.isSame(b.dateTime, 'minute');
-    return (a.dateTime === b.dateTime);
-}
+// addEvents(events: EventItem[]) {
+//     const groupedByMonths = tidy(
+//         events,
+//         groupBy((event: EventItem) => {
+//             const zonedTime = utcToZonedTime(event.dateTime, event.timezone);
+//             const month = getMonth(zonedTime);
+//             const year = getYear(zonedTime);
+//             return { month, year };
+//         })
+//     );
 
-function ascendCompare(a: EventItemType, b: EventItemType) {
-    // if (a.dateTime.isSame(b.dateTime, 'minute')) { return 0; }
-    // if (a.dateTime.isBefore(b.dateTime, 'minute')) { return -1; }
-    // if (a.dateTime.isAfter(b.dateTime, 'minute')) { return 1; }
-    return a.dateTime.localeCompare(b.dateTime);
-}
+// }
 
-function descendCompare(a: EventItemType, b: EventItemType) {
-    // if (aTime.isSame(bTime, 'minute')) { return 0; }
-    // if (aTime.isBefore(bTime, 'minute')) { return 1; }
-    // if (aTime.isAfter(bTime, 'minute')) { return -1; }
-    const aTime = (a.type === 'month') ? endOfMonth(parseISO(a.dateTime)).toISOString() : a.dateTime;
-    const bTime = (b.type === 'month') ? endOfMonth(parseISO(b.dateTime)).toISOString() : b.dateTime;
-    return bTime.localeCompare(aTime);
-}
+// constructor(equalFn: (a: MonthGroup, b: MonthGroup) => boolean, compareFn: (a: MonthGroup, b: MonthGroup) => number) {
+//     this.monthGroups = new SortedArraySet<MonthGroup>([], equalFn, compareFn);
+// }
 
 const FETCH_LIMIT = 25;
 
 interface FetchEventsReturn {
     name: EventListName;
-    listItems: EventItemType[];
-    currentItem?: DayItem;
+    events: EventItem[];
+    currentItem?: EventItem;
     hasMore: boolean;
-    monthsSeen: string[];
     lastQuery?: string;
 }
 
 export const fetchEvents = createAsyncThunk<FetchEventsReturn, FetchEventsArguments, ThunkAPIType>(
     'calendar/fetchEvents',
-    async (args, thunkAPI) => {
+    async (args, _thunkAPI) => {
         const params: FetchEventsAPIParams = {
             limit: FETCH_LIMIT,
         };
         const {
-            name,
+            name: name,
             after,
             before,
             date,
@@ -76,35 +68,28 @@ export const fetchEvents = createAsyncThunk<FetchEventsReturn, FetchEventsArgume
         } else if (before) {
             params.before = before.toISOString();
         }
-        const { data: events } = await axios.get<CachedEvent[]>('/api/calendar', { params });
-        const state = thunkAPI.getState().scheduleEventItems;
-        const { events: listItems, monthsSeen } = transformCachedEventsToListItems(events, new Set(state[name].setOfMonths));
-        let currentItem: DayItem | undefined = undefined;
-        const desiredDate = date || after || before;
+        const { data: cachedEvents } = await axios.get<CachedEvent[]>('/api/calendar', { params });
+        const events = transformCachedEventsToListItems(cachedEvents);
+        let currentItem: EventItem | undefined = undefined;
+        const desiredDate: Date | undefined = date || after || before;
         // find closest event to desired date.
         if (scrollTo && desiredDate) {
-            currentItem = listItems.reduce((acc: EventItemType | undefined, item: EventItemType) => {
+            currentItem = events.reduce((acc: EventItem | undefined, item: EventItem) => {
                 if (acc === undefined) {
-                    if (itemIsDay(item)) {
-                        return item;
-                    } else {
-                        return undefined;
-                    }
-                } else {
-                    return (
-                        differenceInDays(parseISO(item.dateTime), desiredDate) <
-                        differenceInDays(parseISO(acc.dateTime), desiredDate) ? item : acc
-                    );
+                    return item;
                 }
-            }, undefined) as DayItem;
+                return (
+                    differenceInDays(parseISO(item.dateTime), desiredDate) <
+                    differenceInDays(parseISO(acc.dateTime), desiredDate) ? item : acc
+                );
+            }, undefined);
         }
-        const hasMore = !!listItems.length;
+        const hasMore = !!events.length;
         return {
             name,
-            listItems,
+            events,
             currentItem,
             hasMore,
-            monthsSeen: [...monthsSeen],
         };
     },
     {
@@ -123,14 +108,13 @@ export const searchEvents = createAsyncThunk<FetchEventsReturn, SearchEventsArgu
         };
 
         const { data } = await axios.get<void, { data: CachedEvent[] }>('/api/calendar/search', { params });
-        const { events: listItems, monthsSeen } = transformCachedEventsToListItems(data, new Set<string>());
+        const events = transformCachedEventsToListItems(data);
 
         return {
             name,
-            listItems,
+            events,
             currentItem: undefined,
             hasMore: false,
-            monthsSeen: [...monthsSeen],
             lastQuery: q,
         };
     },
@@ -142,7 +126,7 @@ export const searchEvents = createAsyncThunk<FetchEventsReturn, SearchEventsArgu
     }
 )
 
-const initialState: Optional<EventItemsStateShape, 'currentItem' | 'minDate' | 'maxDate'> = {
+const initialState = (order: 'asc' | 'desc' = 'desc'): EventItemsStateShape => ({
     currentItem: undefined,
     currentLatLng: {
         lat: 39.0997,
@@ -153,23 +137,22 @@ const initialState: Optional<EventItemsStateShape, 'currentItem' | 'minDate' | '
     isFetchingLatLng: false,
     minDate: undefined,
     maxDate: undefined,
-    setOfMonths: [],
     hasMore: true,
-    items: [],
     lastQuery: undefined,
-};
+    items: { order, length: 0, monthGroups: [] },
+});
 
 const initialScheduleState: ScheduleStateShape = {
-    upcoming: initialState,
-    archive: initialState,
+    upcoming: initialState('asc'),
+    archive: initialState(),
     search: {
-        ...initialState,
+        ...initialState(),
         lastQuery: '',
     },
 };
 
 export const clearList = createAction<EventListName>('calendar/clearList');
-export const selectEvent = createAction<{ name: EventListName; event?: DayItem }>('calendar/selectEvent');
+export const selectEvent = createAction<{ name: EventListName; event?: EventItem }>('calendar/selectEvent');
 
 const scheduleSlice = createSlice({
     name: 'scheduleEventItems',
@@ -183,8 +166,9 @@ const scheduleSlice = createSlice({
                     ...state[name],
                     hasMore: true,
                     isFetchingList: false,
-                    items: [],
-                    setOfMonths: [],
+                    items: { order: state[name].items.order, length: 0, monthGroups: [] },
+                    minDate: undefined,
+                    maxDate: undefined,
                     lastQuery: '',
                 };
             })
@@ -193,7 +177,13 @@ const scheduleSlice = createSlice({
                 state[name].hasEventBeenSelected = true;
                 state[name].currentItem = event;
             })
-            .addMatcher(isAnyOf(fetchEvents.pending, searchEvents.pending), (state, action) => {
+            .addCase(searchEvents.pending, (state, _action) => {
+                state.search.isFetchingList = true;
+                state.search.items = { order: state.search.items.order, length: 0, monthGroups: [] }
+                state.search.maxDate = undefined;
+                state.search.minDate = undefined;
+            })
+            .addCase(fetchEvents.pending, (state, action) => {
                 const { name } = action.meta.arg;
                 state[name].isFetchingList = true;
             })
@@ -205,26 +195,19 @@ const scheduleSlice = createSlice({
                 const {
                     name,
                     currentItem,
-                    monthsSeen,
                     hasMore,
                     lastQuery,
-                    listItems
+                    events
                 } = action.payload;
-                const sortedArray = (name === 'upcoming') ?
-                    new SortedArraySet<EventItemType>(state[name].items, equals, ascendCompare) :
-                    new SortedArraySet<EventItemType>(state[name].items, equals, descendCompare);
-                sortedArray.addEach(listItems);
-                state[name].items = sortedArray.toArray();
-                // sortedArray.min() and .max() depend on sorting function, so min might actually be max if it's in descending order
-                const minMaxDates = [parseISO(sortedArray.min()?.dateTime), parseISO(sortedArray.max()?.dateTime)];
+                const newMonthGroup = createMonthGroups(events, state[name].items.order);
+                const mergedItems = mergeMonthGroups(state[name].items, newMonthGroup);
                 state[name] = {
                     ...state[name],
                     isFetchingList: false,
                     currentItem: currentItem || state[name].currentItem,
-                    // Need to call min and max functions because of above comment
-                    minDate: state[name].items.length ? min(minMaxDates).toISOString() : new Date().toISOString(),
-                    maxDate: state[name].items.length ? max(minMaxDates).toISOString() : new Date().toISOString(),
-                    setOfMonths: monthsSeen,
+                    items: mergedItems,
+                    minDate: mergedItems.monthGroups.length === 0 ? new Date().toISOString() : minOfMonthGroups(mergedItems).dateTime,
+                    maxDate: mergedItems.monthGroups.length === 0 ? new Date().toISOString() : maxOfMonthGroups(mergedItems).dateTime,
                     hasMore: hasMore,
                     lastQuery: lastQuery,
                 };

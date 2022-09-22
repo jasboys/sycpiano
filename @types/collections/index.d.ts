@@ -11,8 +11,8 @@ declare module 'collections/sorted-array' {
             getDefault?: (a: Key) => T
         );
         constructClone(values?: T[]): SortedArray<T>;
-        has(value: T): boolean;
-        get(value: T): T | undefined;
+        has(value: Partial<T>): boolean;
+        get(value: Partial<T>): T | undefined;
         add(value: T): boolean;
         addEach(...args: T[]): void;
         ['delete'](value: T): boolean;
@@ -57,8 +57,8 @@ declare module 'collections/sorted-array-set' {
             getDefault?: (a: Key) => T
         );
         constructClone(values?: T[]): SortedArraySet<T>;
-        has(value: T): boolean;
-        get(value: T): T | undefined;
+        has(value: Partial<T>): boolean;
+        get(value: Partial<T>): T | undefined;
         add(value: T): boolean;
         addEach(args: T[]): void;
         ['delete'](value: T): boolean;

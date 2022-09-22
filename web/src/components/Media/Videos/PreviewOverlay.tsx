@@ -7,7 +7,7 @@ import styled from '@emotion/styled';
 import { gsap } from 'gsap';
 
 import { playVideo } from 'src/components/Media/Videos/reducers';
-import { cliburn1, generateSrcsetWidths, resizedImage } from 'src/styles/imageUrls';
+import { cliburn1, generateSrcsetWidths, resizedImage } from 'src/imageUrls';
 import { screenLengths, screenWidths, screenXS } from 'src/styles/screens';
 import { navBarHeight } from 'src/styles/variables';
 

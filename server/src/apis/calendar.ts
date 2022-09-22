@@ -13,6 +13,7 @@ const models = db.models;
 const calendarIncludeBase = [
     {
         model: models.collaborator,
+        required: true,
         attributes: {
             exclude: ['id', 'created_at', 'updated_at', 'createdAt', 'updatedAt', 'calendarCollaborators', '_search'],
         },
@@ -22,6 +23,7 @@ const calendarIncludeBase = [
     },
     {
         model: models.piece,
+        required: true,
         attributes: {
             exclude: ['id', 'created_at', 'updated_at', 'createdAt', 'updatedAt', 'calendarPieces', '_search'],
         },
@@ -200,13 +202,66 @@ calendarRouter.get('/search', async (req: express.Request<any, any, any, Calenda
     //     console.log(ids);
     //     idArray = ids.map(({ id }) => id);
     // }
-    const tokens = str.replaceAll(', ', '|').replaceAll(' ', '&');
+    console.log(str);
+    const tokens = str.replaceAll(', ', '|').replaceAll(/ +/g, '&');
+    const splitTokens = tokens.split('|').map(t => t.split('&'));
+    console.log(tokens);
+    console.log(splitTokens);
 
     const calendarResults: calendar[] = await db.models.calendar.findAll({
-        where: sequelize.where(
-            calendar.rawAttributes.id,
-            Op.in,
-            sequelize.literal(`(SELECT cs.id from calendar_search('${tokens}') cs)`)),
+        where: {
+            [Op.or]: [
+                sequelize.where(
+                    calendar.rawAttributes.id,
+                    Op.in,
+                    sequelize.literal(`(SELECT cs.id from calendar_search('${tokens}') cs)`)),
+                ...splitTokens.map(t => {
+                    return {
+                        [Op.and]: t.map(v => {
+                            return {
+                                [Op.or]: [
+                                    {
+                                        name: {
+                                            [Op.iLike]: `%${v}%`,
+                                        }
+                                    },
+                                    {
+                                        location: {
+                                            [Op.iLike]: `%${v}%`,
+                                        }
+                                    },
+                                    {
+                                        type: {
+                                            [Op.iLike]: `%${v}%`,
+                                        }
+                                    },
+                                    {
+                                        '$pieces.composer$': {
+                                            [Op.iLike]: `%${v}%`,
+                                        }
+                                    },
+                                    {
+                                        '$pieces.piece$': {
+                                            [Op.iLike]: `%${v}%`,
+                                        }
+                                    },
+                                    {
+                                        '$collaborators.name$': {
+                                            [Op.iLike]: `%${v}%`,
+                                        }
+                                    },
+                                    {
+                                        '$collaborators.instrument$': {
+                                            [Op.iLike]: `%${v}%`,
+                                        }
+                                    },
+                                ]
+                            };
+                        }),
+                    };
+                }),
+            ],
+        },
         attributes: {
             exclude: ['created_at', 'updated_at', '_search', 'createdAt', 'updatedAt'],
         },

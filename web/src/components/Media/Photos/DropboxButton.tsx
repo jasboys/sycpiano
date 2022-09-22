@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import styled from '@emotion/styled';
 
-import { staticImage } from 'src/styles/imageUrls';
+import { staticImage } from 'src/imageUrls';
 import { screenM, screenXSorPortrait } from 'src/styles/screens';
 import { playlistWidth } from 'src/styles/variables';
 

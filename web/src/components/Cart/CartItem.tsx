@@ -5,7 +5,7 @@ import styled from '@emotion/styled'
 import isPropValid from '@emotion/is-prop-valid';
 import { formatPrice } from 'src/utils';
 import { removeItemFromCart } from 'src/components/Cart/reducers';
-import { staticImage } from 'src/styles/imageUrls';
+import { staticImage } from 'src/imageUrls';
 import { useAppDispatch } from 'src/hooks';
 
 const ItemContainer = styled.div({

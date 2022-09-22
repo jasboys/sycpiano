@@ -76,16 +76,27 @@ const main = async () => {
                     "https://www.youtube.com/embed/",
                 ],
                 'img-src': [
-                    "'self'",
-                    "data:",
-                    "https://i.ytimg.com/vi/",
-                    "https://*.stripe.com"
+                    "*"
+                    // "'self'",
+                    // "data:",
+                    // "https://i.ytimg.com/vi/",
+                    // "https://*.stripe.com",
+                    // "https://*.googleapis.com",
+                    // "https://*.gstatic.com",
+                    // "*.google.com",
+                    // "*.googleusercontent.com"
                 ],
                 'connect-src': [
                     "'self'",
                     "https://api.stripe.com",
                     "https://checkout.stripe.com",
-                    "https://www.googleapis.com/youtube/v3/"
+                    "https://www.googleapis.com/youtube/v3/",
+                    "https://*.googleapis.com",
+                    "*.google.com",
+                    "*.googleusercontent.com",
+                    "https://*.gstatic.com",
+                    "data:",
+                    "blob:",
                 ],
                 'frame-src': [
                     "'self'",
@@ -96,9 +107,6 @@ const main = async () => {
                 ]
             },
         },
-        // crossOriginResourcePolicy: {
-        //     policy: 'cross-origin'
-        // },
         crossOriginEmbedderPolicy: false
     }));
 
@@ -135,14 +143,14 @@ const main = async () => {
         },
     });
 
-    let allowedOrigins = [/localhost:\d{4}$/];
+    let allowedOrigins = [/localhost:\d{4}$/, /https:\/\/\w*.googleapis\.com.*/];
     if (process.env.CORS_ORIGINS) {
         allowedOrigins = allowedOrigins.concat(process.env.CORS_ORIGINS.split(',').map(v => new RegExp(v)));
     }
 
     const corsOptions = {
         origin: allowedOrigins,
-        allowedHeaders: ['Authorization', 'X-Requested-With', 'Content-Type', 'X-Total-Count'],
+        allowedHeaders: ['Access-Control-Allow-Headers', 'Authorization', 'X-Requested-With', 'Content-Type', 'X-Total-Count', 'Origin', 'Accept'],
         optionsSuccessStatus: 204,
         maxAge: 86400,
         credentials: true,
@@ -207,9 +215,12 @@ const main = async () => {
     // We catch any route first, and then let our front-end routing do the work.
     app.get(
         /\//,
+        cors(corsOptions),
         cookieParser(process.env.COOKIE_SECRET),
         csrfHandler,
         async (req, res) => {
+
+            console.log(res.getHeaders());
             // if (isProduction && !req.get('host')?.match(/^www\..*/i)) {
             //     res.redirect(301, `https://www.${req.get('host')}${req.originalUrl}`);
             // }

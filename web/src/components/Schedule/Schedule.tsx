@@ -14,6 +14,8 @@ import { TrebleIconSVG } from 'src/components/Schedule/TrebleIconSVG';
 import { screenXSorPortrait } from 'src/styles/screens';
 import { EventListName } from 'src/components/Schedule/types';
 import styled from '@emotion/styled';
+import { SwitchTransition, Transition } from 'react-transition-group';
+import { fadeOnEnter, fadeOnExit } from 'src/utils';
 
 const ScheduleContainer = styled.div(
     pushed,
@@ -22,26 +24,50 @@ const ScheduleContainer = styled.div(
         fontSize: '100%',
         width: '100%',
         boxSizing: 'border-box',
+        backgroundColor: 'rgb(238 238 238)',
+        backgroundImage: `url('/static/images/Van_Cliburn_Sean_Chen-0044.jpg')`,
+        backgroundSize: 'cover',
+        backgroundPosition: '50% 66%',
+        backgroundBlendMode: 'overlay',
         [screenXSorPortrait]: {
             fontSize: '80%'
         }
     });
 
+const Fading = styled.div(
+    container,
+    {
+        height: '100%',
+        width: '100%',
+        overflow: 'hidden',
+        visibility: 'hidden',
+    }
+);
+
 interface ScheduleProps { isMobile: boolean; type: EventListName; }
 
 const Schedule: React.FC<ScheduleProps> = ({ isMobile, type }) => {
-    // const match = useMatch('schedule/:type/*')
-    // const type = match!.params.type!;
-
     return (
         <ScheduleContainer>
             <Search />
             <div css={css({ height: '100%' })}>
-                <EventList
-                    key={type}
-                    type={type}
-                    isMobile={isMobile}
-                />
+                <SwitchTransition>
+                    <Transition<undefined>
+                        timeout={800}
+                        onEntering={fadeOnEnter(0.2)}
+                        onExiting={fadeOnExit(0.5)}
+                        key={type + ' ' + location.search}
+                        appear={true}
+                    >
+                        <Fading>
+                            <EventList
+                                key={type}
+                                type={type}
+                                isMobile={isMobile}
+                            />
+                        </Fading>
+                    </Transition>
+                </SwitchTransition>
             </div>
             <DateIconSVG />
             <LocationIconSVG />

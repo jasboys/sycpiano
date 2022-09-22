@@ -5,7 +5,7 @@ import { Transition } from 'react-transition-group';
 import { Elastic, gsap } from 'gsap';
 
 import { lato2i } from 'src/styles/fonts';
-import { staticImage } from 'src/styles/imageUrls';
+import { staticImage } from 'src/imageUrls';
 import { noHighlight } from 'src/styles/mixins';
 import { screenXSandPortrait, screenXSorPortrait } from 'src/styles/screens';
 

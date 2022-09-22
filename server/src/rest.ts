@@ -1,9 +1,10 @@
 import * as dotenv from 'dotenv';
 import * as express from 'express';
-import { Attributes, fn, literal, Model, ModelStatic, Op, Order, UUID, ValidationError, where, WhereOptions } from 'sequelize';
+import { Attributes, FindOptions, fn, literal, Model, ModelStatic, Op, Order, UUID, ValidationError, where, WhereOptions } from 'sequelize';
 import crud from 'express-crud-router';
 import * as stripeClient from './stripe';
 import { ProductCreationAttributes, ProductTypes } from './models/product';
+import * as Promise from 'bluebird';
 
 dotenv.config();
 
@@ -11,7 +12,7 @@ import db from './models';
 
 const models = db.models;
 
-import { calendar } from './models/calendar';
+import { calendar, CalendarAttributes, getImageFromMetaTag } from './models/calendar';
 import { ActionsRouter } from './actions';
 import { flatten, isObject, transform, uniqBy } from 'lodash';
 import { collaborator, CollaboratorAttributes } from './models/collaborator';
@@ -19,6 +20,7 @@ import { piece, PieceAttributes } from './models/piece';
 import { CalendarPieceAttributes } from './models/calendarPiece';
 import { CalendarCollaboratorAttributes } from './models/calendarCollaborator';
 import { Actions } from './types';
+import { getPhotos } from './gapi/places';
 
 const adminRest = express.Router();
 
@@ -865,5 +867,76 @@ adminRest.post('/actions/products/pull-from-stripe', async (_: express.Request, 
         respondWithError(e, res);
     }
 });
+
+const calendarMapFn = async (cal: calendar, idx: number) => {
+    console.log(`[POPULATING ${idx}]`);
+    try {
+        console.log(cal.imageUrl, cal.website);
+        if (cal.website && cal.imageUrl === null) {
+            const imageUrl = await getImageFromMetaTag(cal.website);
+            console.log(imageUrl);
+            cal.set('imageUrl', imageUrl);
+        }
+        console.log(cal.photoReference);
+        if (cal.location && cal.photoReference === null) {
+            const { photoReference, placeId } = await getPhotos(cal.location);
+            cal.set('photoReference', photoReference);
+            cal.set('placeId', placeId);
+        }
+        await cal.save();
+    } catch(e) {
+        console.log(e);
+    }
+    return Promise.resolve();
+};
+
+adminRest.post('/actions/calendars/populate-image-fields', async (req: express.Request, res: express.Response) => {
+    const {
+        ids
+    }: {
+        ids: string[] | undefined;
+    } = req.body;
+
+    try {
+        if (ids) {
+            const where: FindOptions<CalendarAttributes> = ids ? {
+                where: {
+                    id: ids,
+                }
+            } : {};
+
+            const { count, rows: calendars } = await models.calendar.findAndCountAll(where);
+            await Promise.mapSeries(
+                calendars,
+                calendarMapFn
+            );
+
+            res
+            .header('x-total-count', count.toFixed(0))
+            .status(200)
+            .json(calendars);
+        } else {
+            let calendars: calendar[] = [];
+            let i = 0;
+            do {
+                calendars = await models.calendar.findAll({ limit: 20, offset: i, order:[['id', 'ASC']] });
+                await Promise.mapSeries(
+                    calendars,
+                    calendarMapFn
+                );
+                console.log(`found ${calendars.length}`);
+                i += calendars.length;
+            } while (calendars.length !== 0);
+            console.log(`total: ${i}`);
+
+            res
+            .header('x-total-count', i.toFixed(0))
+            .sendStatus(200);
+        }
+
+    } catch (e) {
+        respondWithError(e, res);
+    }
+})
 
 export const AdminRest = adminRest;

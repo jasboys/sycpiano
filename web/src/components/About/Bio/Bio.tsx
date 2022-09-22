@@ -15,7 +15,7 @@ import { LazyImage } from 'src/components/LazyImage';
 
 import { offWhite } from 'src/styles/colors';
 import { lato2, lato3 } from 'src/styles/fonts';
-import { generateSrcsetWidths, resizedImage, sycWithPianoBW } from 'src/styles/imageUrls';
+import { generateSrcsetWidths, resizedImage, sycWithPianoBW } from 'src/imageUrls';
 import { pushed } from 'src/styles/mixins';
 import { screenLengths, screenM, screenWidths, screenXSorPortrait } from 'src/styles/screens';
 import { navBarHeight } from 'src/styles/variables';

@@ -11,7 +11,7 @@ import { idFromItem, resizedPathFromItem, staticPathFromItem } from 'src/compone
 import { ChildRendererProps } from 'src/components/Media/types';
 
 import { lightBlue } from 'src/styles/colors';
-import { generateSrcsetWidths, resizedImage } from 'src/styles/imageUrls';
+import { generateSrcsetWidths, resizedImage } from 'src/imageUrls';
 import { screenWidths, screenXSorPortrait } from 'src/styles/screens';
 import { isImageElement } from 'src/utils';
 

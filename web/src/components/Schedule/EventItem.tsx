@@ -12,11 +12,17 @@ import {
     EventTime,
     EventWebsiteButton,
 } from 'src/components/Schedule/EventDetails';
-import { DayItem, EventListName } from 'src/components/Schedule/types';
+import { EventItem as EventItemType, EventListName } from 'src/components/Schedule/types';
 
 import { lightBlue } from 'src/styles/colors';
-import { lato1 } from 'src/styles/fonts';
+import { lato1, lato2 } from 'src/styles/fonts';
 import { screenXSorPortrait } from 'src/styles/screens';
+import { cardShadow } from 'src/styles/mixins';
+import axios from 'axios';
+
+const getGooglePlacePhoto = (photoReference: string, maxHeight: number) =>
+    `https://maps.googleapis.com/maps/api/place/photo?maxheight=${maxHeight}&photo_reference=${photoReference}&key=${GAPI_KEY}`;
+
 
 const FlexEventInfoContainer = styled.div`
     flex: 0 1 auto;
@@ -45,26 +51,56 @@ const Connector = styled.div`
         );
 `;
 
-type EventItemProps = DayItem & { className?: string; isMobile: boolean; permaLink: string; listType: EventListName };
+type EventItemProps = EventItemType & { className?: string; isMobile: boolean; permaLink: string; listType: EventListName };
 
 const detailSectionMargin = (extra?: number) => css` margin-bottom: ${20 + (extra || 0)}px; `;
 
-const StyledItemBody = styled.div`
-    display: flex;
-    padding: 30px 0 30px 30px;
-    font-family: ${lato1};
-    align-items: top;
-    color: black;
-    transition: 0.2s all;
-    width: 80%;
-    max-width: 1240px;
-    margin: 0 auto;
-
-    ${screenXSorPortrait} {
-        padding: 30px 0;
-        width: 90%;
+const ItemContainer = styled.div({
+    margin: '2.4rem auto',
+    maxWidth: 600,
+    overflow: 'hidden',
+    boxShadow: cardShadow,
+    borderRadius: 8,
+    backgroundColor: 'white',
+    display: 'flex',
+    flexWrap: 'wrap',
+    [screenXSorPortrait]: {
+        width: '80vw',
+        flexDirection: 'column',
     }
-`;
+});
+
+const ImageContainer = styled.div(
+    {
+        flex: '0 0 300px',
+        backgroundColor: lightBlue,
+        [screenXSorPortrait]: {
+            height: '50vw',
+            flex: '0 0 50vw',
+            width: '100%',
+            overflow: 'hidden',
+            position: 'relative',
+        }
+    }
+);
+
+const Image = styled.img({
+    objectFit: 'cover',
+    [screenXSorPortrait]: {
+        height: '100%',
+        width: '100%',
+        position: 'relative',
+        left: 0,
+    }
+});
+
+const DetailsContainer = styled.div({
+    flex: 1,
+    padding: '1.5rem',
+    display: 'flex',
+    flexDirection: 'column',
+    fontFamily: lato2
+});
 
 const EventItem: React.FC<EventItemProps> = ({
     dateTime,
@@ -74,12 +110,15 @@ const EventItem: React.FC<EventItemProps> = ({
     name,
     location,
     collaborators,
-    eventType,
-    program,
+    type,
+    pieces,
     website,
     permaLink,
     timezone,
     listType,
+    imageUrl,
+    photoReference,
+    usePlacePhoto,
 }) => {
     const firstDate = listType === 'archive' ? endDate : dateTime;
     const secondDate = listType === 'archive' ? dateTime : endDate;
@@ -90,18 +129,19 @@ const EventItem: React.FC<EventItemProps> = ({
             <EventDate dateTime={secondDate} timezone={timezone} isMobile={isMobile} rounded={'bottom'} />
         </React.Fragment>
     ) : <EventDate dateTime={dateTime} timezone={timezone} isMobile={isMobile} rounded={'both'} />;
-    return (
-        <StyledItemBody>
-            <DateContainer>
-                {DateChildren}
-            </DateContainer>
 
-            <FlexEventInfoContainer>
-                <EventName css={detailSectionMargin()} name={name} isMobile={isMobile} permaLink={permaLink} eventType={eventType} />
+    return (
+        <ItemContainer>
+            <ImageContainer>
+                <Image src={((usePlacePhoto && !!photoReference) ? getGooglePlacePhoto(photoReference, 300) : imageUrl) ?? ''} />
+                {DateChildren}
+            </ImageContainer>
+
+            <DetailsContainer>
+                <EventName css={detailSectionMargin()} name={name} isMobile={isMobile} permaLink={permaLink} eventType={type} />
 
                 {!allDay && (
                     <EventTime
-                        css={detailSectionMargin()}
                         dateTime={dateTime}
                         isMobile={isMobile}
                         timezone={timezone}
@@ -110,11 +150,11 @@ const EventItem: React.FC<EventItemProps> = ({
 
                 <EventLocation location={location} css={detailSectionMargin()} isMobile={isMobile} />
                 <EventCollaborators collaborators={collaborators} css={detailSectionMargin()} />
-                <EventProgram program={program} css={detailSectionMargin(5)} />
+                <EventProgram program={pieces} css={detailSectionMargin(5)} />
 
                 {website && <EventWebsiteButton website={website} />}
-            </FlexEventInfoContainer>
-        </StyledItemBody>
+            </DetailsContainer>
+        </ItemContainer>
     );
 };
 

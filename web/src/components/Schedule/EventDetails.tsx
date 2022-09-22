@@ -12,7 +12,7 @@ import { Collaborator, EventType, Piece } from 'src/components/Schedule/types';
 import { getGoogleMapsSearchUrl } from 'src/components/Schedule/utils';
 
 import { lightBlue, logoBlue, magenta, textGrey } from 'src/styles/colors';
-import { lato2 } from 'src/styles/fonts';
+import { lato2, lato3, lato4 } from 'src/styles/fonts';
 
 import { gsap } from 'gsap';
 import { screenXSorPortrait } from 'src/styles/screens';
@@ -20,6 +20,7 @@ import formatInTimeZone from 'date-fns-tz/formatInTimeZone';
 import parseISO from 'date-fns/parseISO';
 import getDate from 'date-fns/getDate';
 import format from 'date-fns/format';
+import { getMonth } from 'date-fns';
 
 const locationIconDimension = '30px';
 
@@ -35,8 +36,8 @@ let EventDate: React.FC<EventDateTimeProps> = (props) => {
     const date = parseISO(props.dateTime);
     return (
         <div className={props.className}>
-            <div css={css({ fontSize: '2.2em' })}>
-                {getDate(date)}
+            <div css={css({ fontSize: '2.0rem' })}>
+                {`${format(date, 'M/d')}`}
             </div>
             <div css={css({ fontSize: '1.4em' })}>
                 {format(date, 'EEE')}
@@ -48,22 +49,34 @@ let EventDate: React.FC<EventDateTimeProps> = (props) => {
 const radii: {
     [key: string]: string;
 } = {
-    top: '50% 50% 0 0',
-    bottom: '0 0 50% 50%',
-    both: '50%',
+    top: '8px 0 0',
+    bottom: '0 0 8px 0',
+    both: '8px 0',
 };
 
-EventDate = styled(EventDate)<EventDateTimeProps>`
-    text-align: center;
-    background-color: ${lightBlue};
-    color: white;
-    height: 6.7em;
-    width: 6.7em;
-    line-height: 2.5em;
-    padding: 0.8em;
-    flex: 0 0 auto;
-    border-radius: ${props => radii[props.rounded]};
-`;
+EventDate = styled(EventDate)<EventDateTimeProps>(
+    {
+        textAlign: 'center',
+        backgroundColor: 'white',
+        color: lightBlue,
+        height: 'fit-content',
+        width: 'fit-content',
+        padding: '1rem',
+        flex: '0 0 auto',
+        zIndex: 3,
+        fontFamily: lato2,
+        fontWeight: 'bold',
+        position: 'absolute',
+        top: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    (props) => ({
+        borderRadius: radii[props.rounded],
+    })
+);
 
 interface EventNameProps { name: string; eventType: EventType; className?: string; isMobile?: boolean; permaLink: string }
 
@@ -76,7 +89,7 @@ const linkIconStyle = css`
 `;
 
 const eventNameStyle = css`
-    font-size: 2em;
+    font-size: 1.8rem;
     font-family: ${lato2};
     transition: fill 0.2s, color 0.2s;
     fill: transparent;
@@ -127,7 +140,10 @@ let EventTime: React.FC<Omit<EventDateTimeProps, 'rounded'>> = ({ className, dat
     </div>
 );
 
-EventTime = styled(EventTime)` font-size: 1.5em; `;
+EventTime = styled(EventTime)({
+    margin: '0.5rem 0',
+    fontSize: '1rem',
+});
 
 interface EventLocationProps { location: string; className?: string; isMobile?: boolean }
 

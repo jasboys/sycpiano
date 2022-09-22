@@ -9,7 +9,7 @@ import { logoBlue } from 'src/styles/colors';
 import mix from 'polished/lib/color/mix';
 import { GlobalStateShape } from 'src/store';
 import toUpper from 'lodash-es/toUpper';
-import { staticImage } from 'src/styles/imageUrls';
+import { staticImage } from 'src/imageUrls';
 import { getHoverStyle, noHighlight } from 'src/styles/mixins';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { createSelector } from '@reduxjs/toolkit';

@@ -16,7 +16,7 @@ import {
     resizedImage,
     seanChenContactPhotoUrl,
     staticImage,
-} from 'src/styles/imageUrls';
+} from 'src/imageUrls';
 import { screenWidths, screenXSorPortrait } from 'src/styles/screens';
 import { isImageElement } from 'src/utils';
 import { navBarHeight } from 'src/styles/variables';

@@ -34,16 +34,16 @@ export const link = (colorString: string, hoverDelta = 0.2): SerializedStyles =>
     }
 `;
 
-export const container = css`
-    position: absolute;
-    top: 0;
-    left: 0;
-`;
+export const container = css({
+    position: 'absolute',
+    top: 0,
+    left: 0,
+});
 
 export const noHighlight = css({
     userSelect: 'none',
     WebkitTapHighlightColor: 'transparent',
-})
+});
 
 export const getHoverStyle = (isMouseDown: boolean) => ({
     backgroundColor: mix(0.75, logoBlue, '#FFF'),
@@ -53,3 +53,9 @@ export const getHoverStyle = (isMouseDown: boolean) => ({
     transform: isMouseDown ? 'translateY(-1.2px) scale(1.01)' : 'translateY(-2px) scale(1.04)',
     boxShadow: isMouseDown ? '0 1px 2px rgba(0, 0, 0, 0.8)' : '0 4px 6px rgba(0, 0, 0, 0.4)',
 });
+
+export const cardShadow = `
+    0 1px 3px 0 rgba(0 0 0 / 0.2),
+    0 1px 1px 0 rgba(0 0 0 / 0.14),
+    0 2px 1px -1px rgba(0 0 0 / 0.12);
+`

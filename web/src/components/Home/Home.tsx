@@ -9,7 +9,7 @@ import {
     homeBackground,
     resizedImage,
     sycChairVertical,
-} from 'src/styles/imageUrls';
+} from 'src/imageUrls';
 import { container, noHighlight } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 
@@ -268,7 +268,7 @@ const Home: React.FC<HomeProps> = () => {
                 <Name>Sean Chen</Name>
                 <Skills>pianist / composer / arranger</Skills>
                 <Social />
-                <StyledCopyright>Copyright © 2015-{format(new Date(), 'yyyy')} Sean Chen</StyledCopyright>
+                <StyledCopyright>Copyright © {format(new Date(), 'yyyy')} Sean Chen</StyledCopyright>
             </Content>
         </HomeContainer>
     );

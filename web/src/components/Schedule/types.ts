@@ -1,3 +1,7 @@
+import { addMonths, compareAsc, compareDesc, endOfMonth, getMonth, getYear, isSameDay, isSameMonth, parseISO, startOfMonth, subMonths } from 'date-fns';
+import binarySearch from 'binary-search';
+import { utcToZonedTime } from 'date-fns-tz';
+
 export type EventType = 'concerto' | 'chamber' | 'solo' | 'masterclass';
 
 export type EventListName = 'upcoming' | 'archive' | 'search' ;
@@ -15,76 +19,223 @@ export interface Piece {
 export type Collaborators = Collaborator[];
 export type Pieces = Piece[];
 
-export interface CachedEvent {
+export interface HasDate {
+    dateTime: string;
+}
+
+export interface EventItem extends HasDate {
     readonly id: string;
-    readonly location: string;
-    readonly dateTime: string;
-    readonly allDay: boolean;
-    readonly endDate: string;
-    readonly timezone: string;
     readonly name: string;
     readonly collaborators: Collaborators;
-    readonly pieces: Pieces;
     readonly type: EventType;
-    readonly website?: string;
-}
-
-export interface DayItem {
-    readonly type: 'day';
-    readonly id: string;
-    readonly name: string;
-    readonly collaborators: Collaborators;
-    readonly eventType: EventType;
-    readonly dateTime: string;
-    readonly endDate?: string;
+    readonly dateTime: string;  // Can't Store Date because redux can't serializable or something...
+    readonly endDate?: string;  // Can't Store Date because redux can't serializable or something...
     readonly allDay: boolean;
     readonly location: string;
-    readonly program: Pieces;
+    readonly pieces: Pieces;
     readonly website?: string;
     readonly timezone: string;
+    readonly imageUrl?: string;
+    readonly placeId?: string;
+    readonly photoReference?: string;
+    readonly usePlacePhoto: boolean;
 }
 
-export interface MonthItem {
-    readonly type: 'month';
-    readonly dateTime: string;
-    readonly month: string;
-    readonly year: number;
+export interface CachedEvent extends EventItem {
+    readonly endDate: string;
 }
 
 export interface LoadingItem {
     readonly type: 'loading';
 }
 
-export type EventItemType = DayItem | MonthItem;
-
-export const itemIsDay = (item: EventItemType | LoadingItem): item is DayItem => (
-    item.type === 'day'
-);
-
-export const itemIsMonth = (item: EventItemType | LoadingItem): item is MonthItem => (
-    item.type === 'month'
-);
-
-export const itemIsLoading = (item: EventItemType | LoadingItem): item is LoadingItem => (
-    item.type === 'loading'
-);
-
-export const itemNotLoading = (item: EventItemType | LoadingItem): item is DayItem | MonthItem => (
-    item.type !== 'loading'
-);
-
 export type ScheduleStateShape = Record<EventListName, EventItemsStateShape>;
 
+function eventEquals(a: EventItem, b: EventItem) {
+    // return a.dateTime.isSame(b.dateTime, 'minute');
+    return (a.dateTime === b.dateTime);
+}
+
+function eventAscend(a: HasDate, b: HasDate) {
+    // if (a.dateTime.isSame(b.dateTime, 'minute')) { return 0; }
+    // if (a.dateTime.isBefore(b.dateTime, 'minute')) { return -1; }
+    // if (a.dateTime.isAfter(b.dateTime, 'minute')) { return 1; }
+    return compareAsc(parseISO(a.dateTime), parseISO(b.dateTime));
+}
+
+function eventDescend(a: HasDate, b: HasDate) {
+    // if (aTime.isSame(bTime, 'minute')) { return 0; }
+    // if (aTime.isBefore(bTime, 'minute')) { return 1; }
+    // if (aTime.isAfter(bTime, 'minute')) { return -1; }
+    return compareDesc(parseISO(a.dateTime), parseISO(b.dateTime));
+}
+
+export interface MonthGroup {
+    month: number;
+    year: number;
+    dateTime: string;  // Make sure to run startOfMonth on creation then ISOString
+    events: EventItem[];
+}
+
+export interface MonthGroups {
+    order: 'asc' | 'desc';
+    length: number;
+    monthGroups: MonthGroup[];
+}
+
+export const minOfMonthGroups = (mg: MonthGroups) => {
+    if (mg.order === 'asc') {
+        return mg.monthGroups[0].events[0];
+    } else {
+        const mgLength = mg.monthGroups.length;
+        const eventsLength = mg.monthGroups[mgLength - 1].events.length;
+        return mg.monthGroups[mgLength - 1].events[eventsLength - 1];
+    }
+};
+
+export const maxOfMonthGroups = (mg: MonthGroups) => {
+    if (mg.order === 'desc') {
+        return mg.monthGroups[0].events[0];
+    } else {
+        const mgLength = mg.monthGroups.length;
+        const eventsLength = mg.monthGroups[mgLength - 1].events.length;
+        return mg.monthGroups[mgLength - 1].events[eventsLength - 1];
+    }
+};
+
+// export const lengthOfMonthGroups = (mg: MonthGroups) => {
+//     return mg.monthGroups.reduce((prev, curr) => {
+//         return prev + curr.events.length;
+//     }, 0);
+// };
+
+export const createMonthGroups = (events: EventItem[], order: 'asc' | 'desc' = 'desc'): MonthGroups => {
+    if (events.length === 0) {
+        return {
+            order,
+            length: 0,
+            monthGroups: [],
+        };
+    }
+    if (order === 'desc') {
+        const sortedEvents = events.sort(eventDescend);
+        const lastMonth = startOfMonth(utcToZonedTime(parseISO(sortedEvents[0].dateTime), sortedEvents[0].timezone));
+        const firstMonth = startOfMonth(utcToZonedTime(parseISO(sortedEvents[events.length - 1].dateTime), sortedEvents[events.length - 1].timezone));
+        const result: MonthGroup[] = [];
+        let count = 0;
+        for (let it = lastMonth; it >= firstMonth && sortedEvents.length !== 0; it = subMonths(it, 1)) {
+            let pointer = binarySearch(sortedEvents, { dateTime: it.toISOString() }, eventDescend);
+            if (pointer < 1) {
+                pointer = (-1 * pointer) - 1;
+            }
+            const extracted = sortedEvents.splice(0, pointer);
+            if (extracted.length !== 0) {
+                result.push({
+                    month: getMonth(it),
+                    year: getYear(it),
+                    dateTime: it.toISOString(),
+                    events: extracted,
+                });
+                count += extracted.length;
+            }
+        }
+        return {
+            order,
+            length: count,
+            monthGroups: result,
+        };
+    } else {
+        const sortedEvents = events.sort(eventAscend);
+        const firstMonth = endOfMonth(utcToZonedTime(parseISO(sortedEvents[0].dateTime), sortedEvents[0].timezone));
+        const lastMonth = endOfMonth(utcToZonedTime(parseISO(sortedEvents[events.length - 1].dateTime), sortedEvents[events.length - 1].timezone));
+        const result: MonthGroup[] = [];
+        let count = 0;
+        for (let it = firstMonth; it <= lastMonth && sortedEvents.length !== 0; it = addMonths(it, 1)) {
+            let pointer = binarySearch(sortedEvents, { dateTime: it.toISOString() }, eventAscend);
+            if (pointer < 1) {
+                pointer = (-1 * pointer) - 1;
+            }
+            const extracted = sortedEvents.splice(0, pointer);
+            if(extracted.length !== 0) {
+                result.push({
+                    month: getMonth(it),
+                    year: getYear(it),
+                    dateTime: startOfMonth(it).toISOString(),
+                    events: extracted,
+                });
+                count += extracted.length;
+            }
+        }
+        return {
+            order,
+            length: count,
+            monthGroups: result,
+        };
+    }
+};
+
+export const mergeMonthGroups = (left: MonthGroups, right: MonthGroups): MonthGroups => {
+    if (left.order !== right.order) {
+        throw Error('trying to merge two groups of opposite sorting order');
+    }
+    if (left.monthGroups.length === 0) {
+        return { ...right };
+    }
+    if (right.monthGroups.length === 0) {
+        return { ...left };
+    }
+    const mergedWithExisting: MonthGroup[] = right.monthGroups.map((mg) => {
+        const inLeft = left.monthGroups.find((leftGroup) => isSameMonth(parseISO(leftGroup.dateTime), parseISO(mg.dateTime)));
+        return (inLeft !== undefined) ?
+            {
+                ...inLeft,
+                events: [
+                    ...(inLeft.events),
+                    ...(mg.events),
+                ].sort(left.order === 'asc' ? eventAscend : eventDescend),
+            } :
+            mg;
+    });
+    const result = [
+        ...(left.monthGroups),
+        ...(mergedWithExisting),
+    ].sort(left.order === 'asc' ? monthGroupAscend : monthGroupDescend);
+
+    return {
+        order: left.order,
+        length: result.reduce((prev, curr) => {
+            return prev + curr.events.length;
+        }, 0),
+        monthGroups: result,
+    };
+};
+
+export const findDateInMonthGroups = (mgs: MonthGroups, d: Date) => {
+    const monthGroup = mgs.monthGroups.find((mg) => isSameMonth(parseISO(mg.dateTime), d));
+    return monthGroup?.events.find((ev) => isSameDay(utcToZonedTime(parseISO(ev.dateTime), ev.timezone), d));
+}
+
+function monthGroupEquals(a: MonthGroup, b: MonthGroup) {
+    return isSameMonth(parseISO(a.dateTime), parseISO(b.dateTime));
+}
+
+function monthGroupAscend(a: MonthGroup, b: MonthGroup) {
+    return compareAsc(parseISO(a.dateTime), parseISO(b.dateTime));
+}
+
+function monthGroupDescend(a: MonthGroup, b: MonthGroup) {
+    return compareDesc(parseISO(a.dateTime), parseISO(b.dateTime));
+}
+
 export interface EventItemsStateShape {
-    items: EventItemType[];
-    currentItem?: DayItem;
+    items: MonthGroups;
+    currentItem?: EventItem;
     currentLatLng: LatLngLiteral;
     hasEventBeenSelected: boolean;
     isFetchingList: boolean;
     isFetchingLatLng: boolean;
     minDate?: string;
     maxDate?: string;
-    setOfMonths: string[];
     hasMore: boolean;
     lastQuery?: string;
 }

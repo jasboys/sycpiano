@@ -4,7 +4,7 @@ import styled from '@emotion/styled';
 
 import { lightBlue } from 'src/styles/colors';
 import { lato2 } from 'src/styles/fonts';
-import { staticImage } from 'src/styles/imageUrls';
+import { staticImage } from 'src/imageUrls';
 import { screenXSorPortrait } from 'src/styles/screens';
 
 const StyledDiv = styled.div`

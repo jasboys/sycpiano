@@ -16,9 +16,12 @@ import {
 } from 'sequelize';
 import { ModelExport, ModelMap } from '../types';
 
-import { createCalendarEvent, deleteCalendarEvent, getLatLng, getTimeZone, updateCalendar } from '../gapi/calendar';
+import { createCalendarEvent, deleteCalendarEvent, getLatLng, getTimeZone, GoogleCalendarParams, updateCalendar } from '../gapi/calendar';
 import { collaborator } from './collaborator';
 import { piece } from './piece';
+import axios, { AxiosError } from 'axios';
+import { JSDOM } from 'jsdom';
+import { getPhotos } from '../gapi/places';
 
 export interface CalendarAttributes {
     id: string;
@@ -30,9 +33,15 @@ export interface CalendarAttributes {
     location: string;
     type: string;
     website: string;
+    imageUrl: string | null;
+    placeId: string | null;
+    photoReference: string | null;
+    usePlacePhoto: boolean;
 }
 
-export interface CalendarCreationAttributes extends Optional<CalendarAttributes, 'id' | 'endDate' | 'website'> {}
+type OptionalAttributes = 'id' | 'endDate' | 'website' | 'imageUrl' | 'placeId' | 'photoReference' | 'usePlacePhoto';
+
+export interface CalendarCreationAttributes extends Optional<CalendarAttributes, OptionalAttributes> { }
 
 export class calendar extends Model<CalendarAttributes, CalendarCreationAttributes> implements CalendarAttributes {
     declare id: string;
@@ -44,6 +53,10 @@ export class calendar extends Model<CalendarAttributes, CalendarCreationAttribut
     declare location: string;
     declare type: string;
     declare website: string;
+    declare imageUrl: string | null;
+    declare placeId: string | null;
+    declare photoReference: string | null;
+    declare usePlacePhoto: boolean;
     declare readonly collaborators?: collaborator[];
     declare readonly pieces?: piece[];
     declare readonly createdAt?: Date | string;
@@ -71,8 +84,7 @@ export class calendar extends Model<CalendarAttributes, CalendarCreationAttribut
 const transformModelToGoogle = async (c: calendar) => {
     const collaborators = await c.getCollaborators();
     const pieces = await c.getPieces();
-    const data = {
-        id: c.id,
+    const data: GoogleCalendarParams = {
         summary: c.name,
         location: c.location,
         startDatetime: c.dateTime,
@@ -80,19 +92,51 @@ const transformModelToGoogle = async (c: calendar) => {
         allDay: c.allDay,
         timeZone: c.timezone,
         description: JSON.stringify({
-            collaborators: collaborators.map((collab: { name: string; instrument: string }) => ({
-                name: collab.name,
-                instrument: collab.instrument,
+            collaborators: collaborators.map(({ name, instrument }) => ({
+                name,
+                instrument,
             })),
-            pieces: pieces.map((pie: { composer: string; piece: string }) => ({
-                composer: pie.composer,
-                piece: pie.piece,
+            pieces: pieces.map(({ composer, piece }) => ({
+                composer,
+                piece,
             })),
             type: c.type,
-            website: c.website,
+            website: encodeURI(c.website),
+            imageUrl: encodeURI(c.imageUrl ?? ''),
+            placeId: c.placeId,
+            photoReference: c.photoReference,
         }),
     };
+    if (!!c.id) {
+        data.id = c.id;
+    }
     return data;
+};
+
+export const getImageFromMetaTag = async (website: string) => {
+    try {
+        const page = await axios.get<string>(website);
+        const { document } = new JSDOM(page.data).window;
+        return document.querySelector('meta[name="twitter:image"]')?.getAttribute('content')
+            ?? document.querySelector('meta[property="og:image"]')?.getAttribute('content')
+            ?? '';
+    } catch (e) {
+        // console.log(e);
+        try {
+            // Even if website doesn't exist anymore
+            // Response could contain usable images.
+            const err = e as AxiosError<string>;
+            const page = err.response?.data;
+            const { document } = new JSDOM(page).window;
+            return document.querySelector('meta[name="twitter:image"]')?.getAttribute('content')
+                ?? document.querySelector('meta[property="og:image"]')?.getAttribute('content')
+                ?? '';
+        } catch (ee) {
+            // Really can't use it.
+            console.log(ee);
+            return '';
+        }
+    }
 };
 
 const beforeCreateHook = async (c: calendar, _: any) => {
@@ -102,9 +146,8 @@ const beforeCreateHook = async (c: calendar, _: any) => {
         dateTime,
         allDay,
         endDate,
-        name,
-        type,
         website,
+        imageUrl,
     } = c;
 
     console.log(`Fetching coord and tz.`);
@@ -114,47 +157,51 @@ const beforeCreateHook = async (c: calendar, _: any) => {
         timezone = await getTimeZone(latlng.lat, latlng.lng, dateTime);
     }
     console.log(`Done fetching.`);
-    const description = JSON.stringify({
-        collaborators: [],
-        pieces: [],
-        type,
-        website: encodeURI(website) || '',
-    });
 
-    // dateTime passed to hooks are in UTC. So we create a null-timezone moment with dateTime,
-    // so that we can extract HH:mm that was put in on the GUI.
-    // const dateString = moment.tz(c.dateTime, null).format('YYYY-MM-DD HH:mm');
-    // Using the extract string, now create that time in the actual desired timezone.
-    // const dateWithTz = moment.tz(dateString, timezone).toDate();
-    console.log(c.dateTime);
+    console.log('Fetching image url from tags');
+    if (!imageUrl && website) {
+        c.imageUrl = await getImageFromMetaTag(website)
+    }
+
+    console.log('Fetching photos from places');
+    if (location) {
+        try {
+            const { photoReference, placeId } = await getPhotos(location);
+            /* eslint-disable require-atomic-updates */
+            c.photoReference = photoReference;
+            c.placeId = placeId;
+            /* eslint-enable require-atomic-updates */
+        } catch (e) {
+            console.log(e);
+            c.photoReference = '';
+            c.placeId = '';
+        }
+    }
+
+    // convert to event timezone, since sequelize will use default Date object, which defaults to
+    // server timezone.
     const dateWithTz = zonedTimeToUtc(utcToZonedTime(c.dateTime, c.timezone), timezone);
 
-    if (allDay && c.endDate) {
-        // const endDateString = moment(c.endDate).format('YYYY-MM-DD');
-        // const endDateWithTz = moment.tz(endDateString, timezone).toDate();
+    if (allDay && endDate) {
         const endDateWithTz = zonedTimeToUtc(startOfDay(utcToZonedTime(c.endDate, c.timezone)), timezone);
         /* eslint-disable-next-line require-atomic-updates */
         c.endDate = endDateWithTz;
     }
 
-    console.log(`Creating google calendar event '${name}' on ${dateTime}.\n`);
-    const createResponse = await createCalendarEvent(c.sequelize, {
-        summary: name,
-        description,
-        location,
-        startDatetime: dateWithTz,
-        endDate,
-        allDay,
-        timeZone: timezone,
-    });
+    /* eslint-disable require-atomic-updates */
+    c.location = location;
+    c.timezone = timezone;
+    c.dateTime = dateWithTz;
+    /* eslint-enable require-atomic-updates */
+
+    console.log(`Creating google calendar event '${c.name}' on ${c.dateTime.toISOString()}.\n`);
+    const googleParams = await transformModelToGoogle(c);
+    const createResponse = await createCalendarEvent(c.sequelize, googleParams);
 
     const id = createResponse.data.id;
     console.log(`Received response id: ${id}.`);
     /* eslint-disable require-atomic-updates */
     c.id = id;
-    c.location = location;
-    c.timezone = timezone;
-    c.dateTime = dateWithTz;
     /* eslint-enable require-atomic-updates */
     console.log(`[End Hook]\n`);
 };
@@ -164,6 +211,7 @@ const beforeUpdateHook = async (c: calendar, _: any) => {
 
     const dateTimeChanged = c.changed('dateTime') || c.timezone === null;
     const locationChanged = c.changed('location') || c.timezone === null;
+    const websiteChanged = c.changed('website');
 
     let timezone = c.timezone;
     // If location has changed, fetch the new timezone.
@@ -175,43 +223,39 @@ const beforeUpdateHook = async (c: calendar, _: any) => {
         console.log(timezone);
     }
 
-    // See create hook for dateTime parsing logic.
-    if (dateTimeChanged) {
-        console.log(`New dateTime.`);
-        console.log(c.dateTime);
-        // const dateString = moment.tz(c.dateTime, c.previous('timezone')).format('YYYY-MM-DD HH:mm');
-        // const dateWithTz = moment.tz(dateString, timezone).toDate();
+    if (dateTimeChanged || locationChanged) {
+        console.log(`Updating dateTime with new tz.`);
         const previous = c.previous('timezone') || 'America/Chicago';
         const dateWithTz = zonedTimeToUtc(utcToZonedTime(c.dateTime, previous), timezone);
         /* eslint-disable require-atomic-updates */
         c.dateTime = dateWithTz;
         c.timezone = timezone;
         /* eslint-enable require-atomic-updates */
-        console.log(c);
-    } else {
-        // Here, since dateTime was unchanged, we're not being fed an input number, forced into UTC.
-        // Instead, we have a time in a destination timezone. So, we extract the number we want, then
-        // create a new time in the new timezone.
-        if (locationChanged) {
-            console.log(`Updating dateTime with new tz.`);
-            // const dateString = moment(c.dateTime).tz(c.timezone).format('YYYY-MM-DD HH:mm');
-            // const dateWithTz = moment.tz(dateString, timezone).toDate();
-            const previous = c.previous('timezone') || 'America/Chicago';
-            const dateWithTz = zonedTimeToUtc(utcToZonedTime(c.dateTime, previous), timezone);
+    }
+
+    if (locationChanged) {
+        try {
+            const { photoReference, placeId } = await getPhotos(c.location);
             /* eslint-disable require-atomic-updates */
-            c.dateTime = dateWithTz;
-            c.timezone = timezone;
+            c.photoReference = photoReference;
+            c.placeId = placeId;
             /* eslint-enable require-atomic-updates */
-            console.log(c);
+        } catch (e) {
+            console.log(e);
+            c.photoReference = '';
+            c.placeId = '';
         }
     }
 
     if (c.allDay && c.endDate && c.changed('endDate')) {
-        // const endDateString = moment(c.endDate).format('YYYY-MM-DD');
-        // const endDateWithTz = moment.tz(endDateString, timezone).toDate();
         const endDateWithTz = zonedTimeToUtc(startOfDay(utcToZonedTime(c.endDate, c.timezone)), timezone);
         /* eslint-disable-next-line require-atomic-updates */
         c.endDate = endDateWithTz;
+    }
+
+    if (websiteChanged && !c.imageUrl && c.website) {
+        console.log('Fetching image url from tags');
+        c.imageUrl = await getImageFromMetaTag(c.website);
     }
 
     if (c.changed()) {
@@ -247,19 +291,36 @@ export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<
         location: dataTypes.STRING,
         type: dataTypes.STRING,
         website: dataTypes.STRING,
+        imageUrl: {
+            type: dataTypes.STRING,
+            field: 'image_url',
+        },
+        placeId: {
+            type: dataTypes.STRING,
+            field: 'place_id',
+        },
+        photoReference: {
+            type: dataTypes.STRING,
+            field: 'photo_reference',
+        },
+        usePlacePhoto: {
+            type: dataTypes.BOOLEAN,
+            field: 'use_place_photo',
+            defaultValue: true,
+        }
     }, {
-            hooks: {
-                beforeCreate: beforeCreateHook,
-                afterDestroy: async (c: calendar, _: any) => {
-                    console.log(`[Calendar Hook afterDestroy]`);
-                    await deleteCalendarEvent(c.sequelize, c.id);
-                    console.log(`[End Hook]\n`);
-                },
-                beforeUpdate: beforeUpdateHook,
+        hooks: {
+            beforeCreate: beforeCreateHook,
+            afterDestroy: async (c: calendar, _: any) => {
+                console.log(`[Calendar Hook afterDestroy]`);
+                await deleteCalendarEvent(c.sequelize, c.id);
+                console.log(`[End Hook]\n`);
             },
-            sequelize,
-            tableName: 'calendar',
-        });
+            beforeUpdate: beforeUpdateHook,
+        },
+        sequelize,
+        tableName: 'calendar',
+    });
 
     const associate = (models: ModelMap) => {
         calendar.hasMany(models.calendarPiece);

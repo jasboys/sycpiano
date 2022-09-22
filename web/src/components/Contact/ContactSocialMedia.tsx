@@ -3,7 +3,7 @@ import * as React from 'react';
 import styled from '@emotion/styled';
 
 import { ContactSocialMediaShape } from 'src/components/Contact/types';
-import { staticImage } from 'src/styles/imageUrls';
+import { staticImage } from 'src/imageUrls';
 import { screenXSorPortrait } from 'src/styles/screens';
 import { lato3 } from 'src/styles/fonts';
 

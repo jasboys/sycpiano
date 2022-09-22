@@ -36,18 +36,16 @@ const StyledNavBar = styled.div<{ isMobile: boolean; isHome: boolean; menuExpand
         zIndex: 5000,
         transition: 'background-color 0.25s',
         boxShadow: '0 0 6px 1px rgba(0, 0, 0, 0.3)',
-    }, ({ isMobile }) => isMobile && ({
+        backdropFilter: 'blur(1px)'
+    },
+    ({ isMobile }) => isMobile && ({
         height: navBarHeight.mobile,
         paddingRight: 15,
-}), ({ isHome, menuExpanded, cartExpanded }) => isHome &&
-    (
-        (menuExpanded || cartExpanded) ?
-            ({
-                backgroundColor: 'rgba(0, 0, 0, 0.1)',
-            }) : ({
-                backgroundColor: 'transparent',
-            })
-    )
+    }),
+    ({ isHome, menuExpanded, cartExpanded, isMobile }) => ({
+        backgroundColor: (isHome && isMobile && (menuExpanded || cartExpanded)) ?
+            'rgba(0, 0, 0, 0.1)' : 'transparent',
+    })
 );
 
 const StyledNavAndCart = styled.div<{ isMobile: boolean }>({
@@ -104,6 +102,7 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
                             currentBasePath={currentBasePath}
                             specificPath={specificRouteName}
                             isMobile={true}
+
                             key="hamburger-nav"
                         />
                     </StyledNavAndCart>

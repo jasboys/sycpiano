@@ -5,8 +5,9 @@ import styled from '@emotion/styled';
 import iconMap from 'src/components/About/Discs/iconMap';
 import { Disc } from 'src/components/About/Discs/types';
 
-import { staticImage } from 'src/styles/imageUrls';
+import { staticImage } from 'src/imageUrls';
 import { screenXSorPortrait } from 'src/styles/screens';
+import { cardShadow } from 'src/styles/mixins';
 
 const LinkImage = styled.img`
     transition: all 0.2s;
@@ -48,10 +49,7 @@ const DiscItem = styled.div<{ isMobile: boolean }>`
     margin: 4rem auto;
     max-width: 800px;
     overflow: hidden;
-    box-shadow:
-        0 1px 3px 0 rgba(0 0 0 / 0.2),
-        0 1px 1px 0 rgba(0 0 0 / 0.14),
-        0 2px 1px -1px rgba(0 0 0 / 0.12);
+    box-shadow: ${cardShadow};
     border-radius: 8px;
     background-color: white;
     display: flex;

@@ -8,7 +8,7 @@ import { gsap } from 'gsap';
 import { LazyImage } from 'src/components/LazyImage';
 import { PhotoItem } from 'src/components/Media/Photos/types';
 import { idFromItem, resizedPathFromItem, staticPathFromItem } from 'src/components/Media/Photos/utils';
-import { generateSrcsetWidths } from 'src/styles/imageUrls';
+import { generateSrcsetWidths } from 'src/imageUrls';
 import { screenWidths } from 'src/styles/screens';
 import { fadeOnEnter, fadeOnExit, isImageElement } from 'src/utils';
 

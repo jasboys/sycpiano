@@ -32,7 +32,7 @@ const HamburgerNav: React.FC<NavBarLinksProps> = ({ currentBasePath, isMobile, s
             <HamburgerMenu
                 isExpanded={isExpanded}
                 onClick={() => dispatch(toggleExpanded())}
-                layerColor={specificPath === '' ? 'white' : logoBlue}
+                layerColor={(specificPath === '') ? 'white' : logoBlue}
             />
             <Transition<undefined>
                 in={isExpanded}
