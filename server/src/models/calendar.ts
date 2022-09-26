@@ -11,8 +11,10 @@ import {
     BelongsToManySetAssociationsMixin,
     DataTypes,
     Model,
+    ModelStatic,
     Optional,
     Sequelize,
+    Op,
 } from 'sequelize';
 import { ModelExport, ModelMap } from '../types';
 
@@ -142,7 +144,6 @@ export const getImageFromMetaTag = async (website: string) => {
 const beforeCreateHook = async (c: calendar, _: any) => {
     console.log(`[Calendar Hook beforeCreate]`);
     const {
-        location,
         dateTime,
         allDay,
         endDate,
@@ -152,25 +153,47 @@ const beforeCreateHook = async (c: calendar, _: any) => {
 
     console.log(`Fetching coord and tz.`);
     let timezone = 'America/Chicago';
-    if (location) {
-        const { latlng } = await getLatLng(location);
+    if (c.location) {
+        const { latlng } = await getLatLng(c.location);
         timezone = await getTimeZone(latlng.lat, latlng.lng, dateTime);
     }
     console.log(`Done fetching.`);
 
     console.log('Fetching image url from tags');
     if (!imageUrl && website) {
-        c.imageUrl = await getImageFromMetaTag(website)
+        const fetchedImageUrl = await getImageFromMetaTag(website)
+        c.imageUrl = fetchedImageUrl;
+        if (fetchedImageUrl !== '') {
+            c.usePlacePhoto = false;
+        }
     }
 
     console.log('Fetching photos from places');
-    if (location) {
+    if (c.location) {
         try {
-            const { photoReference, placeId } = await getPhotos(location);
-            /* eslint-disable require-atomic-updates */
-            c.photoReference = photoReference;
-            c.placeId = placeId;
-            /* eslint-enable require-atomic-updates */
+            const otherCal = await (c.sequelize.models.calendar as ModelStatic<calendar>).findOne({
+                where: {
+                    [Op.and]: {
+                        location: c.location,
+                        photoReference: {
+                            [Op.not]: null,
+                        },
+                    },
+                },
+            });
+            if (!!otherCal) {
+                console.log('found existing location photo');
+                /* eslint-disable require-atomic-updates */
+                c.photoReference = otherCal.photoReference;
+                c.placeId = otherCal.placeId;
+                /* eslint-enable require-atomic-updates */
+            } else {
+                const { photoReference, placeId } = await getPhotos(c.location);
+                /* eslint-disable require-atomic-updates */
+                c.photoReference = photoReference;
+                c.placeId = placeId;
+                /* eslint-enable require-atomic-updates */
+            }
         } catch (e) {
             console.log(e);
             c.photoReference = '';
@@ -189,7 +212,6 @@ const beforeCreateHook = async (c: calendar, _: any) => {
     }
 
     /* eslint-disable require-atomic-updates */
-    c.location = location;
     c.timezone = timezone;
     c.dateTime = dateWithTz;
     /* eslint-enable require-atomic-updates */
@@ -235,11 +257,29 @@ const beforeUpdateHook = async (c: calendar, _: any) => {
 
     if (locationChanged) {
         try {
-            const { photoReference, placeId } = await getPhotos(c.location);
-            /* eslint-disable require-atomic-updates */
-            c.photoReference = photoReference;
-            c.placeId = placeId;
-            /* eslint-enable require-atomic-updates */
+            const otherCal = await (c.sequelize.models.calendar as ModelStatic<calendar>).findOne({
+                where: {
+                    [Op.and]: {
+                        location: c.location,
+                        photoReference: {
+                            [Op.not]: null,
+                        },
+                    },
+                },
+            });
+            if (!!otherCal) {
+                console.log('found existing location photo');
+                /* eslint-disable require-atomic-updates */
+                c.photoReference = otherCal.photoReference;
+                c.placeId = otherCal.placeId;
+                /* eslint-enable require-atomic-updates */
+            } else {
+                const { photoReference, placeId } = await getPhotos(c.location);
+                /* eslint-disable require-atomic-updates */
+                c.photoReference = photoReference;
+                c.placeId = placeId;
+                /* eslint-enable require-atomic-updates */
+            }
         } catch (e) {
             console.log(e);
             c.photoReference = '';
@@ -255,7 +295,9 @@ const beforeUpdateHook = async (c: calendar, _: any) => {
 
     if (websiteChanged && !c.imageUrl && c.website) {
         console.log('Fetching image url from tags');
-        c.imageUrl = await getImageFromMetaTag(c.website);
+        const fetchedImageUrl = await getImageFromMetaTag(c.website)
+        c.imageUrl = fetchedImageUrl;
+        c.usePlacePhoto = (fetchedImageUrl === ''); // If didn't get any imageUrl, then we should use place photo
     }
 
     if (c.changed()) {

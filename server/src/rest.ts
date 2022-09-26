@@ -871,17 +871,35 @@ adminRest.post('/actions/products/pull-from-stripe', async (_: express.Request, 
 const calendarMapFn = async (cal: calendar, idx: number) => {
     console.log(`[POPULATING ${idx}]`);
     try {
-        console.log(cal.imageUrl, cal.website);
         if (cal.website && cal.imageUrl === null) {
             const imageUrl = await getImageFromMetaTag(cal.website);
-            console.log(imageUrl);
             cal.set('imageUrl', imageUrl);
+            if (imageUrl !== '') {
+                cal.set('usePlacePhoto', false)
+            }
+        } else if (cal.website && cal.imageUrl !== '') {
+            cal.set('usePlacePhoto', false);
         }
-        console.log(cal.photoReference);
         if (cal.location && cal.photoReference === null) {
-            const { photoReference, placeId } = await getPhotos(cal.location);
-            cal.set('photoReference', photoReference);
-            cal.set('placeId', placeId);
+            // first check if we already have another event with the same location
+            const otherCal = await models.calendar.findOne({
+                where: {
+                    [Op.and]: {
+                        location: cal.location,
+                        photoReference: {
+                            [Op.not]: null,
+                        },
+                    },
+                },
+            });
+            if (!!otherCal) {
+                cal.set('photoReference', otherCal.photoReference);
+                cal.set('placeId', otherCal.placeId);
+            } else {
+                const { photoReference, placeId } = await getPhotos(cal.location);
+                cal.set('photoReference', photoReference);
+                cal.set('placeId', placeId);
+            }
         }
         await cal.save();
     } catch(e) {

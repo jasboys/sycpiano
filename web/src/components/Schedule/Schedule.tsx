@@ -7,15 +7,16 @@ import { Search } from 'src/components/Schedule/Search';
 
 import { container, pushed } from 'src/styles/mixins';
 
-import { DateIconSVG } from 'src/components/Schedule/DateIconSVG';
-import { LinkIconSVG } from 'src/components/Schedule/LinkIconSVG';
+// import { DateIconSVG } from 'src/components/Schedule/DateIconSVG';
+// import { LinkIconSVG } from 'src/components/Schedule/LinkIconSVG';
 import { LocationIconSVG } from 'src/components/Schedule/LocationIconSVG';
-import { TrebleIconSVG } from 'src/components/Schedule/TrebleIconSVG';
+// import { TrebleIconSVG } from 'src/components/Schedule/TrebleIconSVG';
 import { screenXSorPortrait } from 'src/styles/screens';
 import { EventListName } from 'src/components/Schedule/types';
 import styled from '@emotion/styled';
 import { SwitchTransition, Transition } from 'react-transition-group';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
+import { ShareIconSVG } from './ShareIconSVG';
 
 const ScheduleContainer = styled.div(
     pushed,
@@ -69,10 +70,11 @@ const Schedule: React.FC<ScheduleProps> = ({ isMobile, type }) => {
                     </Transition>
                 </SwitchTransition>
             </div>
-            <DateIconSVG />
+            {/* <DateIconSVG /> */}
             <LocationIconSVG />
-            <TrebleIconSVG />
-            <LinkIconSVG />
+            {/* <TrebleIconSVG /> */}
+            {/* <LinkIconSVG /> */}
+            <ShareIconSVG />
         </ScheduleContainer>
     );
 };

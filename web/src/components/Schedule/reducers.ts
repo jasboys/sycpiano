@@ -153,6 +153,7 @@ const initialScheduleState: ScheduleStateShape = {
 
 export const clearList = createAction<EventListName>('calendar/clearList');
 export const selectEvent = createAction<{ name: EventListName; event?: EventItem }>('calendar/selectEvent');
+export const hasMore = createAction<{ name: EventListName; hasMore: boolean }>('calendar/hasMore');
 
 const scheduleSlice = createSlice({
     name: 'scheduleEventItems',
@@ -171,6 +172,10 @@ const scheduleSlice = createSlice({
                     maxDate: undefined,
                     lastQuery: '',
                 };
+            })
+            .addCase(hasMore, (state, action) => {
+                const { name, hasMore } = action.payload;
+                state[name].hasMore = hasMore;
             })
             .addCase(selectEvent, (state, action) => {
                 const { name, event } = action.payload;

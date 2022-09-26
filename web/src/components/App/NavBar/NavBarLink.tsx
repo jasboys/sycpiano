@@ -78,6 +78,7 @@ interface NavBarLinkProps {
     readonly link: LinkShape;
     readonly subNavLinks?: LinkShape[];
     readonly isMobile: boolean;
+    readonly currentSpecificPath: string;
 }
 
 const linkStyle = css(
@@ -196,6 +197,7 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
     isMobile,
     link,
     subNavLinks,
+    currentSpecificPath,
 }) => {
     const showSubs = useAppSelector(({ navbar }) => navbar.showSubs);
     const dispatch = useAppDispatch();
@@ -220,7 +222,7 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
     } else {
         attr.to = link.path;
         attr.onClick = () => {
-            !isMobile && dispatch(showSubNav());
+            (!isMobile || !subNavLinks) && dispatch(showSubNav());
             isMobile && dispatch(toggleExpanded(false));
         };
     }
@@ -257,6 +259,7 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
                         <SubNav
                             basePath={link}
                             links={subNavLinks}
+                            currentSpecificPath={currentSpecificPath}
                             onClick={() => {
                                 !isMobile && dispatch(showSubNav());
                                 isMobile && dispatch(toggleExpanded(false));

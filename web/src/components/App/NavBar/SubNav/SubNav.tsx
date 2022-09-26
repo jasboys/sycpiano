@@ -10,6 +10,7 @@ interface SubNavProps {
     readonly className?: string;
     readonly isHome: boolean;
     readonly basePath: LinkShape;
+    readonly currentSpecificPath: string;
     readonly links: LinkShape[];
     readonly onClick: () => void;
     readonly isMobile: boolean;

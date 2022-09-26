@@ -3,7 +3,7 @@ import { parse, stringify } from 'qs';
 import * as React from 'react';
 import { Helmet } from 'react-helmet';
 import ReactMedia from 'react-media';
-import { Navigate, Route, Routes, useLocation, useMatch, useNavigate } from 'react-router-dom';
+import { Route, Routes, useLocation, useMatch, useNavigate } from 'react-router-dom';
 import { SwitchTransition, Transition } from 'react-transition-group';
 
 import Container from 'src/components/App/Container';
@@ -85,7 +85,7 @@ const FadingContainer = styled.div<{ shouldBlur: boolean }>({
     overflow: 'hidden',
     position: 'absolute',
 }, ({ shouldBlur }) => shouldBlur && ({
-    filter: 'blur(8px)',
+    // filter: 'blur(8px)',
 }));
 
 const getRouteBase = (pathname: string) => {

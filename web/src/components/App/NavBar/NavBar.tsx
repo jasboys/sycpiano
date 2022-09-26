@@ -24,7 +24,6 @@ const StyledNavBar = styled.div<{ isMobile: boolean; isHome: boolean; menuExpand
     {
         visibility: 'hidden',
         padding: '0 30px 0 0',
-        backgroundColor: 'white',
         height: navBarHeight.desktop,
         position: 'fixed',
         display: 'flex',
@@ -43,8 +42,12 @@ const StyledNavBar = styled.div<{ isMobile: boolean; isHome: boolean; menuExpand
         paddingRight: 15,
     }),
     ({ isHome, menuExpanded, cartExpanded, isMobile }) => ({
-        backgroundColor: (isHome && isMobile && (menuExpanded || cartExpanded)) ?
-            'rgba(0, 0, 0, 0.1)' : 'transparent',
+        backgroundColor:
+            (isHome && isMobile) ?
+                (menuExpanded || cartExpanded) ?
+                    'rgba(0, 0, 0, 0.1)'
+                    : 'transparent'
+                : 'white',
     })
 );
 

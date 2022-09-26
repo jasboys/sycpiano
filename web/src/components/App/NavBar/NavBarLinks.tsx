@@ -19,8 +19,7 @@ const StyledUL = styled.ul({
         flexDirection: 'column',
         width: '100%',
         paddingTop: '1.8rem',
-        overflowY: 'auto',
-        overflowX: 'hidden',
+        overflow: 'hidden auto',
         alignItems: 'flex-end',
     },
 });
@@ -44,14 +43,13 @@ const LinksDiv = styled.div<{ isHome: boolean }>(
         textTransform: 'uppercase',
         [screenMorPortrait]: {
             ...pushed,
+            height: `calc(100vh - ${navBarHeight.mobile}px)`,
             position: 'fixed',
             left: 0,
             top: 0,
             width: '100%',
-            paddingLeft: 'calc(100vw - 100%)',
-            display: 'flex',
-            justifyContent: 'center',
             boxShadow: 'inset 0 7px 6px -5px rgba(0, 0, 0, 0.25)',
+            backdropFilter: 'blur(1px)',
         },
     }, ({ isHome }) => ({
         [screenMorPortrait]: {
@@ -64,12 +62,14 @@ const NavBarLinks: React.FC<NavBarLinksProps> = (props) => (
     <LinksDiv isHome={props.specificPath === ''}>
         <StyledUL>
             {links.map((link: LinkShape, i: number) => {
+                console.log(link.path, props.currentBasePath, props.specificPath);
                 return (
                     <NavBarLink
                         key={i}
                         link={link}
                         subNavLinks={link.subLinks}
                         active={link.path === props.currentBasePath}
+                        currentSpecificPath={props.specificPath}
                         isHome={props.specificPath === ''}
                         isMobile={props.isMobile}
                     />

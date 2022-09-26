@@ -4,7 +4,6 @@ import { Helmet } from 'react-helmet';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createCachedSelector } from 're-reselect';
 
-import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import debounce from 'lodash-es/debounce';
@@ -19,8 +18,8 @@ import {
     MonthGroups,
     findDateInMonthGroups,
 } from 'src/components/Schedule/types';
-import { lightBlue, logoBlue } from 'src/styles/colors';
-import { lato2, lato3 } from 'src/styles/fonts';
+import { lightBlue } from 'src/styles/colors';
+import { lato2 } from 'src/styles/fonts';
 import { screenXSorPortrait } from 'src/styles/screens';
 import { GlobalStateShape } from 'src/store';
 import { metaDescriptions, titleStringBase } from 'src/utils';
@@ -33,6 +32,8 @@ import format from 'date-fns-tz/format';
 import formatInTimeZone from 'date-fns-tz/formatInTimeZone';
 import { useSearchParams } from 'react-router-dom';
 import { cardShadow } from 'src/styles/mixins';
+import { Transition } from 'react-transition-group';
+import { gsap } from 'gsap';
 
 interface EventListProps {
     readonly type: EventListName;
@@ -45,43 +46,51 @@ interface OnScrollProps {
     clientHeight: number;
 }
 
-const StyledLoadingInstance = styled(LoadingInstance)`
-    position: relative;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 10px;
-    fill: none;
-    stroke: ${lightBlue};
-`;
+const LoadingDiv = styled.div({
+    position: 'absolute',
+    bottom: 0,
+    transform: 'translateY(200px)',
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    pointerEvents: 'none',
+});
 
-const placeholderStyle = css`
-    width: 80%;
-    height: 100%;
-    min-height: 6.5rem;
-    max-width: 1240px;
-    margin: 0 auto;
-    font-family: ${lato2};
-    font-size: 3rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+const SpinnerContainer = styled.div({
+    borderRadius: '50%',
+    backgroundColor: 'rgba(255 255 255 / 0.7)',
+    backdropFilter: 'blur(5px)',
+    margin: '0.7rem',
+    boxShadow: '0 0 4px rgba(0 0 0 / 0.3)',
+    display: 'flex',
+});
 
-    ${screenXSorPortrait} {
-        width: 90%;
-        font-size: 1.5rem;
+const StyledLoadingInstance = styled(LoadingInstance)({
+    fill: 'none',
+    stroke: lightBlue,
+    margin: '0.5rem',
+});
+
+const EndOfList = styled.div({
+    margin: '2.4rem auto',
+    width: '80vw',
+    maxWidth: 600,
+    overflow: 'hidden',
+    boxShadow: cardShadow,
+    borderRadius: 8,
+    backgroundColor: 'white',
+    display: 'flex',
+    flexWrap: 'wrap',
+    fontFamily: lato2,
+    padding: '1.5rem',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '1.8rem',
+    [screenXSorPortrait]: {
+        flexDirection: 'column',
     }
-`;
-
-const firstElementStyle = (isSearch: boolean) => css`
-    ${placeholderStyle}
-    padding-top: 85px;
-    justify-content: unset;
-    padding-left: 28px;
-    min-height: 4.5rem;
-    z-index: 6;
-    background-color: white;
-    ${isSearch ? 'position: sticky; top: 0;' : ''}
-`;
+});
 
 const fetchDateParam = (type: string) => type === 'upcoming' ? 'after' : 'before';
 
@@ -105,13 +114,13 @@ const scheduleListSelector = createCachedSelector(
 const ScrollingContainer = styled.div<{ isMobile: boolean }>(
     {
         width: '100%',
-        height: '100%',
         overflowY: 'scroll',
-        maskImage: 'linear-gradient(0deg, transparent 20%, black 50%)'
+        paddingBottom: '2rem',
     },
     (props) => ({
-        maskImage: props.isMobile ? 'linear-gradient(to bottom, transparent 82px, black 83px)' : 'unset',
-        paddingTop: props.isMobile ? 82 : '2rem',
+        paddingTop: props.isMobile ? 0 : '2rem',
+        marginTop: props.isMobile ? 82 : 0,
+        height: props.isMobile ? 'calc(100% - 82px)' : '100%',
     })
 );
 
@@ -140,12 +149,20 @@ const MonthBar = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
     boxShadow: cardShadow,
 }));
 
-const MonthText = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
+const MonthText = styled.div<{ isMobile: boolean }>(({}) => ({
     width: 'min-content',
     // background: `linear-gradient(white 88%, rgba(255, 255, 255, 0) 88%)`,
     padding: '1rem 0.5rem 0.5rem',
     whiteSpace: 'nowrap',
 }));
+
+const loadingOnEnter = (el: HTMLElement) => {
+    gsap.fromTo(el, { y: 200 }, { duration: 0.25, y: 0, ease: "back.out(1)" });
+};
+
+const loadingOnExit = (el: HTMLElement) => {
+    gsap.fromTo(el, { y: 0 }, { duration: 0.25, y: 200, ease: "back.in(1)" });
+}
 
 interface PrevProps {
     currentItem?: EventItemType;
@@ -351,15 +368,15 @@ export const EventList: React.FC<EventListProps> = (props) => {
                     debouncedFetch({ scrollTop, scrollHeight, clientHeight });
                 }}
             >
-                    {eventItemsLength ?
-                        eventItems.monthGroups.map((monthGroup, idx) =>
-                            <MonthGroup key={`${props.type}-${lastQuery!}-${idx}-month`}>
-                                <MonthBar isMobile={props.isMobile}>
-                                    <MonthText isMobile={props.isMobile}>
-                                        {format(parseISO(monthGroup.dateTime), 'MMMM yyyy')}
-                                    </MonthText>
-                                </MonthBar>
-                                <Events>
+                {eventItemsLength ?
+                    eventItems.monthGroups.map((monthGroup, idx) =>
+                        <MonthGroup key={`${props.type}-${lastQuery!}-${idx}-month`}>
+                            <MonthBar isMobile={props.isMobile}>
+                                <MonthText isMobile={props.isMobile}>
+                                    {format(parseISO(monthGroup.dateTime), 'MMMM yyyy')}
+                                </MonthText>
+                            </MonthBar>
+                            <Events>
                                 {
                                     monthGroup.events.map((event, idx) => {
                                         const permaLink = `/schedule/${format(parseISO(event.dateTime), 'yyyy-MM-dd')}`;
@@ -374,20 +391,33 @@ export const EventList: React.FC<EventListProps> = (props) => {
                                         );
                                     })
                                 }
-                                </Events>
-                            </MonthGroup>
-                        )
-                        : <div />
-                    }
-                    {isFetchingList ?
-                        <StyledLoadingInstance width={80} height={80} />
-                        : (
-                            <div css={placeholderStyle}>
-                                {eventItemsLength === 0 ? 'No Events Fetched' : ''}
-                            </div>
-                        )
-                    }
+                            </Events>
+                        </MonthGroup>
+                    )
+                    : <div />
+                }
+                {
+                    <EndOfList>
+                        {eventItemsLength === 0 ?
+                            'No Events Fetched'
+                            : (hasMore ?
+                                ''
+                                : 'No More Events')}
+                    </EndOfList>
+                }
             </ScrollingContainer>
+            <Transition<undefined>
+                in={isFetchingList}
+                timeout={300}
+                onEnter={loadingOnEnter}
+                onExit={loadingOnExit}
+            >
+                <LoadingDiv>
+                    <SpinnerContainer>
+                        <StyledLoadingInstance width={72} height={72} />
+                    </SpinnerContainer>
+                </LoadingDiv>
+            </Transition>
         </React.Fragment>
     );
 };

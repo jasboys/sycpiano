@@ -58,7 +58,9 @@ export const showSubNav = createAsyncThunk<void, { sub?: string; isMobile?: bool
         const { sub = '', isMobile = false } = (typeof args === 'object') ? args : {};
         let showSubs = thunkAPI.getState().navbar.showSubs;
         if (isMobile) {
-            if (showSubs.includes(sub)) {
+            if (sub === '') {
+                showSubs = [];
+            } else if (showSubs.includes(sub)) {
                 showSubs = showSubs.filter((value) => sub !== value);
             } else {
                 showSubs = [...showSubs, sub];

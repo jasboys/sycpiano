@@ -13,7 +13,6 @@ const models = db.models;
 const calendarIncludeBase = [
     {
         model: models.collaborator,
-        required: true,
         attributes: {
             exclude: ['id', 'created_at', 'updated_at', 'createdAt', 'updatedAt', 'calendarCollaborators', '_search'],
         },
@@ -23,7 +22,6 @@ const calendarIncludeBase = [
     },
     {
         model: models.piece,
-        required: true,
         attributes: {
             exclude: ['id', 'created_at', 'updated_at', 'createdAt', 'updatedAt', 'calendarPieces', '_search'],
         },
@@ -292,6 +290,8 @@ calendarRouter.get('/', async (req: express.Request<any, any, any, CalendarQuery
     let betweenEvents;
     let futureEvents;
     let pastEvents;
+
+    console.log(req.query);
 
     if (parsedDate === undefined) {
         if (before) {

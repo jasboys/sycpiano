@@ -1,6 +1,7 @@
 import { addMonths, compareAsc, compareDesc, endOfMonth, getMonth, getYear, isSameDay, isSameMonth, parseISO, startOfMonth, subMonths } from 'date-fns';
 import binarySearch from 'binary-search';
 import { utcToZonedTime } from 'date-fns-tz';
+import { current } from '@reduxjs/toolkit';
 
 export type EventType = 'concerto' | 'chamber' | 'solo' | 'masterclass';
 
@@ -184,25 +185,31 @@ export const mergeMonthGroups = (left: MonthGroups, right: MonthGroups): MonthGr
     if (right.monthGroups.length === 0) {
         return { ...left };
     }
+    console.log(current(left), right);
+    const localLeft = { ...left };
     const mergedWithExisting: MonthGroup[] = right.monthGroups.map((mg) => {
-        const inLeft = left.monthGroups.find((leftGroup) => isSameMonth(parseISO(leftGroup.dateTime), parseISO(mg.dateTime)));
-        return (inLeft !== undefined) ?
-            {
-                ...inLeft,
+        const inLeftIdx = localLeft.monthGroups.findIndex((leftGroup) => isSameMonth(parseISO(leftGroup.dateTime), parseISO(mg.dateTime)));
+        console.log(inLeftIdx);
+        if (inLeftIdx !== -1) {
+            const popped = localLeft.monthGroups.splice(inLeftIdx, 1)[0];   // mutate local array
+            return {
+                ...popped,
                 events: [
-                    ...(inLeft.events),
+                    ...(popped.events),
                     ...(mg.events),
-                ].sort(left.order === 'asc' ? eventAscend : eventDescend),
-            } :
-            mg;
+                ].sort(localLeft.order === 'asc' ? eventAscend : eventDescend),
+            }
+        } else {
+            return mg;
+        }
     });
     const result = [
-        ...(left.monthGroups),
+        ...(localLeft.monthGroups), // any duplicate months have been removed because of popping
         ...(mergedWithExisting),
-    ].sort(left.order === 'asc' ? monthGroupAscend : monthGroupDescend);
+    ].sort(localLeft.order === 'asc' ? monthGroupAscend : monthGroupDescend);
 
     return {
-        order: left.order,
+        order: localLeft.order,
         length: result.reduce((prev, curr) => {
             return prev + curr.events.length;
         }, 0),

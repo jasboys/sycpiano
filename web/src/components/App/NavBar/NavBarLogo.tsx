@@ -66,7 +66,7 @@ const StyledLink = styled(Link, {
         },
 
     },
-    ({ isHome, isExpanded }) => (isHome) ?
+    ({ isHome }) => (isHome) ?
         {
             fill: 'white',
             '&:hover': {

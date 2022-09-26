@@ -15,25 +15,13 @@ import {
 import { EventItem as EventItemType, EventListName } from 'src/components/Schedule/types';
 
 import { lightBlue } from 'src/styles/colors';
-import { lato1, lato2 } from 'src/styles/fonts';
+import { lato2 } from 'src/styles/fonts';
 import { screenXSorPortrait } from 'src/styles/screens';
 import { cardShadow } from 'src/styles/mixins';
-import axios from 'axios';
+import { ShareIconInstance } from './ShareIconSVG';
 
 const getGooglePlacePhoto = (photoReference: string, maxHeight: number) =>
     `https://maps.googleapis.com/maps/api/place/photo?maxheight=${maxHeight}&photo_reference=${photoReference}&key=${GAPI_KEY}`;
-
-
-const FlexEventInfoContainer = styled.div`
-    flex: 0 1 auto;
-    padding: 0 0 0 35px;
-`;
-
-const DateContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-`;
 
 const Connector = styled.div`
     flex: 1 1 auto;
@@ -57,6 +45,7 @@ const detailSectionMargin = (extra?: number) => css` margin-bottom: ${20 + (extr
 
 const ItemContainer = styled.div({
     margin: '2.4rem auto',
+    width: '80vw',
     maxWidth: 600,
     overflow: 'hidden',
     boxShadow: cardShadow,
@@ -65,7 +54,6 @@ const ItemContainer = styled.div({
     display: 'flex',
     flexWrap: 'wrap',
     [screenXSorPortrait]: {
-        width: '80vw',
         flexDirection: 'column',
     }
 });
@@ -99,7 +87,20 @@ const DetailsContainer = styled.div({
     padding: '1.5rem',
     display: 'flex',
     flexDirection: 'column',
-    fontFamily: lato2
+    fontFamily: lato2,
+    [screenXSorPortrait]: {
+        width: 0,
+        minWidth: '100%',
+    }
+});
+
+const StyledShareIcon = styled(ShareIconInstance)({
+    position: 'absolute',
+    right: 0,
+    zIndex: 5,
+    fill: 'white',
+    stroke: 'white',
+    margin: '0.2rem',
 });
 
 const EventItem: React.FC<EventItemProps> = ({
@@ -135,6 +136,7 @@ const EventItem: React.FC<EventItemProps> = ({
             <ImageContainer>
                 <Image src={((usePlacePhoto && !!photoReference) ? getGooglePlacePhoto(photoReference, 300) : imageUrl) ?? ''} />
                 {DateChildren}
+                <StyledShareIcon width={36} height={36} />
             </ImageContainer>
 
             <DetailsContainer>
@@ -148,9 +150,9 @@ const EventItem: React.FC<EventItemProps> = ({
                     />
                 )}
 
-                <EventLocation location={location} css={detailSectionMargin()} isMobile={isMobile} />
-                <EventCollaborators collaborators={collaborators} css={detailSectionMargin()} />
-                <EventProgram program={pieces} css={detailSectionMargin(5)} />
+                <EventLocation location={location} isMobile={isMobile} />
+                {collaborators.length !== 0 && <EventCollaborators collaborators={collaborators} />}
+                {pieces.length !== 0 && <EventProgram program={pieces} />}
 
                 {website && <EventWebsiteButton website={website} />}
             </DetailsContainer>
