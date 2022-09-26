@@ -10888,10 +10888,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["moment-timezone", [\
-        ["npm:0.5.34", {\
-          "packageLocation": "./.yarn/cache/moment-timezone-npm-0.5.34-e4fe2d01f6-12a1d3d52e.zip/node_modules/moment-timezone/",\
+        ["npm:0.5.37", {\
+          "packageLocation": "./.yarn/cache/moment-timezone-npm-0.5.37-cb6e7487a6-b3fc24848a.zip/node_modules/moment-timezone/",\
           "packageDependencies": [\
-            ["moment-timezone", "npm:0.5.34"],\
+            ["moment-timezone", "npm:0.5.37"],\
             ["moment", "npm:2.29.4"]\
           ],\
           "linkType": "HARD"\
@@ -13954,7 +13954,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["lodash", "npm:4.17.21"],\
             ["mariadb", null],\
             ["moment", "npm:2.29.4"],\
-            ["moment-timezone", "npm:0.5.34"],\
+            ["moment-timezone", "npm:0.5.37"],\
             ["mysql2", null],\
             ["pg", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:8.7.3"],\
             ["pg-connection-string", "npm:2.5.0"],\
