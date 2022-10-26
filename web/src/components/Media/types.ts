@@ -18,7 +18,6 @@ export interface PlaylistProps {
     readonly isShow: boolean;
     readonly togglePlaylist?: (isShow?: boolean) => void;
     readonly shouldAppear: boolean;
-    readonly isMobile?: boolean;
     readonly id?: string;
     readonly onScroll?: (event: React.UIEvent<HTMLElement> | UIEvent) => void;
 }

@@ -8,8 +8,9 @@ import { gsap } from 'gsap';
 
 import { playVideo } from 'src/components/Media/Videos/reducers';
 import { cliburn1, generateSrcsetWidths, resizedImage } from 'src/imageUrls';
-import { screenLengths, screenWidths, screenXS } from 'src/styles/screens';
+import { minRes, screenLengths, screenWidths, webkitMinDPR,} from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
+import { toMedia } from 'src/mediaQuery';
 
 import { LazyImage } from 'src/components/LazyImage';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
@@ -28,9 +29,9 @@ const StyledPreviewOverlay = styled.div<{ bgImage?: string }>`
     background-repeat: no-repeat;
     background-size: cover;
 
-    ${screenXS} {
+    ${toMedia([minRes, webkitMinDPR])} {
         height: 56.25vw;
-        top: ${navBarHeight.mobile}px;
+        top: ${navBarHeight.hiDpx}px;
         position: fixed;
     }
 

@@ -12,10 +12,11 @@ import { ChildRendererProps } from 'src/components/Media/types';
 
 import { lightBlue } from 'src/styles/colors';
 import { generateSrcsetWidths, resizedImage } from 'src/imageUrls';
-import { screenWidths, screenXSorPortrait } from 'src/styles/screens';
+import { screenWidths, screenPortrait, screenXS } from 'src/screens';
 import { isImageElement } from 'src/utils';
+import { toMedia } from 'src/mediaQuery';
 
-const PhotoRow = styled.div<{ isMobile: boolean; isLoaded: boolean }>`
+const PhotoRow = styled.div<{ isLoaded: boolean }>`
     position: relative;
     height: 300px;
     border: 1px solid transparent;
@@ -37,7 +38,7 @@ const PhotoRow = styled.div<{ isMobile: boolean; isLoaded: boolean }>`
         border-color: ${lightBlue};
     }
 
-    ${screenXSorPortrait} {
+    ${toMedia([screenXS, screenPortrait])} {
         height: ${props => props.isLoaded ? 'auto' : '300px'};
         line-height: 0;
 
@@ -82,7 +83,7 @@ const PhotoListItem: React.FC<ChildRendererProps<PhotoItem>> = (props) => {
     const mobileWebP = resizedPathFromItem(item, { gallery: true, webp: true });
     const desktopWebP = resizedPathFromItem(item, { gallery: true, thumbnail: true, webp: true });
     const photoRow = (
-        <PhotoRow onClick={() => onClick && onClick(item)} isMobile={isMobile} isLoaded={isLoaded}>
+        <PhotoRow onClick={() => onClick && onClick(item)} isLoaded={isLoaded}>
             <LazyImage
                 id={idFromItem(item)}
                 offset={500}

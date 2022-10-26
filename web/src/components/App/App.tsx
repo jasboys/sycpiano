@@ -2,7 +2,7 @@ import { omit, startCase, toLower } from 'lodash-es';
 import { parse, stringify } from 'qs';
 import * as React from 'react';
 import { Helmet } from 'react-helmet';
-import ReactMedia from 'react-media';
+import { useMedia } from 'react-media';
 import { Route, Routes, useLocation, useMatch, useNavigate } from 'react-router-dom';
 import { SwitchTransition, Transition } from 'react-transition-group';
 
@@ -32,20 +32,21 @@ import { globalCss } from 'src/styles/global';
 import Cart from 'src/components/Cart/Cart';
 import { toggleCartList } from 'src/components/Cart/reducers';
 import { ClickListenerOverlay } from 'src/components/ClickListenerOverlay';
-import { toggleNavBar } from 'src/components/App/NavBar/reducers';
+import { showSubNav, toggleExpanded, toggleNavBar } from 'src/components/App/NavBar/reducers';
 import NavBar from 'src/components/App/NavBar/NavBar';
 import { LogoSVG } from 'src/components/LogoSVG';
 
 import AsyncComponent from 'src/components/AsyncComponent';
 import extractModule from 'src/module';
 import store from 'src/store';
-import { reactMediaMobileQuery } from 'src/styles/screens';
+import { GLOBAL_QUERIES } from 'src/screens';
 import { metaDescriptions, titleStringBase, slideOnExit, fadeOnEnter, fadeOnExit, slideOnEnter } from 'src/utils';
-import { useFloating, offset, arrow, shift, autoUpdate } from '@floating-ui/react-dom';
+import { useFloating, offset, arrow, shift } from '@floating-ui/react-dom';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import format from 'date-fns/format';
 import { fetchShopItems } from 'src/components/Shop/ShopList/reducers';
-import { EventListName } from '../Schedule/types';
+import { EventListName } from 'src/components/Schedule/types';
+import { MediaContextType } from 'src/types';
 
 const register = extractModule(store);
 // const About = () => register('about', import(/* webpackChunkName: 'about' */ 'src/components/About'));
@@ -102,41 +103,69 @@ const getMostSpecificRouteName = (pathname: string) => {
 const useCustomMatch = () => {
     const root = useMatch('/');
     const home = useMatch('home');
+    const aboutRoot = useMatch('about');
     const about = useMatch('about/:about');
     const contact = useMatch('contact');
     const media = useMatch('media/:media/*');
+    const mediaRoot = useMatch('media');
     const schedule = useMatch('schedule/:type/*');
+    const scheduleRoot = useMatch('schedule');
     const shop = useMatch('shop/:shop/*');
+    const shopRoot = useMatch('shop');
     const scheduleWithoutType = useMatch('schedule/*');
 
     const reducedForRouter = [
         root, home, about, contact, media, schedule, shop,
+        aboutRoot, mediaRoot, scheduleRoot, shopRoot
     ].reduce((prev, curr) => prev ?? curr, null);
 
     const reducedForTransition = [
         root, home, about, contact, media, scheduleWithoutType, shop,
+        aboutRoot, mediaRoot, scheduleRoot, shopRoot
     ].reduce((prev, curr) => prev ?? curr, null);
 
     return [reducedForRouter, reducedForTransition];
 }
 
-const App: React.FC<Record<string, unknown>> = ({ }) => {
+const DefaultMedia = Object.fromEntries(
+    ((Object.keys(GLOBAL_QUERIES) as (keyof typeof GLOBAL_QUERIES)[]).map((k) => [k, false]) as Iterable<readonly [keyof MediaContextType, boolean]>)
+) as Record<keyof typeof GLOBAL_QUERIES, boolean>;
+
+export const MediaContext = React.createContext<MediaContextType>({
+    ...DefaultMedia,
+});
+
+const StyledClickDiv = styled(ClickListenerOverlay)<{ isMobile: boolean; cartOpen: boolean;}>({
+    zIndex: 3001,
+}, ({ cartOpen }) => cartOpen && {
+    backdropFilter: 'blur(2px)',
+}, ({ isMobile, cartOpen }) => isMobile && {
+    zIndex: cartOpen ? 4998 : 5001,
+    right: cartOpen ? 0 : 160,
+    left: 0,
+    width: 'unset',
+});
+
+const App: React.FC<Record<never, unknown>> = () => {
     const location = useLocation();
     const dispatch = useAppDispatch();
     const navbarVisible = useAppSelector(({ navbar }) => navbar.isVisible);
     const menuOpen = useAppSelector(({ navbar }) => navbar.isExpanded);
     const cartOpen = useAppSelector(({ cart }) => cart.visible);
+    const showSubs = useAppSelector(({ navbar }) => navbar.showSubs);
     const [delayedRouteBase, setDelayedRouteBase] = React.useState(getRouteBase(location.pathname));
     const [delayedSpecific, setDelayedSpecific] = React.useState(getMostSpecificRouteName(location.pathname));
     const arrowRef = React.useRef<HTMLDivElement | null>(null);
     const timerRef = React.useRef<NodeJS.Timeout>();
+    const mediaMatches = useMedia({ queries: GLOBAL_QUERIES });
+    const { isHamburger, screenXS, screenM } = mediaMatches;
     const navigate = useNavigate();
     // Make sure to adjust this match array when adding new pages, especially with subpaths
     const [routerMatch, transitionMatch] = useCustomMatch();
 
-    const { x, y, reference, floating, strategy, middlewareData, update, refs } = useFloating({
+    const { x, y, reference, floating, strategy, middlewareData, update } = useFloating({
         middleware: [
-            offset(6),
+            offset(-12),
             shift(),
             arrow({ element: arrowRef }),
         ]
@@ -163,29 +192,47 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
     }, [location]);
 
     React.useEffect(() => {
-        if (!refs.reference.current || !refs.floating.current) {
-            return;
-        }
-
-        // Only call this when the floating element is rendered
-        return autoUpdate(
-            refs.reference.current,
-            refs.floating.current,
-            update
-        );
-    }, [refs.reference, refs.floating, update]);
-
-    React.useEffect(() => {
         dispatch(fetchShopItems());
     }, []);
 
+    React.useEffect(() => {
+        if (!(isHamburger)) {
+            if (!navbarVisible) {
+                dispatch(toggleNavBar(true));
+            }
+        }
+    }, [screenXS, screenM, navbarVisible, dispatch]);
+
+    React.useEffect(() => {
+        update();
+    }, [mediaMatches, menuOpen]);
 
     let currentPage = getMostSpecificRouteName(location.pathname);
-    const transitionKey = location.pathname.search(/schedule/) !== -1 ? '/schedule' : location.pathname;
-    console.log('t', transitionKey);
     currentPage = currentPage ? startCase(currentPage) : 'Home';
     const description =
         metaDescriptions[toLower(currentPage)] || 'Welcome to the official website of pianist, composer, and arranger Sean Chen';
+
+    const isMobile = isHamburger;
+
+    React.useEffect(() => {
+        switch(routerMatch?.pathnameBase) {
+            case '/about':
+                navigate('/about/biography');
+                break;
+            case '/schedule':
+                navigate('/schedule/upcoming');
+                break;
+            case '/shop':
+                navigate('/shop/scores');
+                break;
+            case '/media':
+                navigate('/media/videos');
+                break;
+            default:
+                break;
+        }
+    }, [routerMatch?.pathnameBase, navigate]);
+
     return (
         <>
             <Global styles={globalCss} />
@@ -202,122 +249,117 @@ const App: React.FC<Record<string, unknown>> = ({ }) => {
                     },
                 ]}
             />
-            <ReactMedia query={reactMediaMobileQuery}>
-                {(matches: boolean) => {
-                    if (!matches) {
-                        if (!navbarVisible) {
-                            dispatch(toggleNavBar(true));
-                        }
-                    }
-                    return (
-                        <RootContainer isHome={location.pathname === '/'}>
-                            <LogoSVG />
-                            <Transition<undefined>
-                                in={navbarVisible || !matches}
-                                onEntering={(el, isAppearing) => {
-                                    if (isAppearing) {
-                                        fadeOnEnter(0)(el, isAppearing);
-                                    } else {
-                                        slideOnEnter(0)(el);
-                                    }
-                                }}
-                                onExiting={slideOnExit(0)}
-                                timeout={250}
-                                appear={true}
-                            >
-                                <NavBar
-                                    delayedRouteBase={delayedRouteBase}
-                                    currentBasePath={getRouteBase(location.pathname)}
-                                    specificRouteName={delayedSpecific}
-                                    ref={reference}
-                                />
-                            </Transition>
-                            <SwitchTransition>
-                                <Transition<undefined>
-                                    key={transitionMatch?.pathnameBase}
-                                    onEntering={fadeOnEnter(0.2)}
-                                    onExiting={fadeOnExit(0.5)}
-                                    timeout={800}
-                                    appear={true}
-                                >
-                                    <FadingContainer shouldBlur={matches && (cartOpen || menuOpen) && delayedRouteBase !== '/'}>
-                                        <Routes location={routerMatch?.pathnameBase + location.search}>
-                                            <Route path="about/*" element={<Container />}>
-                                                <Route path="biography" element={
-                                                    <AsyncComponent<BioProps> moduleProvider={Bio} isMobile={matches} />
-                                                } />
-                                                <Route path="press" element={
-                                                    <AsyncComponent<PressProps> moduleProvider={Press} isMobile={matches} />
-                                                } />
-                                                <Route path="discography" element={
-                                                    <AsyncComponent<DiscsProps> moduleProvider={Discs} isMobile={matches} />
-                                                } />
-                                            </Route>
-                                            <Route path="contact" element={
-                                                <AsyncComponent<ContactProps> moduleProvider={Contact} isMobile={matches} />
-                                            } />
-                                            <Route path="media/*" element={<Container />}>
-                                                <Route path="videos/*" element={
-                                                    <AsyncComponent<VideosProps> moduleProvider={Videos} isMobile={matches} />
-                                                } />
-                                                <Route path="music/*" element={
-                                                    <AsyncComponent<MusicProps> moduleProvider={Music} isMobile={matches} />
-                                                } />
-                                                <Route path="photos" element={
-                                                    <AsyncComponent<PhotosProps> moduleProvider={Photos} isMobile={matches} />
-                                                } />
-                                            </Route>
-                                            <Route path="schedule/*">
-                                                <Route path=":type/*" element={
-                                                    <AsyncComponent<ScheduleProps> moduleProvider={Schedule} isMobile={matches} type={routerMatch?.params.type as unknown as EventListName} />
-                                                } />
-                                            </Route>
-                                            <Route path="shop/*" element={
-                                                <Container />
-                                            }>
-                                                <Route path="scores/*" element={
-                                                    <AsyncComponent<ShopListProps> moduleProvider={ShopList} isMobile={matches} />
-                                                } />
-                                                <Route path="retrieve-purchased" element={
-                                                    <AsyncComponent<RetrievalFormProps> moduleProvider={RetrievalForm} isMobile={matches} />
-                                                } />
-                                                <Route path="faqs" element={
-                                                    <AsyncComponent<FAQsProps> moduleProvider={FAQs} isMobile={matches} />
-                                                } />
-                                                <Route path="checkout-success" element={
-                                                    <AsyncComponent<CheckoutSuccessProps> moduleProvider={CheckoutSuccess} isMobile={matches} />
-                                                } />
-                                            </Route>
-                                            <Route index element={
-                                                <AsyncComponent<HomeProps> moduleProvider={Home} isMobile={matches} />
-                                            } />
-                                            <Route path="*" element={
-                                                <AsyncComponent<unknown> moduleProvider={Page404} />
-                                            } />
-                                        </Routes>
-                                    </FadingContainer>
-                                </Transition>
-                            </SwitchTransition>
-                            <Cart
-                                floatingRef={floating}
-                                arrowRef={arrowRef}
-                                isMobile={matches}
-                                strategy={strategy}
-                                position={{ x, y }}
-                                arrow={middlewareData.arrow}
-                                update={update}
-                            />
-                            {(matches && cartOpen) &&
-                                <ClickListenerOverlay onClick={() => dispatch(toggleCartList(false))} />}
-                            {(matches && menuOpen) &&
-                                <ClickListenerOverlay onClick={() => { }} /> /* eslint-disable-line @typescript-eslint/no-empty-function */
+            <MediaContext.Provider value={mediaMatches}>
+                <RootContainer isHome={location.pathname === '/'}>
+                    <LogoSVG />
+                    <Transition<undefined>
+                        in={navbarVisible || !isMobile}
+                        onEntering={(el, isAppearing) => {
+                            if (isAppearing) {
+                                fadeOnEnter(0)(el, isAppearing);
+                            } else {
+                                slideOnEnter(0)(el);
                             }
-                        </RootContainer>
-                    );
-                }}
-            </ReactMedia>
+                        }}
+                        onExiting={slideOnExit(0)}
+                        timeout={250}
+                        appear={true}
+                    >
+                        <NavBar
+                            delayedRouteBase={delayedRouteBase}
+                            currentBasePath={getRouteBase(location.pathname)}
+                            specificRouteName={delayedSpecific}
+                            ref={reference}
+                        />
+                    </Transition>
+                    <SwitchTransition>
+                        <Transition<undefined>
+                            key={transitionMatch?.pathnameBase}
+                            onEntering={fadeOnEnter(0.2)}
+                            onExiting={fadeOnExit(0.5)}
+                            timeout={800}
+                            appear={true}
+                        >
+                            <FadingContainer shouldBlur={isMobile && (cartOpen || menuOpen) && delayedRouteBase !== '/'}>
+                                <Routes location={routerMatch?.pathnameBase + location.search}>
+                                    <Route path="about/*" element={<Container />}>
+                                        <Route path="biography" element={
+                                            <AsyncComponent<BioProps> moduleProvider={Bio} />
+                                        } />
+                                        <Route path="press" element={
+                                            <AsyncComponent<PressProps> moduleProvider={Press} />
+                                        } />
+                                        <Route path="discography" element={
+                                            <AsyncComponent<DiscsProps> moduleProvider={Discs} />
+                                        } />
+                                    </Route>
+                                    <Route path="contact" element={
+                                        <AsyncComponent<ContactProps> moduleProvider={Contact} />
+                                    } />
+                                    <Route path="media/*" element={<Container />}>
+                                        <Route path="videos/*" element={
+                                            <AsyncComponent<VideosProps> moduleProvider={Videos} />
+                                        } />
+                                        <Route path="music/*" element={
+                                            <AsyncComponent<MusicProps> moduleProvider={Music} />
+                                        } />
+                                        <Route path="photos" element={
+                                            <AsyncComponent<PhotosProps> moduleProvider={Photos} />
+                                        } />
+                                    </Route>
+                                    <Route path="schedule/*">
+                                        <Route path=":type/*" element={
+                                            <AsyncComponent<ScheduleProps> moduleProvider={Schedule} type={routerMatch?.params.type as unknown as EventListName} />
+                                        } />
+                                    </Route>
+                                    <Route path="shop/*" element={
+                                        <Container />
+                                    }>
+                                        <Route path="scores/*" element={
+                                            <AsyncComponent<ShopListProps> moduleProvider={ShopList} />
+                                        } />
+                                        <Route path="retrieve-purchased" element={
+                                            <AsyncComponent<RetrievalFormProps> moduleProvider={RetrievalForm} />
+                                        } />
+                                        <Route path="faqs" element={
+                                            <AsyncComponent<FAQsProps> moduleProvider={FAQs} />
+                                        } />
+                                        <Route path="checkout-success" element={
+                                            <AsyncComponent<CheckoutSuccessProps> moduleProvider={CheckoutSuccess} />
+                                        } />
+                                    </Route>
+                                    <Route index element={
+                                        <AsyncComponent<HomeProps> moduleProvider={Home} />
+                                    } />
+                                    <Route path="*" element={
+                                        <AsyncComponent<unknown> moduleProvider={Page404} />
+                                    } />
+                                </Routes>
+                            </FadingContainer>
+                        </Transition>
+                    </SwitchTransition>
+                    <Cart
+                        floatingRef={floating}
+                        arrowRef={arrowRef}
+                        strategy={strategy}
+                        position={{ x, y }}
+                        arrow={middlewareData.arrow}
+                        update={update}
+                    />
+                    {(menuOpen || cartOpen || !!showSubs.length) &&
+                        <StyledClickDiv
+                            isMobile={isMobile}
+                            cartOpen={cartOpen}
+                            onClick={() => {
+                                cartOpen && dispatch(toggleCartList(false));
+                                menuOpen && dispatch(toggleExpanded(false));
+                                showSubs.length && dispatch(showSubNav({ sub: '', isHamburger: isMobile }));
+                            }}
+                        />}
+                </RootContainer>
+            </MediaContext.Provider>
         </>
     );
 };
 
-export default App
+export default App;

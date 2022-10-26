@@ -6,8 +6,10 @@ import iconMap from 'src/components/About/Discs/iconMap';
 import { Disc } from 'src/components/About/Discs/types';
 
 import { staticImage } from 'src/imageUrls';
-import { screenXSorPortrait } from 'src/styles/screens';
+import { webkitMinDPR, minRes, isHamburger, screenXS, hiDpx } from 'src/screens';
 import { cardShadow } from 'src/styles/mixins';
+import { MediaContext } from 'src/components/App/App';
+import { toMedia } from 'src/mediaQuery';
 
 const LinkImage = styled.img`
     transition: all 0.2s;
@@ -15,7 +17,7 @@ const LinkImage = styled.img`
     height: 2em;
     filter: saturate(0.3);
 
-    ${screenXSorPortrait} {
+    ${toMedia(hiDpx)} {
         height: 1.8em;
     }
 
@@ -45,31 +47,77 @@ const DiscLink: React.FC<DiscLinkProps> = (props) => (
     </StyledLink>
 );
 
-const DiscItem = styled.div<{ isMobile: boolean }>`
-    margin: 4rem auto;
-    max-width: 800px;
-    overflow: hidden;
-    box-shadow: ${cardShadow};
-    border-radius: 8px;
-    background-color: white;
-    display: flex;
-    flex-wrap: wrap;
-
-    ${screenXSorPortrait} {
-        width: 80vw;
+const DiscItem = styled.div({
+    margin: '4rem auto',
+    width: '100%',
+    overflow: 'hidden',
+    boxShadow: cardShadow,
+    borderRadius: 8,
+    backgroundColor: 'white',
+    display: 'flex',
+    flexWrap: 'wrap',
+    [toMedia(isHamburger)]: {
+        width: '80vw',
     }
-`;
+});
 
-const DiscImageContainer = styled.div<{ bgImage: string }>`
+const DiscImageContainer = styled.div`
     flex: 0 0 300px;
-    background-image: url(${props => props.bgImage});
-    background-size: cover;
 
-    ${screenXSorPortrait} {
+    ${toMedia(screenXS)} {
         height: 80vw;
         flex: 0 0 80vw;
     }
 `;
+
+const ImageBorder = styled.div({
+    position: 'relative',
+    height: 'calc(100% - 2rem)',
+    margin: '1rem',
+    backgroundColor: 'rgb(244 244 244)',
+    overflow: 'hidden',
+    '&:after': {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        boxShadow: 'inset 0 0 10px rgba(0 0 0 / 0.4)',
+    },
+});
+
+const DiscImage = styled.img({
+    position: 'absolute',
+    width: '60%',
+    zIndex: 5,
+    bottom: '20%',
+    left: '50%',
+    transform: 'translate(-50%)',
+    boxShadow: '0 6px 10px -3px rgba(0 0 0 / 0.6)',
+});
+
+const TopGradient = styled.div({
+    background: 'radial-gradient(circle, rgb(255, 255, 255) 0%, rgb(238, 238, 238) 35%, rgb(125, 125, 125) 100%)',
+    height: '100%',
+    transform: 'scale(1.5, 0.8) translateY(-20%)',
+    position: 'absolute',
+    width: '100%'
+});
+
+const BottomGradient = styled.div({
+    background: 'radial-gradient(circle, rgb(255, 255, 255) 0%, rgb(193, 193, 193) 35%, rgb(125, 125, 125) 100%)',
+    height: '100%',
+    transform: 'scale(1.5, 0.8) translateY(80%)',
+    position: 'absolute',
+    width: '100%',
+});
+
+const BoxShadow = styled.div({
+    position: 'absolute',
+    height: '100%',
+    width: '100%',
+    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.2)',
+});
 
 const DiscDescription = styled.div`
     flex: 1;
@@ -105,26 +153,33 @@ const LinksContainer = styled.div`
 `;
 
 interface DiscListProps {
-    isMobile: boolean;
     item: Disc;
 }
 
-const DiscListItem: React.FC<DiscListProps> = (props) => {
+const DiscListItem: React.FC<DiscListProps> = ({ item }) => {
+    const mediaProps = React.useContext(MediaContext);
     return (
         <li>
-            <DiscItem isMobile={props.isMobile}>
-                <DiscImageContainer bgImage={`/static/images/cd-thumbnails/${props.item.thumbnailFile}`} />
+            <DiscItem {...mediaProps}>
+                <DiscImageContainer>
+                    <ImageBorder>
+                        <DiscImage src={`/static/images/cd-thumbnails/${item.thumbnailFile}`} />
+                        <TopGradient />
+                        <BottomGradient />
+                        <BoxShadow />
+                    </ImageBorder>
+                </DiscImageContainer>
                 <DiscDescription>
-                    <DiscTitle>{props.item.title}</DiscTitle>
-                    <DiscLabel>{props.item.label}</DiscLabel>
-                    <DiscYear>{props.item.releaseDate}</DiscYear>
-                    <p>{props.item.description}</p>
+                    <DiscTitle>{item.title}</DiscTitle>
+                    <DiscLabel>{item.label}</DiscLabel>
+                    <DiscYear>{item.releaseDate}</DiscYear>
+                    <p>{item.description}</p>
                     <Divider />
                     <LinksContainer>
-                        {props.item.discLinks
+                        {item.discLinks
                             .filter((value) => value.type !== 'google')
                             .map((value) => (
-                                <DiscLink key={`${props.item.id}-${value.type}`} linkUrl={value.url} imageUrl={iconMap[value.type]} />
+                                <DiscLink key={`${item.id}-${value.type}`} linkUrl={value.url} imageUrl={iconMap[value.type]} />
                             ))}
                     </LinksContainer>
                 </DiscDescription>

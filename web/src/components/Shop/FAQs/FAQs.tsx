@@ -37,7 +37,7 @@ interface FAQ {
     answer: string;
 }
 
-const FAQs: React.FC<Record<string, unknown>> = () => {
+const FAQs: React.FC<Record<never, unknown>> = () => {
     const [faqs, setFaqs] = React.useState<FAQ[]>([]);
 
     React.useEffect(() => {
@@ -91,5 +91,5 @@ const FAQs: React.FC<Record<string, unknown>> = () => {
 };
 
 export default FAQs;
-export type RequiredProps = Record<string, unknown>;
 export type FAQsType = typeof FAQs;
+export type RequiredProps = React.ComponentProps<FAQsType>;

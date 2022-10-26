@@ -185,11 +185,9 @@ export const mergeMonthGroups = (left: MonthGroups, right: MonthGroups): MonthGr
     if (right.monthGroups.length === 0) {
         return { ...left };
     }
-    console.log(current(left), right);
     const localLeft = { ...left };
     const mergedWithExisting: MonthGroup[] = right.monthGroups.map((mg) => {
         const inLeftIdx = localLeft.monthGroups.findIndex((leftGroup) => isSameMonth(parseISO(leftGroup.dateTime), parseISO(mg.dateTime)));
-        console.log(inLeftIdx);
         if (inLeftIdx !== -1) {
             const popped = localLeft.monthGroups.splice(inLeftIdx, 1)[0];   // mutate local array
             return {

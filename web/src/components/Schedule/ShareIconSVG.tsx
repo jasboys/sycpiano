@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-export const ShareIconSVG: React.FC<Record<string, unknown>> = () => {
+export const ShareIconSVG: React.FC<Record<never, unknown>> = () => {
     const xs = [-10, -10 * Math.cos(2 * Math.PI / 3), -10 * Math.cos(4 * Math.PI / 3)];
     const ys = [0, -10 * Math.sin(2 * Math.PI / 3), -10 * Math.sin(4 * Math.PI / 3)]
     return (
@@ -15,8 +15,10 @@ export const ShareIconSVG: React.FC<Record<string, unknown>> = () => {
     );
 };
 
-export const ShareIconInstance: React.FC<React.SVGAttributes<unknown>> = (props) => (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36">
-        <use href="#share_icon_template" width={props.width} height={props.height} />
-    </svg>
+export const ShareIconInstance = React.forwardRef<SVGSVGElement, React.SVGProps<SVGSVGElement>>(
+    (props, ref) => (
+        <svg ref={ref} {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36">
+            <use href="#share_icon_template" width={props.width} height={props.height} />
+        </svg>
+    )
 );

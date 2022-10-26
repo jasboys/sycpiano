@@ -7,25 +7,10 @@ import Playlist from 'src/components/Media/Playlist';
 import { playVideo, togglePlaylist } from 'src/components/Media/Videos/reducers';
 import VideoPlaylistItem from 'src/components/Media/Videos/VideoPlaylistItem';
 
-import { screenXSorPortrait } from 'src/styles/screens';
+import { screenXS, screenPortrait } from 'src/screens';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
-
-// interface VideoPlaylistStateToProps {
-//     readonly videos: VideoItemShape[];
-//     readonly videoId: string;
-//     readonly isShow: boolean;
-// }
-
-// interface VideoPlaylistDispatchToProps {
-//     readonly playVideo: typeof playVideo;
-//     readonly togglePlaylistAction: typeof togglePlaylistAction;
-// }
-
-interface VideoPlaylistProps {
-    readonly isMobile: boolean;
-}
-
-// type VideoPlaylistProps = VideoOwnProps & VideoPlaylistStateToProps & VideoPlaylistDispatchToProps;
+import { MediaContext } from 'src/components/App/App';
+import { toMedia } from 'src/mediaQuery';
 
 const StyledPlaylistContainer = styled.div`
     width: fit-content;
@@ -33,7 +18,7 @@ const StyledPlaylistContainer = styled.div`
     right: 0;
     position: absolute;
 
-    ${screenXSorPortrait} {
+    ${toMedia([screenXS, screenPortrait])} {
         width: 100%;
         height: calc(100% - 56.25vw);
         top: 56.25vw;
@@ -44,13 +29,14 @@ const StyledPlaylistContainer = styled.div`
 `;
 
 const videoPlaylistStyle = css`
-    ${screenXSorPortrait} {
+    ${toMedia([screenXS, screenPortrait])} {
         position: relative;
         overflow: visible;
     }
 `;
 
-const VideoPlaylist: React.FC<VideoPlaylistProps> = (props) => {
+const VideoPlaylist: React.FC<Record<never, unknown>> = () => {
+    const { isHamburger } = React.useContext(MediaContext);
     const isShow = useAppSelector(({ videoPlaylist }) => videoPlaylist.isShow);
     const videos = useAppSelector(({ videoPlaylist }) => videoPlaylist.items);
     const videoId = useAppSelector(({ videoPlayer }) => videoPlayer.videoId);
@@ -69,10 +55,9 @@ const VideoPlaylist: React.FC<VideoPlaylistProps> = (props) => {
             <Playlist
                 extraStyles={{ div: videoPlaylistStyle }}
                 isShow={isShow}
-                hasToggler={!props.isMobile}
+                hasToggler={!isHamburger}
                 togglePlaylist={toggleDispatch}
                 shouldAppear={false}
-                isMobile={props.isMobile}
             >
                 {videos.map((video) => (
                     <VideoPlaylistItem
@@ -80,7 +65,7 @@ const VideoPlaylist: React.FC<VideoPlaylistProps> = (props) => {
                         item={video}
                         currentItemId={videoId}
                         onClick={playDispatch}
-                        isMobile={props.isMobile}
+                        isMobile={isHamburger}
                     />
                 ))}
             </Playlist>

@@ -1,7 +1,8 @@
 import styled from '@emotion/styled';
 
-import { screenM, screenXSorPortrait } from 'src/styles/screens';
+import { screenM, screenPortrait } from 'src/screens';
 import { navBarHeight, playlistContainerWidth } from 'src/styles/variables';
+import { toMedia } from 'src/mediaQuery';
 
 export const TWO_PI = 2 * Math.PI;
 export const HALF_PI = Math.PI / 2;
@@ -33,14 +34,14 @@ export const VisualizerContainer = styled.div`
     width: calc(100% - ${playlistContainerWidth.desktop});
     height: 100%;
 
-    ${screenM} {
+    ${toMedia(screenM)} {
         width: calc(100% - ${playlistContainerWidth.tablet});
     }
 
-    ${screenXSorPortrait} {
+    ${toMedia(screenPortrait)} {
         width: 100%;
         height: 360px;
-        top: ${navBarHeight.mobile}px;
+        top: ${navBarHeight.hiDpx}px;
     }
 `;
 

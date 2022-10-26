@@ -22,6 +22,9 @@ import { CartStateShape } from './components/Cart/types';
 import { cartReducer } from './components/Cart/reducers';
 import { ComponentType } from 'react';
 import { AppDispatch, GlobalStateShape } from 'src/store';
+import { GLOBAL_QUERIES } from './screens';
+import { CSSVariables } from 'src/styles/variables';
+import { colorVars } from 'src/styles/colors';
 
 export type AnyStateShape = BioStateShape |
     DiscsStateShape |
@@ -77,3 +80,7 @@ export interface FloatingRefStructure {
     readonly arrow: HTMLDivElement | null;
     readonly floating: HTMLDivElement | null;
 }
+
+export type MediaContextType = Record<keyof typeof GLOBAL_QUERIES, boolean>;
+
+export type CSSVariableKeys = keyof typeof CSSVariables | keyof typeof colorVars;

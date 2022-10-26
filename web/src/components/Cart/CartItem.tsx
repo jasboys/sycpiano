@@ -16,7 +16,7 @@ const ItemContainer = styled.div({
 const ItemThumbnail = styled.div({
     flex: '0 0 20%',
     display: 'flex',
-    ['img']: {
+    'img': {
         width: '100%',
         objectFit: 'cover',
         flex: '1',
@@ -42,19 +42,19 @@ const ItemName = styled(Link, {
     fontWeight: 'bold',
     color: 'black',
     paddingRight: '1rem',
-    ['&:hover']: {
+    '&:hover': {
         cursor: 'pointer',
         textDecoration: 'underline',
     },
-    ['&:visited']: {
+    '&:visited': {
         color: '',
     }
 }, ({ error }) => error && ({
     color: 'darkred',
-    ['&:visited']: {
+    '&:visited': {
         color: 'darkred',
     },
-    ['&:hover']: {
+    '&:hover': {
         color: 'darkred',
     },
 }));
@@ -62,10 +62,6 @@ const ItemName = styled(Link, {
 const ItemPrice = styled.div({
     display: 'inline',
 });
-
-// const Divider = styled.span({
-//     margin: '2rem',
-// });
 
 interface CartProps {
     item: Product;

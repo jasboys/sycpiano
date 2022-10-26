@@ -6,7 +6,7 @@ import startOfMonth from 'date-fns/startOfMonth';
 import sub from 'date-fns/sub';
 import * as React from 'react';
 
-export const DateIconSVG: React.FC<Record<string, unknown>> = () => {
+export const DateIconSVG: React.FC<Record<never, unknown>> = () => {
     return (
         <svg style={{ display: 'none' }}>
             <symbol id="date_icon_template">
@@ -16,7 +16,7 @@ export const DateIconSVG: React.FC<Record<string, unknown>> = () => {
     );
 };
 
-interface DateIconProps extends React.SVGAttributes<unknown> {
+interface DateIconProps extends React.SVGProps<SVGSVGElement> {
     readonly date: Date;
 }
 

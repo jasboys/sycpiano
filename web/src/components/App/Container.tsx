@@ -14,7 +14,7 @@ const ContainerElement = styled.div(
     }
 );
 
-type ContainerProps = Record<string, unknown>;
+type ContainerProps = Record<never, unknown>;
 
 const Container: React.FC<ContainerProps> = () => {
     return (

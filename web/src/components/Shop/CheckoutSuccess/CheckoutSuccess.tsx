@@ -4,7 +4,8 @@ import { clearCart } from 'src/components/Cart/reducers';
 import styled from '@emotion/styled';
 import { pushed } from 'src/styles/mixins';
 import { lato2, } from 'src/styles/fonts';
-import { screenXSorPortrait } from 'src/styles/screens';
+import { screenPortrait, screenXS } from 'src/screens';
+import { toMedia } from 'src/mediaQuery';
 import { useAppDispatch } from 'src/hooks';
 import { useSearchParams } from 'react-router-dom';
 
@@ -17,7 +18,7 @@ const Container = styled.div(
         marginLeft: 'auto',
         marginRight: 'auto',
         alignItems: 'center',
-        [screenXSorPortrait]: {
+        [toMedia([screenXS, screenPortrait])]: {
             padding: '1rem',
             alignItems: 'flex-start',
         }
@@ -32,7 +33,7 @@ const LineItem = styled.li({
 const Thanks = styled.div({
     fontSize: '2rem',
     padding: '3rem 0 2rem 0',
-    [screenXSorPortrait]: {
+    [toMedia([screenXS, screenPortrait])]: {
         padding: '2rem 0',
     }
 });
@@ -45,14 +46,10 @@ const EmailedTo = styled.div({
 const Questions = styled.div({
     fontSize: '1rem',
     padding: '2rem',
-    [screenXSorPortrait]: {
+    [toMedia([screenXS, screenPortrait])]: {
         padding: '1rem 0',
     }
 });
-
-interface CheckoutSuccessProps {
-    isMobile?: boolean;
-}
 
 interface CheckoutSuccessResponse {
     session: {
@@ -64,7 +61,7 @@ interface CheckoutSuccessResponse {
     lineItems: string[];
 }
 
-const CheckoutSuccess: React.FC<CheckoutSuccessProps> = () => {
+const CheckoutSuccess: React.FC<Record<never, unknown>> = () => {
     const [ search, _setSearch ] = useSearchParams();
     const dispatch = useAppDispatch();
     const [email, setEmail] = React.useState<string>();
@@ -112,4 +109,5 @@ const CheckoutSuccess: React.FC<CheckoutSuccessProps> = () => {
 };
 
 export default CheckoutSuccess;
-export type RequiredProps = CheckoutSuccessProps;
+export type CheckoutSuccessType = typeof CheckoutSuccess;
+export type RequiredProps = React.ComponentProps<CheckoutSuccessType>;

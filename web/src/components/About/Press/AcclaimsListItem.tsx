@@ -5,16 +5,17 @@ import styled from '@emotion/styled';
 import { AcclaimItemShape } from 'src/components/About/Press/types';
 import { logoBlue } from 'src/styles/colors';
 import { lato1, lato2 } from 'src/styles/fonts';
-import { screenXSorPortrait } from 'src/styles/screens';
+import { screenXS, screenPortrait } from 'src/screens';
 import format from 'date-fns/format';
 import parseISO from 'date-fns/parseISO';
+import { toMedia } from 'src/mediaQuery';
 
 const AcclaimContainer = styled.div`
     margin: 0 auto;
     max-width: 800px;
     font-size: 1.2rem;
 
-    ${screenXSorPortrait} {
+    ${toMedia([screenXS, screenPortrait])} {
         font-size: 1rem;
         padding: 0 1.2rem;
     }

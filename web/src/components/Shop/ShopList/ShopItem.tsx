@@ -13,22 +13,18 @@ import { staticImage } from 'src/imageUrls';
 import { getHoverStyle, noHighlight } from 'src/styles/mixins';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { createSelector } from '@reduxjs/toolkit';
+import { css } from '@emotion/react';
+import { MediaContext } from 'src/components/App/App';
 
 interface ShopItemProps {
     item: Product;
     className?: string;
-    isMobile: boolean;
 }
 
-const ThumbnailContainer = styled('div')<{ isMobile: boolean }>(
-    ({ isMobile }) => ({
-        flex: '0 0 ' + (isMobile ? '80vw' : '210px'),
-        position: 'relative',
-        boxShadow: '0 2px 7px -4px rgba(0,0,0,0.8)'
-            + (isMobile ? ', 0 -2px 7px -4px rgba(0, 0, 0, 0.8)' : ''),
+const ThumbnailContainer = styled.div<{ isHamburger: boolean }>(
+    {
         zIndex: 0,
-        width: isMobile ? '60vw' : '',
-        height: isMobile ? '80vw' : 280,
+        position: 'relative',
         '&:before, &:after': {
             zIndex: -1,
             position: 'absolute',
@@ -47,10 +43,17 @@ const ThumbnailContainer = styled('div')<{ isMobile: boolean }>(
             right: '0.35rem',
             left: 'unset',
         },
-    })
+    },
+    ({ isHamburger }) => ({
+        flex: '0 0 ' + (isHamburger ? '80vw' : '210px'),
+        boxShadow: '0 2px 7px -4px rgba(0,0,0,0.8)'
+            + (isHamburger ? ', 0 -2px 7px -4px rgba(0, 0, 0, 0.8)' : ''),
+        width: isHamburger ? '60vw' : '',
+        height: isHamburger ? '80vw' : 280,
+    }),
 );
 
-const Thumbnail = styled('div')<{ imageUrl: string; isMobile: boolean }>(
+const Thumbnail = styled.div<{ imageUrl: string; isHamburger: boolean }>(
     {
         backgroundColor: '#fff',
         backgroundPosition: 'center',
@@ -58,7 +61,7 @@ const Thumbnail = styled('div')<{ imageUrl: string; isMobile: boolean }>(
         height: '100%',
     },
     props => {
-        const spread = props.isMobile ? '1rem' : '0.5rem';
+        const spread = props.isHamburger ? '1rem' : '0.5rem';
         return {
             backgroundImage: `url(${props.imageUrl})`,
             boxShadow: `0 0 2px ${spread} rgba(255, 255, 255, 1) inset`,
@@ -66,7 +69,7 @@ const Thumbnail = styled('div')<{ imageUrl: string; isMobile: boolean }>(
     }
 );
 
-const ContentContainer = styled.div<{ isMobile: boolean }>(
+const ContentContainer = styled.div<{ isHamburger: boolean }>(
     {
         flex: '1 1 auto',
         height: 'auto',
@@ -78,12 +81,24 @@ const ContentContainer = styled.div<{ isMobile: boolean }>(
         justifyContent: 'space-evenly',
         alignItems: 'center',
     },
-    ({ isMobile }) => isMobile && ({
+    ({ isHamburger }) => isHamburger && ({
         padding: '1rem',
     }),
 );
 
-const CartButton = styled.button<{ isItemInCart: boolean; isMouseDown: boolean; isMobile: boolean }>(
+const baseItemInCart = css({
+    color: 'white',
+    backgroundColor: mix(0.50, logoBlue, '#FFF'),
+    border: `1px solid ${mix(0.52, logoBlue, '#FFF')}`
+});
+
+const baseItemNotInCart = css({
+    color: logoBlue,
+    backgroundColor: 'white',
+    border: `1px solid ${logoBlue}`,
+});
+
+const CartButton = styled.button<{ isItemInCart: boolean; isMouseDown: boolean; isHamburger: boolean }>(
     {
         fontSize: '0.8em',
         width: 230,
@@ -96,36 +111,17 @@ const CartButton = styled.button<{ isItemInCart: boolean; isMouseDown: boolean; 
         userSelect: 'none',
     },
     noHighlight,
-    props => {
-        let base;
-        if (props.isItemInCart) {
-            base = {
-                color: 'white',
-                backgroundColor: mix(0.50, logoBlue, '#FFF'),
-                border: `1px solid ${mix(0.52, logoBlue, '#FFF')}`
-            };
-        } else {
-            base = {
-                color: logoBlue,
-                backgroundColor: 'white',
-                border: `1px solid ${logoBlue}`,
-            };
-        }
-        if (props.isMobile) {
-            return {
-                ...base,
-                ...getHoverStyle(props.isMouseDown),
-            };
-        } else {
-            return {
-                ...base,
-                '&:hover': getHoverStyle(props.isMouseDown),
-            };
-        }
+    ({ isHamburger, isMouseDown }) => isHamburger ?
+        getHoverStyle(isMouseDown) :
+        ({
+            '&:hover': getHoverStyle(isMouseDown),
+        }),
+    ({ isItemInCart }) => {
+        return isItemInCart ? baseItemInCart : baseItemNotInCart;
     },
 );
 
-const ShopItemContainer = styled.div<{ isMobile: boolean }>({
+const ShopItemContainer = styled.div<{ isHamburger: boolean }>({
     fontFamily: lato2,
     height: 'auto',
     display: 'flex',
@@ -134,21 +130,21 @@ const ShopItemContainer = styled.div<{ isMobile: boolean }>({
     flex: '0 1 auto',
     maxWidth: 600,
     scrollMarginTop: '5rem',
-}, ({ isMobile }) => isMobile && ({
+}, ({ isHamburger }) => isHamburger && ({
     flexDirection: 'column',
     alignItems: 'center',
 }));
 
-const ItemName = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
-    margin: isMobile ? '0.8rem 0' : '0 0 0.8rem 0',
+const ItemName = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => ({
+    margin: isHamburger ? '0.8rem 0' : '0 0 0.8rem 0',
     fontSize: '1.2rem',
     fontWeight: 'bold',
-    textAlign: isMobile ? 'center' : 'unset',
+    textAlign: isHamburger ? 'center' : 'unset',
 }));
 
-const ItemDescription = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
-    margin: isMobile ? '1rem 2rem' : '2rem 0',
-    paddingLeft: isMobile ? 'unset' : '1rem',
+const ItemDescription = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => ({
+    margin: isHamburger ? '1rem 2rem' : '2rem 0',
+    paddingLeft: isHamburger ? 'unset' : '1rem',
 }));
 
 const ItemDetails = styled.span({
@@ -160,12 +156,12 @@ const ItemPrice = styled.span({
     fontWeight: 'bold',
 });
 
-const DetailContainer = styled.div<{ isMobile: boolean }>({
+const DetailContainer = styled.div<{ isHamburger: boolean }>({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     maxWidth: 500,
-}, ({ isMobile }) => isMobile && ({
+}, ({ isHamburger }) => isHamburger && ({
     justifyContent: 'space-evenly',
 }));
 
@@ -174,9 +170,9 @@ const Separator = styled.span({
     fontSize: '1.5rem',
 });
 
-const SampleLink = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
-    margin: isMobile ? '1rem 2rem' : '2rem 0',
-    paddingLeft: isMobile ? 'unset' : '1rem',
+const SampleLink = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => ({
+    margin: isHamburger ? '1rem 2rem' : '2rem 0',
+    paddingLeft: isHamburger ? 'unset' : '1rem',
 }));
 
 const formatCentsToDollars = (price: number) => `$${(price / 100).toFixed(2)}`;
@@ -187,25 +183,26 @@ const cartSelector = createSelector(
     (items, itemId) => items.includes(itemId)
 );
 
-export const ShopItem: React.FC<ShopItemProps> = ({ item, className, children, ...isMobile }) => {
+export const ShopItem: React.FC<ShopItemProps> = ({ item, className }) => {
+    const { isHamburger } = React.useContext(MediaContext);
     const isItemInCart = useAppSelector((state) => cartSelector(state, item.id));
     const [isMouseDown, setIsMouseDown] = React.useState(false);
 
     const dispatch = useAppDispatch();
 
     return (
-        <ShopItemContainer id={item.permalink} {...isMobile} className={className}>
-            <ThumbnailContainer {...isMobile}>
-                <Thumbnail {...isMobile} imageUrl={staticImage('/products/thumbnails/' + item.images[0]) || ''} />
+        <ShopItemContainer id={item.permalink} isHamburger={isHamburger} className={className}>
+            <ThumbnailContainer isHamburger={isHamburger}>
+                <Thumbnail isHamburger={isHamburger} imageUrl={staticImage('/products/thumbnails/' + item.images[0]) || ''} />
             </ThumbnailContainer>
-            <ContentContainer {...isMobile}>
+            <ContentContainer isHamburger={isHamburger}>
                 <div css={{ marginBottom: '24px' }}>
-                    <ItemName {...isMobile}>{item.name}</ItemName>
-                    <ItemDescription {...isMobile}>{item.description}</ItemDescription>
+                    <ItemName isHamburger={isHamburger}>{item.name}</ItemName>
+                    <ItemDescription isHamburger={isHamburger}>{item.description}</ItemDescription>
                     {item.sample && (
-                        <SampleLink {...isMobile}><a href={item.sample} target="seanchenpiano_sample">Listen to the work here.</a></SampleLink>
+                        <SampleLink isHamburger={isHamburger}><a href={item.sample} target="seanchenpiano_sample">Listen to the work here.</a></SampleLink>
                     )}
-                    <DetailContainer {...isMobile}>
+                    <DetailContainer isHamburger={isHamburger}>
                         <ItemDetails>{toUpper(item.format)} format</ItemDetails>
                         <Separator>|</Separator>
                         <ItemDetails>{item.pages} pages</ItemDetails>
@@ -214,7 +211,7 @@ export const ShopItem: React.FC<ShopItemProps> = ({ item, className, children, .
                     </DetailContainer>
                 </div>
                 <CartButton
-                    {...isMobile}
+                    isHamburger={isHamburger}
                     isMouseDown={isMouseDown}
                     isItemInCart={isItemInCart}
                     onTouchStart={() => {

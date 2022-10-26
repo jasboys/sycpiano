@@ -76,9 +76,9 @@ const main = async () => {
                     "https://www.youtube.com/embed/",
                 ],
                 'img-src': [
-                    "*"
                     // "'self'",
-                    // "data:",
+                    "https:",
+                    "data:",
                     // "https://i.ytimg.com/vi/",
                     // "https://*.stripe.com",
                     // "https://*.googleapis.com",

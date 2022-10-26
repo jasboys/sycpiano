@@ -7,11 +7,9 @@ import { Search } from 'src/components/Schedule/Search';
 
 import { container, pushed } from 'src/styles/mixins';
 
-// import { DateIconSVG } from 'src/components/Schedule/DateIconSVG';
-// import { LinkIconSVG } from 'src/components/Schedule/LinkIconSVG';
 import { LocationIconSVG } from 'src/components/Schedule/LocationIconSVG';
-// import { TrebleIconSVG } from 'src/components/Schedule/TrebleIconSVG';
-import { screenXSorPortrait } from 'src/styles/screens';
+import { screenPortrait, screenXS } from 'src/screens';
+import { toMedia } from 'src/mediaQuery';
 import { EventListName } from 'src/components/Schedule/types';
 import styled from '@emotion/styled';
 import { SwitchTransition, Transition } from 'react-transition-group';
@@ -30,7 +28,7 @@ const ScheduleContainer = styled.div(
         backgroundSize: 'cover',
         backgroundPosition: '50% 66%',
         backgroundBlendMode: 'overlay',
-        [screenXSorPortrait]: {
+        [toMedia([screenXS, screenPortrait])]: {
             fontSize: '80%'
         }
     });
@@ -45,9 +43,9 @@ const Fading = styled.div(
     }
 );
 
-interface ScheduleProps { isMobile: boolean; type: EventListName; }
+interface ScheduleProps { type: EventListName; }
 
-const Schedule: React.FC<ScheduleProps> = ({ isMobile, type }) => {
+const Schedule: React.FC<ScheduleProps> = ({ type }) => {
     return (
         <ScheduleContainer>
             <Search />
@@ -64,7 +62,6 @@ const Schedule: React.FC<ScheduleProps> = ({ isMobile, type }) => {
                             <EventList
                                 key={type}
                                 type={type}
-                                isMobile={isMobile}
                             />
                         </Fading>
                     </Transition>

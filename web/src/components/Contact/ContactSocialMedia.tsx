@@ -4,8 +4,9 @@ import styled from '@emotion/styled';
 
 import { ContactSocialMediaShape } from 'src/components/Contact/types';
 import { staticImage } from 'src/imageUrls';
-import { screenXSorPortrait } from 'src/styles/screens';
+import { minRes, webkitMinDPR } from 'src/screens';
 import { lato3 } from 'src/styles/fonts';
+import { toMedia } from 'src/mediaQuery';
 
 const SocialMediaLinkContainer = styled.div` padding-top: 20px; `;
 
@@ -15,7 +16,7 @@ const SocialMediaImg = styled.img`
     margin: 0 20px;
     width: 3em;
 
-    ${screenXSorPortrait} {
+    ${toMedia([minRes, webkitMinDPR])} {
         width: 2em;
     }
 

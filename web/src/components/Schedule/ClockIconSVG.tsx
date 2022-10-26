@@ -7,7 +7,7 @@ import { polarToCartesian } from 'src/components/Media/Music/utils';
 const HOUR_LENGTH = 120;
 const MINUTES_LENGTH = 180;
 
-export const ClockIconInstance: React.FC<React.SVGAttributes<unknown> & { readonly date: Date }> = ({ date, ...props }) => {
+export const ClockIconInstance: React.FC<React.SVGProps<SVGSVGElement> & { readonly date: Date }> = ({ date, ...props }) => {
     const minutes = getMinutes(date);
     const minutesAngle = -Math.PI / 2 + Math.PI * minutes / 30;
 

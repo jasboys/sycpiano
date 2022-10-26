@@ -3,24 +3,22 @@ import * as React from 'react';
 import styled from '@emotion/styled';
 
 import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
-import StyledContactItem from 'src/components/Contact/ContactItem';
+import ContactItem from 'src/components/Contact/ContactItem';
 import contacts from 'src/components/Contact/contacts';
 
-import { screenXSorPortrait } from 'src/styles/screens';
+import { minRes, webkitMinDPR } from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
 import { useAppDispatch } from 'src/hooks';
 import { pushed } from 'src/styles/mixins';
+import { MediaContext } from 'src/components/App/App';
+import { toMedia } from 'src/mediaQuery';
 
-interface ContactProps {
-    isMobile: boolean;
-    className?: string;
-}
+type ContactProps = Record<never, unknown>;
 
 const ContactContainer = styled.div(
     pushed,
     {
         display: 'flex',
-        // visibility: 'hidden',
         flexFlow: 'row wrap',
         justifyContent: 'center',
         height: '100%',
@@ -29,16 +27,16 @@ const ContactContainer = styled.div(
         top: 0,
         overflowX: 'hidden',
         overflowY: 'unset',
-        [screenXSorPortrait]: {
+        [toMedia([minRes, webkitMinDPR])]: {
             height: '100%',
             marginTop: 0,
             overflowY: 'scroll',
             justifyContent: 'space-around',
-            WebkitOverflowScrolling: 'touch',
         },
     });
 
-const Contact: React.FC<ContactProps> = ({ isMobile }) => {
+const Contact: React.FC<ContactProps> = () => {
+    const { isHamburger, hiDpx } = React.useContext(MediaContext);
     const dispatch = useAppDispatch();
 
     const onScrollDispatch = (triggerHeight: number, scrollTop: number) => {
@@ -47,10 +45,10 @@ const Contact: React.FC<ContactProps> = ({ isMobile }) => {
 
     return (
         <ContactContainer
-            onScroll={isMobile ? scrollFn(navBarHeight.mobile, onScrollDispatch) : undefined}
+            onScroll={isHamburger ? scrollFn(navBarHeight.get(hiDpx), onScrollDispatch) : undefined}
         >
             {contacts.map((contact, i) => (
-                <StyledContactItem {...contact} isMobile={isMobile} key={i} />
+                <ContactItem {...contact} key={i} />
             ))}
         </ContactContainer>
     );

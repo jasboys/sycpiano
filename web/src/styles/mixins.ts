@@ -1,38 +1,38 @@
 // Various CSS emotion mixins
 
-import { css, SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
 import mix from 'polished/lib/color/mix';
 import darken from 'polished/lib/color/darken';
 
-import { screenMorPortrait } from 'src/styles/screens';
+import { hiDpx } from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
 import { logoBlue } from './colors';
+import { toMedia } from 'src/mediaQuery';
 
-export const pushedHelper = (marginTop: number): { height: string; marginTop: string } => ({
-    height: `calc(100% - ${marginTop}px)`,
+export const pushedHelper = (marginTop: number, unit: '%' | 'vh' = '%') => ({
+    height: `calc(100${unit} - ${marginTop}px)`,
     marginTop: `${marginTop}px`,
 });
 
-export const pushedDesktop = css(pushedHelper(navBarHeight.desktop));
-export const pushedMobile = css(pushedHelper(navBarHeight.mobile));
+export const pushedDesktop = css(pushedHelper(navBarHeight.lowDpx));
+export const pushedMobile = css(pushedHelper(navBarHeight.hiDpx));
 
 export const pushed = css({
-    ...pushedHelper(navBarHeight.desktop),
-    [screenMorPortrait]: {
-        ...pushedHelper(navBarHeight.mobile),
+    ...pushedHelper(navBarHeight.lowDpx),
+    [toMedia(hiDpx)]: {
+        ...pushedHelper(navBarHeight.hiDpx),
     },
 });
 
-export const link = (colorString: string, hoverDelta = 0.2): SerializedStyles => css`
-    color: ${colorString};
-    text-decoration: none;
-    cursor: pointer;
-    transition: color 0.5s;
-
-    :hover {
-        color: ${darken(hoverDelta, colorString)};
+export const link = (colorString: string, hoverDelta = 0.2) => css({
+    color: colorString,
+    textDecoration: 'none',
+    cursor: 'pointer',
+    transition: 'color 0.5s',
+    '&:hover': {
+        color: darken(hoverDelta, colorString),
     }
-`;
+});
 
 export const container = css({
     position: 'absolute',
@@ -45,7 +45,7 @@ export const noHighlight = css({
     WebkitTapHighlightColor: 'transparent',
 });
 
-export const getHoverStyle = (isMouseDown: boolean) => ({
+export const getHoverStyle = (isMouseDown: boolean) => css({
     backgroundColor: mix(0.75, logoBlue, '#FFF'),
     color: 'white',
     cursor: 'pointer',

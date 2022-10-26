@@ -10,7 +10,8 @@ import {
 import { contactPageLinkColor } from 'src/styles/colors';
 import { lato2, lato3 } from 'src/styles/fonts';
 import { link } from 'src/styles/mixins';
-import { screenXL } from 'src/styles/screens';
+import { screenXL } from 'src/screens';
+import { toMedia } from 'src/mediaQuery';
 
 const dividerColor = '#888';
 
@@ -20,7 +21,7 @@ const NameContainer = styled.div`
     font-weight: bold;
     margin-bottom: 0.5rem;
 
-    ${screenXL} {
+    ${toMedia(screenXL)} {
         font-size: 2.4rem;
     }
 `;
@@ -66,7 +67,7 @@ const StyledPersonalInfo = styled(React.memo(PersonalInfo))`
     flex-direction: column;
     margin-bottom: 1rem;
 
-    ${screenXL} {
+    ${toMedia(screenXL)} {
         flex: 0 0 150px;
     }
 `;

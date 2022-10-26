@@ -2,7 +2,7 @@ import Blazy from 'blazy';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
 
-import { SerializedStyles } from '@emotion/react';
+import { Interpolation, Theme } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import { LoadingInstance } from 'src/components/LoadingSVG';
@@ -39,9 +39,9 @@ interface LazyImageProps {
     readonly mobileAttributes?: PictureGroupAttributes;
     readonly desktopAttributes?: PictureGroupAttributes;
     readonly csss?: {
-        readonly mobile?: SerializedStyles;
-        readonly desktop?: SerializedStyles;
-        readonly loading?: SerializedStyles;
+        readonly mobile?: Interpolation<Theme>;
+        readonly desktop?: Interpolation<Theme>;
+        readonly loading?: Interpolation<Theme>;
     };
     readonly loadingComponent?: 'default' | React.ComponentType<{ isMobile: boolean }>;
     readonly alt: string;

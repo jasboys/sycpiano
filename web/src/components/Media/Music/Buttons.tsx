@@ -7,11 +7,11 @@ import { PauseSVG, PlaySVG, SkipSVG } from 'src/components/Media/Music/IconSVGs'
 
 interface IconProps {
     setRef: (div: HTMLDivElement | null) => void;
-    width: number;
-    height: number;
+    width: number | string;
+    height: number | string;
     verticalOffset: number;
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    Component?: React.ComponentType<Partial<IconProps> & React.SVGAttributes<SVGElement>>;
+    Component?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
     className?: string;
 }
 
@@ -48,7 +48,7 @@ const getInnerSolidStyle = css({
     zIndex: 1,
 })
 
-const Icon: React.FC<IconProps & React.SVGAttributes<SVGElement>> = ({ setRef, verticalOffset, Component, ...props }) => {
+const Icon: React.FC<IconProps & React.SVGProps<SVGSVGElement>> = ({ setRef, verticalOffset, Component, ...props }) => {
     return (Component === undefined) ? null : (
         <StyledIcon
             ref={(div) => setRef(div)}
@@ -58,7 +58,7 @@ const Icon: React.FC<IconProps & React.SVGAttributes<SVGElement>> = ({ setRef, v
             <Component css={getInnerBlurStyle} {...props} />
         </StyledIcon>);
 }
-export const PlayIcon: React.FC<IconProps & React.SVGAttributes<SVGElement>> = React.memo(({ ...props }) =>
+export const PlayIcon: React.FC<IconProps> = React.memo(({ ...props }) =>
     <Icon Component={PlaySVG} {...props} />
 );
 
@@ -72,16 +72,13 @@ export const SkipIcon: React.FC<IconProps> = React.memo(({ ...props }) =>
 
 interface ButtonProps {
     readonly isHovering: boolean;
-    readonly onMouseOver: (event: React.MouseEvent<SVGElement, MouseEvent>) => void;
-    readonly onMouseOut: (event: React.MouseEvent<SVGElement, MouseEvent>) => void;
     readonly onMouseMove: (event: React.MouseEvent<HTMLElement>) => void;
     readonly onClick: (event: React.MouseEvent<HTMLElement>) => void;
     readonly width: number;
     readonly height: number;
     readonly verticalOffset: number;
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    readonly Component?: React.ComponentType<Partial<ButtonProps> & React.SVGAttributes<SVGElement>>;
-    readonly className?: string;
+    readonly Component?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
 }
 
 const StyledButton = styled.div<{ verticalOffset: number; height: number; width: number }>(
@@ -119,7 +116,7 @@ const blurButtonStyle = css(
 
 const blurButtonHover = css` filter: blur(5px); `;
 
-const Button: React.FC<ButtonProps & React.SVGAttributes<SVGElement>> = ({
+const Button: React.FC<ButtonProps & React.SVGProps<SVGSVGElement>> = ({
     isHovering,
     onMouseOver,
     onMouseOut,
@@ -163,14 +160,14 @@ const Button: React.FC<ButtonProps & React.SVGAttributes<SVGElement>> = ({
     );
 };
 
-export const PlayButton: React.FC<ButtonProps & React.SVGAttributes<SVGElement>> = React.memo(({ ...props }) =>
+export const PlayButton: React.FC<ButtonProps & React.SVGProps<SVGSVGElement>> = React.memo(({ ...props }) =>
     <Button Component={PlaySVG} {...props} />
 );
 
-export const PauseButton: React.FC<ButtonProps & React.SVGAttributes<SVGElement>> = React.memo(({ ...props }) =>
+export const PauseButton: React.FC<ButtonProps & React.SVGProps<SVGSVGElement>> = React.memo(({ ...props }) =>
     <Button Component={PauseSVG} {...props} />
 );
 
-export const SkipButton: React.FC<ButtonProps & React.SVGAttributes<SVGElement>> = React.memo(({ ...props }) =>
+export const SkipButton: React.FC<ButtonProps & React.SVGProps<SVGSVGElement>> = React.memo(({ ...props }) =>
     <Button Component={SkipSVG} {...props} />
 );

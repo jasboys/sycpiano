@@ -10,16 +10,18 @@ import PhotoListItem from 'src/components/Media/Photos/PhotoListItem';
 import { PhotoItem } from 'src/components/Media/Photos/types';
 import { idFromItem } from 'src/components/Media/Photos/utils';
 import Playlist from 'src/components/Media/Playlist';
-import { screenXSorPortrait } from 'src/styles/screens';
+import { screenXS, screenPortrait, webkitMinDPR, minRes } from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
 import { useAppDispatch } from 'src/hooks';
+import { MediaContext } from 'src/components/App/App';
+import { toMedia } from 'src/mediaQuery';
 
 const photoListStyle = css`
     padding-left: 5px;
     background-color: black;
     top: 0;
 
-    ${screenXSorPortrait} {
+    ${toMedia([screenXS, screenPortrait])} {
         padding-left: 0;
     }
 `;
@@ -28,8 +30,8 @@ const photoULStyle = css`
     padding-bottom: 80px;
     background-color: black;
 
-    ${screenXSorPortrait} {
-        padding-top: ${navBarHeight.mobile}px;
+    ${toMedia([minRes, webkitMinDPR])} {
+        padding-top: ${navBarHeight.hiDpx}px;
         background-color: unset;
         padding-bottom: 60px;
     }
@@ -47,7 +49,7 @@ const StyledPhotoListContainer = styled.div`
     top: 0;
     position: absolute;
 
-    ${screenXSorPortrait} {
+    ${toMedia([screenXS, screenPortrait])} {
         width: 100%;
         height: auto;
         right: unset;
@@ -57,13 +59,13 @@ const StyledPhotoListContainer = styled.div`
 `;
 
 interface PhotoListProps {
-    isMobile: boolean;
     items: PhotoItem[];
     currentItem?: PhotoItem;
     selectPhoto: (item: PhotoItem) => void;
 }
 
 const PhotoList: React.FC<PhotoListProps> = (props) => {
+    const { isHamburger, hiDpx } = React.useContext(MediaContext);
     const dispatch = useAppDispatch();
 
     const onScrollDispatch = (triggerHeight: number, scrollTop: number) => {
@@ -72,7 +74,6 @@ const PhotoList: React.FC<PhotoListProps> = (props) => {
 
 
     const {
-        isMobile,
         items,
         currentItem,
         selectPhoto,
@@ -85,16 +86,15 @@ const PhotoList: React.FC<PhotoListProps> = (props) => {
                 hasToggler={false}
                 isShow={true}
                 shouldAppear={false}
-                isMobile={isMobile}
-                onScroll={isMobile ? scrollFn(navBarHeight.mobile, onScrollDispatch) : undefined}
+                onScroll={isHamburger ? scrollFn(navBarHeight.get(hiDpx), onScrollDispatch) : undefined}
             >
                 {items.map((item) => (
                     <PhotoListItem
                         key={item.file}
                         item={item}
-                        currentItemId={isMobile ? undefined : idFromItem(currentItem)}
-                        onClick={isMobile ? undefined : selectPhoto}
-                        isMobile={isMobile}
+                        isMobile={isHamburger}
+                        currentItemId={isHamburger ? undefined : idFromItem(currentItem)}
+                        onClick={isHamburger ? undefined : selectPhoto}
                     />
                 ))}
             </Playlist>

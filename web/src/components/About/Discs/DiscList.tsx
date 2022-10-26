@@ -4,41 +4,49 @@ import styled from '@emotion/styled';
 
 import DiscListItem from 'src/components/About/Discs/DiscListItem';
 
-import { lato2 } from 'src/styles/fonts';
-import { screenXSorPortrait } from 'src/styles/screens';
-import { navBarHeight } from 'src/styles/variables';
+import { lato2, lato3 } from 'src/styles/fonts';
+import { camel2var } from 'src/styles/variables';
 import { useAppSelector } from 'src/hooks';
+import { MediaContext } from 'src/components/App/App';
+import { toMedia } from 'src/mediaQuery';
+import { isHamburger } from 'src/screens';
 
-interface DiscListOwnProps {
-    isMobile: boolean;
-}
+type DiscListProps = Record<never, unknown>;
 
-type DiscListProps = DiscListOwnProps;
-
-const DiscListUL = styled.ul`
-    width: 100%;
-    height: auto;
-    padding: 0;
-    margin: 0;
-    list-style-type: none;
-    font-family: ${lato2};
-
-    ${screenXSorPortrait} {
-        padding-top: ${navBarHeight.mobile}px;
-        padding-bottom: 60px;
+const DiscListUL = styled.ul(
+    {
+        width: 'fit-content',
+        maxWidth: 800,
+        height: 'auto',
+        padding: 0,
+        margin: '0 auto',
+        listStyleType: 'none',
+        fontFamily: lato2,
+        [toMedia(isHamburger)]: {
+            paddingBottom: 60,
+            paddingTop: camel2var('navBarHeight'),
+        }
     }
-`;
+);
 
-const DiscList: React.FunctionComponent<DiscListProps> = (props) => {
+const Title = styled.li({
+    fontFamily: lato3,
+    fontSize: '2rem',
+    width: '100%',
+    margin: '4rem auto',
+});
+
+const DiscList: React.FunctionComponent<DiscListProps> = () => {
+    const { isHamburger } = React.useContext(MediaContext);
     const items = useAppSelector(({ discs }) => discs.discs);
 
     return (
         <div>
             <DiscListUL>
+                {!isHamburger && <Title>Discography</Title>}
                 {
                     items.map((item, id) => (
                         <DiscListItem
-                            isMobile={props.isMobile}
                             item={item}
                             key={id}
                         />

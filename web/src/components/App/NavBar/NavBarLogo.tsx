@@ -1,18 +1,17 @@
 import * as React from 'react';
-import { useMedia } from 'react-media';
 import { Link } from 'react-router-dom';
 
 import styled from '@emotion/styled';
 
-import { SycLogo } from 'src/components/App/NavBar/SycLogo';
+import { SycLogo, sycLogoSize } from 'src/components/App/NavBar/SycLogo';
 
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { lato2 } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
-import { screenBreakPoints } from 'src/styles/screens';
 import { navBarHeight } from 'src/styles/variables';
 import { useAppDispatch } from 'src/hooks';
 import { toggleExpanded } from 'src/components/App/NavBar/reducers';
+import { MediaContext } from '../App';
 
 const navBarFontSizeREM = 2.5;
 const letterSpacing = 0.05;
@@ -24,24 +23,20 @@ interface NavBarLogoProps {
     specificRouteName?: string;
 }
 
-const LogoText = styled.div<{ isMobile: boolean }>(
+const LogoText = styled.div<{ hiDpx: boolean }>(
     noHighlight,
     {
         display: 'inline-block',
         verticalAlign: 'middle',
-        lineHeight: `${navBarHeight.desktop}px`,
-        height: navBarHeight.desktop,
+        lineHeight: `${navBarHeight.lowDpx}px`,
+        height: navBarHeight.lowDpx,
         textTransform: 'uppercase',
         flex: '1 1 auto',
-
-        screenXSorPortrait: {
-            marginLeft: 0,
-            lineHeight: navBarHeight.mobile,
-            height: navBarHeight.mobile,
-        },
-    },
-    ({ isMobile }) => !isMobile && {
         marginLeft: 20,
+    },
+    ({ hiDpx }) => hiDpx && {
+        lineHeight: `${navBarHeight.hiDpx}px`,
+        height: navBarHeight.hiDpx,
     },
 );
 
@@ -80,7 +75,7 @@ const StyledLink = styled(Link, {
         },
 );
 
-const SeanChenText = styled.span` vertical-align: middle; `;
+const SeanChenText = styled.span({ verticalAlign: 'middle' });
 
 const RouteText = styled.div({
     fontSize: `${navBarFontSizeREM * 0.8}rem`,
@@ -90,9 +85,10 @@ const RouteText = styled.div({
     marginLeft: 10,
 });
 
-const routeNameMapping: Record<string, string> = {
-    biography: 'bio',
-    discography: 'discog',
+// either a string as map, or an array with full-sized map and shortened map (for screenXS)
+const routeNameMapping: Record<string, string | string[]> = {
+    biography: ['biography', 'bio'],
+    discography: ['discography', 'discog'],
     'retrieve-purchased': 'shop',
     scores: 'shop',
     checkout: 'shop',
@@ -104,21 +100,21 @@ const NavBarLogo: React.FC<React.HTMLAttributes<HTMLDivElement> & NavBarLogoProp
     specificRouteName,
 }) => {
     const dispatch = useAppDispatch();
-    const { xs, medium } = useMedia({ queries: screenBreakPoints });
-    const displayName = specificRouteName && ((xs && routeNameMapping[specificRouteName]) || specificRouteName);
+    const { hiDpx, screenS, screenXS, isHamburger } = React.useContext(MediaContext);
+    const mapped = specificRouteName && (routeNameMapping[specificRouteName] ?? specificRouteName);
+    const displayName = (Array.isArray(mapped)) ? mapped[screenXS ? 1 : 0] : mapped;
     const letterCount = displayName?.length;
     const estimatedTextWidth = letterCount && letterCount * capitalRatio * navBarFontSizeREM * 0.8 + letterSpacing * (letterCount - 1);
-    const otherObjectSizes = (xs || medium) && ((xs ? 120 : 150) + (xs ? 0 : 20) + 111);   // other stuff 56 + 35 + 15 + 5 buffer
+    // 120 or 150 is logo, 20 margin, other stuff is cart + menu + 15 + 5 buffer
+    const otherObjectSizes = ((sycLogoSize.get(hiDpx)) + 20 + 111);
 
     return (
         <StyledLink to="/" isHome={isHome} isExpanded={isExpanded} onClick={() => { dispatch(toggleExpanded(false)); }}>
             <SycLogo />
-            <LogoText isMobile={xs}>
-                {!isHome && !xs && <SeanChenText>{'SEAN CHEN' + (medium ? ' |' : '')}</SeanChenText>}
+            <LogoText hiDpx={hiDpx}>
+                {!isHome && !screenS && <SeanChenText>{'SEAN CHEN' + ((isHamburger) ? ' |' : '')}</SeanChenText>}
                 {
-                    displayName &&
-                    !isHome &&
-                    (xs || medium) &&
+                    displayName && !isHome && isHamburger &&
                     <RouteText
                         css={{ fontSize: `min(${navBarFontSizeREM * 0.8}rem, calc(${navBarFontSizeREM * 0.8} * (100vw - ${otherObjectSizes}px) / ${estimatedTextWidth}))` }}
                     >

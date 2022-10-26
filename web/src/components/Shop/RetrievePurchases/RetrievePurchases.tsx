@@ -88,7 +88,7 @@ enum SubmitState {
     success = 2,
 }
 
-const RetrievalForm: React.FC<Record<string, unknown>> = () => {
+const RetrievalForm: React.FC<Record<never, unknown>> = () => {
     const [isMouseDown, setIsMouseDown] = React.useState(false);
     const [email, setEmail] = React.useState('');
     const [error, setError] = React.useState(false);
@@ -176,5 +176,5 @@ const RetrievalForm: React.FC<Record<string, unknown>> = () => {
 };
 
 export default RetrievalForm;
-export type RequiredProps = Record<string, unknown>;
+export type RequiredProps = React.ComponentProps<typeof RetrievalForm>;
 export type RetrievalFormType = typeof RetrievalForm;

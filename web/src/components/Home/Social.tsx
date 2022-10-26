@@ -7,7 +7,8 @@ import { Elastic, gsap } from 'gsap';
 import { lato2i } from 'src/styles/fonts';
 import { staticImage } from 'src/imageUrls';
 import { noHighlight } from 'src/styles/mixins';
-import { screenXSandPortrait, screenXSorPortrait } from 'src/styles/screens';
+import { screenXS, screenPortrait, isHamburger } from 'src/screens';
+import { toMedia } from 'src/mediaQuery';
 
 import socials from 'src/components/Home/socials';
 import { keyframes } from '@emotion/react';
@@ -28,7 +29,7 @@ const Handle = styled('div')`
     margin: 1.2rem 0;
     -webkit-tap-highlight-color: transparent;
 
-    ${screenXSorPortrait} {
+    ${toMedia([screenXS, screenPortrait])} {
         width: 100%;
         bottom: 15%;
     }
@@ -36,7 +37,7 @@ const Handle = styled('div')`
 
 const HandleText = styled('span')({
     fontFamily: lato2i,
-    fontSize: 30,
+    fontSize: 'min(2rem, calc(100vh / 20))',
     color: 'white',
     textShadow: `0 0 6px ${textShadowColor}`,
     textDecoration: 'underline',
@@ -44,22 +45,23 @@ const HandleText = styled('span')({
     '&:hover': {
         cursor: 'pointer',
         animationPlayState: 'paused',
-    }
+    },
+    [toMedia({and: [isHamburger, screenPortrait]})]: {
+        fontSize: 'min(3rem, calc(100vw / 16))'
+    },
 })
 
-const SocialContainer = styled('div')`
-    position: absolute;
-    width: fit-content;
-    top: 55%;
-    left: 50%;
-    transform: translateX(-50%);
-
-    ${screenXSandPortrait} {
-        bottom: 12%;
-        font-size: 0.8rem;
-        top: unset;
+const SocialContainer = styled('div')({
+    position: 'absolute',
+    width: 'fit-content',
+    top: 'calc(59.6% - 43.3px)',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    [toMedia({and: [isHamburger, screenPortrait]})]: {
+        bottom: '12%',
+        top: 'unset',
     }
-`;
+});
 
 const SocialLink = styled.a<{ show: boolean; canHover: boolean }>`
     padding: 1.5rem 0;
@@ -71,7 +73,7 @@ const SocialLink = styled.a<{ show: boolean; canHover: boolean }>`
     pointer-events: ${props => props.show ? 'unset' : 'none'};
     filter: drop-shadow(0 0 0.5rem black);
 
-    ${screenXSandPortrait} {
+    ${toMedia(isHamburger)} {
         padding: 0.8rem 0;
     }
 
@@ -110,7 +112,7 @@ interface SocialState {
     canHover: { [key: string]: boolean };
 }
 
-class Social extends React.PureComponent<Record<string, unknown>, SocialState> {
+class Social extends React.PureComponent<Record<never, unknown>, SocialState> {
     defaultCanHover = Object.keys(socials).reduce((prev, curr) => {
         return {
             ...prev,

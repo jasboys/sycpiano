@@ -7,30 +7,30 @@ import DiscList from 'src/components/About/Discs/DiscList';
 import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
 
 import { pushed } from 'src/styles/mixins';
-import { screenXSorPortrait } from 'src/styles/screens';
 import { navBarHeight } from 'src/styles/variables';
 import { useAppDispatch } from 'src/hooks';
+import { MediaContext } from 'src/components/App/App';
+import { isHamburger } from 'src/screens';
+import { toMedia } from 'src/mediaQuery';
 
-const StyledDiscs = styled.div`
-    ${pushed}
-    width: 100%;
-    background-color: rgb(238 238 238);
-    overflow-y: scroll;
-    -webkit-overflow-scrolling: touch;
-
-    ${screenXSorPortrait} {
-        height: 100%;
-        margin-top: 0;
-        overflow-y: scroll;
-        -webkit-overflow-scrolling: touch;
+const StyledDiscs = styled.div(
+    pushed,
+    {
+        width: '100%',
+        backgroundColor: 'rgb(238 238 238)',
+        overflowY: 'scroll',
+        [toMedia(isHamburger)]: {
+            height: '100%',
+            marginTop: 0,
+        }
     }
-`;
+);
 
-interface DiscsProps {
-    readonly isMobile: boolean;
-}
+type DiscsProps = Record<never, unknown>;
 
-const Discs: React.FC<DiscsProps> = (props) => {
+const Discs: React.FC<DiscsProps> = () => {
+    const mediaProps = React.useContext(MediaContext);
+    const { isHamburger, hiDpx } = mediaProps;
     const dispatch = useAppDispatch();
 
     React.useEffect(() => {
@@ -43,17 +43,14 @@ const Discs: React.FC<DiscsProps> = (props) => {
 
     return (
         <StyledDiscs
-            onScroll={props.isMobile ? scrollFn(navBarHeight.mobile, onScrollDispatch) : undefined}
+            {...mediaProps}
+            onScroll={isHamburger ? scrollFn(navBarHeight.get(hiDpx), onScrollDispatch) : undefined}
         >
-            <DiscList
-                isMobile={props.isMobile}
-            />
+            <DiscList />
         </StyledDiscs>
     );
 };
 
-const MemoizedDiscs = React.memo(Discs, (prev, next) => prev.isMobile === next.isMobile);
-
-export type DiscsType = typeof MemoizedDiscs;
+export type DiscsType = typeof Discs;
 export type RequiredProps = DiscsProps;
-export default MemoizedDiscs;
+export default Discs;

@@ -84,7 +84,7 @@ export const fetchEvents = createAsyncThunk<FetchEventsReturn, FetchEventsArgume
                 );
             }, undefined);
         }
-        const hasMore = !!events.length;
+        const hasMore = !!events.length && events.length === FETCH_LIMIT;
         return {
             name,
             events,

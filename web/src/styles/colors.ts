@@ -22,3 +22,15 @@ export const theme = createTheme({
         }
     },
 });
+
+export const colorVars = {
+    lightBlue,
+    logoBlue,
+    magenta,
+    offWhite,
+    textGrey,
+    contactPageLinkColor,
+    gold,
+    navFontColor,
+    playlistBackground,
+};

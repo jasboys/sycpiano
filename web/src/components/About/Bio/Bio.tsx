@@ -17,43 +17,49 @@ import { offWhite } from 'src/styles/colors';
 import { lato2, lato3 } from 'src/styles/fonts';
 import { generateSrcsetWidths, resizedImage, sycWithPianoBW } from 'src/imageUrls';
 import { pushed } from 'src/styles/mixins';
-import { screenLengths, screenM, screenWidths, screenXSorPortrait } from 'src/styles/screens';
-import { navBarHeight } from 'src/styles/variables';
+import { screenLengths, screenM, screenPortrait, screenWidths, screenXS } from 'src/screens';
+import { camel2var, navBarHeight } from 'src/styles/variables';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { isImageElement } from 'src/utils';
+import { MediaContext } from 'src/components/App/App';
+import { toMedia } from 'src/mediaQuery';
 
 const pictureHeight = 250;
 
 const Paragraph = styled.p({
     fontFamily: lato2,
-    fontSize: '1.2em',
-    lineHeight: '2em',
-    margin: '1.6em 0',
+    fontSize: '1.2rem',
+    lineHeight: '2rem',
+    margin: '1.6rem 0',
 
-    [screenM]: {
-        fontSize: '1em',
+    [toMedia(screenM)]: {
+        fontSize: '1rem',
     },
 
-    [screenXSorPortrait]: {
-        fontSize: '1em',
-        lineHeight: '1.6em',
-        margin: '1.3em 0',
+    [toMedia([screenXS, screenPortrait])]: {
+        fontSize: '1rem',
+        lineHeight: '1.6rem',
+        margin: '1.3rem 0',
+        '&:last-of-type': {
+            marginBottom: '3rem'
+        }
     }
 });
 
 const SpaceFiller = styled.div({
     display: 'none',
 
-    [screenXSorPortrait]: {
+    [toMedia([screenXS, screenPortrait])]: {
         display: 'block',
-        height: pictureHeight,
+        minHeight: pictureHeight,
+        height: 'min(50vw, 33vh)',
         width: '100%',
         backgroundColor: 'transparent',
     }
 });
 
 const TextGroup = styled.div({
-    [screenXSorPortrait]: {
+    [toMedia([screenXS, screenPortrait])]: {
         backgroundColor: 'white',
         padding: '20px 20px',
     },
@@ -62,14 +68,18 @@ const TextGroup = styled.div({
 
 const TextContainer = styled.div({
     boxSizing: 'border-box',
-    flex: '0 0 45%',
+    flex: '1 0 45%',
     height: 'auto',
-    padding: '20px 40px 80px 60px',
+    padding: '2rem 40px 80px 60px',
     backgroundColor: offWhite,
     color: 'black',
     overflowY: 'scroll',
 
-    [screenXSorPortrait]: {
+    [toMedia(screenM)]: {
+        padding: '2rem 2rem 5rem 3rem',
+    },
+
+    [toMedia([screenXS, screenPortrait])]: {
         position: 'relative',
         zIndex: 1,
         marginTop: 0,
@@ -85,14 +95,21 @@ const NameSpan = styled.span({
     fontFamily: lato3,
 });
 
+const Title = styled.div({
+    fontFamily: lato3,
+    fontSize: '2rem',
+});
+
 interface BioTextProps {
     bio: Blurb[];
+    needsTitle: boolean;
 }
 
 const BioText: React.FunctionComponent<BioTextProps> = (props) => {
     return (
         <TextContainer>
             <SpaceFiller />
+            {props.needsTitle && <Title>Biography</Title> }
             <TextGroup>
                 {props.bio.map(({ text }, i) => {
                     return (
@@ -115,36 +132,39 @@ const BioText: React.FunctionComponent<BioTextProps> = (props) => {
     );
 };
 
-const MemoizedBioText = React.memo(BioText, (prev, next) => { return prev.bio.length === next.bio.length; });
+const MemoizedBioText = React.memo(BioText, (prev, next) => {
+    return prev.bio.length === next.bio.length && prev.needsTitle === next.needsTitle;
+});
 
 interface ImageContainerProps { bgImage?: string }
 
 const ImageContainer = styled.div<ImageContainerProps>({
-    flex: 1,
+    flex: '0 1 50vw',
     backgroundSize: 'cover',
-    backgroundPosition: 'center 100px',
+    backgroundPosition: 'center 25%',
     backgroundAttachment: 'initial',
     backgroundRepeat: 'no-repeat',
     backgroundColor: 'black',
     visibility: 'hidden',
 
-    [screenM]: {
+    [toMedia(screenM)]: {
         backgroundSize: 'cover',
         backgroundPosition: 'center 0',
     },
 
-    [screenXSorPortrait]: {
+    [toMedia([screenXS, screenPortrait])]: {
         position: 'fixed',
         zIndex: 0,
-        top: navBarHeight.mobile,
-        height: pictureHeight,
+        minHeight: pictureHeight,
+        height: 'min(50vw, 33vh)',
         width: '100%',
         backgroundSize: '106%',
         backgroundPosition: 'center 15%',
-    }
+        maxWidth: 'unset',
+        paddingTop: camel2var('navBarHeight'),
+    },
 }, ({ bgImage }) => ({
     backgroundImage: bgImage ? `url(${bgImage})` : 'unset',
-    // opacity: easeQuadOut(Math.max(1 - currScrollTop / pictureHeight, 0)),
 }));
 
 const BioContainer = styled.div(
@@ -154,31 +174,29 @@ const BioContainer = styled.div(
         backgroundColor: 'black',
         position: 'absolute',
         display: 'flex',
-        [screenXSorPortrait]: {
+        [toMedia([screenXS, screenPortrait])]: {
             marginTop: 0,
-            paddingTop: navBarHeight.mobile,
             display: 'block',
             height: '100%',
             overflowY: 'scroll',
-            WebkitOverflowScrolling: 'touch',
             backgroundColor: 'white',
+            paddingTop: camel2var('navBarHeight'),
         },
     });
 
-const srcWidths = screenLengths.map((value) => (
-    Math.round(value * 1736 / 2560)
-));
+const IMAGE_RATIO = 1736 / 2560;
 
-interface BioProps {
-    readonly isMobile: boolean;
-}
+const srcWidths = screenLengths.map((value) => (
+    Math.round(value * IMAGE_RATIO)
+));
 
 const imageLoaderStyle = css({
     visibility: 'hidden',
     position: 'absolute',
 });
 
-const Bio: React.FunctionComponent<BioProps> = (props) => {
+const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
+    const { hiDpx, isHamburger, screenXS, screenPortrait } = React.useContext(MediaContext);
     const [bgImage, setBgImage] = React.useState('');
     const bgRef = React.useRef<HTMLImageElement>(null);
     const dispatch = useAppDispatch();
@@ -191,9 +209,16 @@ const Bio: React.FunctionComponent<BioProps> = (props) => {
 
     React.useEffect(() => {
         if (bgRef.current) {
-            bgRef.current.style.opacity = easeQuadOut(Math.max(1 - scrollTop / pictureHeight, 0)).toString();
+            if (screenXS || screenPortrait) {
+                const height = parseInt(window.getComputedStyle(bgRef.current).height);
+                const float = easeQuadOut(Math.max(1 - scrollTop / height, 0));
+                const rounded = Math.round((float + Number.EPSILON) * 100) / 100;
+                bgRef.current.style.opacity = rounded.toFixed(2);
+            } else {
+                bgRef.current.style.opacity = '1.0';
+            }
         }
-    }, [scrollTop]);
+    }, [scrollTop, screenXS, screenPortrait]);
 
     React.useEffect(() => {
         if (bgRef.current) {
@@ -223,13 +248,23 @@ const Bio: React.FunctionComponent<BioProps> = (props) => {
     };
 
     return (
-        <BioContainer onScroll={props.isMobile ? scrollFn(pictureHeight + navBarHeight.mobile, onScrollDispatch) : undefined}>
+        <BioContainer onScroll={
+            isHamburger ?
+                (ev) => {
+                    if (bgRef.current) {
+                        const height = parseInt(window.getComputedStyle(bgRef.current).height);
+                        scrollFn(height + navBarHeight.get(hiDpx), onScrollDispatch)(ev);
+                    }
+                }
+                : undefined
+            }
+        >
             <ImageContainer
                 bgImage={bgImage}
                 ref={bgRef}
             >
                 <LazyImage
-                    isMobile={props.isMobile}
+                    isMobile={isHamburger}
                     id="about_lazy_image"
                     csss={{
                         mobile: imageLoaderStyle,
@@ -262,12 +297,12 @@ const Bio: React.FunctionComponent<BioProps> = (props) => {
                     destroyCb={onImageDestroy}
                 />
             </ImageContainer>
-            <MemoizedBioText bio={bio} />
+            <MemoizedBioText bio={bio} needsTitle={!isHamburger}/>
             <PortfolioButton />
         </BioContainer>
     );
 }
 
 export type BioType = typeof Bio;
-export type RequiredProps = BioProps;
+export type RequiredProps = React.ComponentProps<typeof Bio>;
 export default Bio;

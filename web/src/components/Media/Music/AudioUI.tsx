@@ -9,8 +9,9 @@ import { cartesianToPolar } from 'src/components/Media/Music/utils';
 
 import { HEIGHT_ADJUST_DESKTOP, HEIGHT_ADJUST_MOBILE } from 'src/components/Media/Music/audioVisualizerBase';
 import { lightBlue } from 'src/styles/colors';
-import { screenM, screenXSorPortrait } from 'src/styles/screens';
+import { screenM, screenPortrait, screenXS } from 'src/screens';
 import { navBarHeight, playlistContainerWidth } from 'src/styles/variables';
+import { toMedia } from 'src/mediaQuery';
 
 interface AudioUIOwnProps {
     readonly currentPosition: number;
@@ -51,7 +52,7 @@ const loadingInstanceStyle = css`
     fill: none;
     stroke: ${lightBlue};
 
-    ${screenXSorPortrait} {
+    ${toMedia([screenXS, screenPortrait])} {
         top: calc(50% + ${HEIGHT_ADJUST_MOBILE}px);
     }
 `;
@@ -75,14 +76,14 @@ const UIContainer = styled.div`
     align-items: center;
     justify-content: space-around;
 
-    ${screenM} {
+    ${toMedia(screenM)} {
         width: calc(100% - ${playlistContainerWidth.tablet});
     }
 
-    ${screenXSorPortrait} {
+    ${toMedia(screenPortrait)} {
         width: 100%;
         height: 360px;
-        top: ${navBarHeight.mobile}px;
+        top: ${navBarHeight.hiDpx}px;
     }
 `;
 

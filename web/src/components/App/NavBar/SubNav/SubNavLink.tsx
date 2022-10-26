@@ -15,18 +15,18 @@ interface SubNavLinkProps {
     readonly basePath: LinkShape;
     readonly link: LinkShape;
     readonly onClick: () => void;
-    readonly isMobile: boolean;
+    readonly isHamburger: boolean;
     readonly currentSpecificPath: string;
 }
 
 const StyledSubNavLink = styled(
     Link,
     { shouldForwardProp: (prop) => (
-        prop !== 'isMobile' &&
+        prop !== 'isHamburger' &&
         prop !== 'isHome' &&
         prop !== 'isActive'
     ), }
-)<{ isMobile: boolean; isHome: boolean, isActive: boolean }>(
+)<{ isHamburger: boolean; isHome: boolean, isActive: boolean }>(
     {
         color: navFontColor,
         position: 'relative',
@@ -48,7 +48,7 @@ const StyledSubNavLink = styled(
             color: 'white',
         }
     },
-    (props) => props.isMobile && {
+    (props) => props.isHamburger && {
         color: props.isActive ? lightBlue : navFontColor,
         padding: '0.5rem 1rem 0.5rem',
         backgroundColor: 'transparent',
@@ -59,7 +59,7 @@ const StyledSubNavLink = styled(
             backgroundColor: 'transparent',
         },
     },
-    (props) => props.isMobile && props.isActive && {
+    (props) => props.isHamburger && props.isActive && {
         '&:hover': {
             color: saturate(0.2, darken(0.1, lightBlue)),
         }
@@ -79,13 +79,12 @@ const StyledSubNavLink = styled(
 
 const StyledLi = styled.li(noHighlight);
 
-const SubNavLink: React.FC<SubNavLinkProps> = ({ basePath, link, onClick, isHome, isMobile, currentSpecificPath }) => {
-    console.log(link.name === currentSpecificPath);
+const SubNavLink: React.FC<SubNavLinkProps> = ({ basePath, link, onClick, isHome, isHamburger, currentSpecificPath }) => {
     return (
         <StyledLi className={basePath.name}>
             <StyledSubNavLink
                 to={`${basePath.path}${link.path}`}
-                isMobile={isMobile}
+                isHamburger={isHamburger}
                 isHome={isHome}
                 isActive={link.name === currentSpecificPath}
                 onClick={() => { setTimeout(() => onClick(), 250); }}

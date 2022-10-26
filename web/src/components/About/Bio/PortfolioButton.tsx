@@ -5,7 +5,8 @@ import styled from '@emotion/styled';
 import { lightBlue } from 'src/styles/colors';
 import { lato2 } from 'src/styles/fonts';
 import { staticImage } from 'src/imageUrls';
-import { screenXSorPortrait } from 'src/styles/screens';
+import { screenXS, screenPortrait } from 'src/screens';
+import { toMedia } from 'src/mediaQuery';
 
 const StyledDiv = styled.div`
     position: fixed;
@@ -29,7 +30,7 @@ const StyledDiv = styled.div`
         display: block;
     }
 
-    ${screenXSorPortrait} {
+    ${toMedia([screenXS, screenPortrait])} {
         bottom: 10px;
         right: 50%;
     }

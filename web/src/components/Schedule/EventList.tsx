@@ -20,7 +20,8 @@ import {
 } from 'src/components/Schedule/types';
 import { lightBlue } from 'src/styles/colors';
 import { lato2 } from 'src/styles/fonts';
-import { screenXSorPortrait } from 'src/styles/screens';
+import { screenPortrait, screenXS, screenXSandPortrait } from 'src/screens';
+import { toMedia } from 'src/mediaQuery';
 import { GlobalStateShape } from 'src/store';
 import { metaDescriptions, titleStringBase } from 'src/utils';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
@@ -34,10 +35,10 @@ import { useSearchParams } from 'react-router-dom';
 import { cardShadow } from 'src/styles/mixins';
 import { Transition } from 'react-transition-group';
 import { gsap } from 'gsap';
+import { MediaContext } from '../App/App';
 
 interface EventListProps {
     readonly type: EventListName;
-    readonly isMobile: boolean;
 }
 
 interface OnScrollProps {
@@ -75,7 +76,7 @@ const StyledLoadingInstance = styled(LoadingInstance)({
 const EndOfList = styled.div({
     margin: '2.4rem auto',
     width: '80vw',
-    maxWidth: 600,
+    maxWidth: 720,
     overflow: 'hidden',
     boxShadow: cardShadow,
     borderRadius: 8,
@@ -87,7 +88,7 @@ const EndOfList = styled.div({
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '1.8rem',
-    [screenXSorPortrait]: {
+    [toMedia([screenXS, screenPortrait])]: {
         flexDirection: 'column',
     }
 });
@@ -111,16 +112,17 @@ const scheduleListSelector = createCachedSelector(
     (_, type) => type
 );
 
-const ScrollingContainer = styled.div<{ isMobile: boolean }>(
-    {
+const ScrollingContainer = styled.div<{ isSearch: boolean; }>((props) => ({
         width: '100%',
+        height: '100%',
         overflowY: 'scroll',
-        paddingBottom: '2rem',
-    },
-    (props) => ({
-        paddingTop: props.isMobile ? 0 : '2rem',
-        marginTop: props.isMobile ? 82 : 0,
-        height: props.isMobile ? 'calc(100% - 82px)' : '100%',
+        padding: '2rem 0',
+        marginTop: 0,
+        [toMedia(screenXSandPortrait)]: {
+            paddingTop: 0,
+            marginTop: props.isSearch ? 112 : 82,
+            height: 'calc(100% - 82px)'
+        }
     })
 );
 
@@ -136,7 +138,7 @@ const MonthBar = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
     color: lightBlue,
     fontFamily: lato2,
     fontWeight: 'bold',
-    fontSize: '2.5rem',
+    fontSize: 'min(10vw, 2.5rem)',
     padding: '0 1rem',
     position: 'sticky',
     top: 0,
@@ -187,6 +189,7 @@ export const EventList: React.FC<EventListProps> = (props) => {
     const { date: dateParam } = useParams();
     const dispatch = useAppDispatch();
     const [params, _setParams] = useSearchParams();
+    const { isHamburger } = React.useContext(MediaContext);
 
     const searchQ = params.get('q');
 
@@ -204,6 +207,7 @@ export const EventList: React.FC<EventListProps> = (props) => {
                 q: searchQ
             }));
         } else {
+            // Empty List
             if (eventItemsLength === 0) {
                 let fetchParams: FetchEventsArguments;
                 if (date) {
@@ -215,7 +219,7 @@ export const EventList: React.FC<EventListProps> = (props) => {
                 } else {
                     fetchParams = {
                         name: props.type,
-                        [fetchDateParam(props.type)]: new Date(),
+                        [fetchDateParam(props.type)]: startOfDay(new Date()),
                         scrollTo: false,
                     };
                 }
@@ -357,7 +361,7 @@ export const EventList: React.FC<EventListProps> = (props) => {
                 ]}
             />
             <ScrollingContainer
-                isMobile={props.isMobile}
+                isSearch={props.type === 'search'}
                 onScroll={(ev) => {
                     ev.persist();
                     const {
@@ -371,8 +375,8 @@ export const EventList: React.FC<EventListProps> = (props) => {
                 {eventItemsLength ?
                     eventItems.monthGroups.map((monthGroup, idx) =>
                         <MonthGroup key={`${props.type}-${lastQuery!}-${idx}-month`}>
-                            <MonthBar isMobile={props.isMobile}>
-                                <MonthText isMobile={props.isMobile}>
+                            <MonthBar isMobile={isHamburger}>
+                                <MonthText isMobile={isHamburger}>
                                     {format(parseISO(monthGroup.dateTime), 'MMMM yyyy')}
                                 </MonthText>
                             </MonthBar>
@@ -384,7 +388,7 @@ export const EventList: React.FC<EventListProps> = (props) => {
                                             <EventItem
                                                 key={`${props.type}-${lastQuery!}-${idx}-event`}
                                                 listType={props.type}
-                                                isMobile={props.isMobile}
+                                                isMobile={isHamburger}
                                                 permaLink={permaLink}
                                                 {...event}
                                             />

@@ -1,13 +1,14 @@
 import * as React from 'react';
 
-import { css, SerializedStyles } from '@emotion/react';
+import { css, Interpolation, Theme } from '@emotion/react';
 
 import { lightBlue } from 'src/styles/colors';
-import { screenM, screenXSorPortrait } from 'src/styles/screens';
+import { GLOBAL_QUERIES, screenM, screenPortrait, screenXS } from 'src/screens';
 import { playlistWidth } from 'src/styles/variables';
+import { useMedia } from 'react-media';
+import { toMedia } from 'src/mediaQuery';
 
 interface ShuffleButtonProps {
-    isMobile?: boolean;
     className?: string;
     onClick?: () => void;
     on?: boolean;
@@ -40,49 +41,41 @@ const baseClass = (on?: boolean) => css`
         }
     }
 
-    ${screenM} {
+    ${toMedia(screenM)} {
         right: calc(${playlistWidth.tablet} / 3);
     }
 
-    ${screenXSorPortrait} {
+    ${toMedia([screenXS, screenPortrait])} {
         bottom: 10px;
         right: calc(100% / 3);
     }
 `;
 
-interface ShuffleButtonState {
-    extraClass: SerializedStyles | null | undefined;
-}
+const ShuffleButton: React.FC<ShuffleButtonProps> = ({ on, onClick }) => {
+    const [extraClass, setExtraClass] = React.useState<Interpolation<Theme>>(null);
+    const { screenTouch } = useMedia({ queries: GLOBAL_QUERIES });
 
-class ShuffleButton extends React.Component<ShuffleButtonProps, ShuffleButtonState> {
-    state: ShuffleButtonState = {
-        extraClass: null,
-    };
-
-    render(): JSX.Element {
-        const { on, onClick } = this.props;
-        return (
-            <div
-                css={[baseClass(on), this.state.extraClass]}
-                onClick={onClick}
-                onMouseDown={() => !this.props.isMobile && this.setState({ extraClass: null })}
-                onMouseOut={() => !this.props.isMobile && this.setState({ extraClass: null })}
-                onMouseOver={() => !this.props.isMobile && this.setState({ extraClass: upClass })}
-                onMouseUp={() => !this.props.isMobile && this.setState({ extraClass: upClass })}
+    return (
+        <div
+            css={[baseClass(on), extraClass]}
+            onClick={onClick}
+            onMouseDown={() => !screenTouch && setExtraClass(null)}
+            onMouseOut={() => !screenTouch && setExtraClass(null)}
+            onMouseOver={() => !screenTouch && setExtraClass(upClass)}
+            onMouseUp={() => !screenTouch && setExtraClass(upClass)}
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 120 120"
+                height="50"
+                width="50"
             >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 120 120"
-                    height="50"
-                    width="50"
-                >
-                    <path d="M15 75H37.5Q48.75 75 60 60Q71.25 45 82.5 45H105" fill="none" stroke-style="solid" strokeWidth="6" />
-                    <path id="outline" d="M15 45H37.5Q48.75 45 60 60Q71.25 75 82.5 75H105" fill="none" stroke-style="solid" strokeWidth="15" />
-                    <path d="M15 45H37.5Q48.75 45 60 60Q71.25 75 82.5 75H105" fill="none" stroke-style="solid" strokeWidth="6" />
-                </svg>
-            </div>
-        );
-    }
+                <path d="M15 75H37.5Q48.75 75 60 60Q71.25 45 82.5 45H105" fill="none" stroke-style="solid" strokeWidth="6" />
+                <path id="outline" d="M15 45H37.5Q48.75 45 60 60Q71.25 75 82.5 75H105" fill="none" stroke-style="solid" strokeWidth="15" />
+                <path d="M15 45H37.5Q48.75 45 60 60Q71.25 75 82.5 75H105" fill="none" stroke-style="solid" strokeWidth="6" />
+            </svg>
+        </div>
+    );
 }
 
 export default ShuffleButton;

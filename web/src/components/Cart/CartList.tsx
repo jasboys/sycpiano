@@ -19,30 +19,47 @@ import { noHighlight } from 'src/styles/mixins';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { ThemeProvider } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
+import { MediaContext } from 'src/components/App/App';
+import { isHamburger } from 'src/screens';
+import { toMedia } from 'src/mediaQuery';
 
 const ARROW_SIDE = 32;
 
-const CartListDiv = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
-    backgroundColor: 'white',
-    position: 'relative',
-    width: isMobile ? '100vw' : cartWidth,
-    margin: isMobile ? 'unset' : `${ARROW_SIDE / 2}px 1.5rem`,
-    fontFamily: lato2,
-    fontSize: '0.8rem',
-    borderRadius: '4px',
-}));
+const CartListDiv = styled.div(
+    {
+        backgroundColor: 'rgba(255 255 255 / 0.4)',
+        position: 'relative',
+        width: cartWidth,
+        margin: `${ARROW_SIDE / 2}px 1.5rem`,
+        fontFamily: lato2,
+        fontSize: '0.8rem',
+        borderRadius: '4px',
+        border: '4px solid transparent',
+        overflowY: 'auto',
+        height: 'fit-content',
+        maxHeight: 'calc(100% - 2rem)',
+        [toMedia(isHamburger)]: {
+            width: '100vw',
+            margin: 'unset',
+            height: '100%',
+            maxHeight: 'unset',
+            borderRadius: 'unset',
+            overflowY: 'unset',
+        }
+    },
+);
 
 const StyledItemList = styled.div({
-    overflowY: 'auto',
-    maxHeight: 'calc(100vh - 400px)',
+    backgroundColor: 'white',
+    padding: '1rem',
 });
 
 const StyledHeading = styled.div({
     textAlign: 'center',
-    position: 'relative',
+    position: 'sticky',
+    top: 0,
     backgroundColor: lightBlue,
     color: 'white',
-    borderRadius: '4px 4px 0 0',
 });
 
 const CloseSVG = styled.svg({
@@ -51,7 +68,7 @@ const CloseSVG = styled.svg({
     top: '50%',
     transform: 'translateY(-50%)',
     stroke: 'white',
-    ['&:hover']: {
+    '&:hover': {
         cursor: 'pointer',
     },
 });
@@ -106,6 +123,7 @@ const StyledForm = styled.form({
     flexDirection: 'column',
     alignItems: 'center',
     padding: '0 2rem',
+    backgroundColor: 'white',
 });
 
 const StyledTextField = styled(TextField)({
@@ -122,19 +140,20 @@ const Subtotal = styled.div({
     fontWeight: 'bold',
     padding: '1rem',
     display: 'flex',
-    ['div:nth-of-type(1)']: {
+    'div:nth-of-type(1)': {
         flex: '0 0 20%',
         textAlign: 'right',
     },
-    ['div:nth-of-type(2)']: {
+    'div:nth-of-type(2)': {
         paddingLeft: '0.5rem',
     },
 });
 
 const EmptyMessage = styled.div({
-    margin: '1rem auto',
-    width: 'max-content',
+    padding: '1rem',
+    width: '100%',
     fontSize: '1.2rem',
+    backgroundColor: 'white',
 });
 
 const StripeDiv = styled.div({
@@ -142,7 +161,6 @@ const StripeDiv = styled.div({
     padding: '0.5rem',
     backgroundColor: lightBlue,
     direction: 'rtl',
-    borderRadius: '0 0 4px 4px',
 });
 
 const StripeIcon = styled.img({
@@ -155,11 +173,7 @@ const StripeLink = styled.a({
     height: '100%',
 });
 
-interface CartListProps {
-    isMobile: boolean;
-}
-
-const Heading: React.FC<Record<string, unknown>> = () => {
+const Heading: React.FC<Record<never, unknown>> = () => {
     const dispatch = useAppDispatch();
 
     return (
@@ -243,9 +257,15 @@ const CheckoutForm: React.FC<{ cartLength: number }> = ({ cartLength }) => {
     );
 };
 
-export const CartList: React.FC<CartListProps> = ({
-    isMobile,
-}) => {
+const InnerBorderContainer = styled.div({
+    height: '100%',
+    width: '100%',
+    borderRadius: 4,
+    overflowY: 'auto',
+});
+
+export const CartList: React.FC<Record<never, unknown>> = () => {
+    const { isHamburger } = React.useContext(MediaContext);
     const shopItems = useAppSelector(({ shop }) => shop.items);
     const cart = useAppSelector(({ cart }) => cart.items);
     const checkoutError = useAppSelector(({ cart }) => cart.checkoutError);
@@ -259,52 +279,54 @@ export const CartList: React.FC<CartListProps> = ({
     }
 
     return (
-        <CartListDiv isMobile={isMobile}>
-            <Heading />
-            {cart.length !== 0 && shopItems && Object.keys(shopItems).length !== 0 ?
-                (
-                    <StyledItemList>
-                        {checkoutError.message !== '' &&
-                            (
-                                <ErrorMessage>
-                                    <Markdown>{checkoutError.message}</Markdown>
-                                </ErrorMessage>
-                            )
-                        }
-                        {cart.map((item: string) => {
-                            // item = cart item
-                            // reduce over all categories of shop items { arrangement: Product[]; cadenza: Product[]; original: Product[] },
-                            // accumulate starting with undefined
-                            // if accumulator is falsy, then return
-                            // within all items in that category find the one where id === item
-                            // null coalesce
-                            const currentItem = Object.values(shopItems)
-                                .reduce((acc: Product | undefined, prods) => (acc !== undefined) ? acc : prods?.find(el => el.id === item), undefined);
-                            subtotal += currentItem ? currentItem.price : 0;
-                            const error = checkoutError.message !== '' && !!checkoutError.data && checkoutError.data?.includes(item);
-                            return currentItem && (
-                                <CartItem key={item} item={currentItem} error={error} />
-                            );
-                        })}
-                    </StyledItemList>
+        <CartListDiv>
+            <InnerBorderContainer>
+                <Heading />
+                {cart.length !== 0 && shopItems && Object.keys(shopItems).length !== 0 ?
+                    (
+                        <StyledItemList>
+                            {checkoutError.message !== '' &&
+                                (
+                                    <ErrorMessage>
+                                        <Markdown>{checkoutError.message}</Markdown>
+                                    </ErrorMessage>
+                                )
+                            }
+                            {cart.map((item: string) => {
+                                // item = cart item
+                                // reduce over all categories of shop items { arrangement: Product[]; cadenza: Product[]; original: Product[] },
+                                // accumulate starting with undefined
+                                // if accumulator is falsy, then return
+                                // within all items in that category find the one where id === item
+                                // null coalesce
+                                const currentItem = Object.values(shopItems)
+                                    .reduce((acc: Product | undefined, prods) => (acc !== undefined) ? acc : prods?.find(el => el.id === item), undefined);
+                                subtotal += currentItem ? currentItem.price : 0;
+                                const error = checkoutError.message !== '' && !!checkoutError.data && checkoutError.data?.includes(item);
+                                return currentItem && (
+                                    <CartItem key={item} item={currentItem} error={error} />
+                                );
+                            })}
+                        </StyledItemList>
 
-                ) : (
-                    <EmptyMessage>Cart is Empty!</EmptyMessage>
-                )
-            }
-            <Subtotal>
-                <div>Subtotal:</div>
-                <div>{formatPrice(subtotal)}</div>
-            </Subtotal>
-            <CheckoutForm cartLength={cart.length} />
-            <StripeDiv>
-                <StripeLink href="https://stripe.com" target="_blank" rel="noopener, noreferrer">
-                    <StripeIcon src="/static/images/logos/stripe-white.svg" />
-                </StripeLink>
-            </StripeDiv>
+                    ) : (
+                        <EmptyMessage>Cart is Empty!</EmptyMessage>
+                    )
+                }
+                <Subtotal>
+                    <div>Subtotal:</div>
+                    <div>{formatPrice(subtotal)}</div>
+                </Subtotal>
+                <CheckoutForm cartLength={cart.length} />
+                <StripeDiv>
+                    <StripeLink href="https://stripe.com" target="_blank" rel="noopener, noreferrer">
+                        <StripeIcon src="/static/images/logos/stripe-white.svg" />
+                    </StripeLink>
+                </StripeDiv>
+            </InnerBorderContainer>
         </CartListDiv>
     );
 };
 
 export type CartListType = typeof CartList;
-export type RequiredProps = CartListProps;
+export type RequiredProps = Record<never, unknown>;

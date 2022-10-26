@@ -16,14 +16,15 @@ import { LinkShape } from 'src/components/App/NavBar/types';
 import { lightBlue, logoBlue, navFontColor } from 'src/styles/colors';
 import { lato2 } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
-import { screenMorPortrait } from 'src/styles/screens';
+import { minRes, webkitMinDPR } from 'src/screens';
 import { navBarHeight, navBarMarginTop } from 'src/styles/variables';
 import { useAppSelector, useAppDispatch } from 'src/hooks';
+import { toMedia } from 'src/mediaQuery';
 
 interface HighlightProps {
     readonly active: boolean;
     readonly expanded?: boolean;
-    readonly isMobile: boolean;
+    readonly isHamburger: boolean;
     readonly isHome: boolean;
     readonly link: LinkShape;
 }
@@ -49,25 +50,32 @@ const MobileHighlight = styled.div<{ active: boolean; isHome: boolean }>({
     backgroundColor: isHome ? 'white' : lightBlue,
 }));
 
-const HyperlinkText = styled.div({
-    height: navBarHeight.desktop - navBarMarginTop,
-    padding: '20px 10px 0 10px',
-    marginTop: navBarMarginTop,
-
-    [screenMorPortrait]: {
-        marginTop: 'unset',
-        height: 'unset',
-        lineHeight: '1.5rem',
-        padding: '1rem 0.8rem',
-        flex: '0 0 auto',
+const HyperlinkText = styled.div<{ isHamburger: boolean }>(
+    {
+        height: navBarHeight.lowDpx - navBarMarginTop,
+        padding: '20px 10px 0 10px',
+        marginTop: navBarMarginTop,
     },
-});
+    ({ isHamburger }) => isHamburger ?
+        ({
+            marginTop: 'unset',
+            height: 'unset',
+            lineHeight: '1.5rem',
+            padding: '1rem 0.8rem',
+            flex: '0 0 auto',
+        }) :
+        ({
+            [toMedia([minRes, webkitMinDPR])]: {
+                height: navBarHeight.hiDpx - navBarMarginTop,
+            }
+        }),
+);
 
-const Highlight: React.FC<HighlightProps> = ({ active, isHome, link, isMobile }) => (
+const Highlight: React.FC<HighlightProps> = ({ active, isHome, link, isHamburger }) => (
     <React.Fragment>
-        {!isMobile && <HighlightDiv active={active} isHome={isHome} />}
-        <HyperlinkText>{link.name}</HyperlinkText>
-        {isMobile && <MobileHighlight active={active} isHome={isHome} />}
+        {!isHamburger && <HighlightDiv active={active} isHome={isHome} />}
+        <HyperlinkText isHamburger={isHamburger}>{link.name}</HyperlinkText>
+        {isHamburger && <MobileHighlight active={active} isHome={isHome} />}
     </React.Fragment>
 );
 
@@ -77,7 +85,7 @@ interface NavBarLinkProps {
     readonly isHome: boolean;
     readonly link: LinkShape;
     readonly subNavLinks?: LinkShape[];
-    readonly isMobile: boolean;
+    readonly isHamburger: boolean;
     readonly currentSpecificPath: string;
 }
 
@@ -121,16 +129,17 @@ const mobileLinkStyle = css({
     justifyContent: 'flex-end',
 });
 
-const SubNavContainer = styled.div({
-    visibility: 'hidden',
-    [screenMorPortrait]: {
+const SubNavContainer = styled.div<{ isHamburger: boolean }>(
+    {
+        visibility: 'hidden',
+    }, ({ isHamburger }) => isHamburger && ({
         visibility: 'unset',
         height: 0,
         overflow: 'hidden',
         display: 'flex',
         marginRight: '1rem',
-    },
-});
+    })
+);
 
 const SubNavLine = styled.div<{ isHome: boolean }>({
     flex: '0 0 1px',
@@ -138,8 +147,8 @@ const SubNavLine = styled.div<{ isHome: boolean }>({
     backgroundColor: isHome ? 'white' : navFontColor,
 }));
 
-const enterAnimation = (el: HTMLElement, isAppearing: boolean, isMobile: boolean, path: string) => {
-    if (isMobile) {
+const enterAnimation = (el: HTMLElement, isAppearing: boolean, isHamburger: boolean, path: string) => {
+    if (isHamburger) {
         if (isAppearing) {
             el.style.height = 'auto';
         } else {
@@ -153,8 +162,8 @@ const enterAnimation = (el: HTMLElement, isAppearing: boolean, isMobile: boolean
     }
 };
 
-const exitAnimation = (el: HTMLElement, isMobile: boolean, path: string) => {
-    if (isMobile) {
+const exitAnimation = (el: HTMLElement, isHamburger: boolean, path: string) => {
+    if (isHamburger) {
         gsap.to(el, { height: 0, duration: 0.25 })
         gsap.to(`.${path}`, { autoAlpha: 0, x: 80, stagger: 0.05, duration: 0.25 });
     } else {
@@ -162,28 +171,26 @@ const exitAnimation = (el: HTMLElement, isMobile: boolean, path: string) => {
     }
 };
 
-const StyledLi = styled.li<{ isHome: boolean }>({
-    fontSize: '1.4rem',
-    position: 'relative',
-    fontFamily: lato2,
-    letterSpacing: 0,
-    display: 'inline-block',
-    padding: '0 1px 0 1px',
-    verticalAlign: 'top',
-    textAlign: 'center',
+const StyledLi = styled.li<{ isHamburger: boolean }>(
+    {
+        fontSize: '1.4rem',
+        position: 'relative',
+        fontFamily: lato2,
+        letterSpacing: 0,
+        display: 'inline-block',
+        padding: '0 1px 0 1px',
+        verticalAlign: 'top',
+        textAlign: 'center',
 
-    '&:last-child': {
-        marginRight: 0,
-    },
-}, ({ isHome: _isHome }) => ({
-    [screenMorPortrait]: {
+        '&:last-child': {
+            marginRight: 0,
+        },
+    }, ({ isHamburger }) => isHamburger && ({
         textAlign: 'right',
         visibility: 'hidden',
         opacity: 0,
-        // fontFamily: isHome ? lato2 : lato3,
-        // fontWeight: isHome ? 'bold' : 'unset',
-    },
-}));
+    })
+);
 
 interface AorLink {
     href?: string;
@@ -194,7 +201,7 @@ interface AorLink {
 const NavBarLink: React.FC<NavBarLinkProps> = ({
     active,
     isHome,
-    isMobile,
+    isHamburger,
     link,
     subNavLinks,
     currentSpecificPath,
@@ -208,8 +215,8 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
         linkStyle,
         active && !isHome && linkActiveStyle,
         isHome && linkHomeStyle,
-        active && isHome && !isMobile && linkHomeActiveStyle,
-        isMobile && mobileLinkStyle,
+        active && isHome && !isHamburger && linkHomeActiveStyle,
+        isHamburger && mobileLinkStyle,
     );
 
     // add attr's conditionally
@@ -217,13 +224,13 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
         attr.href = link.path;
     } else if (subNavLinks) {
         attr.onClick = () => {
-            dispatch(showSubNav({ sub: link.name, isMobile }));
+            dispatch(showSubNav({ sub: link.name, isHamburger }));
         };
     } else {
         attr.to = link.path;
         attr.onClick = () => {
-            (!isMobile || !subNavLinks) && dispatch(showSubNav());
-            isMobile && dispatch(toggleExpanded(false));
+            (!isHamburger || !subNavLinks) && dispatch(showSubNav());
+            isHamburger && dispatch(toggleExpanded(false));
         };
     }
 
@@ -232,12 +239,12 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
             active={active}
             isHome={isHome}
             link={link}
-            isMobile={isMobile}
+            isHamburger={isHamburger}
             expanded={showSubs.includes(link.name)}
         />;
 
     return (
-        <StyledLi className="navlink-entry" isHome={isHome}>
+        <StyledLi className="navlink-entry" isHamburger={isHamburger}>
             {(subNavLinks || link.name === 'blog') ? (
                 <a css={style} {...attr}>
                     {HighlightComponent}
@@ -250,24 +257,24 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
             {subNavLinks && (
                 <Transition<undefined>
                     in={showSubs.includes(link.name)}
-                    onEnter={(el, isAppearing) => enterAnimation(el, isAppearing, isMobile, link.name)}
-                    onExit={(el) => exitAnimation(el, isMobile, link.name)}
+                    onEnter={(el, isAppearing) => enterAnimation(el, isAppearing, isHamburger, link.name)}
+                    onExit={(el) => exitAnimation(el, isHamburger, link.name)}
                     timeout={250}
                     appear={true}
                 >
-                    <SubNavContainer>
+                    <SubNavContainer isHamburger={isHamburger}>
                         <SubNav
                             basePath={link}
                             links={subNavLinks}
                             currentSpecificPath={currentSpecificPath}
                             onClick={() => {
-                                !isMobile && dispatch(showSubNav());
-                                isMobile && dispatch(toggleExpanded(false));
+                                !isHamburger && dispatch(showSubNav());
+                                isHamburger && dispatch(toggleExpanded(false));
                             }}
                             isHome={isHome}
-                            isMobile={isMobile}
+                            isHamburger={isHamburger}
                         />
-                        {isMobile && <SubNavLine isHome={isHome} />}
+                        {isHamburger && <SubNavLine isHome={isHome} />}
                     </SubNavContainer>
                 </Transition>
             )}

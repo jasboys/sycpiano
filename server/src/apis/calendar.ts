@@ -60,7 +60,7 @@ function getEventsAfter(after: string | Date, limit?: number) {
         include: calendarIncludeBase,
         where: {
             dateTime: {
-                [Op.gt]: after,
+                [Op.gte]: after,
             },
         },
         limit,
@@ -109,104 +109,22 @@ interface CalendarQuery {
     limit?: string;
 }
 
+// Hey, think about implementing before:[date] or after:[date], or even [month year] search.
+
 calendarRouter.get('/search', async (req: express.Request<any, any, any, CalendarQuery>, res) => {
     const str = req.query.q;
     if (str === undefined || str === '') {
         res.json([]);
         return;
     }
-    // let idArray: string[];
-    // if (str) {
-    //     const tokens = str.replace(', ', '|').replace(' ', '&');
 
-    //     const ids: calendar[] = await db.sequelize.query(`
-    //         SELECT cs.* FROM calendar_search('beethoven') cs
-    //         LEFT OUTER JOIN LATERAL (
-    //             "calendar_piece" cp
-    //             INNER JOIN "piece" AS p
-    //                 ON p.id = cp.piece_id
-    //         ) ON cp.calendar_id = cs.id
-    //         LEFT OUTER JOIN LATERAL (
-    //             "calendar_collaborator" cc
-    //             INNER JOIN "collaborator" AS c
-    //                 ON c.id = cc.collaborator_id
-    //         ) ON cc.calendar_id = cs.id
-    //     `, {
-    //             replacements: { query: tokens },
-    //             type: Sequelize.QueryTypes.SELECT,
-    //         });
-
-    //     console.log(ids);
-    //     idArray = ids.map(({ id }) => id);
-    // }
-
-    // const before = req.query.before ? moment(req.query.before) : undefined;
-    // const after = req.query.after ? moment(req.query.after) : undefined;
-    // const date = req.query.date ? moment(req.query.date) : undefined;
-
-    // let where: {
-    //     id?: string[];
-    //     dateTime?: any;
-    // } = (str) ? {
-    //     id: idArray,
-    // } : {};
-    // if (date) {
-    //     where = {
-    //         dateTime: {
-    //             [eq]: date,
-    //         },
-    //     };
-    // } else if (before && after) {
-    //     const arr = [
-    //         { [lt]: before },
-    //         { [gt]: after },
-    //     ];
-    //     let op;
-    //     if (before.isBefore(after)) {
-    //         op = or;
-    //     } else {
-    //         op = and;
-    //     }
-    //     where = {
-    //         dateTime: {
-    //             [op]: arr,
-    //         },
-    //     };
-    // } else if (before) {
-    //     where = {
-    //         dateTime: {
-    //             [lt]: before,
-    //         },
-    //     };
-    // } else if (after) {
-    //     where = {
-    //         dateTime: {
-    //             [gt]: after,
-    //         },
-    //     };
-    // }
-
-    // if (str) {
-    //     const tokens = str.replace(', ', '|').replace(' ', '&');
-
-    //     const ids: calendar[] = await db.sequelize.query(`
-    //         SELECT * FROM calendar_search(:query)
-    //         WHERE
-    //     `, {
-    //             replacements: { query: tokens },
-    //             type: Sequelize.QueryTypes.SELECT,
-    //         });
-
-    //     console.log(ids);
-    //     idArray = ids.map(({ id }) => id);
-    // }
     console.log(str);
     const tokens = str.replaceAll(', ', '|').replaceAll(/ +/g, '&');
     const splitTokens = tokens.split('|').map(t => t.split('&'));
     console.log(tokens);
     console.log(splitTokens);
 
-    const calendarResults: calendar[] = await db.models.calendar.findAll({
+    const calendarMatch: calendar[] = await db.models.calendar.findAll({
         where: {
             [Op.or]: [
                 sequelize.where(
@@ -264,12 +182,24 @@ calendarRouter.get('/search', async (req: express.Request<any, any, any, Calenda
             exclude: ['created_at', 'updated_at', '_search', 'createdAt', 'updatedAt'],
         },
         include: calendarIncludeBase,
+    });
+
+    const calendarIds = calendarMatch.map((c) => c.id);
+
+    const calendarResults = await db.models.calendar.findAll({
+        where: {
+            id: calendarIds,
+        },
+        attributes: {
+            exclude: ['created_at', 'updated_at', '_search', 'createdAt', 'updatedAt'],
+        },
+        include: calendarIncludeBase,
         order: [
             ['dateTime', 'DESC'],
             [models.collaborator, models.calendarCollaborator, 'order', 'ASC'],
             [models.piece, models.calendarPiece, 'order', 'ASC'],
         ],
-    });
+    })
 
     res.json(calendarResults);
 });

@@ -15,16 +15,14 @@ import VideoPlaylist from 'src/components/Media/Videos/VideoPlaylist';
 import { fetchVideoPlaylist, playerIsReady, playVideo, resetPlayer } from 'src/components/Media/Videos/reducers';
 
 import { pushed } from 'src/styles/mixins';
-import { screenXSorPortrait } from 'src/styles/screens';
+import { minRes, webkitMinDPR } from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
 import { titleStringBase } from 'src/utils';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { MediaContext } from 'src/components/App/App';
+import { toMedia } from 'src/mediaQuery';
 
-interface VideosOwnProps {
-    readonly isMobile: boolean;
-}
-
-type VideosProps = VideosOwnProps;
+type VideosProps = Record<never, unknown>;
 
 const StyledVideos = styled.div`
     ${pushed}
@@ -32,9 +30,9 @@ const StyledVideos = styled.div`
     background-color: black;
     position: relative;
 
-    ${screenXSorPortrait} {
+    ${toMedia([minRes, webkitMinDPR])} {
         margin-top: 0;
-        padding-top: ${navBarHeight.mobile}px;
+        padding-top: ${navBarHeight.hiDpx}px;
         height: 100%;
     }
 
@@ -42,9 +40,9 @@ const StyledVideos = styled.div`
         width: 100%;
         height: 100%;
 
-        ${screenXSorPortrait} {
+        ${toMedia([minRes, webkitMinDPR])} {
             position: fixed;
-            top: ${navBarHeight.mobile}px;
+            top: ${navBarHeight.hiDpx}px;
             height: 56.25vw;
             z-index: 5;
             box-shadow: 0 0 7px 2px rgba(0 0 0 / 0.5);
@@ -65,7 +63,8 @@ const LoadingOverlayDiv = styled.div`
     justify-content: center;
 `;
 
-const Videos: React.FC<VideosProps> = (props) => {
+const Videos: React.FC<VideosProps> = () => {
+    const { isHamburger } = React.useContext(MediaContext);
     const match = useMatch('media/videos/:videoId');
     const domElement = React.useRef<HTMLDivElement>(null);
     // const initialized = React.useRef<boolean>(false);
@@ -82,7 +81,7 @@ const Videos: React.FC<VideosProps> = (props) => {
                 ]);
                 dispatch(playerIsReady());
                 if (match?.params.videoId !== undefined) {
-                    dispatch(playVideo(props.isMobile, match.params.videoId));
+                    dispatch(playVideo(isHamburger, match.params.videoId));
                 }
             }
         }
@@ -112,7 +111,7 @@ const Videos: React.FC<VideosProps> = (props) => {
             <StyledVideos
                 ref={domElement}
             >
-                <PreviewOverlay isMobile={props.isMobile} />
+                <PreviewOverlay isMobile={isHamburger} />
                 <Transition<undefined>
                     in={!isPlayerReady}
                     onExit={(el) => gsap.to(el, { duration: 0.3, autoAlpha: 0 })}
@@ -124,7 +123,7 @@ const Videos: React.FC<VideosProps> = (props) => {
                         <LoadingInstance width={120} height={120} />
                     </LoadingOverlayDiv>
                 </Transition>
-                <VideoPlaylist isMobile={props.isMobile} />
+                <VideoPlaylist />
             </StyledVideos>
         </>
     );

@@ -406,6 +406,11 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
         this.RADIUS_SCALE = Math.min(this.width, this.height) / 12;
         this.RADIUS_BASE = Math.min(centerX, centerY) - this.RADIUS_SCALE * 3 / 4;
         this.WAVEFORM_HALF_HEIGHT = Math.min(50, this.RADIUS_BASE / 4);
+
+        if (!this.isRendering) {
+            gsap.ticker.add(this.onAnalyze);
+            this.isRendering = true;
+        }
     }
 
     onVisibilityChange = (): void => {

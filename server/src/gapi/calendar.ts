@@ -85,9 +85,9 @@ export const createCalendarEvent = async (sequelize: Sequelize, {
             { date: format(startDatetime, 'yyyy-MM-dd') } :
             { dateTime: startDatetime.toISOString(), timeZone }),
         end: (endDate ?
-            { date: format(endDate, 'yyyy-MM-dd') } :
+            { date: endDate } :
             (allDay ?
-                { date: format(add(startDatetime, { days: 1 }), 'YYYY-MM-DD') } :
+                { date: format(add(startDatetime, { days: 1 }), 'yyyy-MM-dd') } :
                 { dateTime: add(startDatetime, { hours: 2 }).toISOString(), timeZone }
             )
         ),
@@ -119,9 +119,9 @@ export const updateCalendar = async (sequelize: Sequelize, {
             { date: format(startDatetime, 'yyyy-MM-dd') } :
             { dateTime: startDatetime.toISOString(), timeZone }),
         end: (endDate ?
-            { date: format(endDate, 'yyyy-MM-dd') } :
+            { date: endDate } :
             (allDay ?
-                { date: format(add(startDatetime, { days: 1 }), 'YYYY-MM-DD') } :
+                { date: format(add(startDatetime, { days: 1 }), 'yyyy-MM-dd') } :
                 { dateTime: add(startDatetime, { hours: 2 }).toISOString(), timeZone }
             )
         ),

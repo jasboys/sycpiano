@@ -3,8 +3,9 @@ import * as React from 'react';
 import styled from '@emotion/styled';
 
 import { staticImage } from 'src/imageUrls';
-import { screenM, screenXSorPortrait } from 'src/styles/screens';
+import { screenM, screenXS, screenPortrait } from 'src/screens';
 import { playlistWidth } from 'src/styles/variables';
+import { toMedia } from 'src/mediaQuery';
 
 const StyledDiv = styled.div`
     position: fixed;
@@ -21,11 +22,11 @@ const StyledDiv = styled.div`
         transform: translateX(calc(100% / 3)) translateY(-1px) scale(1.05);
     }
 
-    ${screenM} {
+    ${toMedia(screenM)} {
         right: calc(${playlistWidth.tablet} * 2 / 3);
     }
 
-    ${screenXSorPortrait} {
+    ${toMedia([screenXS, screenPortrait])} {
         bottom: 10px;
         right: calc(100% * 2 / 3);
     }

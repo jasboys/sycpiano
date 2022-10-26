@@ -11,9 +11,10 @@ import { formatTime } from 'src/components/Media/Music/utils';
 
 import { lato1 } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
-import { screenM, screenXSorPortrait } from 'src/styles/screens';
+import { minRes, screenM, screenPortrait, webkitMinDPR } from 'src/screens';
 import { navBarHeight, playlistContainerWidth } from 'src/styles/variables';
 import { metaDescriptions, titleStringBase } from 'src/utils';
+import { toMedia } from 'src/mediaQuery';
 
 interface AudioInfoProps {
     currentTrack?: MusicFileItem;
@@ -41,14 +42,14 @@ const AudioInfoContainer = styled.div`
     color: white;
     padding-bottom: 3rem;
 
-    ${screenM} {
+    ${toMedia(screenM)} {
         width: calc(100% - ${playlistContainerWidth.tablet});
     }
 
-    ${screenXSorPortrait} {
+    ${toMedia(screenPortrait)} {
         width: 100%;
         height: 360px;
-        top: ${navBarHeight.mobile}px;
+        top: ${navBarHeight.hiDpx}px;
         padding-bottom: 1rem;
     }
 `;
@@ -60,7 +61,7 @@ const ComposerTitle = styled.div`
     width: 100%;
     overflow-x: hidden;
 
-    ${screenXSorPortrait} {
+    ${toMedia([minRes, webkitMinDPR])} {
         white-space: nowrap;
         font-size: 1.4rem;
         line-height: 2rem;
@@ -92,7 +93,7 @@ const ContributingOrDuration = styled.div`
     font-size: 2rem;
     line-height: 3.2rem;
 
-    ${screenXSorPortrait} {
+    ${toMedia([minRes, webkitMinDPR])} {
         font-size: 1.1rem;
         line-height: 1.5rem;
     }
@@ -117,9 +118,10 @@ class AudioInfo extends React.PureComponent<AudioInfoProps> {
                 this.secondSpan.current.style.visibility = 'hidden';
             } else {
                 const dur = this.marquee.current.offsetWidth / 100;
-                this.tween = gsap.fromTo(this.marquee.current, dur,
+                this.tween = gsap.fromTo(this.marquee.current,
                     { x: '0%' },
                     {
+                        duration: dur,
                         x: '-50%',
                         ease: 'linear',
                         clearProps: 'transform',

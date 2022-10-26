@@ -9,18 +9,17 @@ import isEqual from 'react-fast-compare';
 import { gsap } from 'gsap';
 
 import { navBarHeight } from 'src/styles/variables';
-import { lightBlue } from 'src/styles/colors';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { MediaContext } from 'src/components/App/App';
 
 const Arrow = styled.div({
     position: 'absolute',
     top: -15,
     width: 0,
     height: 0,
-    borderLeft: '24px solid transparent',
-    borderRight: '24px solid transparent',
-    borderBottom: `24px solid ${lightBlue}`,
-    zIndex: 10,
+    borderLeft: '16px solid transparent',
+    borderRight: '16px solid transparent',
+    borderBottom: `15.5px solid rgba(255 255 255 / 0.4)`,
 });
 
 const LoadingDiv = styled.div({
@@ -34,26 +33,34 @@ const LoadingDiv = styled.div({
     fill: 'white',
 });
 
-const CartFilterGroup = styled.div<{ isCheckingOut: boolean }>({
-    position: 'relative',
-}, ({ isCheckingOut }) =>
-    isCheckingOut && ({
+const CartFilterGroup = styled.div<{ isCheckingOut: boolean; }>(
+    {
+        position: 'relative',
+        height: '100%',
+    },
+    ({ isCheckingOut }) => isCheckingOut && ({
         filter: 'brightness(0.75)',
+    }),
+);
+const CartContainer = styled.div<{ hiDpx: boolean; top: number }>(
+    {
+        zIndex: 5001,
+        filter: `drop-shadow(0px 4px 8px rgba(0 0 0 / 0.5))`,
+        overflow: 'hidden',
+        visibility: 'hidden',
+        opacity: 0,
+        maxHeight: '100%',
+    },
+    ({ top }) => ({
+        height: `calc(100% - ${top}px)`
+    }),
+    ({ hiDpx }) => hiDpx && ({
+        position: 'absolute',
+        paddingTop: navBarHeight.hiDpx,
+        zIndex: 4999,
+        height: '100%',
     })
 );
-const CartContainer = styled.div<{ isMobile: boolean }>({
-    zIndex: 5001,
-    filter: `drop-shadow(0px 4px 8px rgba(0 0 0 / 0.5))`,
-    overflow: 'hidden',
-    height: 'auto',
-    visibility: 'hidden',
-    opacity: 0,
-}, ({ isMobile }) => isMobile && ({
-    position: 'absolute',
-    top: navBarHeight.mobile,
-    zIndex: 4999,
-    maxHeight: `calc(100% - ${navBarHeight.mobile}px)`,
-}));
 
 interface CartProps {
     position: {
@@ -68,11 +75,11 @@ interface CartProps {
     strategy: 'absolute' | 'fixed';
     floatingRef: (node: HTMLElement | null) => void;
     arrowRef: React.MutableRefObject<HTMLDivElement | null>;
-    isMobile: boolean;
     update: () => void;
 }
 
-const Cart: React.FC<CartProps> = ({ position, strategy, isMobile, floatingRef, arrowRef, arrow, update }) => {
+const Cart: React.FC<CartProps> = ({ position, strategy, floatingRef, arrowRef, arrow, update }) => {
+    const { isHamburger, hiDpx } = React.useContext(MediaContext);
     const dispatch = useAppDispatch();
     const visible = useAppSelector(({ cart }) => cart.visible);
     const isCheckingOut = useAppSelector(({ cart }) => cart.isCheckingOut);
@@ -113,13 +120,14 @@ const Cart: React.FC<CartProps> = ({ position, strategy, isMobile, floatingRef, 
             }}
         >
             <CartContainer
-                style={{
+                css={!isHamburger && {
                     left: position.x !== null ? position.x : '',
                     top: position.y !== null ? position.y : '',
                     position: strategy,
                 }}
-                isMobile={isMobile}
-                ref={isMobile ? () => { } : floatingRef}    /* eslint-disable-line @typescript-eslint/no-empty-function */
+                top={(!isHamburger && position.y !== null) ? position.y : 0}
+                hiDpx={hiDpx}
+                ref={isHamburger ? () => { } : floatingRef}    /* eslint-disable-line @typescript-eslint/no-empty-function */
             >
                 {isCheckingOut &&
                     <LoadingDiv>
@@ -127,16 +135,16 @@ const Cart: React.FC<CartProps> = ({ position, strategy, isMobile, floatingRef, 
                     </LoadingDiv>
                 }
                 <CartFilterGroup isCheckingOut={isCheckingOut}>
-                    {!isMobile && (
+                    {!isHamburger && (
                         <Arrow
-                            ref={isMobile ? () => { } : arrowCallback}     /* eslint-disable-line @typescript-eslint/no-empty-function */
+                            ref={isHamburger ? () => { } : arrowCallback}     /* eslint-disable-line @typescript-eslint/no-empty-function */
                             style={{
                                 left: arrow?.x !== undefined ? arrow?.x : '',
                                 top: arrow?.y !== undefined ? arrow?.y : '',
                             }}
                         />
                     )}
-                    <CartList isMobile={isMobile} />
+                    <CartList />
                 </CartFilterGroup>
             </CartContainer>
         </Transition>
@@ -145,7 +153,9 @@ const Cart: React.FC<CartProps> = ({ position, strategy, isMobile, floatingRef, 
 
 const MemoizedCart = React.memo(
     Cart,
-    (prev, next) => isEqual(prev, next)
+    (prev, next) => {
+        return isEqual(prev, next);
+    }
 );
 
 export default MemoizedCart;

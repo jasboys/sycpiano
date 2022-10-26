@@ -6,14 +6,15 @@ import AcclaimsList from 'src/components/About/Press/AcclaimsList';
 import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
 
 import { pushed } from 'src/styles/mixins';
-import { screenXSorPortrait } from 'src/styles/screens';
+import { screenXS, screenPortrait } from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
 import { useAppDispatch } from 'src/hooks';
 import { fetchAcclaims } from 'src/components/About/Press/reducers';
+import { MediaContext } from 'src/components/App/App';
+import { toMedia } from 'src/mediaQuery';
 
 interface PressProps {
     className?: string;
-    isMobile?: boolean;
 }
 
 const PressContainer = styled.div(
@@ -22,14 +23,15 @@ const PressContainer = styled.div(
         width: '100%',
         overflowY: 'scroll',
         WebkitOverflowScrolling: 'touch',
-        [screenXSorPortrait]: {
+        [toMedia([screenXS, screenPortrait])]: {
             marginTop: 0,
             height: '100%',
         },
     },
 );
 
-const Press: React.FC<PressProps> = (props) => {
+const Press: React.FC<PressProps> = () => {
+    const { isHamburger, hiDpx } = React.useContext(MediaContext);
     const dispatch = useAppDispatch();
 
     React.useEffect(() => {
@@ -41,14 +43,12 @@ const Press: React.FC<PressProps> = (props) => {
     };
 
     return (
-        <PressContainer onScroll={props.isMobile ? scrollFn(navBarHeight.mobile, onScrollDispatch) : undefined}>
-            <AcclaimsList isMobile={props.isMobile} />
+        <PressContainer onScroll={isHamburger ? scrollFn(navBarHeight.get(hiDpx), onScrollDispatch) : undefined}>
+            <AcclaimsList />
         </PressContainer>
     );
 };
 
-const MemoizedPress = React.memo(Press, (prev, next) => prev.isMobile === next.isMobile)
-
-export type PressType = typeof MemoizedPress;
+export type PressType = typeof Press;
 export type RequiredProps = PressProps;
-export default MemoizedPress;
+export default Press;

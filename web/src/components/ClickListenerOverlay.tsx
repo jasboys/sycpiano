@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 
 interface ClickListenerProps {
     onClick: () => void;
+    className?: string;
 }
 
 const ClickDiv = styled.div({
@@ -12,8 +13,8 @@ const ClickDiv = styled.div({
     top: 0,
 });
 
-export const ClickListenerOverlay: React.FC<ClickListenerProps> = ({ onClick }) => {
+export const ClickListenerOverlay: React.FC<ClickListenerProps> = ({ onClick, className }) => {
     return (
-        <ClickDiv onClick={onClick} />
+        <ClickDiv onClick={onClick} className={className} />
     );
 };

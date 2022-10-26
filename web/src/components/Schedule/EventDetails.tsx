@@ -1,12 +1,10 @@
 import startCase from 'lodash-es/startCase';
 import mix from 'polished/lib/color/mix';
 import * as React from 'react';
-import CopyToClipboard from 'react-copy-to-clipboard';
 
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
-import { LinkIconInstance } from 'src/components/Schedule/LinkIconSVG';
 import { LocationIconInstance } from 'src/components/Schedule/LocationIconSVG';
 import { Collaborator, EventType, Piece } from 'src/components/Schedule/types';
 import { getGoogleMapsSearchUrl } from 'src/components/Schedule/utils';
@@ -14,26 +12,42 @@ import { getGoogleMapsSearchUrl } from 'src/components/Schedule/utils';
 import { lightBlue, logoBlue, magenta, textGrey } from 'src/styles/colors';
 import { lato2 } from 'src/styles/fonts';
 
-import { gsap } from 'gsap';
-import { screenXSorPortrait } from 'src/styles/screens';
+import { screenPortrait, screenXS } from 'src/screens';
+import { toMedia } from 'src/mediaQuery';
 import formatInTimeZone from 'date-fns-tz/formatInTimeZone';
 import parseISO from 'date-fns/parseISO';
 import format from 'date-fns/format';
-import { ClockIconInstance } from './ClockIconSVG';
+import { ClockIconInstance } from 'src/components/Schedule/ClockIconSVG';
 import { utcToZonedTime } from 'date-fns-tz';
 
 const locationIconDimension = '30px';
 
+const Connector = styled.div({
+    height: '1.2rem',
+    width: '100%',
+    background:
+        `linear-gradient(
+        to right,
+        white 0%,
+        white calc(50% - 0.82px),
+        ${lightBlue} calc(50% - 0.82px),
+        ${lightBlue} calc(50% + 0.82px),
+        white calc(50% + 0.82px),
+        white 100%
+    );`
+})
+
 interface EventDateTimeProps {
     dateTime: string;
+    endDate?: string;
     timezone: string;
     className?: string;
     isMobile: boolean;
-    rounded: 'top' | 'bottom' | 'both';
 }
 
 let EventDate: React.FC<EventDateTimeProps> = (props) => {
     const date = parseISO(props.dateTime);
+    const end = props.endDate ? parseISO(props.endDate) : undefined;
     return (
         <div className={props.className}>
             <div css={css({ fontSize: '2.0rem' })}>
@@ -42,16 +56,20 @@ let EventDate: React.FC<EventDateTimeProps> = (props) => {
             <div css={css({ fontSize: '1.4em' })}>
                 {format(date, 'EEE')}
             </div>
+            {!!end && (
+                <>
+                    <Connector />
+                    <div css={css({ fontSize: '2.0rem' })}>
+                        {`${format(end, 'M/d')}`}
+                    </div>
+                    <div css={css({ fontSize: '1.4em' })}>
+                        {format(end, 'EEE')}
+                    </div>
+                </>
+            )}
+
         </div>
     );
-};
-
-const radii: {
-    [key: string]: string;
-} = {
-    top: '8px 0 0',
-    bottom: '0 0 8px 0',
-    both: '8px 0',
 };
 
 EventDate = styled(EventDate)<EventDateTimeProps>(
@@ -72,21 +90,11 @@ EventDate = styled(EventDate)<EventDateTimeProps>(
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-    },
-    (props) => ({
-        borderRadius: radii[props.rounded],
-    })
+        borderRadius: '0 0 8px 0',
+    }
 );
 
 interface EventNameProps { name: string; eventType: EventType; className?: string; isMobile?: boolean; permaLink: string }
-
-const linkIconStyle = css`
-    margin: 0 0.5em;
-    width: 1em;
-    height: 1em;
-    display: inline-block;
-    vertical-align: top;
-`;
 
 const eventNameStyle = css`
     font-size: 1.75rem;
@@ -97,69 +105,39 @@ const eventNameStyle = css`
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    margin-bottom: 0.3rem;
 
     &:hover {
         cursor: pointer;
-        fill: #999;
+        filter: drop-shadow();
     }
 
-    ${screenXSorPortrait} {
+    ${toMedia([screenXS, screenPortrait])} {
         fill: ${logoBlue};
     }
 `;
 
-const EventName: React.FC<EventNameProps> = (props) => {
-    const copiedSpan = React.useRef<HTMLSpanElement>(null);
-
-    const onCopy = () => {
-        if (copiedSpan.current) {
-            gsap.fromTo(copiedSpan.current, { autoAlpha: 1, duration: 0.2 }, { autoAlpha: 0, delay: 0.5 });
-        }
-    };
-
+const EventName: React.FC<EventNameProps> = ({ name, eventType }) => {
     return (
-        <CopyToClipboard onCopy={onCopy} text={`${window.location.host}${props.permaLink}`}>
-            <div css={eventNameStyle}>
-                <span css={{ overflowWrap: 'break-word' }}>
-                    {`${props.name}${props.eventType === 'masterclass' ? ': Masterclass' : ''}`}
-                    {/*
-                    // TODO CHANGE TO SHARE ICON MAYBE TOP RIGHT CORNER OF IMAGElpppopopoooooo
-
-jfjfkjdkdslk \\yy 6t 65j fygh =[ 6 6lk c66 kl5kl56to lk56okl5 69i659i06]
-
-
-
-                    <LinkIconInstance css={linkIconStyle} />
-
-                    */}
-                </span>
-                {
-                // TODO Replace with a popover/hover thing
-                /* <span
-                    ref={copiedSpan}
-                    css={css`
-                            visibility: hidden;
-                            font-size: 0.5em;
-                        `}
-                >
-                    copied
-                </span> */}
-            </div>
-        </CopyToClipboard>
+        <div css={eventNameStyle}>
+            <span css={{ overflowWrap: 'break-word' }}>
+                {`${name}${eventType === 'masterclass' ? ': Masterclass' : ''}`}
+            </span>
+        </div>
     );
 };
 
 let EventTime: React.FC<Omit<EventDateTimeProps, 'rounded'>> = ({ className, dateTime, timezone }) => (
     <div className={className}>
         <div css={{ margin: '0 3px', display: 'flex' }}>
-            <ClockIconInstance width={24} height={24} stroke="black" strokeWidth={20} date={utcToZonedTime(dateTime, timezone)}/>
+            <ClockIconInstance width={24} height={24} stroke="black" strokeWidth={20} date={utcToZonedTime(dateTime, timezone)} />
         </div>
-        {formatInTimeZone(parseISO(dateTime), timezone, 'h:mm a z')}
+        <div css={{ marginLeft: '10px' }}>{formatInTimeZone(parseISO(dateTime), timezone, 'h:mm a z')}</div>
     </div>
 );
 
 EventTime = styled(EventTime)({
-    margin: '0.5rem 0 0.5rem -6px',
+    margin: '0.3rem 0 0.3rem -6px',
     fontSize: '1rem',
     display: 'flex',
     flexDirection: 'row',
@@ -190,7 +168,7 @@ let EventLocation: React.FC<EventLocationProps> = ({ location, className, isMobi
             <LocationIconInstance css={locationIconStyle} />
 
             <strong
-                css={{ marginLeft: isMobile ? 0 : 10}}
+                css={{ marginLeft: isMobile ? 0 : 10 }}
             >
                 {getVenueName(location)}
             </strong>
@@ -199,14 +177,14 @@ let EventLocation: React.FC<EventLocationProps> = ({ location, className, isMobi
 };
 
 EventLocation = styled(EventLocation)`
-    font-size: 1.2em;
+    font-size: 1rem;
     display: flex;
     flex-direction: row;
     align-items: center;
     width: fit-content;
     text-decoration: underline solid transparent;
     transition: text-decoration-color 0.2s;
-    margin-left: -6px;
+    margin: 0.3rem 0 0.3rem -6px;
 
     &:hover {
         color: ${logoBlue};
@@ -225,7 +203,7 @@ let EventCollaborators: React.FC<EventCollaboratorsProps> = ({ className, collab
             collaborator.name && collaborator.instrument && (
                 <div key={i}>
                     <span><strong>{collaborator.name}</strong></span>{' - '}
-                    <span>{startCase(collaborator.instrument)}</span>
+                    <span css={{ fontSize: '0.8rem' }}>{startCase(collaborator.instrument)}</span>
                 </div>
             )
         ))}
@@ -236,7 +214,7 @@ EventCollaborators = styled(EventCollaborators)`
     list-style: none;
     padding: 0;
     padding-left: 0.5rem;
-    font-size: 1.2em;
+    font-size: 1rem;
     font-family: ${lato2};
     margin: 0.5rem 0;
 `;
@@ -261,7 +239,7 @@ EventProgram = styled(EventProgram)`
     padding: 0;
     padding-left: 1.5rem;
     text-indent: -1rem;
-    font-size: 1.2em;
+    font-size: 1rem;
     font-family: ${lato2};
     margin: 0.5rem 0;
 `;
@@ -288,7 +266,7 @@ EventWebsiteButton = styled(EventWebsiteButton)`
     background-color: ${magenta};
     color: ${textGrey};
     transition: all 0.25s;
-    margin: 0.5rem 0;
+    margin: 0.6rem 0;
 
     &:hover {
         background-color: ${mix(0.75, magenta, '#FFF')};

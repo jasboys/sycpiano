@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useMedia } from 'react-media';
 
 import styled from '@emotion/styled';
 
@@ -8,10 +7,10 @@ import HamburgerNav from 'src/components/App/NavBar/HamburgerNav';
 import NavBarLinks from 'src/components/App/NavBar/NavBarLinks';
 import NavBarLogo from 'src/components/App/NavBar/NavBarLogo';
 
-import { screenBreakPoints } from 'src/styles/screens';
 import { navBarHeight } from 'src/styles/variables';
 import { setSpecificRouteNameAction, toggleExpanded } from 'src/components/App/NavBar/reducers';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { MediaContext } from 'src/components/App/App';
 
 interface NavBarProps {
     readonly currentBasePath: string;
@@ -20,11 +19,16 @@ interface NavBarProps {
     readonly specificRouteName: string;
 }
 
-const StyledNavBar = styled.div<{ isMobile: boolean; isHome: boolean; menuExpanded: boolean; cartExpanded: boolean; }>(
+const StyledNavBar = styled.div<{
+    hiDpx: boolean;
+    isHamburger: boolean;
+    isHome: boolean;
+    menuExpanded: boolean;
+    cartExpanded: boolean;
+}>(
     {
         visibility: 'hidden',
         padding: '0 30px 0 0',
-        height: navBarHeight.desktop,
         position: 'fixed',
         display: 'flex',
         justifyContent: 'space-between',
@@ -37,28 +41,41 @@ const StyledNavBar = styled.div<{ isMobile: boolean; isHome: boolean; menuExpand
         boxShadow: '0 0 6px 1px rgba(0, 0, 0, 0.3)',
         backdropFilter: 'blur(1px)'
     },
-    ({ isMobile }) => isMobile && ({
-        height: navBarHeight.mobile,
+    ({ hiDpx }) => ({
+        height: navBarHeight.get(hiDpx),
+    }),
+    ({ hiDpx }) => hiDpx && ({
         paddingRight: 15,
     }),
-    ({ isHome, menuExpanded, cartExpanded, isMobile }) => ({
+    ({ isHome, menuExpanded, cartExpanded, isHamburger }) => ({
         backgroundColor:
-            (isHome && isMobile) ?
-                (menuExpanded || cartExpanded) ?
+            (isHome) ?
+                (isHamburger && (menuExpanded || cartExpanded)) ?
                     'rgba(0, 0, 0, 0.1)'
                     : 'transparent'
                 : 'white',
     })
 );
 
-const StyledNavAndCart = styled.div<{ isMobile: boolean }>({
+const StyledNavAndCart = styled.div<{ isHamburger: boolean }>({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'flex-end',
-}, ({ isMobile }) => isMobile && ({
+}, ({ isHamburger }) => isHamburger && ({
+    alignItems: 'center',
     height: '100%',
     justifyContent: 'center',
+    flexDirection: 'row-reverse',
 }));
+
+
+/*
+STYLING LOGIC
+height: dppx > 2 ? mobile height : desktop height
+menu: (portrait || dppx > 2 || (max-width: 1280 and orientation: landscape)) ? hamburger : normal
+
+
+*/
 
 const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
     currentBasePath,
@@ -67,7 +84,8 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
 }, ref) => {
     const isExpanded = useAppSelector(({ navbar }) => navbar.isExpanded);
     const cartIsOpen = useAppSelector(({ cart }) => cart.visible);
-    const { xs, medium } = useMedia({ queries: screenBreakPoints });
+    const { hiDpx, isHamburger } = React.useContext(MediaContext);
+
     const dispatch = useAppDispatch();
 
     React.useEffect(() => {
@@ -75,17 +93,17 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
     }, [specificRouteName]);
 
     React.useEffect(() => {
-        if (!xs || !medium) {
+        if (!isHamburger) {
             dispatch(toggleExpanded(false));
         }
-    }, [xs, medium]);
+    }, [isHamburger]);
 
-    const isMobile = xs || medium;
     const isHome = delayedRouteBase === '/';
     return (
         <StyledNavBar
             isHome={isHome}
-            isMobile={medium}
+            hiDpx={hiDpx}
+            isHamburger={isHamburger}
             menuExpanded={isExpanded}
             cartExpanded={cartIsOpen}
         >
@@ -94,35 +112,25 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
                 isExpanded={isExpanded}
                 specificRouteName={specificRouteName}
             />
-            {(isMobile) ?
-                (
-                    <StyledNavAndCart isMobile={true}>
-                        <CartButton
-                            isHome={isHome}
-                            ref={ref}
-                        />
-                        <HamburgerNav
-                            currentBasePath={currentBasePath}
-                            specificPath={specificRouteName}
-                            isMobile={true}
-
-                            key="hamburger-nav"
-                        />
-                    </StyledNavAndCart>
+            <StyledNavAndCart isHamburger={isHamburger}>
+                {(isHamburger) ? (
+                    <HamburgerNav
+                        currentBasePath={currentBasePath}
+                        specificPath={specificRouteName}
+                        key="hamburger-nav"
+                    />
                 ) : (
-                    <StyledNavAndCart isMobile={false}>
-                        <NavBarLinks
-                            currentBasePath={currentBasePath}
-                            specificPath={specificRouteName}
-                            isMobile={false}
-                        />
-                        <CartButton
-                            isHome={isHome}
-                            ref={ref}   /* eslint-disable-line @typescript-eslint/no-empty-function */
-                        />
-                    </StyledNavAndCart>
-                )
-            }
+                    <NavBarLinks
+                        currentBasePath={currentBasePath}
+                        specificPath={specificRouteName}
+                        isHamburger={false}
+                    />
+                )}
+                <CartButton
+                    isHome={isHome}
+                    ref={ref}
+                />
+            </StyledNavAndCart>
         </StyledNavBar >
     );
 });

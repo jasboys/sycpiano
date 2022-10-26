@@ -10,8 +10,9 @@ import { PlaylistProps } from 'src/components/Media/types';
 import { playlistBackground } from 'src/styles/colors';
 import { lato1 } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
-import { screenM, screenXSorPortrait } from 'src/styles/screens';
+import { screenM, screenXS, screenPortrait } from 'src/screens';
 import { playlistContainerWidth, playlistWidth } from 'src/styles/variables';
+import { toMedia } from 'src/mediaQuery';
 
 const slideLeft = (element: HTMLElement, amount: number, delay = 0) => {
     gsap.fromTo(element, { x: amount, duration: 0.4 }, { x: 0, ease: 'Power3.easeOut', delay });
@@ -33,12 +34,12 @@ const playlistContainerStyle = css`
     display: flex;
     ${noHighlight}
 
-    ${screenM} {
+    ${toMedia(screenM)} {
         width: ${playlistContainerWidth.tablet};
         transform: translateX(${playlistWidth.tablet});
     }
 
-    ${screenXSorPortrait} {
+    ${toMedia([screenXS, screenPortrait])} {
         width: 100%;
     }
 `;
@@ -111,7 +112,6 @@ const Playlist: React.FC<PlaylistProps> = (props) => {
             </div>
         </Transition>
     );
-}
-
+};
 
 export default Playlist;

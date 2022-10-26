@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { css, SerializedStyles } from '@emotion/react';
+import { css, Interpolation, Theme } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import { gsap } from 'gsap';
@@ -17,9 +17,11 @@ import {
     seanChenContactPhotoUrl,
     staticImage,
 } from 'src/imageUrls';
-import { screenWidths, screenXSorPortrait } from 'src/styles/screens';
+import { minRes, screenWidths, webkitMinDPR } from 'src/screens';
 import { isImageElement } from 'src/utils';
 import { navBarHeight } from 'src/styles/variables';
+import { MediaContext } from 'src/components/App/App';
+import { toMedia } from 'src/mediaQuery';
 
 const imageInsetShadowColor = '#222';
 const alternateBackgroundColor = '#eee';
@@ -28,8 +30,8 @@ interface PhotoAttributes {
     jpg?: string;
     webp?: string;
     svg?: string;
-    css: SerializedStyles;
-    imgCss?: SerializedStyles;
+    css: Interpolation<Theme>;
+    imgCss?: Interpolation<Theme>;
 }
 
 const photosAttributesMap: Record<string, PhotoAttributes> = {
@@ -69,7 +71,7 @@ const ImageContainer = styled.div<ImageContainerProps>(
         boxShadow:
             `inset 0 -15px 15px -15px ${imageInsetShadowColor}`,
 
-        [screenXSorPortrait]: {
+        [toMedia([minRes, webkitMinDPR])]: {
             height: '75vw',
             flex: 'unset',
             boxShadow:
@@ -99,24 +101,25 @@ const StyledContactItem = styled.div({
     flex: '0 1 600px',
     width: '100%',
 
-
     '&:nth-of-type(2n)': {
         backgroundColor: alternateBackgroundColor,
     },
 
-    [screenXSorPortrait]: {
+    [toMedia([minRes, webkitMinDPR])]: {
         height: 'fit-content',
         paddingBottom: '3em',
         marginTop: 0,
         '&:first-of-type': {
-            marginTop: navBarHeight.mobile,
+            marginTop: navBarHeight.hiDpx,
         },
     },
 });
 
-type ContactItemProps = ContactItemShape & { isMobile: boolean };
+type ContactItemProps = ContactItemShape;
 
 const ContactItem: React.FC<ContactItemProps> = (props) => {
+    const mediaProps = React.useContext(MediaContext);
+    const { isHamburger } = mediaProps;
     const [bgImage, setBgImage] = React.useState('');
     const bgRef = React.useRef<HTMLDivElement>(null);
 
@@ -145,7 +148,6 @@ const ContactItem: React.FC<ContactItemProps> = (props) => {
         phone,
         email,
         social,
-        isMobile,
         website,
     }: Partial<ContactItemProps> = props;
 
@@ -163,7 +165,7 @@ const ContactItem: React.FC<ContactItemProps> = (props) => {
                 {(!svg) ?
                     (
                         <LazyImage
-                            isMobile={isMobile}
+                            isMobile={isHamburger}
                             id={`contact_lazy_image_${name.replace(/ /g, '_')}`}
                             csss={{
                                 mobile: imageLoaderStyle,

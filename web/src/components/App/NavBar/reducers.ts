@@ -52,12 +52,12 @@ export const toggleExpanded = createAsyncThunk<void, boolean | void, ThunkAPITyp
     }
 );
 
-export const showSubNav = createAsyncThunk<void, { sub?: string; isMobile?: boolean } | void, ThunkAPIType>(
+export const showSubNav = createAsyncThunk<void, { sub?: string; isHamburger?: boolean } | void, ThunkAPIType>(
     'navbar/callSub',
     (args, thunkAPI) => {
-        const { sub = '', isMobile = false } = (typeof args === 'object') ? args : {};
+        const { sub = '', isHamburger = false } = (typeof args === 'object') ? args : {};
         let showSubs = thunkAPI.getState().navbar.showSubs;
-        if (isMobile) {
+        if (isHamburger) {
             if (sub === '') {
                 showSubs = [];
             } else if (showSubs.includes(sub)) {

@@ -1,5 +1,6 @@
 import bluebird from 'bluebird';
 import * as ReactDOM from 'react-dom';
+import 'vite/modulepreload-polyfill';
 
 global.Promise = (bluebird as any); /* eslint-disable-line @typescript-eslint/no-explicit-any */
 
@@ -19,7 +20,7 @@ function main() {
                 </Routes>
             </BrowserRouter>
         </Provider>
-    ), document.getElementById('hero-container') as HTMLElement);
+    ), document.getElementById('app') as HTMLElement);
 }
 
 main();

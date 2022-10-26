@@ -10,6 +10,7 @@ import { NavBarLinksProps } from 'src/components/App/NavBar/types';
 
 import { logoBlue } from 'src/styles/colors';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { toggleCartList } from 'src/components/Cart/reducers';
 
 const MenuContainer = styled.div` margin: auto 0; `;
 
@@ -23,15 +24,19 @@ const onExit = (el: HTMLElement) => {
     gsap.to(el, { autoAlpha: 0, duration: 0.3, delay: 0.15 });
 }
 
-const HamburgerNav: React.FC<NavBarLinksProps> = ({ currentBasePath, isMobile, specificPath }) => {
+const HamburgerNav: React.FC<Omit<NavBarLinksProps, 'isHamburger'>> = ({ currentBasePath, specificPath }) => {
     const isExpanded = useAppSelector(({ navbar }) => navbar.isExpanded);
+    const cartOpen = useAppSelector(({ cart }) => cart.visible);
     const dispatch = useAppDispatch();
 
     return (
         <MenuContainer>
             <HamburgerMenu
                 isExpanded={isExpanded}
-                onClick={() => dispatch(toggleExpanded())}
+                onClick={() => {
+                    dispatch(toggleExpanded());
+                    cartOpen && dispatch(toggleCartList(false));
+                }}
                 layerColor={(specificPath === '') ? 'white' : logoBlue}
             />
             <Transition<undefined>
@@ -44,7 +49,7 @@ const HamburgerNav: React.FC<NavBarLinksProps> = ({ currentBasePath, isMobile, s
             >
                 <NavBarLinks
                     currentBasePath={currentBasePath}
-                    isMobile={isMobile}
+                    isHamburger={true}
                     specificPath={specificPath}
                 />
             </Transition>

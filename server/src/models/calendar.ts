@@ -145,8 +145,6 @@ const beforeCreateHook = async (c: calendar, _: any) => {
     console.log(`[Calendar Hook beforeCreate]`);
     const {
         dateTime,
-        allDay,
-        endDate,
         website,
         imageUrl,
     } = c;
@@ -205,7 +203,7 @@ const beforeCreateHook = async (c: calendar, _: any) => {
     // server timezone.
     const dateWithTz = zonedTimeToUtc(utcToZonedTime(c.dateTime, c.timezone), timezone);
 
-    if (allDay && endDate) {
+    if (c.allDay && !!c.endDate) {
         const endDateWithTz = zonedTimeToUtc(startOfDay(utcToZonedTime(c.endDate, c.timezone)), timezone);
         /* eslint-disable-next-line require-atomic-updates */
         c.endDate = endDateWithTz;
@@ -215,7 +213,6 @@ const beforeCreateHook = async (c: calendar, _: any) => {
     c.timezone = timezone;
     c.dateTime = dateWithTz;
     /* eslint-enable require-atomic-updates */
-
     console.log(`Creating google calendar event '${c.name}' on ${c.dateTime.toISOString()}.\n`);
     const googleParams = await transformModelToGoogle(c);
     const createResponse = await createCalendarEvent(c.sequelize, googleParams);

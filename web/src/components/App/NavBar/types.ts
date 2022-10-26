@@ -12,7 +12,7 @@ export interface LinkShape extends LinkBaseShape {
 export interface NavBarLinksProps {
     readonly className?: string;
     readonly currentBasePath: string;
-    readonly isMobile: boolean;
+    readonly isHamburger: boolean;
     readonly specificPath: string;
 }
 

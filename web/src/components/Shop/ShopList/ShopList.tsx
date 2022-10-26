@@ -7,14 +7,11 @@ import { pushed } from 'src/styles/mixins';
 import styled from '@emotion/styled';
 import { lato2 } from 'src/styles/fonts';
 import { logoBlue } from 'src/styles/colors';
-import { useMedia } from 'react-media';
-import { screenBreakPoints } from 'src/styles/screens';
 import { useAppSelector } from 'src/hooks';
 import { useParams } from 'react-router-dom';
+import { MediaContext } from 'src/components/App/App';
 
-interface ShopListProps {
-    isMobile: boolean;
-}
+type ShopListProps = Record<never, unknown>;
 
 const listStyle = css(
     pushed,
@@ -25,12 +22,12 @@ const listStyle = css(
     }
 );
 
-const Category = styled.div<{ isMobile: boolean }>(({ isMobile }) => !isMobile && ({
+const Category = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => !isHamburger && ({
     display: 'flex',
     flexDirection: 'column',
 }));
 
-const CategoryTitle = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
+const CategoryTitle = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => ({
     color: logoBlue,
     fontFamily: lato2,
     fontSize: '1.6rem',
@@ -40,14 +37,14 @@ const CategoryTitle = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
     background: `linear-gradient(white 0% 86%, ${logoBlue} 86% 88%, white 88%, rgba(255, 255, 255, 0))`,
     zIndex: 5,
     width: '100%',
-    maxWidth: isMobile ? 'unset' : '800px',
-    margin: isMobile ? 'unset' : '0 auto',
+    maxWidth: isHamburger ? 'unset' : '800px',
+    margin: isHamburger ? 'unset' : '0 auto',
 }));
 
-const CategoryTitleText = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
+const CategoryTitleText = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => ({
     width: 'min-content',
     background: `linear-gradient(white 88%, rgba(255, 255, 255, 0) 88%)`,
-    padding: isMobile ? '1.6rem 0.5rem 0' : '2.5rem 0.5rem 0',
+    padding: isHamburger ? '1.6rem 0.5rem 0' : '2.5rem 0.5rem 0',
     whiteSpace: 'nowrap',
 }));
 
@@ -58,9 +55,9 @@ const CategoryToLabel: Record<typeof ProductTypes[number], string> = {
 };
 
 const ShopList: React.FC<ShopListProps> = () => {
+    const { isHamburger } = React.useContext(MediaContext);
     const { product } = useParams();
     const categorizedItems = useAppSelector(({ shop }) => shop.items);
-    const { xs } = useMedia({ queries: screenBreakPoints });
 
     React.useEffect(() => {
         if (categorizedItems && Object.keys(categorizedItems).length && product) {
@@ -75,16 +72,15 @@ const ShopList: React.FC<ShopListProps> = () => {
         <div css={listStyle}>
             {
                 Object.entries(categorizedItems).map(([key, items]) => (
-                    <Category isMobile={xs} key={key}>
-                        <CategoryTitle isMobile={xs}>
-                            <CategoryTitleText isMobile={xs}>{CategoryToLabel[key as typeof ProductTypes[number]]}</CategoryTitleText>
+                    <Category isHamburger={isHamburger} key={key}>
+                        <CategoryTitle isHamburger={isHamburger}>
+                            <CategoryTitleText isHamburger={isHamburger}>{CategoryToLabel[key as typeof ProductTypes[number]]}</CategoryTitleText>
                         </CategoryTitle>
                         {
                             items.map((item: Product, idx: number) => (
                                 <ShopItem
                                     item={item}
                                     key={idx}
-                                    isMobile={xs}
                                 />
                             ))
                         }
@@ -96,5 +92,5 @@ const ShopList: React.FC<ShopListProps> = () => {
 };
 
 export default ShopList;
-export type RequiredProps = ShopListProps;
 export type ShopListType = typeof ShopList;
+export type RequiredProps = React.ComponentProps<ShopListType>;

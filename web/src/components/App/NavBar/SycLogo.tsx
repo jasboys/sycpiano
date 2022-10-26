@@ -1,16 +1,25 @@
 import styled from '@emotion/styled';
 
 import { LogoInstance } from 'src/components/LogoSVG';
-import { screenMorPortrait } from 'src/styles/screens';
+import { toMedia } from 'src/mediaQuery';
+import { hiDpx } from 'src/screens';
+
+export const sycLogoSize = {
+    hiDpx: 120,
+    lowDpx: 150,
+    get(hiDpx: boolean) {
+        return hiDpx ? this.hiDpx : this.lowDpx;
+    }
+};
 
 export const SycLogo = styled(LogoInstance)({
-    width: 150,
-    height: 150,
+    width: sycLogoSize.lowDpx,
+    height: sycLogoSize.lowDpx,
     float: 'left',
     flex: '0 0 auto',
     WebkitTapHighlightColor: 'transparent',
-    [screenMorPortrait]: {
-        width: 120,
-        height: 120,
+    [toMedia(hiDpx)]: {
+        width: sycLogoSize.hiDpx,
+        height: sycLogoSize.hiDpx,
     },
 });
