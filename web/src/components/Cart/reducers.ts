@@ -8,7 +8,8 @@ import { GlobalStateShape } from 'src/store';
 import { loadStripe } from '@stripe/stripe-js';
 
 const LOCAL_STORAGE_KEY = 'seanchenpiano_cart';
-const stripe = loadStripe(STRIPE_PUBLIC_KEY);
+const apiKey = STRIPE_PUBLIC_KEY;
+const stripe = loadStripe(apiKey);
 
 export const toggleCartList = createAction<boolean | undefined>('cart/toggleCartList');
 const addItemToCart = createAction<string>('cart/addItemToCart');

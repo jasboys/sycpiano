@@ -12,10 +12,8 @@ const { multiply, SparseMatrix, matrix } = create({
     SparseMatrixDependencies,
 }, {});
 
-import jBinary from 'jbinary';
-import jDataView from 'jdataview';
-
 import { getAudioContext } from 'src/components/Media/Music/utils';
+import axios from 'axios';
 
 export const CIRCLE_SAMPLES = 512;
 
@@ -53,11 +51,6 @@ const getCirclePoints = (points: number, offset = 0) => {
     return pointArray;
 };
 
-interface Binary extends jBinary {
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    read(type: any, offset?: number): any;
-}
-
 interface WaveformHeader {
     version: number;
     flags: number;
@@ -66,14 +59,33 @@ interface WaveformHeader {
     length: number;
 }
 
+type DataViewDataType = 'int32' | 'uint32' | 'float32'
+
+const getDatatypeAndReturnOffset = (dataView: DataView, dataType: DataViewDataType, offset = 0) => {
+    switch(dataType) {
+        case 'int32': {
+            return [dataView.getInt32(offset, true), offset + 4];
+        }
+        case 'uint32': {
+            return [dataView.getUint32(offset, true), offset + 4];
+        }
+        case 'float32': {
+            return [dataView.getFloat32(offset, true), offset + 4];
+        }
+        default: {
+            throw new Error('dataType extraction not implemented');
+        }
+    }
+}
+
 export class WaveformLoader {
-    headerStructure = {
-        version: 'int32',
-        flags: 'uint32',
-        sampleRate: 'int32',
-        samplesPerPixel: 'int32',
-        length: 'uint32',
-    };
+    headerStructure: [keyof WaveformHeader, DataViewDataType][] = [
+        ['version', 'int32'],
+        ['flags', 'uint32'],
+        ['sampleRate', 'int32'],
+        ['samplesPerPixel', 'int32'],
+        ['length', 'uint32'],
+    ];
     header?: WaveformHeader;
     waveform?: Float32Array ;
     angles?: Array<{ x: number; y: number }>;
@@ -88,27 +100,38 @@ export class WaveformLoader {
     loadWaveformFile = (filename: string): void => {
         this.header = undefined;
         this.waveform = undefined;
-        this.loaded = new Promise((resolve) => {
-            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-            jBinary.loadData(filename).then((data: any) => {
-                const j: Binary = new jBinary(new jDataView(data, 0, data.byteLength, true), {});
-                const header: WaveformHeader = j.read(this.headerStructure);
-                const type = header.flags ? 'int8' : 'int16';
-                const body = j.read({
-                    values: ['array', type],
-                });
-                const maxAbs = body.values.reduce((acc: number, value: number) => {
-                    if (Math.abs(value) > acc) {
-                        acc = Math.abs(value);
-                    }
-                    return acc;
-                }, 0);
-                this.waveform = Float32Array.from(body.values, (num) => num / maxAbs);
-                this.header = header;
-                const length = this.waveform.length / 2;
-                this.angles = getCirclePoints(length, Math.PI / length);
-                return resolve();
+        this.loaded = new Promise(async (resolve) => {
+            const { data: buffer } = await axios.get<ArrayBuffer>(filename, {
+                responseType: 'arraybuffer',
+                headers: {
+                    'Content-Type': 'application/octet-stream',
+                }
             });
+
+            const dataView = new DataView(buffer);
+            const header: Partial<WaveformHeader> = {};
+            let offset = 0;
+
+            // Get Header
+            for (const [key, dataType] of this.headerStructure) {
+                const [data, next] = getDatatypeAndReturnOffset(dataView, dataType, offset);
+                header[key] = data;
+                offset = next;
+            }
+
+            const dataValues = !!header.flags ? new Int8Array(buffer, offset) : new Int16Array(buffer, offset);
+            this.waveform = Float32Array.from(dataValues);
+            const maxAbs = this.waveform?.reduce((acc: number, value: number) => {
+                if (Math.abs(value) > acc) {
+                    acc = Math.abs(value);
+                }
+                return acc;
+            }, 0);
+            this.waveform = this.waveform?.map((val) => val / maxAbs)
+            this.header = header as WaveformHeader;
+            const length = this.waveform.length / 2;
+            this.angles = getCirclePoints(length, Math.PI / length);
+            return resolve();
         });
     }
 }
@@ -123,12 +146,12 @@ interface FIRHeader {
 }
 
 class FIRLoader {
-    headerStructure = {
-        numCrossings: 'uint32',
-        samplesPerCrossing: 'uint32',
-        cutoffcycle: 'float32',
-        kaiserBeta: 'float32',
-    };
+    headerStructure: [keyof FIRHeader, DataViewDataType][] = [
+        ['numCrossings', 'uint32'],
+        ['samplesPerCrossing', 'uint32'],
+        ['cutoffcycle', 'float32'],
+        ['kaiserBeta', 'float32'],
+    ];
     numCrossings!: number;
     samplesPerCrossing!: number;
     filterSize!: number;
@@ -142,39 +165,63 @@ class FIRLoader {
     }
 
     loadFIRFile = () =>
-        new Promise<void>((resolve) => {
-            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-            jBinary.loadData(`${BINARY_PATH}/fir.dat`).then((data: any) => {
-                const j: Binary = new jBinary(new jDataView(data, 0, data.byteLength, true), {});
-                const header: FIRHeader = j.read(this.headerStructure);
-                this.numCrossings = header.numCrossings as number;
-                this.samplesPerCrossing = header.samplesPerCrossing as number;
-                this.halfCrossings = (this.numCrossings - 1) / 2;
-                this.filterSize = this.samplesPerCrossing * (this.numCrossings - 1) - 1;
-                const body = j.read({
-                    coeffs: ['array', 'float32', this.filterSize],
-                    deltas: ['array', 'float32', this.filterSize],
-                });
-                this.coeffs = Float32Array.from(body.coeffs);
-                this.deltas = Float32Array.from(body.deltas);
-                resolve();
+        new Promise<void>(async (resolve) => {
+            const { data: buffer } = await axios.get<ArrayBuffer>(`${BINARY_PATH}/fir.dat`, {
+                responseType: 'arraybuffer',
+                headers: {
+                    'Content-Type': 'application/octet-stream',
+                }
             });
+            console.log('bufferSize', buffer.byteLength);
+
+            const dataView = new DataView(buffer);
+            const header: Partial<FIRHeader> = {};
+            let offset = 0;
+
+            // Get Header
+            for (const [key, dataType] of this.headerStructure) {
+                const [data, next] = getDatatypeAndReturnOffset(dataView, dataType, offset);
+                header[key] = data;
+                offset = next;
+            }
+            console.log('headerSize', offset);
+            this.numCrossings = header.numCrossings!;
+            this.samplesPerCrossing = header.samplesPerCrossing!;
+            this.halfCrossings = (this.numCrossings - 1) / 2;
+            this.filterSize = this.samplesPerCrossing * (this.numCrossings - 1) - 1;
+            console.log(header);
+            console.log(this.filterSize);
+            this.coeffs = new Float32Array(buffer, offset, this.filterSize);
+            offset += Float32Array.BYTES_PER_ELEMENT * this.filterSize;
+            this.deltas = new Float32Array(buffer, offset, this.filterSize);
+            resolve();
         })
 }
 
 export const firLoader = new FIRLoader();
 
+interface ConstantQHeader {
+    sampleRate: number;
+    binsPerOctave: number;
+    minFreq: number;
+    maxFreq: number;
+    numRows: number;
+    numCols: number;
+    innerPtrSize: number;
+    outerPtrSize: number;
+}
+
 class ConstantQ {
-    headerStructure = {
-        sampleRate: 'uint32',
-        binsPerOctave: 'uint32',
-        minFreq: 'float32',
-        maxFreq: 'float32',
-        numRows: 'uint32',
-        numCols: 'uint32',
-        innerPtrSize: 'uint32',
-        outerPtrSize: 'uint32',
-    };
+    headerStructure: [keyof ConstantQHeader, DataViewDataType][] = [
+        ['sampleRate', 'uint32'],
+        ['binsPerOctave', 'uint32'],
+        ['minFreq', 'float32'],
+        ['maxFreq', 'float32'],
+        ['numRows', 'uint32'],
+        ['numCols', 'uint32'],
+        ['innerPtrSize', 'uint32'],
+        ['outerPtrSize', 'uint32'],
+    ];
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     matrix?: Matrix;
     input = matrix([], 'dense', 'number');
@@ -193,36 +240,50 @@ class ConstantQ {
     }
 
     loadMatrix = (filename: string) => (
-        new Promise<void>((resolve) => {
-            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-            jBinary.loadData(filename).then((data: any) => {
-                const j: Binary = new jBinary(new jDataView(data, 0, data.byteLength, true), {});
-                const header = j.read(this.headerStructure);
-                const body = j.read({
-                    values: ['array', 'float32', header.innerPtrSize],
-                    innerPtr: ['array', 'int32', header.innerPtrSize],
-                    outerPtr: ['array', 'int32', header.outerPtrSize],
-                });
-                const o = {
-                    mathjs: 'SparseMatrix',
-                    values: body.values,
-                    index: body.innerPtr,
-                    ptr: body.outerPtr,
-                    size: [header.numRows, header.numCols],
-                    datatype: 'number',
-                };
-                this.numRows = header.numRows;
-                this.numCols = header.numCols;
-                this.minF = header.minFreq;
-                this.maxF = header.maxFreq;
-                this.matrix = SparseMatrix.fromJSON(o);
-                this.input.resize([1, this.numRows]);
-
-                const cqBins = 2 * this.numCols;
-                const invCqBins = 1 / cqBins;
-                this.angles = getCirclePoints(CIRCLE_SAMPLES, Math.PI * (invCqBins + 1));
-                resolve();
+        new Promise<void>(async (resolve) => {
+            const { data: buffer } = await axios.get<ArrayBuffer>(filename, {
+                responseType: 'arraybuffer',
+                headers: {
+                    'Content-Type': 'application/octet-stream',
+                }
             });
+
+            const dataView = new DataView(buffer);
+            const header: Partial<ConstantQHeader> = {};
+            let offset = 0;
+
+            // Get Header
+            for (const [key, dataType] of this.headerStructure) {
+                const [data, next] = getDatatypeAndReturnOffset(dataView, dataType, offset);
+                header[key] = data;
+                offset = next;
+            }
+
+            const values = new Float32Array(buffer, offset, header.innerPtrSize!);
+            offset += Float32Array.BYTES_PER_ELEMENT * header.innerPtrSize!;
+            const innerPtr = new Int32Array(buffer, offset, header.innerPtrSize!);
+            offset += Int32Array.BYTES_PER_ELEMENT * header.innerPtrSize!
+            const outerPtr = new Int32Array(buffer, offset, header.outerPtrSize!);
+            const o = {
+                mathjs: 'SparseMatrix',
+                values: [...values],
+                index: [...innerPtr],
+                ptr: [...outerPtr],
+                size: [header.numRows, header.numCols],
+                datatype: 'number',
+            };
+            this.numRows = header.numRows!;
+            this.numCols = header.numCols!;
+            this.minF = header.minFreq!;
+            this.maxF = header.maxFreq!;
+            this.matrix = SparseMatrix.fromJSON(o);
+            this.input.resize([1, this.numRows]);
+
+            const cqBins = 2 * this.numCols;
+            const invCqBins = 1 / cqBins;
+            this.angles = getCirclePoints(CIRCLE_SAMPLES, Math.PI * (invCqBins + 1));
+            console.log(header);
+            resolve();
         })
     )
 

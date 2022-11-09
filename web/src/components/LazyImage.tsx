@@ -43,7 +43,7 @@ interface LazyImageProps {
         readonly desktop?: Interpolation<Theme>;
         readonly loading?: Interpolation<Theme>;
     };
-    readonly loadingComponent?: 'default' | React.ComponentType<{ isMobile: boolean }>;
+    readonly loadingComponent?: 'default' | React.ComponentType;
     readonly alt: string;
     readonly successCb?: (el?: Element | HTMLElement | HTMLImageElement) => void;
     readonly destroyCb?: () => void;
@@ -99,7 +99,7 @@ export const LazyImage: React.FC<LazyImageProps> = (props) => {
         alt,
         loadingComponent: LoadingComponent,
     } = props;
-    let Loading: React.ComponentType<{ isMobile: boolean }> | typeof StyledLoadingInstance | undefined;
+    let Loading: React.ComponentType | typeof StyledLoadingInstance | undefined;
     if (LoadingComponent === 'default') {
         Loading = StyledLoadingInstance;
     } else {
@@ -148,7 +148,7 @@ export const LazyImage: React.FC<LazyImageProps> = (props) => {
                 timeout={250}
             >
                 <div css={csss?.loading}>
-                    {!!Loading ? <Loading isMobile={props.isMobile} /> : null}
+                    {!!Loading ? <Loading /> : null}
                 </div>
             </Transition>
 

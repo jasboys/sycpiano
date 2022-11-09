@@ -64,6 +64,7 @@ const main = async () => {
                     "'self'",
                     "'unsafe-inline'",
                     "'unsafe-eval'",
+                    "http://localhost:5173",
                     "https://js.stripe.com",
                     "https://checkout.stripe.com",
                     "https://www.youtube.com/iframe_api",
@@ -88,6 +89,7 @@ const main = async () => {
                 ],
                 'connect-src': [
                     "'self'",
+                    "ws://localhost:5173/",
                     "https://api.stripe.com",
                     "https://checkout.stripe.com",
                     "https://www.googleapis.com/youtube/v3/",
@@ -127,12 +129,16 @@ const main = async () => {
         app.use('/static/music', express.static(path.resolve(rootPath.toString(), process.env.MUSIC_ASSETS_DIR)));
         app.use('/static/images', express.static(path.resolve(rootPath.toString(), process.env.IMAGE_ASSETS_DIR)));
         app.use('/static', express.static(path.resolve(rootPath.toString(), 'web/assets')));
-        app.use('/static', express.static(path.resolve(rootPath.toString(), 'web/build')));
+        // app.use('/static', express.static(path.resolve(rootPath.toString(), 'web/build')));
+        app.use('/static', createProxyMiddleware({
+            target: 'http://localhost:5173',
+            ws: true,
+        }));
     }
 
     app.engine('html', mustacheExpress());
     app.set('view engine', 'html');
-    app.set('views', path.resolve(rootPath.toString(), 'web/build'));
+    app.set('views', path.resolve(rootPath.toString(), 'web/partials'));
 
     const csrfHandler = csurf({
         cookie: {
@@ -243,6 +249,23 @@ const main = async () => {
                         secure_image: meta.image,
                         url: 'https://' + req.get('host') + req.originalUrl
                     },
+                    vite: {
+                        refresh: `
+                            <script type="module">
+                                window.global = window;
+                                import RefreshRuntime from 'http://localhost:5173/@react-refresh';
+                                RefreshRuntime.injectIntoGlobalHook(window);
+                                window.$RefreshReg$ = () => {};
+                                window.$RefreshSig$ = () => (type) => type;
+                                window.__vite_plugin_react_preamble_installed__ = true;
+                            </script>
+                        `,
+                        srcs: `
+                            <!-- if development -->
+                            <script type="module" src="http://localhost:5173/@vite/client"></script>
+                            <script type="module" src="http://localhost:5173/main.tsx"></script>
+                        `,
+                    }
                 });
             }
         });

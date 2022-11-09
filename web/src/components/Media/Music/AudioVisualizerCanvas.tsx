@@ -43,7 +43,8 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
     HEIGHT_ADJUST!: number;
     visualizationCtx: CanvasRenderingContext2D | null = null;
 
-    frequencyData!: Uint8Array;
+    frequencyDataL!: Uint8Array;
+    frequencyDataR!: Uint8Array;
     FFT_HALF_SIZE!: number;
     CQ_BINS!: number;
     INV_CQ_BINS!: number;
@@ -86,7 +87,8 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
             await Promise.all([constantQ.loaded, firLoader.loaded]);
 
             this.FFT_HALF_SIZE = constantQ.numRows;
-            this.frequencyData = new Uint8Array(this.FFT_HALF_SIZE);
+            this.frequencyDataL = new Uint8Array(this.FFT_HALF_SIZE);
+            this.frequencyDataR = new Uint8Array(this.FFT_HALF_SIZE);
             this.CQ_BINS = constantQ.numCols * 2;
             this.INV_CQ_BINS = 1 / this.CQ_BINS;
 
@@ -168,31 +170,26 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
             };
 
             // get byte data, and store into normalized[L,R], while accumulating
-            this.props.analyzerL.getByteFrequencyData(this.frequencyData);
-            this.normalizedL?.forEach((_, index, arr) => {
-                if (this.frequencyData && this.MAX_BIN && this.HIGH_PASS_BIN) {
-                    const temp = this.frequencyData[index] / 255;
-                    arr[index] = temp;
-                    // accumulate
-                    if (index < this.MAX_BIN) {
-                        index && (lowFreqs.l += temp);
-                        (index >= this.HIGH_PASS_BIN) && (highFreqs.l += temp);
-                    }
+            this.props.analyzerL.getByteFrequencyData(this.frequencyDataL);
+            this.props.analyzerR.getByteFrequencyData(this.frequencyDataR);
+
+            // use normalizedL to index into both L and R
+            this.normalizedL.forEach((_, index) => {
+                const tempL = this.frequencyDataL[index] / 255;
+                const tempR = this.frequencyDataR[index] / 255;
+
+                this.normalizedL[index] = tempL;
+                this.normalizedR[index] = tempR;
+
+                // accumulate
+                if (index < this.MAX_BIN) {
+                    index
+                        && (lowFreqs.l += tempL, lowFreqs.r += tempR);
+                    (index >= this.HIGH_PASS_BIN)
+                        && (highFreqs.l += tempL, highFreqs.r += tempR);
                 }
             });
 
-            this.props.analyzerR.getByteFrequencyData(this.frequencyData);
-            this.normalizedR?.forEach((_, index, arr) => {
-                if (this.frequencyData && this.MAX_BIN && this.HIGH_PASS_BIN) {
-                    const temp = this.frequencyData[index] / 255;
-                    arr[index] = temp;
-                    // accumulate
-                    if (index < this.MAX_BIN) {
-                        index && (lowFreqs.r += temp);
-                        (index >= this.HIGH_PASS_BIN) && (highFreqs.r += temp);
-                    }
-                }
-            });
             // FFT -> CQ
             const resultL = constantQ.apply(this.normalizedL);
             const resultR = constantQ.apply(this.normalizedR).reverse();

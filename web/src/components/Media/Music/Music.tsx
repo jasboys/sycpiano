@@ -187,6 +187,7 @@ class Music extends React.Component<MusicProps, MusicState> {
         // smooth more when sampleRate is higher
         this.analyzerL.smoothingTimeConstant = this.analyzerR.smoothingTimeConstant = 0.9 * Math.pow(sampleRate / 192000, 2);
 
+        console.log(this.analyzerL, this.analyzerR);
         this.audio.current.volume = 0;
 
         this.setState({ isLoading: true });
