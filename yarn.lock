@@ -10484,10 +10484,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"retry-as-promised@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "retry-as-promised@npm:5.0.0"
-  checksum: 4d17e0597f967db0516714f0f2b085e2d1e8ea592450b013a1e0cd41dad74a9c3d1eb3c45351887de4bca1c3ac5f74dd07ef9942a3fb0e4db996a83bb28cb46e
+"retry-as-promised@npm:^7.0.3":
+  version: 7.0.4
+  resolution: "retry-as-promised@npm:7.0.4"
+  checksum: 2b0dcddb06649d42b1384ec1f933c7cb4461939c28004460b0c4be0c8ae16cabaed2411aa5d46e734a320f33f4a1d480078a19b97c743c754bd32e896b3f8ea2
   languageName: node
   linkType: hard
 
@@ -10802,7 +10802,7 @@ __metadata:
     reselect: ^4.1.6
     rimraf: ^3.0.2
     run-script-os: ^1.1.6
-    sequelize: ^6.21.3
+    sequelize: ^6.28.2
     serve-favicon: ^2.5.0
     sharp: ^0.30.7
     smartcrop-gm: ^2.0.2
@@ -10913,9 +10913,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sequelize@npm:^6.21.3":
-  version: 6.21.3
-  resolution: "sequelize@npm:6.21.3"
+"sequelize@npm:^6.28.2":
+  version: 6.28.2
+  resolution: "sequelize@npm:6.28.2"
   dependencies:
     "@types/debug": ^4.1.7
     "@types/validator": ^13.7.1
@@ -10924,9 +10924,9 @@ __metadata:
     inflection: ^1.13.2
     lodash: ^4.17.21
     moment: ^2.29.1
-    moment-timezone: ^0.5.34
+    moment-timezone: ^0.5.35
     pg-connection-string: ^2.5.0
-    retry-as-promised: ^5.0.0
+    retry-as-promised: ^7.0.3
     semver: ^7.3.5
     sequelize-pool: ^7.1.0
     toposort-class: ^1.0.1
@@ -10940,6 +10940,8 @@ __metadata:
       optional: true
     mysql2:
       optional: true
+    oracledb:
+      optional: true
     pg:
       optional: true
     pg-hstore:
@@ -10950,7 +10952,7 @@ __metadata:
       optional: true
     tedious:
       optional: true
-  checksum: 85a57cdde00edc5e1634585aacda874eeab9cc0d6d296e5ae90be3d861cba682bacde427009600d331fec82396520621a16a27d1958c689dd197d9d88051cf7e
+  checksum: 323f60e37105a2b2203e9932fd6bad3f93138720fcb3a707a14f0bd677463602cdedcd6cfef6d8c686d70221666186f02c73dca4ceee5cd4bac369b2c4d78e7d
   languageName: node
   linkType: hard
 

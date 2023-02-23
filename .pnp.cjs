@@ -179,7 +179,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["reselect", "npm:4.1.6"],\
             ["rimraf", "npm:3.0.2"],\
             ["run-script-os", "npm:1.1.6"],\
-            ["sequelize", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:6.21.3"],\
+            ["sequelize", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:6.28.2"],\
             ["serve-favicon", "npm:2.5.0"],\
             ["sharp", "npm:0.30.7"],\
             ["smartcrop-gm", "npm:2.0.2"],\
@@ -13488,10 +13488,10 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["retry-as-promised", [\
-        ["npm:5.0.0", {\
-          "packageLocation": "./.yarn/cache/retry-as-promised-npm-5.0.0-305d61b9d1-4d17e0597f.zip/node_modules/retry-as-promised/",\
+        ["npm:7.0.4", {\
+          "packageLocation": "./.yarn/cache/retry-as-promised-npm-7.0.4-d2e9247001-2b0dcddb06.zip/node_modules/retry-as-promised/",\
           "packageDependencies": [\
-            ["retry-as-promised", "npm:5.0.0"]\
+            ["retry-as-promised", "npm:7.0.4"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -13826,7 +13826,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["reselect", "npm:4.1.6"],\
             ["rimraf", "npm:3.0.2"],\
             ["run-script-os", "npm:1.1.6"],\
-            ["sequelize", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:6.21.3"],\
+            ["sequelize", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:6.28.2"],\
             ["serve-favicon", "npm:2.5.0"],\
             ["sharp", "npm:0.30.7"],\
             ["smartcrop-gm", "npm:2.0.2"],\
@@ -13926,21 +13926,22 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
         }]\
       ]],\
       ["sequelize", [\
-        ["npm:6.21.3", {\
-          "packageLocation": "./.yarn/cache/sequelize-npm-6.21.3-f172bd7134-85a57cdde0.zip/node_modules/sequelize/",\
+        ["npm:6.28.2", {\
+          "packageLocation": "./.yarn/cache/sequelize-npm-6.28.2-5840ab60d9-323f60e371.zip/node_modules/sequelize/",\
           "packageDependencies": [\
-            ["sequelize", "npm:6.21.3"]\
+            ["sequelize", "npm:6.28.2"]\
           ],\
           "linkType": "SOFT"\
         }],\
-        ["virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:6.21.3", {\
-          "packageLocation": "./.yarn/__virtual__/sequelize-virtual-a2a2fbf6ad/0/cache/sequelize-npm-6.21.3-f172bd7134-85a57cdde0.zip/node_modules/sequelize/",\
+        ["virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:6.28.2", {\
+          "packageLocation": "./.yarn/__virtual__/sequelize-virtual-97a21c1dd4/0/cache/sequelize-npm-6.28.2-5840ab60d9-323f60e371.zip/node_modules/sequelize/",\
           "packageDependencies": [\
-            ["sequelize", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:6.21.3"],\
+            ["sequelize", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:6.28.2"],\
             ["@types/debug", "npm:4.1.7"],\
             ["@types/ibm_db", null],\
             ["@types/mariadb", null],\
             ["@types/mysql2", null],\
+            ["@types/oracledb", null],\
             ["@types/pg", null],\
             ["@types/pg-hstore", null],\
             ["@types/snowflake-sdk", null],\
@@ -13956,10 +13957,11 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["moment", "npm:2.29.4"],\
             ["moment-timezone", "npm:0.5.37"],\
             ["mysql2", null],\
+            ["oracledb", null],\
             ["pg", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:8.7.3"],\
             ["pg-connection-string", "npm:2.5.0"],\
             ["pg-hstore", null],\
-            ["retry-as-promised", "npm:5.0.0"],\
+            ["retry-as-promised", "npm:7.0.4"],\
             ["semver", "npm:7.3.7"],\
             ["sequelize-pool", "npm:7.1.0"],\
             ["snowflake-sdk", null],\
@@ -13974,6 +13976,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             "@types/ibm_db",\
             "@types/mariadb",\
             "@types/mysql2",\
+            "@types/oracledb",\
             "@types/pg-hstore",\
             "@types/pg",\
             "@types/snowflake-sdk",\
@@ -13982,6 +13985,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             "ibm_db",\
             "mariadb",\
             "mysql2",\
+            "oracledb",\
             "pg-hstore",\
             "pg",\
             "snowflake-sdk",\
