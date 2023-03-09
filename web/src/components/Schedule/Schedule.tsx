@@ -24,10 +24,11 @@ const ScheduleContainer = styled.div(
         width: '100%',
         boxSizing: 'border-box',
         backgroundColor: 'rgb(238 238 238)',
-        backgroundImage: `url('/static/images/Van_Cliburn_Sean_Chen-0044.jpg')`,
-        backgroundSize: 'cover',
-        backgroundPosition: '50% 66%',
-        backgroundBlendMode: 'overlay',
+        // backgroundImage: 'linear-gradient(90deg, var(--light-blue) calc(50vw - 200px), rgb(238 238 238) calc(50vw - 200px))',
+        // backgroundImage: `url('/static/images/Van_Cliburn_Sean_Chen-0044.jpg')`,
+        // backgroundSize: 'cover',
+        // backgroundPosition: '50% 66%',
+        // backgroundBlendMode: 'overlay',
         [toMedia([screenXS, screenPortrait])]: {
             fontSize: '80%'
         }

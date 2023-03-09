@@ -18,8 +18,9 @@ import { toMedia } from 'src/mediaQuery';
 
 const photoListStyle = css`
     padding-left: 5px;
-    background-color: black;
+    background-color: rgb(248 248 248);
     top: 0;
+    width: 300px;
 
     ${toMedia([screenXS, screenPortrait])} {
         padding-left: 0;
@@ -28,7 +29,7 @@ const photoListStyle = css`
 
 const photoULStyle = css`
     padding-bottom: 80px;
-    background-color: black;
+    background-color: rgb(248 248 248);
 
     ${toMedia([minRes, webkitMinDPR])} {
         padding-top: ${navBarHeight.hiDpx}px;

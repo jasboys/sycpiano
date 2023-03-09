@@ -9,7 +9,7 @@ import { fetchPhotos, selectFirstPhoto, selectPhoto } from 'src/components/Media
 import { PhotoItem } from 'src/components/Media/Photos/types';
 import { idFromItem } from 'src/components/Media/Photos/utils';
 
-import { lato1 } from 'src/styles/fonts';
+import { lato1, lato2 } from 'src/styles/fonts';
 import { pushed } from 'src/styles/mixins';
 import { screenM, screenXS, screenPortrait } from 'src/screens';
 import { playlistContainerWidth } from 'src/styles/variables';
@@ -21,7 +21,7 @@ import { toMedia } from 'src/mediaQuery';
 const StyledPhotos = styled.div`
     ${pushed}
     width: 100%;
-    background-color: black;
+    background-color: rgb(248 248 248);
     position: relative;
 
     ${toMedia([screenXS, screenPortrait])} {
@@ -33,29 +33,23 @@ const StyledPhotos = styled.div`
 
 const StyledPhotoViewer = styled.div`
     position: relative;
-    width: calc(100% - ${playlistContainerWidth.desktop});
+    width: calc(100% - 300px);
     height: 100%;
-
-    ${toMedia(screenM)} {
-        width: calc(100% - ${playlistContainerWidth.tablet});
-    }
+    justify-content: center;
+    display: flex;
+    text-align: center;
 
     img {
-        position: absolute;
         max-width: 100%;
         max-height: 100%;
-        left: 50%;
-        top: 50%;
-        transform: translate3d(-50%, -50%, 0);
     }
 `;
 
 const StyledCredit = styled.div`
     position: absolute;
     bottom: 0;
-    right: 0;
-    font-family: ${lato1};
-    color: white;
+    font-family: ${lato2};
+    color: black;
     padding: 20px;
 `;
 

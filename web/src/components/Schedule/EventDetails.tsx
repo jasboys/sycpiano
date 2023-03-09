@@ -10,7 +10,7 @@ import { Collaborator, EventType, Piece } from 'src/components/Schedule/types';
 import { getGoogleMapsSearchUrl } from 'src/components/Schedule/utils';
 
 import { lightBlue, logoBlue, magenta, textGrey } from 'src/styles/colors';
-import { lato2 } from 'src/styles/fonts';
+import { lato1, lato2 } from 'src/styles/fonts';
 
 import { screenPortrait, screenXS } from 'src/screens';
 import { toMedia } from 'src/mediaQuery';
@@ -28,12 +28,12 @@ const Connector = styled.div({
     background:
         `linear-gradient(
         to right,
-        white 0%,
+        transparent 0%,
+        transparent calc(50% - 0.82px),
         white calc(50% - 0.82px),
-        ${lightBlue} calc(50% - 0.82px),
-        ${lightBlue} calc(50% + 0.82px),
         white calc(50% + 0.82px),
-        white 100%
+        transparent calc(50% + 0.82px),
+        transparent 100%
     );`
 })
 
@@ -50,20 +50,20 @@ let EventDate: React.FC<EventDateTimeProps> = (props) => {
     const end = props.endDate ? parseISO(props.endDate) : undefined;
     return (
         <div className={props.className}>
-            <div css={css({ fontSize: '2.0rem' })}>
+            <div css={css({ fontSize: '1.8rem' })}>
                 {`${format(date, 'M/d')}`}
             </div>
-            <div css={css({ fontSize: '1.4em' })}>
-                {format(date, 'EEE')}
+            <div css={css({ fontSize: '0.8rem' })}>
+                {format(date, 'EEEE')}
             </div>
             {!!end && (
                 <>
                     <Connector />
-                    <div css={css({ fontSize: '2.0rem' })}>
+                    <div css={css({ fontSize: '1.8rem' })}>
                         {`${format(end, 'M/d')}`}
                     </div>
-                    <div css={css({ fontSize: '1.4em' })}>
-                        {format(end, 'EEE')}
+                    <div css={css({ fontSize: '0.8rem' })}>
+                        {format(end, 'EEEE')}
                     </div>
                 </>
             )}
@@ -75,22 +75,20 @@ let EventDate: React.FC<EventDateTimeProps> = (props) => {
 EventDate = styled(EventDate)<EventDateTimeProps>(
     {
         textAlign: 'center',
-        backgroundColor: 'white',
-        color: lightBlue,
+        background: 'none',
+        color: 'white',
         height: 'fit-content',
         width: 'fit-content',
-        padding: '1rem',
+        padding: '1.5rem 1.0rem',
         flex: '0 0 auto',
-        zIndex: 3,
+        zIndex: 5,
         fontFamily: lato2,
-        fontWeight: 'bold',
-        position: 'absolute',
+        position: 'relative',
         top: 0,
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        borderRadius: '0 0 8px 0',
     }
 );
 
@@ -261,15 +259,14 @@ EventWebsiteButton = styled(EventWebsiteButton)`
     width: 150px;
     padding: 10px;
     text-align: center;
-    border-radius: 4px;
     font-family: ${lato2};
-    background-color: ${magenta};
-    color: ${textGrey};
+    background-color: var(--light-blue);
+    color: white;
     transition: all 0.25s;
     margin: 0.6rem 0;
 
     &:hover {
-        background-color: ${mix(0.75, magenta, '#FFF')};
+        background-color: ${mix(0.75, lightBlue, '#FFF')};
         color: white;
         cursor: pointer;
     }

@@ -17,7 +17,7 @@ import { offWhite } from 'src/styles/colors';
 import { lato2, lato3 } from 'src/styles/fonts';
 import { generateSrcsetWidths, resizedImage, sycWithPianoBW } from 'src/imageUrls';
 import { pushed } from 'src/styles/mixins';
-import { screenLengths, screenM, screenPortrait, screenWidths, screenXS } from 'src/screens';
+import { isHamburger, screenLengths, screenM, screenPortrait, screenWidths, screenXS } from 'src/screens';
 import { camel2var, navBarHeight } from 'src/styles/variables';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { isImageElement } from 'src/utils';
@@ -31,6 +31,12 @@ const Paragraph = styled.p({
     fontSize: '1.2rem',
     lineHeight: '2rem',
     margin: '1.6rem 0',
+
+    [toMedia(isHamburger)]: {
+        '&:first-of-type': {
+            marginTop: 0,
+        }
+    },
 
     [toMedia(screenM)]: {
         fontSize: '1rem',
@@ -70,7 +76,7 @@ const TextContainer = styled.div({
     boxSizing: 'border-box',
     flex: '1 0 45%',
     height: 'auto',
-    padding: '2rem 40px 80px 60px',
+    padding: '3rem 40px 80px 60px',
     backgroundColor: offWhite,
     color: 'black',
     overflowY: 'scroll',

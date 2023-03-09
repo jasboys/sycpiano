@@ -18,7 +18,7 @@ import { toMedia } from 'src/mediaQuery';
 
 const PhotoRow = styled.div<{ isLoaded: boolean }>`
     position: relative;
-    height: 300px;
+    height: 200px;
     border: 1px solid transparent;
     transition: all 0.2s;
     border-radius: 10px;
@@ -35,7 +35,7 @@ const PhotoRow = styled.div<{ isLoaded: boolean }>`
 
     &:hover {
         cursor: pointer;
-        border-color: ${lightBlue};
+        border-color: white;
     }
 
     ${toMedia([screenXS, screenPortrait])} {
@@ -53,15 +53,15 @@ const PhotoRow = styled.div<{ isLoaded: boolean }>`
 `;
 
 const Highlight = styled.div<{ active: boolean }>`
-    padding-left: 15px;
+    padding-left: 0;
     transition: border 0.15s;
-    border-left: 7px solid ${props => props.active ? lightBlue : 'transparent'};
+    border-left: 7px solid ${props => props.active ? 'var(--light-blue)' : 'transparent'};
 `;
 
 const loadingStyle = css`
     background-color: rgb(208 208 208);
     fill: rgb(208 208 208);
-    height: 300px;
+    height: 100%;
     width: 100%;
     position: absolute;
 `;
@@ -109,12 +109,12 @@ const PhotoListItem: React.FC<ChildRendererProps<PhotoItem>> = (props) => {
                 }}
                 desktopAttributes={{
                     webp: {
-                        srcset: resizedImage(desktopWebP, { width: 400 }),
-                        sizes: '400px',
+                        srcset: resizedImage(desktopWebP, { width: 300 }),
+                        sizes: '300px',
                     },
                     jpg: {
-                        srcset: `${desktopUrl} 400w`,
-                        sizes: '400px',
+                        srcset: `${desktopUrl} 300w`,
+                        sizes: '300px',
                     },
                     src: desktopUrl,
                 }}

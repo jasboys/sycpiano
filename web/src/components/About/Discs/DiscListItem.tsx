@@ -52,7 +52,7 @@ const DiscItem = styled.div({
     width: '100%',
     overflow: 'hidden',
     boxShadow: cardShadow,
-    borderRadius: 8,
+    // borderRadius: 8,
     backgroundColor: 'white',
     display: 'flex',
     flexWrap: 'wrap',
@@ -61,63 +61,61 @@ const DiscItem = styled.div({
     }
 });
 
-const DiscImageContainer = styled.div`
-    flex: 0 0 300px;
-
-    ${toMedia(screenXS)} {
-        height: 80vw;
-        flex: 0 0 80vw;
-    }
-`;
-
-const ImageBorder = styled.div({
-    position: 'relative',
-    height: 'calc(100% - 2rem)',
-    margin: '1rem',
-    backgroundColor: 'rgb(244 244 244)',
+const DiscImageContainer = styled.div({
+    flex: '0 0 300px',
     overflow: 'hidden',
-    '&:after': {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        boxShadow: 'inset 0 0 10px rgba(0 0 0 / 0.4)',
-    },
+    [toMedia(screenXS)]: {
+        height: '80vw',
+        flex: '0 0 80vw',
+    }
 });
+
+// const ImageBorder = styled.div({
+//     position: 'relative',
+//     height: 'calc(100% - 2rem)',
+//     margin: '1rem',
+//     backgroundColor: 'rgb(244 244 244)',
+//     overflow: 'hidden',
+//     '&:after': {
+//         position: 'absolute',
+//         top: 0,
+//         left: 0,
+//         right: 0,
+//         bottom: 0,
+//         boxShadow: 'inset 0 0 10px rgba(0 0 0 / 0.4)',
+//     },
+// });
 
 const DiscImage = styled.img({
-    position: 'absolute',
-    width: '60%',
-    zIndex: 5,
-    bottom: '20%',
-    left: '50%',
-    transform: 'translate(-50%)',
-    boxShadow: '0 6px 10px -3px rgba(0 0 0 / 0.6)',
+    minHeight: '100%',
+    minWidth: '100%',
+    height: 0,
+    objectFit: 'cover',
+    objectPosition: 'center center',
 });
 
-const TopGradient = styled.div({
-    background: 'radial-gradient(circle, rgb(255, 255, 255) 0%, rgb(238, 238, 238) 35%, rgb(125, 125, 125) 100%)',
-    height: '100%',
-    transform: 'scale(1.5, 0.8) translateY(-20%)',
-    position: 'absolute',
-    width: '100%'
-});
+// const TopGradient = styled.div({
+//     background: 'radial-gradient(circle, rgb(255, 255, 255) 0%, rgb(238, 238, 238) 35%, rgb(125, 125, 125) 100%)',
+//     height: '100%',
+//     transform: 'scale(1.5, 0.8) translateY(-20%)',
+//     position: 'absolute',
+//     width: '100%'
+// });
 
-const BottomGradient = styled.div({
-    background: 'radial-gradient(circle, rgb(255, 255, 255) 0%, rgb(193, 193, 193) 35%, rgb(125, 125, 125) 100%)',
-    height: '100%',
-    transform: 'scale(1.5, 0.8) translateY(80%)',
-    position: 'absolute',
-    width: '100%',
-});
+// const BottomGradient = styled.div({
+//     background: 'radial-gradient(circle, rgb(255, 255, 255) 0%, rgb(193, 193, 193) 35%, rgb(125, 125, 125) 100%)',
+//     height: '100%',
+//     transform: 'scale(1.5, 0.8) translateY(80%)',
+//     position: 'absolute',
+//     width: '100%',
+// });
 
-const BoxShadow = styled.div({
-    position: 'absolute',
-    height: '100%',
-    width: '100%',
-    boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.2)',
-});
+// const BoxShadow = styled.div({
+//     position: 'absolute',
+//     height: '100%',
+//     width: '100%',
+//     boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.2)',
+// });
 
 const DiscDescription = styled.div`
     flex: 1;
@@ -162,12 +160,7 @@ const DiscListItem: React.FC<DiscListProps> = ({ item }) => {
         <li>
             <DiscItem {...mediaProps}>
                 <DiscImageContainer>
-                    <ImageBorder>
-                        <DiscImage src={`/static/images/cd-thumbnails/${item.thumbnailFile}`} />
-                        <TopGradient />
-                        <BottomGradient />
-                        <BoxShadow />
-                    </ImageBorder>
+                    <DiscImage src={`/static/images/cd-thumbnails/${item.thumbnailFile}`} />
                 </DiscImageContainer>
                 <DiscDescription>
                     <DiscTitle>{item.title}</DiscTitle>

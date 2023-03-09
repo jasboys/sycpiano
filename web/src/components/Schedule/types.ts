@@ -126,8 +126,10 @@ export const createMonthGroups = (events: EventItem[], order: 'asc' | 'desc' = '
         let count = 0;
         for (let it = lastMonth; it >= firstMonth && sortedEvents.length !== 0; it = subMonths(it, 1)) {
             let pointer = binarySearch(sortedEvents, { dateTime: it.toISOString() }, eventDescend);
-            if (pointer < 1) {
+            if (pointer < 0) {
                 pointer = (-1 * pointer) - 1;
+            } else {
+                pointer += 1;
             }
             const extracted = sortedEvents.splice(0, pointer);
             if (extracted.length !== 0) {
@@ -153,8 +155,10 @@ export const createMonthGroups = (events: EventItem[], order: 'asc' | 'desc' = '
         let count = 0;
         for (let it = firstMonth; it <= lastMonth && sortedEvents.length !== 0; it = addMonths(it, 1)) {
             let pointer = binarySearch(sortedEvents, { dateTime: it.toISOString() }, eventAscend);
-            if (pointer < 1) {
+            if (pointer < 0) {
                 pointer = (-1 * pointer) - 1;
+            } else {
+                pointer += 1;
             }
             const extracted = sortedEvents.splice(0, pointer);
             if(extracted.length !== 0) {

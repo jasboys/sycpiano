@@ -45,6 +45,19 @@ const PhotoFader: React.FC<PhotoFaderProps> = ({ item, isCurrent, idx, isMobile 
                 alt="Sean Chen Pianist Photo Viewer"
                 csss={{
                     desktop: css` visibility: hidden; `,
+                    picture: css`
+                        position: absolute;
+                        width: 100%;
+                        height: 100%;
+                        padding: 1rem 1rem 3rem;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                    `,
+                    loading: css`
+                        background-color: rgb(208 208 208);
+                        fill: rgb(208 208 208);
+                    `
                 }}
                 desktopAttributes={{
                     webp: {

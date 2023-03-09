@@ -22,7 +22,7 @@
         "jsxImportSource": "@emotion/react",
         "allowJs": true,
         "noEmit": true,
-        "moduleResolution": "node",
+        "moduleResolution": "nodenext",
         "isolatedModules": true,
         "esModuleInterop": true,
         "noImplicitAny": true,

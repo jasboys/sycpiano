@@ -18,7 +18,7 @@ import {
     MonthGroups,
     findDateInMonthGroups,
 } from 'src/components/Schedule/types';
-import { lightBlue } from 'src/styles/colors';
+import { lightBlue, logoBlue } from 'src/styles/colors';
 import { lato2 } from 'src/styles/fonts';
 import { screenPortrait, screenXS, screenXSandPortrait } from 'src/screens';
 import { toMedia } from 'src/mediaQuery';
@@ -59,11 +59,11 @@ const LoadingDiv = styled.div({
 });
 
 const SpinnerContainer = styled.div({
-    borderRadius: '50%',
-    backgroundColor: 'rgba(255 255 255 / 0.7)',
-    backdropFilter: 'blur(5px)',
+    // borderRadius: '50%',
+    // backgroundColor: 'rgba(255 255 255 / 0.7)',
+    // backdropFilter: 'blur(5px)',
     margin: '0.7rem',
-    boxShadow: '0 0 4px rgba(0 0 0 / 0.3)',
+    // boxShadow: '0 0 4px rgba(0 0 0 / 0.3)',
     display: 'flex',
 });
 
@@ -78,9 +78,10 @@ const EndOfList = styled.div({
     width: '80vw',
     maxWidth: 720,
     overflow: 'hidden',
-    boxShadow: cardShadow,
-    borderRadius: 8,
-    backgroundColor: 'white',
+    // boxShadow: cardShadow,
+    // borderRadius: 8,
+    // backgroundColor: 'rgba(255 255 255 / 0.5)',
+    // backdropFilter: 'blur(2px)',
     display: 'flex',
     flexWrap: 'wrap',
     fontFamily: lato2,
@@ -88,6 +89,7 @@ const EndOfList = styled.div({
     alignItems: 'center',
     justifyContent: 'center',
     fontSize: '1.8rem',
+    color: logoBlue,
     [toMedia([screenXS, screenPortrait])]: {
         flexDirection: 'column',
     }
@@ -116,7 +118,6 @@ const ScrollingContainer = styled.div<{ isSearch: boolean; }>((props) => ({
         width: '100%',
         height: '100%',
         overflowY: 'scroll',
-        padding: '2rem 0',
         marginTop: 0,
         [toMedia(screenXSandPortrait)]: {
             paddingTop: 0,
@@ -132,30 +133,34 @@ const Events = styled.div({
 
 const MonthGroup = styled.div({
     marginBottom: 4,
+    width: '100vw',
 })
 
 const MonthBar = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
-    color: lightBlue,
-    fontFamily: lato2,
-    fontWeight: 'bold',
-    fontSize: 'min(10vw, 2.5rem)',
-    padding: '0 1rem',
+    fontSize: 'min(10vw, 2.0rem)',
     position: 'sticky',
     top: 0,
-    backgroundColor: 'white',
-    borderRadius: 8,
-    zIndex: 5,
-    width: '100%',
-    maxWidth: isMobile ? '88vw' : '800px',
-    margin: isMobile ? 'auto' : '0.1rem auto',
-    boxShadow: cardShadow,
+    zIndex: 11,
+    width: '80vw',
+    maxWidth: isMobile ? '88vw' : '960px',
+    margin: isMobile ? 'auto' : '0 auto',
+    display: 'flex',
+    fontFamily: lato2,
+    backgroundColor: 'rgb(238 238 238)',
+    color: logoBlue,
+    borderBottom: `1px var(--logo-blue) solid`,
 }));
 
 const MonthText = styled.div<{ isMobile: boolean }>(({}) => ({
-    width: 'min-content',
-    // background: `linear-gradient(white 88%, rgba(255, 255, 255, 0) 88%)`,
-    padding: '1rem 0.5rem 0.5rem',
+    flex: '0 0 calc(50% - 200px)',
     whiteSpace: 'nowrap',
+    textAlign: 'right',
+    padding: '2rem 0.5rem 0.8rem 0',
+}));
+
+const YearText = styled.div<{ isMobile: boolean }>(({}) => ({
+    flex: 1,
+    padding: '2rem 0 0.8rem 0.5rem',
 }));
 
 const loadingOnEnter = (el: HTMLElement) => {
@@ -372,13 +377,30 @@ export const EventList: React.FC<EventListProps> = (props) => {
                     debouncedFetch({ scrollTop, scrollHeight, clientHeight });
                 }}
             >
+                {/* <div
+                    css={{
+                        position: 'absolute',
+                        top: 0,
+                        backgroundColor: 'rgb(238 238 238)',
+                        width: '100%',
+                        maxWidth: 800,
+                        height: 40,
+                        margin: 'auto',
+                        left: 0,
+                        right: 0,
+                        zIndex: 5
+                    }}
+                /> */}
                 {eventItemsLength ?
                     eventItems.monthGroups.map((monthGroup, idx) =>
                         <MonthGroup key={`${props.type}-${lastQuery!}-${idx}-month`}>
                             <MonthBar isMobile={isHamburger}>
                                 <MonthText isMobile={isHamburger}>
-                                    {format(parseISO(monthGroup.dateTime), 'MMMM yyyy')}
+                                    {format(parseISO(monthGroup.dateTime), 'MMMM')}
                                 </MonthText>
+                                <YearText isMobile={isHamburger}>
+                                    {format(parseISO(monthGroup.dateTime), 'yyyy')}
+                                </YearText>
                             </MonthBar>
                             <Events>
                                 {
@@ -403,10 +425,10 @@ export const EventList: React.FC<EventListProps> = (props) => {
                 {
                     <EndOfList>
                         {eventItemsLength === 0 ?
-                            'No Events Fetched'
+                            'No events fetched'
                             : (hasMore ?
                                 ''
-                                : 'No More Events')}
+                                : 'No more events')}
                     </EndOfList>
                 }
             </ScrollingContainer>

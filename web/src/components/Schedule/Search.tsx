@@ -27,7 +27,7 @@ type SearchProps = {
 };
 
 const ResultsContainer = styled.div({
-    width: '90%',
+    width: 'fit-content',
     maxWidth: '25rem',
     height: 80,
     right: 0,
@@ -36,7 +36,7 @@ const ResultsContainer = styled.div({
     margin: '1rem 1.5rem',
     fontFamily: lato2,
     borderRadius: 30,
-    zIndex: 6,
+    zIndex: 14,
     display: 'flex',
     alignItems: 'flex-end',
     justifyContent: 'flex-end',
@@ -54,7 +54,7 @@ const ResultsContainer = styled.div({
 const Container = styled.div<{ dirty: boolean; expanded: boolean; }>(
     {
         height: 50,
-        zIndex: 7,
+        zIndex: 15,
         right: 0,
         position: 'fixed',
         padding: '9px 9px',

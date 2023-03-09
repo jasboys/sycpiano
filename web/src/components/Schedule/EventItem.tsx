@@ -32,13 +32,12 @@ type EventItemProps = EventItemType & { className?: string; isMobile: boolean; p
 const detailSectionMargin = (extra?: number) => css` margin-bottom: ${20 + (extra || 0)}px; `;
 
 const ItemContainer = styled.div({
-    margin: '2.4rem auto',
+    margin: '1.8rem auto',
     width: '80vw',
-    maxWidth: 720,
+    maxWidth: 800,
     overflow: 'hidden',
     boxShadow: cardShadow,
-    borderRadius: 8,
-    backgroundColor: 'white',
+    backgroundColor: 'transparent',
     display: 'flex',
     [toMedia(screenXS)]: {
         flexWrap: 'wrap',
@@ -46,11 +45,12 @@ const ItemContainer = styled.div({
     }
 });
 
-const ImageContainer = styled.div(
+const Left = styled.div(
     {
-        flex: '0 0 300px',
+        flex: '0 0 calc(50% - 200px)',
+        display: 'flex',
+        justifyContent: 'end',
         backgroundColor: lightBlue,
-        width: 300,
         overflow: 'hidden',
         position: 'relative',
         [toMedia(screenXS)]: {
@@ -61,11 +61,21 @@ const ImageContainer = styled.div(
     }
 );
 
+const BlueOverlay = styled.div({
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    zIndex: 4,
+    backgroundColor: `${lightBlue}cc`,
+    backdropFilter: 'blur(1px)',
+});
+
 const Image = styled.img({
     objectFit: 'cover',
     height: '100%',
     width: '100%',
-    position: 'relative',
+    position: 'absolute',
+    zIndex: 3,
     [toMedia(screenXS)]: {
         left: 0,
     }
@@ -77,10 +87,20 @@ const DetailsContainer = styled.div({
     display: 'flex',
     flexDirection: 'column',
     fontFamily: lato2,
+    position: 'relative',
+    zIndex: 10,
+    // backdropFilter: 'blur(2px) contrast(0.1) brightness(1.8)',
+    backgroundColor: 'rgba(255 255 255 / 0.92)',
+    height: '100%',
     [toMedia(screenXS)]: {
         width: 0,
         minWidth: '100%',
     }
+});
+
+const Right = styled.div({
+    flex: 1,
+    position: 'relative',
 });
 
 const StyledShareIcon = styled(ShareIconInstance, {
@@ -88,10 +108,18 @@ const StyledShareIcon = styled(ShareIconInstance, {
 })({
     position: 'absolute',
     right: 0,
-    fill: 'white',
-    stroke: 'white',
-    margin: '0.2rem',
-    filter: 'drop-shadow(0 0 1px black)',
+    top: 0,
+    fill: 'var(--light-blue)',
+    stroke: 'var(--light-blue)',
+    margin: '0.25rem',
+    width: 32,
+    height: 32,
+    transition: 'opacity 250ms',
+    // filter: 'drop-shadow(0 0 1px var(--light-blue))',
+    '&:hover': {
+        cursor: 'pointer',
+        opacity: 0.6,
+    },
 });
 
 const CopiedTooltip = styled.div<{ x: number; y: number; strategy: 'absolute' | 'fixed' }>({
@@ -167,26 +195,16 @@ const EventItem: React.FC<EventItemProps> = ({
 
     return (
         <ItemContainer>
-            <ImageContainer>
-                <Image src={((usePlacePhoto && !!photoReference) ? getGooglePlacePhoto(photoReference, 300) : imageUrl) ?? ''} />
+            <Left>
                 {DateChildren}
-                <StyledShareIcon width={36} height={36} onClick={onCopy} ref={reference} />
-                <Transition<undefined>
-                    in={copiedIn}
-                    onEnter={fadeOnEnter(0, 0.15)}
-                    onExit={fadeOnExit(0, 0.15)}
-                    timeout={250}
-                    mountOnEnter={true}
-                    unmountOnExit={true}
-                >
-                    <CopiedTooltip x={x ?? 0} y={y ?? 0} strategy={strategy} ref={floating}>
-                        <Arrow y={middlewareData.arrow?.y ?? 0} ref={arrowRef} />
-                        <CopiedDiv>Link Copied!</CopiedDiv>
-                    </CopiedTooltip>
-                </Transition>
-            </ImageContainer>
+                <BlueOverlay />
+                <Image src={((usePlacePhoto && !!photoReference) ? getGooglePlacePhoto(photoReference, 300) : imageUrl) ?? ''} />
+
+            </Left>
+            <Right>
 
             <DetailsContainer>
+
                 <EventName css={detailSectionMargin()} name={name} isMobile={isMobile} permaLink={permaLink} eventType={type} />
 
                 {!allDay && (
@@ -202,7 +220,22 @@ const EventItem: React.FC<EventItemProps> = ({
                 {pieces.length !== 0 && <EventProgram program={pieces} />}
 
                 {website && <EventWebsiteButton website={website} />}
+                <StyledShareIcon width={36} height={36} onClick={onCopy} ref={reference} />
+                <Transition<undefined>
+                    in={copiedIn}
+                    onEnter={fadeOnEnter(0, 0.15)}
+                    onExit={fadeOnExit(0, 0.15)}
+                    timeout={250}
+                    mountOnEnter={true}
+                    unmountOnExit={true}
+                >
+                    <CopiedTooltip x={x ?? 0} y={y ?? 0} strategy={strategy} ref={floating}>
+                        <Arrow y={middlewareData.arrow?.y ?? 0} ref={arrowRef} />
+                        <CopiedDiv>Link Copied!</CopiedDiv>
+                    </CopiedTooltip>
+                </Transition>
             </DetailsContainer>
+            </Right>
         </ItemContainer>
     );
 };

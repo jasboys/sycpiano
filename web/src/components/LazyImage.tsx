@@ -42,6 +42,7 @@ interface LazyImageProps {
         readonly mobile?: Interpolation<Theme>;
         readonly desktop?: Interpolation<Theme>;
         readonly loading?: Interpolation<Theme>;
+        readonly picture?: Interpolation<Theme>;
     };
     readonly loadingComponent?: 'default' | React.ComponentType;
     readonly alt: string;
@@ -152,7 +153,7 @@ export const LazyImage: React.FC<LazyImageProps> = (props) => {
                 </div>
             </Transition>
 
-            <picture key="mobile">
+            <picture key="mobile" css={csss?.picture}>
                 <source {...sourceProps} />
                 <img {...imgProps} />
             </picture>
