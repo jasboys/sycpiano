@@ -28,7 +28,6 @@ import { toMedia } from 'src/mediaQuery';
 import { NavigateFunction, PathMatch, useMatch, useNavigate } from 'react-router-dom';
 import module from 'src/module';
 import store, { AppDispatch, GlobalStateShape } from 'src/store';
-import { MediaContext } from 'src/components/App/App';
 
 const register = module(store);
 
@@ -58,6 +57,8 @@ interface MusicState {
 interface MusicStateToProps {
     readonly items: MusicListItem[];
     readonly flatItems: MusicFileItem[];
+    readonly hiDpx: boolean;
+    readonly isHamburger: boolean;
 }
 
 interface MusicDispatchToProps {
@@ -508,81 +509,81 @@ class Music extends React.Component<MusicProps, MusicState> {
 
     render() {
         const Visualizer = this.state.Visualizer;
+        const isHamburger = this.props.isHamburger;
+        const hiDpx = this.props.hiDpx;
         return (
-            <MediaContext.Consumer>
-                {({ isHamburger, hiDpx }) => (
-                    <MusicDiv onScroll={isHamburger ? scrollFn(navBarHeight.get(hiDpx), this.onScrollDispatch) : undefined}>
-                        <audio
-                            id="audio"
-                            crossOrigin="anonymous"
-                            ref={this.audio}
-                            onLoadedData={this.audioOnLoad}
-                            onCanPlayThrough={this.audioOnLoad}
-                            onPlaying={this.onPlaying}
-                            onTimeUpdate={this.onTimeUpdate}
-                            onPause={this.onPause}
-                            onEnded={this.onEnded}
-                        />
-                        <MusicPlaylist
-                            play={this.play}
-                            onClick={this.loadTrack}
-                            currentTrackId={(this.state.currentTrack) ? this.state.currentTrack.id : ''}
-                            userInteracted={this.state.userInteracted}
-                            toggleShuffle={this.toggleShuffle}
-                            isShuffle={this.state.isShuffle}
-                        />
-                        <AudioUI
-                            seekAudio={this.seekAudio}
-                            onStartDrag={this.onStartDrag}
-                            onDrag={this.onDrag}
-                            play={this.play}
-                            pause={this.pause}
-                            next={this.playNext}
-                            prev={this.playPrev}
-                            isPlaying={this.state.isPlaying}
-                            currentPosition={this.state.playbackPosition}
-                            isMobile={isHamburger}
-                            isLoading={this.state.isLoading}
-                            isMouseMove={this.state.isMouseMove}
-                            radii={this.state.radii}
-                            setMouseMove={this.setMouseMove}
-                            setRadii={this.setRadii}
-                            setHoverSeekring={this.setHoverSeekring}
-                        />
-                        <AudioInfo
-                            duration={this.state.duration}
-                            currentPosition={this.state.playbackPosition}
-                            currentTrack={this.state.currentTrack}
-                            isMobile={isHamburger}
-                            matchParams={!isEmpty(this.props.matches?.params)}
-                        />
-                        {Visualizer && (
-                            <Visualizer
-                                currentPosition={this.state.playbackPosition}
-                                analyzerL={this.analyzerL}
-                                analyzerR={this.analyzerR}
-                                isPlaying={this.state.isPlaying}
-                                duration={this.state.duration}
-                                prevTimestamp={this.state.lastUpdateTimestamp}
-                                volume={this.state.volume}
-                                isMobile={isHamburger}
-                                isHoverSeekring={this.state.isHoverSeekring}
-                                hoverAngle={this.state.angle}
-                                setRadii={this.setRadii}
-                            />
-                        )}
-                    </MusicDiv>
+            <MusicDiv onScroll={isHamburger ? scrollFn(navBarHeight.get(hiDpx), this.onScrollDispatch) : undefined}>
+                <audio
+                    id="audio"
+                    crossOrigin="anonymous"
+                    ref={this.audio}
+                    onLoadedData={this.audioOnLoad}
+                    onCanPlayThrough={this.audioOnLoad}
+                    onPlaying={this.onPlaying}
+                    onTimeUpdate={this.onTimeUpdate}
+                    onPause={this.onPause}
+                    onEnded={this.onEnded}
+                />
+                <MusicPlaylist
+                    play={this.play}
+                    onClick={this.loadTrack}
+                    currentTrackId={(this.state.currentTrack) ? this.state.currentTrack.id : ''}
+                    userInteracted={this.state.userInteracted}
+                    toggleShuffle={this.toggleShuffle}
+                    isShuffle={this.state.isShuffle}
+                />
+                <AudioUI
+                    seekAudio={this.seekAudio}
+                    onStartDrag={this.onStartDrag}
+                    onDrag={this.onDrag}
+                    play={this.play}
+                    pause={this.pause}
+                    next={this.playNext}
+                    prev={this.playPrev}
+                    isPlaying={this.state.isPlaying}
+                    currentPosition={this.state.playbackPosition}
+                    isMobile={isHamburger}
+                    isLoading={this.state.isLoading}
+                    isMouseMove={this.state.isMouseMove}
+                    radii={this.state.radii}
+                    setMouseMove={this.setMouseMove}
+                    setRadii={this.setRadii}
+                    setHoverSeekring={this.setHoverSeekring}
+                />
+                <AudioInfo
+                    duration={this.state.duration}
+                    currentPosition={this.state.playbackPosition}
+                    currentTrack={this.state.currentTrack}
+                    isMobile={isHamburger}
+                    matchParams={!isEmpty(this.props.matches?.params)}
+                />
+                {Visualizer && (
+                    <Visualizer
+                        currentPosition={this.state.playbackPosition}
+                        analyzerL={this.analyzerL}
+                        analyzerR={this.analyzerR}
+                        isPlaying={this.state.isPlaying}
+                        duration={this.state.duration}
+                        prevTimestamp={this.state.lastUpdateTimestamp}
+                        volume={this.state.volume}
+                        isMobile={isHamburger}
+                        isHoverSeekring={this.state.isHoverSeekring}
+                        hoverAngle={this.state.angle}
+                        setRadii={this.setRadii}
+                    />
                 )}
-            </MediaContext.Consumer>
+            </MusicDiv>
         );
     }
 }
 
 type PathMatchResult = PathMatch<'composer' | 'piece'> | PathMatch<'composer' | 'piece' | 'movement'> | null;
 
-const mapStateToProps = ({ audioPlaylist }: GlobalStateShape): MusicStateToProps => ({
+const mapStateToProps = ({ audioPlaylist, mediaQuery }: GlobalStateShape): MusicStateToProps => ({
     items: audioPlaylist.items,
     flatItems: audioPlaylist.flatItems,
+    isHamburger: mediaQuery.isHamburger,
+    hiDpx: mediaQuery.hiDpx,
 });
 
 const ConnectedMusic = connect<MusicStateToProps, void, Record<never, unknown>, GlobalStateShape>(

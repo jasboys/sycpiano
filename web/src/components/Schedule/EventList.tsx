@@ -1,9 +1,8 @@
 import startCase from 'lodash-es/startCase';
 import * as React from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams } from 'react-router-dom';
 import { createCachedSelector } from 're-reselect';
-
 import styled from '@emotion/styled';
 
 import debounce from 'lodash-es/debounce';
@@ -32,10 +31,10 @@ import isBefore from 'date-fns/isBefore';
 import format from 'date-fns-tz/format';
 import formatInTimeZone from 'date-fns-tz/formatInTimeZone';
 import { useSearchParams } from 'react-router-dom';
-import { cardShadow } from 'src/styles/mixins';
 import { Transition } from 'react-transition-group';
 import { gsap } from 'gsap';
-import { MediaContext } from '../App/App';
+import { css } from '@emotion/react';
+import { mqSelectors } from 'src/components/App/reducers';
 
 interface EventListProps {
     readonly type: EventListName;
@@ -118,11 +117,12 @@ const ScrollingContainer = styled.div<{ isSearch: boolean; }>((props) => ({
         width: '100%',
         height: '100%',
         overflowY: 'scroll',
+        overflowX: 'hidden',
         marginTop: 0,
         [toMedia(screenXSandPortrait)]: {
             paddingTop: 0,
-            marginTop: props.isSearch ? 112 : 82,
-            height: 'calc(100% - 82px)'
+            marginTop: props.isSearch ? 'calc(80px + 1.2rem)' : 'calc(50px + 1.2rem)',
+            height: props.isSearch ? 'calc(100% - (80px + 1.2rem))' : 'calc(100% - (50px + 1.2rem))'
         }
     })
 );
@@ -141,27 +141,35 @@ const MonthBar = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
     position: 'sticky',
     top: 0,
     zIndex: 11,
-    width: '80vw',
-    maxWidth: isMobile ? '88vw' : '960px',
+    width: '86vw',
+    maxWidth: isMobile ? 'unset' : 850,
     margin: isMobile ? 'auto' : '0 auto',
     display: 'flex',
     fontFamily: lato2,
     backgroundColor: 'rgb(238 238 238)',
     color: logoBlue,
     borderBottom: `1px var(--logo-blue) solid`,
+    padding: '2rem 0 0.5rem 0',
+    [toMedia(screenXS)]: {
+        paddingTop: '0.5rem',
+    }
 }));
 
-const MonthText = styled.div<{ isMobile: boolean }>(({}) => ({
-    flex: '0 0 calc(50% - 200px)',
-    whiteSpace: 'nowrap',
-    textAlign: 'right',
-    padding: '2rem 0.5rem 0.8rem 0',
-}));
+const MonthText = styled.div<{ isMobile: boolean }>(
+    {
+        paddingRight: '0.3rem',
+        flex: '0 0 max(calc(50% - 200px), 100px)',
+        whiteSpace: 'nowrap',
+        textAlign: 'right',
+    }
+);
 
-const YearText = styled.div<{ isMobile: boolean }>(({}) => ({
-    flex: 1,
-    padding: '2rem 0 0.8rem 0.5rem',
-}));
+const YearText = styled.div<{ isMobile: boolean }>(
+    {
+        paddingLeft: '0.3rem',
+        flex: 1,
+    }
+);
 
 const loadingOnEnter = (el: HTMLElement) => {
     gsap.fromTo(el, { y: 200 }, { duration: 0.25, y: 0, ease: "back.out(1)" });
@@ -194,7 +202,7 @@ export const EventList: React.FC<EventListProps> = (props) => {
     const { date: dateParam } = useParams();
     const dispatch = useAppDispatch();
     const [params, _setParams] = useSearchParams();
-    const { isHamburger } = React.useContext(MediaContext);
+    const isHamburger = useAppSelector(mqSelectors.isHamburger);
 
     const searchQ = params.get('q');
 
@@ -301,7 +309,7 @@ export const EventList: React.FC<EventListProps> = (props) => {
         }),
     };
 
-    const onScroll = ({ clientHeight, scrollTop, scrollHeight }: OnScrollProps) => {
+    const onScroll = React.useCallback(({ clientHeight, scrollTop, scrollHeight }: OnScrollProps) => {
         if (scrollTop + clientHeight > scrollHeight - 600 &&
             hasMore &&
             !isFetchingList &&
@@ -312,7 +320,7 @@ export const EventList: React.FC<EventListProps> = (props) => {
                 dispatch(fetchEvents(getScrollFetchParams[props.type]()));
             }
         }
-    };
+    }, [hasMore, isFetchingList, maxDate, minDate, props.type]);
 
     const debouncedFetch = React.useMemo(
         () => debounce(onScroll, 100, { leading: true })

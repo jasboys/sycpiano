@@ -10,7 +10,7 @@ import NavBarLogo from 'src/components/App/NavBar/NavBarLogo';
 import { navBarHeight } from 'src/styles/variables';
 import { setSpecificRouteNameAction, toggleExpanded } from 'src/components/App/NavBar/reducers';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { MediaContext } from 'src/components/App/App';
+import { mqSelectors } from '../reducers';
 
 interface NavBarProps {
     readonly currentBasePath: string;
@@ -20,6 +20,7 @@ interface NavBarProps {
 }
 
 const StyledNavBar = styled.div<{
+    height: number;
     hiDpx: boolean;
     isHamburger: boolean;
     isHome: boolean;
@@ -41,8 +42,8 @@ const StyledNavBar = styled.div<{
         boxShadow: '0 0 6px 1px rgba(0, 0, 0, 0.3)',
         backdropFilter: 'blur(1px)'
     },
-    ({ hiDpx }) => ({
-        height: navBarHeight.get(hiDpx),
+    ({ height }) => ({
+        height,
     }),
     ({ hiDpx }) => hiDpx && ({
         paddingRight: 15,
@@ -84,7 +85,8 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
 }, ref) => {
     const isExpanded = useAppSelector(({ navbar }) => navbar.isExpanded);
     const cartIsOpen = useAppSelector(({ cart }) => cart.visible);
-    const { hiDpx, isHamburger } = React.useContext(MediaContext);
+    const isHamburger = useAppSelector(mqSelectors.isHamburger);
+    const hiDpx = useAppSelector(mqSelectors.hiDpx);
 
     const dispatch = useAppDispatch();
 
@@ -106,6 +108,7 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(({
             isHamburger={isHamburger}
             menuExpanded={isExpanded}
             cartExpanded={cartIsOpen}
+            height={navBarHeight.get(hiDpx)}
         >
             <NavBarLogo
                 isHome={isHome}

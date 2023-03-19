@@ -14,7 +14,7 @@ import { getHoverStyle, noHighlight } from 'src/styles/mixins';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { createSelector } from '@reduxjs/toolkit';
 import { css } from '@emotion/react';
-import { MediaContext } from 'src/components/App/App';
+import { mqSelectors } from 'src/components/App/reducers';
 
 interface ShopItemProps {
     item: Product;
@@ -184,7 +184,7 @@ const cartSelector = createSelector(
 );
 
 export const ShopItem: React.FC<ShopItemProps> = ({ item, className }) => {
-    const { isHamburger } = React.useContext(MediaContext);
+    const isHamburger = useAppSelector(mqSelectors.isHamburger);
     const isItemInCart = useAppSelector((state) => cartSelector(state, item.id));
     const [isMouseDown, setIsMouseDown] = React.useState(false);
 

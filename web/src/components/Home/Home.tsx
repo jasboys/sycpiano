@@ -21,8 +21,9 @@ import { Transition } from 'react-transition-group';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
 import { useAppSelector } from 'src/hooks';
 import format from 'date-fns/format';
-import { MediaContext } from 'src/components/App/App';
 import { toMedia } from 'src/mediaQuery';
+import { createStructuredSelector } from 'reselect';
+import { mqSelectors } from '../App/reducers';
 
 const textShadowColor = 'rgba(0 0 0 / 0.75)';
 
@@ -213,10 +214,16 @@ const Content: React.FC = () => (
         <Social />
         <StyledCopyright>Copyright © {format(new Date(), 'yyyy')} Sean Chen</StyledCopyright>
     </React.Fragment>
-)
+);
+
+const selectors = createStructuredSelector({
+    isHamburger: mqSelectors.isHamburger,
+    hiDpx: mqSelectors.hiDpx,
+    screenPortrait: mqSelectors.screenPortrait,
+});
 
 const Home: React.FC<Record<never, unknown>> = () => {
-    const { isHamburger, hiDpx, screenPortrait } = React.useContext(MediaContext);
+    const { isHamburger, hiDpx, screenPortrait } = useAppSelector(selectors);
     const menuExpanded = useAppSelector(({ navbar }) => navbar.isExpanded);
     const cartExpanded = useAppSelector(({ cart }) => cart.visible);
 

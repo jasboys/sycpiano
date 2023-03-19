@@ -25,6 +25,9 @@ import { AppDispatch, GlobalStateShape } from 'src/store';
 import { GLOBAL_QUERIES } from './screens';
 import { CSSVariables } from 'src/styles/variables';
 import { colorVars } from 'src/styles/colors';
+import { mediaQueryReducer } from './components/App/reducers';
+
+export type MediaQueryStateShape = Record<keyof typeof GLOBAL_QUERIES, boolean>;
 
 export type AnyStateShape = BioStateShape |
     DiscsStateShape |
@@ -37,7 +40,8 @@ export type AnyStateShape = BioStateShape |
     VideoPlayerStateShape |
     VideoPlaylistStateShape |
     NavBarStateShape |
-    CartStateShape;
+    CartStateShape |
+    MediaQueryStateShape;
 
 export interface IndexableGlobalStateShape extends GlobalStateShape {
     [key: string]: AnyStateShape | undefined;
@@ -45,7 +49,8 @@ export interface IndexableGlobalStateShape extends GlobalStateShape {
 
 export type AnyReducerType = typeof bioReducer | typeof discsReducer | typeof audioPlaylistReducer |
     typeof photoListReducer | typeof photoViewerReducer | typeof acclaimsListReducer | typeof cartReducer |
-    typeof scheduleReducer | typeof videoPlayerReducer | typeof videoPlaylistReducer | typeof shopReducer;
+    typeof scheduleReducer | typeof videoPlayerReducer | typeof videoPlaylistReducer | typeof shopReducer |
+    typeof mediaQueryReducer;
 
 export interface Reducers {
     readonly bio: typeof bioReducer;
@@ -57,6 +62,7 @@ export interface Reducers {
     readonly scheduleEventItems: typeof scheduleReducer;
     readonly videoPlayer: typeof videoPlayerReducer;
     readonly videoPlaylist: typeof videoPlaylistReducer;
+    readonly mediaQuery: typeof mediaQueryReducer;
     readonly [key: string]: AnyReducerType | undefined;
 }
 
@@ -65,10 +71,12 @@ export interface ThunkAPIType {
     state: GlobalStateShape
 }
 
-// export type AnyComponent<P> = React.ComponentClass<P> | React.FunctionComponent<P>;
-export type DynamicReducers = Omit<GlobalStateShape, 'shop' | 'navbar' | 'cart'>;
+export type StaticReducers = Pick<GlobalStateShape, 'shop' | 'navbar' | 'cart' | 'mediaQuery'>;
 
-export type AsyncStore = Omit<Store<GlobalStateShape>, 'shop' | 'navbar' | 'cart'> & { async?: Partial<Reducers> };
+// export type AnyComponent<P> = React.ComponentClass<P> | React.FunctionComponent<P>;
+export type DynamicReducers = Omit<GlobalStateShape, keyof StaticReducers>;
+
+export type AsyncStore = Omit<Store<GlobalStateShape>, keyof StaticReducers> & { async?: Partial<Reducers> };
 export type IndexableAsyncStore = Store<IndexableGlobalStateShape> & { async?: Reducers };
 
 export interface AsyncModule<P> {
@@ -80,7 +88,5 @@ export interface FloatingRefStructure {
     readonly arrow: HTMLDivElement | null;
     readonly floating: HTMLDivElement | null;
 }
-
-export type MediaContextType = Record<keyof typeof GLOBAL_QUERIES, boolean>;
 
 export type CSSVariableKeys = keyof typeof CSSVariables | keyof typeof colorVars;

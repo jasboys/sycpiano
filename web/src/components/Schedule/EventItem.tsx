@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import {
@@ -29,8 +28,6 @@ const getGooglePlacePhoto = (photoReference: string, maxHeight: number) =>
 
 type EventItemProps = EventItemType & { className?: string; isMobile: boolean; permaLink: string; listType: EventListName };
 
-const detailSectionMargin = (extra?: number) => css` margin-bottom: ${20 + (extra || 0)}px; `;
-
 const ItemContainer = styled.div({
     margin: '1.8rem auto',
     width: '80vw',
@@ -39,34 +36,23 @@ const ItemContainer = styled.div({
     boxShadow: cardShadow,
     backgroundColor: 'transparent',
     display: 'flex',
-    [toMedia(screenXS)]: {
-        flexWrap: 'wrap',
-        flexDirection: 'column',
-    }
 });
 
-const Left = styled.div(
-    {
-        flex: '0 0 calc(50% - 200px)',
-        display: 'flex',
-        justifyContent: 'end',
-        backgroundColor: lightBlue,
-        overflow: 'hidden',
-        position: 'relative',
-        [toMedia(screenXS)]: {
-            height: '50vw',
-            flex: '0 0 50vw',
-            width: '100%',
-        }
-    }
-);
+const Left = styled.div({
+    flex: '0 0 max(calc(50% - 200px), 100px)',
+    display: 'flex',
+    justifyContent: 'end',
+    backgroundColor: lightBlue,
+    overflow: 'hidden',
+    position: 'relative',
+});
 
-const BlueOverlay = styled.div({
+const Overlay = styled.div({
     position: 'absolute',
     width: '100%',
     height: '100%',
     zIndex: 4,
-    backgroundColor: `${lightBlue}cc`,
+    backgroundColor: `#14141473`,
     backdropFilter: 'blur(1px)',
 });
 
@@ -93,9 +79,8 @@ const DetailsContainer = styled.div({
     backgroundColor: 'rgba(255 255 255 / 0.92)',
     height: '100%',
     [toMedia(screenXS)]: {
-        width: 0,
-        minWidth: '100%',
-    }
+        padding: '1.0rem',
+    },
 });
 
 const Right = styled.div({
@@ -119,6 +104,10 @@ const StyledShareIcon = styled(ShareIconInstance, {
     '&:hover': {
         cursor: 'pointer',
         opacity: 0.6,
+    },
+    [toMedia(screenXS)]: {
+        height: 24,
+        width: 24,
     },
 });
 
@@ -167,7 +156,7 @@ const EventItem: React.FC<EventItemProps> = ({
     website,
     permaLink,
     timezone,
-    listType,
+    // listType,
     imageUrl,
     photoReference,
     usePlacePhoto,
@@ -197,7 +186,7 @@ const EventItem: React.FC<EventItemProps> = ({
         <ItemContainer>
             <Left>
                 {DateChildren}
-                <BlueOverlay />
+                <Overlay />
                 <Image src={((usePlacePhoto && !!photoReference) ? getGooglePlacePhoto(photoReference, 300) : imageUrl) ?? ''} />
 
             </Left>
@@ -205,7 +194,7 @@ const EventItem: React.FC<EventItemProps> = ({
 
             <DetailsContainer>
 
-                <EventName css={detailSectionMargin()} name={name} isMobile={isMobile} permaLink={permaLink} eventType={type} />
+                <EventName name={name} isMobile={isMobile} permaLink={permaLink} eventType={type} />
 
                 {!allDay && (
                     <EventTime
@@ -220,7 +209,7 @@ const EventItem: React.FC<EventItemProps> = ({
                 {pieces.length !== 0 && <EventProgram program={pieces} />}
 
                 {website && <EventWebsiteButton website={website} />}
-                <StyledShareIcon width={36} height={36} onClick={onCopy} ref={reference} />
+                {/* <StyledShareIcon width={36} height={36} onClick={onCopy} ref={reference} /> */}
                 <Transition<undefined>
                     in={copiedIn}
                     onEnter={fadeOnEnter(0, 0.15)}

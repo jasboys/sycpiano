@@ -77,15 +77,15 @@ const PreviewOverlay: React.FC<PreviewOverlayProps> = (props) => {
         }
     }, [bgImage])
 
-    const onImageLoad = (el: HTMLImageElement | HTMLElement | Element | undefined) => {
+    const onImageLoad = React.useCallback((el: HTMLImageElement | HTMLElement | Element | undefined) => {
         if (el && isImageElement(el)) {
             setBgImage(el.currentSrc);
         }
-    };
+    }, []);
 
-    const clickCallback = () => {
+    const clickCallback = React.useCallback(() => {
         dispatch(playVideo(props.isMobile));
-    };
+    }, [props.isMobile]);
 
     return (
         <Transition<undefined>

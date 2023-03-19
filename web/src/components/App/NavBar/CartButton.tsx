@@ -9,9 +9,9 @@ import { toggleCartList } from 'src/components/Cart/reducers';
 import { lato4 } from 'src/styles/fonts';
 import { gsap } from 'gsap';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { MediaContext } from 'src/components/App/App';
 import { css } from '@emotion/react';
 import { toggleExpanded } from 'src/components/App/NavBar/reducers';
+import { mqSelectors } from '../reducers';
 
 const cartStyle = ({ isHamburger }: { isHamburger: boolean }) => css({
     noHighlight,
@@ -90,7 +90,7 @@ interface CartButtonProps {
 }
 
 const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(({ isHome }, ref) => {
-    const { isHamburger } = React.useContext(MediaContext);
+    const isHamburger = useAppSelector(mqSelectors.isHamburger);
     const cartCount = useAppSelector(({ cart }) => cart.items.length);
     const cartIsInit = useAppSelector(({ cart }) => cart.isInit);
     const cartOpened = useAppSelector(({ cart }) => cart.visible);

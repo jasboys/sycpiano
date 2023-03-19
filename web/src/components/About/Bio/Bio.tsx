@@ -21,8 +21,9 @@ import { isHamburger, screenLengths, screenM, screenPortrait, screenWidths, scre
 import { camel2var, navBarHeight } from 'src/styles/variables';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { isImageElement } from 'src/utils';
-import { MediaContext } from 'src/components/App/App';
 import { toMedia } from 'src/mediaQuery';
+import { mqSelectors } from 'src/components/App/reducers';
+import { createStructuredSelector } from 'reselect';
 
 const pictureHeight = 250;
 
@@ -201,8 +202,15 @@ const imageLoaderStyle = css({
     position: 'absolute',
 });
 
+const selector = createStructuredSelector({
+    hiDpx: mqSelectors.hiDpx,
+    screenPortrait: mqSelectors.screenPortrait,
+    screenXS: mqSelectors.screenXS,
+    isHamburger: mqSelectors.isHamburger,
+});
+
 const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
-    const { hiDpx, isHamburger, screenXS, screenPortrait } = React.useContext(MediaContext);
+    const { hiDpx, isHamburger, screenXS, screenPortrait } = useAppSelector(selector);
     const [bgImage, setBgImage] = React.useState('');
     const bgRef = React.useRef<HTMLImageElement>(null);
     const dispatch = useAppDispatch();
@@ -234,24 +242,24 @@ const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
         }
     }, [bgImage]);
 
-    const onImageLoad = (el: HTMLImageElement | Element | undefined) => {
+    const onImageLoad = React.useCallback((el: HTMLImageElement | Element | undefined) => {
         if (el && isImageElement(el)) {
             setBgImage(el.currentSrc);
         }
-    };
+    }, []);
 
-    const onImageDestroy = () => {
+    const onImageDestroy = React.useCallback(() => {
         if (bgRef.current) {
             gsap.to(
                 bgRef.current,
                 { autoAlpha: 0, duration: 0.1 },
             );
         }
-    };
+    }, []);
 
-    const onScrollDispatch = (triggerHeight: number, scrollTop: number) => {
+    const onScrollDispatch = React.useCallback((triggerHeight: number, scrollTop: number) => {
         dispatch(onScroll({ triggerHeight, scrollTop }));
-    };
+    }, []);
 
     return (
         <BioContainer onScroll={

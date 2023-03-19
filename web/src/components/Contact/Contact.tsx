@@ -8,10 +8,10 @@ import contacts from 'src/components/Contact/contacts';
 
 import { minRes, webkitMinDPR } from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
-import { useAppDispatch } from 'src/hooks';
+import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { pushed } from 'src/styles/mixins';
-import { MediaContext } from 'src/components/App/App';
 import { toMedia } from 'src/mediaQuery';
+import { mqSelectors } from 'src/components/App/reducers';
 
 type ContactProps = Record<never, unknown>;
 
@@ -36,7 +36,8 @@ const ContactContainer = styled.div(
     });
 
 const Contact: React.FC<ContactProps> = () => {
-    const { isHamburger, hiDpx } = React.useContext(MediaContext);
+    const isHamburger = useAppSelector(mqSelectors.isHamburger);
+    const hiDpx = useAppSelector(mqSelectors.hiDpx);
     const dispatch = useAppDispatch();
 
     const onScrollDispatch = (triggerHeight: number, scrollTop: number) => {

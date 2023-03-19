@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Transition } from 'react-transition-group';
 import { initCartAction, syncLocalStorage } from 'src/components/Cart/reducers';
 import { CartList } from 'src/components/Cart/CartList';
+import { mqSelectors } from 'src/components/App/reducers';
 import { LoadingInstance } from 'src/components/LoadingSVG';
 import isEqual from 'react-fast-compare';
 
@@ -10,7 +11,6 @@ import { gsap } from 'gsap';
 
 import { navBarHeight } from 'src/styles/variables';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { MediaContext } from 'src/components/App/App';
 
 const Arrow = styled.div({
     position: 'absolute',
@@ -79,7 +79,8 @@ interface CartProps {
 }
 
 const Cart: React.FC<CartProps> = ({ position, strategy, floatingRef, arrowRef, arrow, update }) => {
-    const { isHamburger, hiDpx } = React.useContext(MediaContext);
+    const isHamburger = useAppSelector(mqSelectors.isHamburger);
+    const hiDpx = useAppSelector(mqSelectors.hiDpx);
     const dispatch = useAppDispatch();
     const visible = useAppSelector(({ cart }) => cart.visible);
     const isCheckingOut = useAppSelector(({ cart }) => cart.isCheckingOut);
@@ -98,7 +99,7 @@ const Cart: React.FC<CartProps> = ({ position, strategy, floatingRef, arrowRef, 
         }
     }, [cartLength]);
 
-    const arrowCallback = React.useCallback((el) => {
+    const arrowCallback = React.useCallback((el: HTMLDivElement) => {
         arrowRef.current = el;
         update();
     }, [update]);

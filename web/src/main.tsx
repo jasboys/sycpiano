@@ -1,5 +1,5 @@
 import bluebird from 'bluebird';
-import * as ReactDOM from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import 'vite/modulepreload-polyfill';
 
 global.Promise = (bluebird as any); /* eslint-disable-line @typescript-eslint/no-explicit-any */
@@ -12,7 +12,9 @@ import store from 'src/store';
 import App from 'src/components/App/App';
 
 function main() {
-    ReactDOM.render((
+    const container = document.getElementById('app') as HTMLElement;
+    const root = createRoot(container);
+    root.render(
         <Provider store={store}>
             <BrowserRouter>
                 <Routes>
@@ -20,7 +22,7 @@ function main() {
                 </Routes>
             </BrowserRouter>
         </Provider>
-    ), document.getElementById('app') as HTMLElement);
+    );
 }
 
 main();

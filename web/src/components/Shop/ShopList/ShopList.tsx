@@ -9,7 +9,7 @@ import { lato2 } from 'src/styles/fonts';
 import { logoBlue } from 'src/styles/colors';
 import { useAppSelector } from 'src/hooks';
 import { useParams } from 'react-router-dom';
-import { MediaContext } from 'src/components/App/App';
+import { mqSelectors } from 'src/components/App/reducers';
 
 type ShopListProps = Record<never, unknown>;
 
@@ -55,7 +55,7 @@ const CategoryToLabel: Record<typeof ProductTypes[number], string> = {
 };
 
 const ShopList: React.FC<ShopListProps> = () => {
-    const { isHamburger } = React.useContext(MediaContext);
+    const isHamburger = useAppSelector(mqSelectors.isHamburger);
     const { product } = useParams();
     const categorizedItems = useAppSelector(({ shop }) => shop.items);
 

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { connect } from 'react-redux';
 
 import styled from '@emotion/styled';

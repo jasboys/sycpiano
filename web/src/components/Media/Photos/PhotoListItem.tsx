@@ -10,7 +10,6 @@ import { PhotoItem } from 'src/components/Media/Photos/types';
 import { idFromItem, resizedPathFromItem, staticPathFromItem } from 'src/components/Media/Photos/utils';
 import { ChildRendererProps } from 'src/components/Media/types';
 
-import { lightBlue } from 'src/styles/colors';
 import { generateSrcsetWidths, resizedImage } from 'src/imageUrls';
 import { screenWidths, screenPortrait, screenXS } from 'src/screens';
 import { isImageElement } from 'src/utils';
@@ -69,12 +68,12 @@ const loadingStyle = css`
 const PhotoListItem: React.FC<ChildRendererProps<PhotoItem>> = (props) => {
     const [isLoaded, setIsLoaded] = React.useState(false);
 
-    const successCb = (el: HTMLImageElement | HTMLElement | Element | undefined) => {
+    const successCb = React.useCallback((el: HTMLImageElement | HTMLElement | Element | undefined) => {
         setIsLoaded(true);
         if (el && isImageElement(el)) {
             gsap.to(el, { duration: 0.2, autoAlpha: 1 });
         }
-    };
+    }, []);
 
     const { item, currentItemId, isMobile, onClick } = props;
     const isActive = currentItemId === idFromItem(item);

@@ -9,8 +9,8 @@ import VideoPlaylistItem from 'src/components/Media/Videos/VideoPlaylistItem';
 
 import { screenXS, screenPortrait } from 'src/screens';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { MediaContext } from 'src/components/App/App';
 import { toMedia } from 'src/mediaQuery';
+import { mqSelectors } from 'src/components/App/reducers';
 
 const StyledPlaylistContainer = styled.div`
     width: fit-content;
@@ -36,19 +36,19 @@ const videoPlaylistStyle = css`
 `;
 
 const VideoPlaylist: React.FC<Record<never, unknown>> = () => {
-    const { isHamburger } = React.useContext(MediaContext);
+    const isHamburger = useAppSelector(mqSelectors.isHamburger);
     const isShow = useAppSelector(({ videoPlaylist }) => videoPlaylist.isShow);
     const videos = useAppSelector(({ videoPlaylist }) => videoPlaylist.items);
     const videoId = useAppSelector(({ videoPlayer }) => videoPlayer.videoId);
     const dispatch = useAppDispatch();
 
-    const toggleDispatch = (show?: boolean) => {
+    const toggleDispatch = React.useCallback((show?: boolean) => {
         dispatch(togglePlaylist(show));
-    };
+    }, []);
 
-    const playDispatch = (isMobile: boolean, videoId: string) => {
+    const playDispatch = React.useCallback((isMobile: boolean, videoId: string) => {
         dispatch(playVideo(isMobile, videoId));
-    };
+    }, []);
 
     return (
         <StyledPlaylistContainer>

@@ -19,7 +19,6 @@ import { noHighlight } from 'src/styles/mixins';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { ThemeProvider } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
-import { MediaContext } from 'src/components/App/App';
 import { isHamburger } from 'src/screens';
 import { toMedia } from 'src/mediaQuery';
 
@@ -265,7 +264,6 @@ const InnerBorderContainer = styled.div({
 });
 
 export const CartList: React.FC<Record<never, unknown>> = () => {
-    const { isHamburger } = React.useContext(MediaContext);
     const shopItems = useAppSelector(({ shop }) => shop.items);
     const cart = useAppSelector(({ cart }) => cart.items);
     const checkoutError = useAppSelector(({ cart }) => cart.checkoutError);

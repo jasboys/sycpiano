@@ -9,9 +9,10 @@ import { lightBlue, logoBlue } from 'src/styles/colors';
 import { lato2 } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
-import { useAppDispatch } from 'src/hooks';
+import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { toggleExpanded } from 'src/components/App/NavBar/reducers';
-import { MediaContext } from '../App';
+import { createStructuredSelector } from 'reselect';
+import { mqSelectors } from 'src/components/App/reducers';
 
 const navBarFontSizeREM = 2.5;
 const letterSpacing = 0.05;
@@ -94,13 +95,20 @@ const routeNameMapping: Record<string, string | string[]> = {
     checkout: 'shop',
 };
 
+const selector = createStructuredSelector({
+    hiDpx: mqSelectors.hiDpx,
+    screenS: mqSelectors.screenS,
+    screenXS: mqSelectors.screenXS,
+    isHamburger: mqSelectors.isHamburger,
+});
+
 const NavBarLogo: React.FC<React.HTMLAttributes<HTMLDivElement> & NavBarLogoProps> = ({
     isHome,
     isExpanded,
     specificRouteName,
 }) => {
     const dispatch = useAppDispatch();
-    const { hiDpx, screenS, screenXS, isHamburger } = React.useContext(MediaContext);
+    const { hiDpx, screenS, screenXS, isHamburger } = useAppSelector(selector);
     const mapped = specificRouteName && (routeNameMapping[specificRouteName] ?? specificRouteName);
     const displayName = (Array.isArray(mapped)) ? mapped[screenXS ? 1 : 0] : mapped;
     const letterCount = displayName?.length;

@@ -14,6 +14,7 @@ import * as csurf from 'csurf';
 import * as cors from 'cors';
 import * as rootPath from 'app-root-path';
 import { precheck } from './precheck';
+import { Options } from 'pino-http';
 
 const main = async () => {
     await precheck();
@@ -37,7 +38,7 @@ const main = async () => {
                     res: pino.stdSerializers.res,
                     err: pino.stdSerializers.err,
                 },
-            });
+            } as Options);
         } else {
             const morgan = await import('morgan');
             return morgan('dev');

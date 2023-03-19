@@ -12,9 +12,9 @@ import { idFromItem } from 'src/components/Media/Photos/utils';
 import Playlist from 'src/components/Media/Playlist';
 import { screenXS, screenPortrait, webkitMinDPR, minRes } from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
-import { useAppDispatch } from 'src/hooks';
-import { MediaContext } from 'src/components/App/App';
+import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { toMedia } from 'src/mediaQuery';
+import { mqSelectors } from 'src/components/App/reducers';
 
 const photoListStyle = css`
     padding-left: 5px;
@@ -66,13 +66,13 @@ interface PhotoListProps {
 }
 
 const PhotoList: React.FC<PhotoListProps> = (props) => {
-    const { isHamburger, hiDpx } = React.useContext(MediaContext);
+    const isHamburger = useAppSelector(mqSelectors.isHamburger);
+    const hiDpx = useAppSelector(mqSelectors.hiDpx);
     const dispatch = useAppDispatch();
 
-    const onScrollDispatch = (triggerHeight: number, scrollTop: number) => {
+    const onScrollDispatch = React.useCallback((triggerHeight: number, scrollTop: number) => {
         dispatch(onScroll({ triggerHeight, scrollTop }));
-    };
-
+    }, []);
 
     const {
         items,

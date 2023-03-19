@@ -14,6 +14,7 @@ export interface PlaylistProps {
         div?: SerializedStyles;
         ul?: SerializedStyles;
     };
+    readonly children?: React.ReactNode;
     readonly hasToggler: boolean;
     readonly isShow: boolean;
     readonly togglePlaylist?: (isShow?: boolean) => void;

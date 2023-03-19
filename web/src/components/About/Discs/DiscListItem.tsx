@@ -6,9 +6,8 @@ import iconMap from 'src/components/About/Discs/iconMap';
 import { Disc } from 'src/components/About/Discs/types';
 
 import { staticImage } from 'src/imageUrls';
-import { webkitMinDPR, minRes, isHamburger, screenXS, hiDpx } from 'src/screens';
+import { isHamburger, screenXS, hiDpx } from 'src/screens';
 import { cardShadow } from 'src/styles/mixins';
-import { MediaContext } from 'src/components/App/App';
 import { toMedia } from 'src/mediaQuery';
 
 const LinkImage = styled.img`
@@ -58,7 +57,10 @@ const DiscItem = styled.div({
     flexWrap: 'wrap',
     [toMedia(isHamburger)]: {
         width: '80vw',
-    }
+    },
+    '&:first-of-type': {
+        marginTop: '2rem',
+    },
 });
 
 const DiscImageContainer = styled.div({
@@ -155,10 +157,9 @@ interface DiscListProps {
 }
 
 const DiscListItem: React.FC<DiscListProps> = ({ item }) => {
-    const mediaProps = React.useContext(MediaContext);
     return (
         <li>
-            <DiscItem {...mediaProps}>
+            <DiscItem>
                 <DiscImageContainer>
                     <DiscImage src={`/static/images/cd-thumbnails/${item.thumbnailFile}`} />
                 </DiscImageContainer>

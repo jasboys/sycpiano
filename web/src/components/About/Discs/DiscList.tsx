@@ -7,9 +7,9 @@ import DiscListItem from 'src/components/About/Discs/DiscListItem';
 import { lato2, lato3 } from 'src/styles/fonts';
 import { camel2var } from 'src/styles/variables';
 import { useAppSelector } from 'src/hooks';
-import { MediaContext } from 'src/components/App/App';
 import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
+import { mqSelectors } from 'src/components/App/reducers';
 
 type DiscListProps = Record<never, unknown>;
 
@@ -33,11 +33,11 @@ const Title = styled.li({
     fontFamily: lato3,
     fontSize: '2rem',
     width: '100%',
-    margin: '4rem auto',
+    margin: '2rem auto',
 });
 
 const DiscList: React.FunctionComponent<DiscListProps> = () => {
-    const { isHamburger } = React.useContext(MediaContext);
+    const isHamburger = useAppSelector(mqSelectors.isHamburger);
     const items = useAppSelector(({ discs }) => discs.discs);
 
     return (

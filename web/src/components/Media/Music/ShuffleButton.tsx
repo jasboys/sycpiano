@@ -3,10 +3,10 @@ import * as React from 'react';
 import { css, Interpolation, Theme } from '@emotion/react';
 
 import { lightBlue } from 'src/styles/colors';
-import { GLOBAL_QUERIES, screenM, screenPortrait, screenXS } from 'src/screens';
+import { screenM, screenPortrait, screenXS } from 'src/screens';
 import { playlistWidth } from 'src/styles/variables';
-import { useMedia } from 'react-media';
 import { toMedia } from 'src/mediaQuery';
+import { useAppSelector } from 'src/hooks';
 
 interface ShuffleButtonProps {
     className?: string;
@@ -53,7 +53,7 @@ const baseClass = (on?: boolean) => css`
 
 const ShuffleButton: React.FC<ShuffleButtonProps> = ({ on, onClick }) => {
     const [extraClass, setExtraClass] = React.useState<Interpolation<Theme>>(null);
-    const { screenTouch } = useMedia({ queries: GLOBAL_QUERIES });
+    const screenTouch = useAppSelector(({ mediaQuery }) => mediaQuery.screenTouch);
 
     return (
         <div

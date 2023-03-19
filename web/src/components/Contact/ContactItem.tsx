@@ -20,8 +20,9 @@ import {
 import { minRes, screenWidths, webkitMinDPR } from 'src/screens';
 import { isImageElement } from 'src/utils';
 import { navBarHeight } from 'src/styles/variables';
-import { MediaContext } from 'src/components/App/App';
 import { toMedia } from 'src/mediaQuery';
+import { useAppSelector } from 'src/hooks';
+import { mqSelectors } from '../App/reducers';
 
 const imageInsetShadowColor = '#222';
 const alternateBackgroundColor = '#eee';
@@ -118,8 +119,7 @@ const StyledContactItem = styled.div({
 type ContactItemProps = ContactItemShape;
 
 const ContactItem: React.FC<ContactItemProps> = (props) => {
-    const mediaProps = React.useContext(MediaContext);
-    const { isHamburger } = mediaProps;
+    const isHamburger = useAppSelector(mqSelectors.isHamburger);
     const [bgImage, setBgImage] = React.useState('');
     const bgRef = React.useRef<HTMLDivElement>(null);
 

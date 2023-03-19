@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useSelector } from 'react-redux';
 
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
@@ -10,12 +9,11 @@ import SpotifyButton from 'src/components/Media/Music/SpotifyButton';
 import Playlist from 'src/components/Media/Playlist';
 
 import { MusicFileItem } from 'src/components/Media/Music/types';
-import { GlobalStateShape } from 'src/store';
 
 import { playlistBackground } from 'src/styles/colors';
 import { screenXS, screenPortrait } from 'src/screens';
-import { createSelector } from '@reduxjs/toolkit';
 import { toMedia } from 'src/mediaQuery';
+import { useAppSelector } from 'src/hooks';
 
 interface MusicPlaylistOwnProps {
     readonly currentTrackId: string;
@@ -61,11 +59,6 @@ const PlaylistContainer = styled.div`
     }
 `;
 
-const selectItems = createSelector(
-    (state: GlobalStateShape) => state.audioPlaylist,
-    (audioPlaylist) => audioPlaylist.items
-);
-
 const MusicPlaylist: React.FC<MusicPlaylistProps> = ({
     onClick,
     currentTrackId,
@@ -75,7 +68,7 @@ const MusicPlaylist: React.FC<MusicPlaylistProps> = ({
     toggleShuffle,
 }) => {
     const didRun = React.useRef<boolean>(false);
-    const items = useSelector(selectItems);
+    const items = useAppSelector(({ audioPlaylist }) => audioPlaylist.items);
 
     React.useEffect(() => {
         if (didRun.current === false) {

@@ -12,6 +12,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import thunk from 'redux-thunk';
 
 import { navBarReducer } from 'src/components/App/NavBar/reducers';
+import { mediaQueryReducer } from './components/App/reducers';
 import { cartReducer } from 'src/components/Cart/reducers';
 import { shopReducer } from 'src/components/Shop/ShopList/reducers';
 
@@ -21,7 +22,8 @@ const staticReducers = {
     navbar: navBarReducer,
     cart: cartReducer,
     shop: shopReducer,
-}
+    mediaQuery: mediaQueryReducer,
+};
 
 const createReducer = (reducers: Partial<Reducers>) => {
     return combineReducers(

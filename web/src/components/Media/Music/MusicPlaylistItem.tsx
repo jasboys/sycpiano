@@ -206,7 +206,6 @@ const MusicCollection: React.FC<MusicItemProps> = ({
     item,
     ...props
 }) => {
-
     return (
         <StyledCollectionContainer>
             <StyledCollectionTitleContainer>

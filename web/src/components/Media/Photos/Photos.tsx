@@ -9,14 +9,13 @@ import { fetchPhotos, selectFirstPhoto, selectPhoto } from 'src/components/Media
 import { PhotoItem } from 'src/components/Media/Photos/types';
 import { idFromItem } from 'src/components/Media/Photos/utils';
 
-import { lato1, lato2 } from 'src/styles/fonts';
+import { lato2 } from 'src/styles/fonts';
 import { pushed } from 'src/styles/mixins';
-import { screenM, screenXS, screenPortrait } from 'src/screens';
-import { playlistContainerWidth } from 'src/styles/variables';
+import { screenXS, screenPortrait } from 'src/screens';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { TransitionGroup } from 'react-transition-group';
-import { MediaContext } from 'src/components/App/App';
 import { toMedia } from 'src/mediaQuery';
+import { mqSelectors } from 'src/components/App/reducers';
 
 const StyledPhotos = styled.div`
     ${pushed}
@@ -54,7 +53,7 @@ const StyledCredit = styled.div`
 `;
 
 const Photos: React.FC<Record<never, unknown>> = () => {
-    const { isHamburger } = React.useContext(MediaContext);
+    const isHamburger = useAppSelector(mqSelectors.isHamburger);
     const dispatch = useAppDispatch();
     const currentItem = useAppSelector(({ photoViewer }) => photoViewer.currentItem);
     const items = useAppSelector(({ photoList }) => photoList.items);
@@ -69,12 +68,13 @@ const Photos: React.FC<Record<never, unknown>> = () => {
         // dispatch(fetchPhotos());
     }, []);
 
-    const selectPhotoCallback = (photo: PhotoItem) => {
+    const selectPhotoCallback = React.useCallback((photo: PhotoItem) => {
         dispatch(selectPhoto(photo));
-    };
+    }, []);
 
-    const isCurrentItem = (item: PhotoItem) =>
-        currentItem && idFromItem(item) === idFromItem(currentItem);
+    const isCurrentItem = React.useCallback((item: PhotoItem) => {
+        return currentItem && idFromItem(item) === idFromItem(currentItem);
+    }, [currentItem]);
 
     return (
         <StyledPhotos>

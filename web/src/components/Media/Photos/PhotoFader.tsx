@@ -23,11 +23,11 @@ const PhotoFader: React.FC<PhotoFaderProps> = ({ item, isCurrent, idx, isMobile 
     const urlWebP = resizedPathFromItem(item, { gallery: true, webp: true });
     const urlJpg = resizedPathFromItem(item, { gallery: true });
 
-    const successCb = (el: HTMLImageElement | HTMLElement | Element | undefined) => {
+    const successCb = React.useCallback((el: HTMLImageElement | HTMLElement | Element | undefined) => {
         if (el && isImageElement(el)) {
             gsap.to(el, { autoAlpha: 1, duration: 0.2 });
         }
-    };
+    }, []);
 
     return (
         <Transition<undefined>

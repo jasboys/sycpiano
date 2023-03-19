@@ -7,8 +7,8 @@ import { SearchIconInstance, SearchIconSVG } from 'src/components/Schedule/Searc
 
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { lato1, lato2 } from 'src/styles/fonts';
-import {  noHighlight } from 'src/styles/mixins';
-import { GLOBAL_QUERIES, screenPortrait, screenXS, screenXSandPortrait } from 'src/screens';
+import { noHighlight } from 'src/styles/mixins';
+import { screenPortrait, screenXS, screenXSandPortrait } from 'src/screens';
 import { toMedia } from 'src/mediaQuery';
 import { createSearchParams, useLocation, useMatch, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -16,9 +16,9 @@ import { createSelector } from 'reselect';
 import { useAppSelector } from 'src/hooks';
 import { GlobalStateShape } from 'src/store';
 import lighten from 'polished/lib/color/lighten';
-import { useMedia } from 'react-media';
 import { Transition } from 'react-transition-group';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
+import { mqSelectors } from '../App/reducers';
 
 const unfocusedGray = rgba(180, 180, 180, 0.4);
 
@@ -30,12 +30,12 @@ const ResultsContainer = styled.div({
     width: 'fit-content',
     maxWidth: '25rem',
     height: 80,
-    right: 0,
+    right: 48,
     position: 'fixed',
     padding: '0.2rem 1rem',
     margin: '1rem 1.5rem',
     fontFamily: lato2,
-    borderRadius: 30,
+    borderRadius: 5,
     zIndex: 14,
     display: 'flex',
     alignItems: 'flex-end',
@@ -46,8 +46,8 @@ const ResultsContainer = styled.div({
     boxShadow: '0 1px 5px -2px rgba(0 0 0 / 0.4)',
     [toMedia([screenXS, screenPortrait])]: {
         left: 0,
-        margin: '1rem auto',
-        maxWidth: 'unset',
+        margin: '0.8rem auto 0',
+        borderRadius: 2,
     },
 });
 
@@ -71,7 +71,7 @@ const Container = styled.div<{ dirty: boolean; expanded: boolean; }>(
 
         [toMedia(screenXSandPortrait)]: {
             left: 0,
-            margin: '1rem auto',
+            margin: '0.8rem auto 0',
             maxWidth: 'unset',
         },
     },
@@ -189,12 +189,12 @@ export const Search: React.FC<SearchProps> = ({ }) => {
         lastQuery,
         isFetching,
     } = useAppSelector(selector);
-    const matches = useMedia({ queries: GLOBAL_QUERIES });
+    const screenXS = useAppSelector(mqSelectors.screenXS);
     const [searchParams] = useSearchParams();
     const [focused, setFocused] = React.useState(false);
     const match = useMatch('/schedule/search');
     const [showCancel, setShowCancel] = React.useState(!!searchParams.get('q'));
-    const [expanded, setExpanded] = React.useState(matches.screenXS || !!searchParams.get('q'));
+    const [expanded, setExpanded] = React.useState(screenXS || !!searchParams.get('q'));
     const { register, handleSubmit, reset, formState, setFocus, getValues, setValue } = useForm<{ search: string }>({
         defaultValues: {
             search: searchParams.get('q') ?? '',
@@ -217,25 +217,27 @@ export const Search: React.FC<SearchProps> = ({ }) => {
         setTimeout(() => setFocus('search'), 250);
     }, [reset, navigate, match]);
 
-    const onSubmit = (data: { search: string }) => {
+    const onSubmit = React.useCallback((data: { search: string }) => {
         // if (data.search === '') {
         //     navigate('/schedule/upcoming');
         // }
         navigate(`/schedule/search?${createSearchParams({ q: data.search })}`, {
             state: location.pathname === '/schedule/search' ? location.state : location.pathname,
         });
-    };
+    }, [location.pathname, location.state, navigate]);
 
     const onFocus = React.useCallback(() => setFocused(true), []);
-    const onBlur = React.useCallback((ev: FocusEvent) => {
+
+    const onBlur = React.useCallback((_ev: FocusEvent) => {
         setFocused(false);
         if (getValues('search') === '') {
-            !matches.screenXS && setTimeout(() => setExpanded(false), 50);
+            !screenXS && setTimeout(() => setExpanded(false), 50);
             if (!!match) {
                 navigate('/schedule/upcoming');
             }
         }
-    }, [getValues, match, navigate, matches.screenXS]);
+    }, [getValues, match, navigate, screenXS]);
+
     const onChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.value !== '' && showCancel === false) {
             setShowCancel(true);
@@ -254,11 +256,11 @@ export const Search: React.FC<SearchProps> = ({ }) => {
     React.useEffect(() => {
         const q = searchParams.get('q');
         if (!q || q === '') {
-            !matches.screenXS && setExpanded(false);
+            !screenXS && setExpanded(false);
         } else {
             setValue('search', searchParams.get('q') ?? '');
         }
-    }, [searchParams, setValue, matches.screenXS]);
+    }, [searchParams, setValue, screenXS]);
 
     // Remember, flex-direction is row reverse inside the Container
     return (
@@ -276,7 +278,7 @@ export const Search: React.FC<SearchProps> = ({ }) => {
                     mountOnEnter={false}
                     unmountOnExit={false}
                 >
-                    <InputGroup isMobile={matches.screenXS || !!searchParams.get('q')}>
+                    <InputGroup isMobile={screenXS || !!searchParams.get('q')}>
                         <Span focused={focused}>
                             <Input
                                 id="search"

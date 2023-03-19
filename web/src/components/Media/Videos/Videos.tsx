@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Helmet } from 'react-helmet';
+import { Helmet } from 'react-helmet-async';
 import { useMatch } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
 import youTube from 'src/services/YouTube';
@@ -19,8 +19,8 @@ import { minRes, webkitMinDPR } from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
 import { titleStringBase } from 'src/utils';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { MediaContext } from 'src/components/App/App';
 import { toMedia } from 'src/mediaQuery';
+import { mqSelectors } from 'src/components/App/reducers';
 
 type VideosProps = Record<never, unknown>;
 
@@ -64,7 +64,7 @@ const LoadingOverlayDiv = styled.div`
 `;
 
 const Videos: React.FC<VideosProps> = () => {
-    const { isHamburger } = React.useContext(MediaContext);
+    const isHamburger = useAppSelector(mqSelectors.isHamburger);
     const match = useMatch('media/videos/:videoId');
     const domElement = React.useRef<HTMLDivElement>(null);
     // const initialized = React.useRef<boolean>(false);

@@ -8,10 +8,10 @@ import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
 
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
-import { useAppDispatch } from 'src/hooks';
-import { MediaContext } from 'src/components/App/App';
+import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { isHamburger } from 'src/screens';
 import { toMedia } from 'src/mediaQuery';
+import { mqSelectors } from 'src/components/App/reducers';
 
 const StyledDiscs = styled.div(
     pushed,
@@ -29,21 +29,20 @@ const StyledDiscs = styled.div(
 type DiscsProps = Record<never, unknown>;
 
 const Discs: React.FC<DiscsProps> = () => {
-    const mediaProps = React.useContext(MediaContext);
-    const { isHamburger, hiDpx } = mediaProps;
+    const isHamburger = useAppSelector(mqSelectors.isHamburger);
+    const hiDpx = useAppSelector(mqSelectors.hiDpx)
     const dispatch = useAppDispatch();
 
     React.useEffect(() => {
         dispatch(fetchDiscs());
     }, []);
 
-    const onScrollDispatch = (triggerHeight: number, scrollTop: number) => {
+    const onScrollDispatch = React.useCallback((triggerHeight: number, scrollTop: number) => {
         dispatch(onScroll({ triggerHeight, scrollTop }));
-    };
+    }, []);
 
     return (
         <StyledDiscs
-            {...mediaProps}
             onScroll={isHamburger ? scrollFn(navBarHeight.get(hiDpx), onScrollDispatch) : undefined}
         >
             <DiscList />
