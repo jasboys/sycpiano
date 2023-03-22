@@ -13,7 +13,11 @@ export const THUMBNAIL_STATIC = 'https://seanchenpiano.com/static/images/product
 
 // const isDev = process.env.NODE_ENV === 'development';
 const host = process.env.HOST;
-const stripe: Stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2022-08-01' });
+
+if (process.env.STRIPE_SECRET_KEY === undefined) {
+    throw new Error('Stripe Secret Key undefined');
+}
+const stripe: Stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: '2022-11-15' });
 
 const stripeCustomerActive = (cr: CustomerReturn): cr is Stripe.Customer => {
     return cr.deleted !== true;
@@ -128,6 +132,9 @@ export const getEmailFromCustomer = async (cid: string): Promise<string> => {
 };
 
 export const constructEvent = (body: string | Buffer, sig: string | string[]): Stripe.Event => {
+    if (process.env.STRIPE_WEBHOOK_KEY === undefined) {
+        throw new Error('Stripe Webhook Key undefined');
+    }
     const event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_KEY);
     return event;
 };

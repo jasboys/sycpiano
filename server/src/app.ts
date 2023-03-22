@@ -49,7 +49,7 @@ const main = async () => {
     await (async () => {
         if (!isProduction) {
             const fav = await import('serve-favicon');
-            app.use(fav(path.resolve(process.env.IMAGE_ASSETS_DIR, 'favicon.png')));
+            app.use(fav(path.resolve(process.env.IMAGE_ASSETS_DIR || './', 'favicon.png')));
         }
     })();
 
@@ -232,10 +232,7 @@ const main = async () => {
             //     res.redirect(301, `https://www.${req.get('host')}${req.originalUrl}`);
             // }
             delete req.query.fbclid;    // NO FACEBOOK
-            const { sanitize = '', notFound = false, ...meta } = await getMetaFromPathAndSanitize(req.path);
-            if (notFound) {
-                res.status(404);
-            }
+            const { sanitize = '', ...meta } = await getMetaFromPathAndSanitize(req.path, req.query.q as string);
             if (sanitize) {
                 res.redirect(req.url.replace(`/${sanitize}`, ''));
                 res.end();
@@ -243,6 +240,7 @@ const main = async () => {
                 meta.image = meta.image ?? `https://${req.get('host')}/static/images/syc_chair_meta.jpg`;
                 res.render('index', {
                     csrf: req.csrfToken(),
+                    ...meta,
                     twitter: meta,
                     facebook: {
                         ...meta,

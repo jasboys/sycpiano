@@ -3,7 +3,7 @@ import { parse, stringify } from 'qs';
 import * as React from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { useMedia } from 'react-media';
-import { Params, PathMatch, Route, Routes, useLocation, useMatch, useNavigate } from 'react-router-dom';
+import { Params, PathMatch, Route, Routes, useLocation, useMatch, useNavigate, useSearchParams } from 'react-router-dom';
 import { SwitchTransition, Transition } from 'react-transition-group';
 
 import Container from 'src/components/App/Container';
@@ -236,7 +236,7 @@ const App: React.FC<Record<never, unknown>> = () => {
         <HelmetProvider>
             <Global styles={globalCss} />
             <Helmet
-                title={`${titleStringBase} | ${currentPage}`}
+                title={`${titleStringBase} ${currentPage}`}
                 meta={[
                     {
                         name: 'description',
@@ -279,7 +279,11 @@ const App: React.FC<Record<never, unknown>> = () => {
                         appear={true}
                     >
                         <FadingContainer shouldBlur={isMobile && (cartOpen || menuOpen) && delayedRouteBase !== '/'}>
-                            <Routes location={routerMatch?.pathnameBase + location.search}>
+                            <Routes location={{
+                                ...location,
+                                pathname: routerMatch?.pathnameBase,
+                                search: location.search
+                            }}>
                                 <Route path="about/*" element={<Container />}>
                                     <Route path="biography" element={
                                         <AsyncComponent<BioProps> moduleProvider={Bio} />
@@ -306,6 +310,14 @@ const App: React.FC<Record<never, unknown>> = () => {
                                     } />
                                 </Route>
                                 <Route path="schedule/*">
+                                    <Route path=":date" Component={
+                                        (props) => {
+                                            const [sp, _setSp] = useSearchParams();
+                                            return (
+                                                <div>{sp}</div>
+                                            )
+                                        }
+                                    } />
                                     <Route path=":type/*" element={
                                         <AsyncComponent<ScheduleProps> moduleProvider={Schedule} type={(routerMatch?.params as Params<"*" | "type">).type as EventListName} />
                                     } />

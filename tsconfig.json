@@ -39,6 +39,7 @@
         "noErrorTruncation": true
     },
     "include": [
-        "web/src"
+        "server/src/meta.ts",
+        "web/src",
     ]
 }

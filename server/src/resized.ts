@@ -6,7 +6,7 @@ import * as arp from 'app-root-path';
 
 const root = arp.toString();
 
-import * as mkdirp from 'mkdirp';
+import mkdirp from 'mkdirp';
 import * as Sharp from 'sharp';
 import { OutgoingHttpHeaders } from 'http';
 
@@ -18,6 +18,9 @@ resized.get('/*', async (req: express.Request<string[], any, any, { width?: stri
     let imgPath = req.params[0];
     if (!imgPath) {
         res.status(404).end();
+    }
+    if (process.env.IMAGE_ASSETS_DIR === undefined) {
+        throw new Error('Missing env vars');
     }
     imgPath = path.join(process.env.IMAGE_ASSETS_DIR, imgPath);
 

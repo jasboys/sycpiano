@@ -209,6 +209,8 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
         if (
             !this.props.analyzerL ||
             !this.props.analyzerR ||
+            !this.frequencyDataL ||
+            !this.frequencyDataR ||
             this.props.isMobile && this.lastCallback && (timestamp - this.lastCallback) < MOBILE_MSPF
         ) {
             return;

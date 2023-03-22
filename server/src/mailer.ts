@@ -11,6 +11,18 @@ import { Attachment } from 'nodemailer/lib/mailer';
 
 const models = db.models;
 
+if (process.env.SMTP_HOST === undefined ||
+    process.env.SMTP_PASSWORD === undefined ||
+    process.env.SMTP_PORT === undefined ||
+    process.env.SMTP_USERNAME === undefined ||
+    process.env.SMTP_PASSWORD === undefined ||
+    process.env.DKIM_PRIVATE_KEY_FILE === undefined ||
+    process.env.IMAGE_ASSETS_DIR === undefined ||
+    process.env.PRODUCTS_DIR === undefined
+) {
+    throw new Error('Missing env vars');
+}
+
 const transportOptions = {
     host: process.env.SMTP_HOST,
     secure: parseInt(process.env.SMTP_PORT) === 465 ? true : false,
@@ -27,6 +39,11 @@ const transportOptions = {
 };
 
 export const duplicateEmailNotification = async (username: string): Promise<void> => {
+    if (
+        process.env.IMAGE_ASSETS_DIR === undefined
+    ) {
+        throw new Error('Missing env vars');
+    }
     const transport = nodemailer.createTransport(transportOptions);
     const attachments: {
         filename: string;
@@ -67,6 +84,11 @@ export const duplicateEmailNotification = async (username: string): Promise<void
 }
 
 export const emailRegisterNotification = async (username: string): Promise<void> => {
+    if (
+        process.env.IMAGE_ASSETS_DIR === undefined
+    ) {
+        throw new Error('Missing env vars');
+    }
     const transport = nodemailer.createTransport(transportOptions);
     const attachments: {
         filename: string;
@@ -109,6 +131,11 @@ export const emailRegisterNotification = async (username: string): Promise<void>
 // To email a manual request, omit clientRef (or pass falsey value)
 export const emailPDFs = async (productIDs: string[], email: string, clientRef?: string): Promise<void> => {
     try {
+        if (process.env.PRODUCTS_DIR === undefined ||
+            process.env.IMAGE_ASSETS_DIR === undefined
+        ) {
+            throw new Error('Missing env vars');
+        }
         const transport = nodemailer.createTransport(transportOptions);
 
         const products = await models.product.findAll({
@@ -156,7 +183,7 @@ export const emailPDFs = async (productIDs: string[], email: string, clientRef?:
             });
 
             products.forEach((prod) => {
-                zip.file(path.resolve(process.env.PRODUCTS_DIR, prod.file), { name: prod.file });
+                zip.file(path.resolve(process.env.PRODUCTS_DIR!, prod.file), { name: prod.file });
             });
             await zip.finalize();
             attachments = [

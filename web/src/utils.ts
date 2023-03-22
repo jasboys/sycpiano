@@ -1,5 +1,5 @@
 import { gsap } from 'gsap';
-import differenceInCalendarYears from 'date-fns/differenceInCalendarYears';
+import { baseString, getAge as _getAge, descriptions } from '../../server/src/common';
 
 export interface FormattedLocationShape {
     venue: string;
@@ -23,42 +23,12 @@ export const getViewportSize = (): { width: number; height: number } => (
     }
 );
 
-export const titleStringBase = 'Sean Chen: Pianist, Composer, Arranger';
+export const titleStringBase = baseString;
 
-const getAge = () => differenceInCalendarYears(new Date(), new Date(1988, 7, 27));
+export const getAge = _getAge;
 
 // map of page name to meta title strings
-export const metaDescriptions: {
-    home: string;
-    biography: string;
-    discography: string;
-    contact: string;
-    upcoming: string;
-    archive: string;
-    videos: string;
-    music: string;
-    photos: string;
-    press: string;
-    getMusic: (piece: string, contributors?: string) => string;
-    shop: string;
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-    [index: string]: any;
-} = {
-        home: 'Welcome to the official website of pianist, composer, and arranger Sean Chen. Third Prize at the 2013 Van Cliburn, Christel DeHaan Classical Fellow of the 2013 American Pianists Awards, and Artist-in-Residence at University of Missouri, Kansas City.',
-        biography: `Hailed as a charismatic rising star with “an exceptional ability to connect with an audience combined with an easy virtuosity” (Huffington Post), ${getAge()}-year-old American pianist Sean Chen, third prize winner at the 2013 Van Cliburn International Piano Competition and recipient of the DeHaan Classical Fellowship as the winner of the 2013 American Pianists Awards, has continued to earn accolades for “alluring, colorfully shaded renditions” (New York Times) and “genuinely sensitive” (LA Times) playing. He was named a 2015 fellow by the prestigious Leonore Annenberg Fellowship Fund for the Performing Arts.`,
-        discography: 'Complete discography of Sean Chen',
-        contact: `Contact information for Sean Chen and for booking performances.`,
-        upcoming: 'Upcoming recitals, concerti, and masterclasses.',
-        archive: 'Past recitals, concerti, and masterclasses.',
-        videos: 'A playlist of Sean Chen\'s YouTube clips.',
-        music: 'A playlist of Sean Chen\'s live concert recordings, and a link to his Spotify musician page.',
-        getMusic: (piece: string, contributors?: string) =>
-            `Listen to Sean Chen's live performance of ${piece}` + (contributors ? `, with ${contributors}` : '.'),
-        photos: 'Publicity photos for browsing, and a link to a Dropbox folder for high-resolution images.',
-        press: `Press of Sean Chen's performances.`,
-        shop: `Online shop of Sean Chen's arrangements, cadenzas, and original compositions.`,
-        faqs: `Information about Sean Chen Piano online shop.`,
-    };
+export const metaDescriptions = descriptions;
 
 export const formatPrice = (price: number): string => (
     '$' + (price / 100).toFixed(2)

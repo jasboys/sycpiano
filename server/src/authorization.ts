@@ -38,7 +38,9 @@ const authorize = async (user: string) => {
     }
 };
 
-export const authAndGetRole: express.RequestHandler = async (req, res, next) => {
+type HandlerWithRole = express.RequestHandler<unknown, unknown, unknown, unknown, { role: 'admin' | 'customer' }>
+
+export const authAndGetRole: HandlerWithRole = async (req, res, next) => {
     if (ignoredMethods.includes(req.method)) {
         return next();
     }
@@ -66,15 +68,15 @@ export const authAndGetRole: express.RequestHandler = async (req, res, next) => 
                 issuer: 'seanchenpiano.com'
             }
         );
-        req.role = user.role;
+        res.locals.role = user.role;
         next();
     } catch (e) {
         res.status(401).send('Unauthorized');
     }
 };
 
-export const checkAdmin: express.RequestHandler = async (req, res, next) => {
-    if (req.role === 'admin' || ignoredMethods.includes(req.method)) {
+export const checkAdmin: HandlerWithRole = async (req, res, next) => {
+    if (res.locals.role === 'admin' || ignoredMethods.includes(req.method)) {
         next();
     } else {
         res.status(401).send('Unauthorized');

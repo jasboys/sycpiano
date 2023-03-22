@@ -210,19 +210,19 @@ export const Search: React.FC<SearchProps> = ({ }) => {
         });
         setShowCancel(false);
         if (!!match) {
-            navigate((location.state ?? '/schedule/upcoming') as string);
+            navigate((location.state?.last ?? '/schedule/upcoming') as string);
         } else {
             event.preventDefault();
         }
         setTimeout(() => setFocus('search'), 250);
-    }, [reset, navigate, match]);
+    }, [reset, navigate, match, location.state]);
 
     const onSubmit = React.useCallback((data: { search: string }) => {
         // if (data.search === '') {
         //     navigate('/schedule/upcoming');
         // }
         navigate(`/schedule/search?${createSearchParams({ q: data.search })}`, {
-            state: location.pathname === '/schedule/search' ? location.state : location.pathname,
+            state: location.pathname === '/schedule/search' ? location.state : { last: location.pathname },
         });
     }, [location.pathname, location.state, navigate]);
 
@@ -265,7 +265,7 @@ export const Search: React.FC<SearchProps> = ({ }) => {
     // Remember, flex-direction is row reverse inside the Container
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
-            <Container dirty={formState.isDirty} expanded={expanded} onClick={onClick} onMouseDown={(ev) => ev.preventDefault()}>
+            <Container dirty={formState.isDirty} expanded={expanded} onClick={onClick}>
                 <SearchIconSVG />
                 <SubmitButton disabled={!formState.isDirty} expanded={expanded} dirty={formState.isDirty}>
                     <SearchIconInstance />
@@ -285,6 +285,7 @@ export const Search: React.FC<SearchProps> = ({ }) => {
                                 type="text"
                                 placeholder={`try 'Mozart'`}
                                 onFocus={onFocus}
+                                onMouseDown={(ev) => ev.stopPropagation()}
                                 {...register('search', {
                                     onBlur,
                                     onChange,

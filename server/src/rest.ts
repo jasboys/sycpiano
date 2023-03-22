@@ -157,7 +157,7 @@ const sequelizeSearchFields =
             return { rows, count: rows.length }
         }
 
-const getSearchTerm = <Attributes>(
+const getSearchTerm = <Attributes extends object>(
     model: ModelStatic<Model<Attributes>>,
     field: keyof Attributes,
     comparator: symbol,
@@ -172,7 +172,7 @@ const getSearchTerm = <Attributes>(
 }
 
 const prepareQueries =
-    <Attributes>(
+    <Attributes extends object>(
         model: ModelStatic<Model<Attributes>>,
         searchableFields: (keyof Attributes)[]
     ) =>

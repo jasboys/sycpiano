@@ -126,7 +126,11 @@ class AudioVisualizer extends React.Component<AudioVisualizerProps> {
         const timestamp = performance.now();
         if (this.props.isMobile && this.lastCallback && (timestamp - this.lastCallback) < MOBILE_MSPF) {
             return;
-        } else if (!(this.props.analyzerL && this.props.analyzerR) || !this.visualizationCtx) {
+        } else if (
+            !(this.props.analyzerL && this.props.analyzerR) ||
+            !(this.frequencyDataL && this.frequencyDataR) ||
+            !this.visualizationCtx
+        ) {
             return;
         } else {
             if (this.props.isMobile) {

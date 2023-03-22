@@ -8,7 +8,7 @@ const config = () => {
     let host: string;
     let database: string;
     let port: number;
-    const dbUrl = process.env.DB_URL;
+    const dbUrl = process.env.DATABASE_URL;
     if (dbUrl) {
         let portString;
         const match = dbUrl.match(/postgres:\/\/(.+):(.+)@(.+):(.+)\/(.+)/);
@@ -26,6 +26,13 @@ const config = () => {
         ] = match;
         port = parseInt(portString, 10);
     } else {
+        if (
+            process.env.DB_USER === undefined ||
+            process.env.DB_PASS === undefined ||
+            process.env.DB_NAME === undefined
+        ) {
+            throw new Error('Missing env variables');
+        }
         username = process.env.DB_USER;
         password = process.env.DB_PASS;
         host = process.env.DB_HOST || '127.0.0.1';

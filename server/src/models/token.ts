@@ -12,7 +12,7 @@ export interface TokenCreationAttributes extends TokenAttributes {}
 export class token extends Model<TokenAttributes, TokenCreationAttributes> implements TokenAttributes {
     declare id: string;
     declare token: string;
-    declare expires?: Date | string;
+    declare expires?: Date;
     declare readonly createdAt?: Date | string;
     declare readonly updatedAt?: Date | string;
 }
