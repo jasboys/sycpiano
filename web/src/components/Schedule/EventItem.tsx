@@ -21,7 +21,9 @@ import { cardShadow } from 'src/styles/mixins';
 import { ShareIconInstance } from './ShareIconSVG';
 import { arrow, offset, useFloating } from '@floating-ui/react-dom';
 import { Transition } from 'react-transition-group';
-import { fadeOnEnter, fadeOnExit } from 'src/utils';
+import { fadeOnEnter, fadeOnExit, titleStringBase } from 'src/utils';
+import { formatInTimeZone } from 'date-fns-tz';
+import { parseISO } from 'date-fns';
 
 const getGooglePlacePhoto = (photoReference: string, maxHeight: number) =>
     `https://maps.googleapis.com/maps/api/place/photo?maxheight=${maxHeight}&photo_reference=${photoReference}&key=${GAPI_KEY}`;
@@ -91,12 +93,9 @@ const Right = styled.div({
 const StyledShareIcon = styled(ShareIconInstance, {
     shouldForwardProp: () => true,
 })({
-    position: 'absolute',
-    right: 0,
-    top: 0,
+    position: 'relative',
     fill: 'var(--light-blue)',
     stroke: 'var(--light-blue)',
-    margin: '0.25rem',
     width: 32,
     height: 32,
     transition: 'opacity 250ms',
@@ -143,6 +142,13 @@ const Arrow = styled.div<{ y: number; }>({
     top: props.y,
 }));
 
+const Links = styled.div({
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: '0.6rem',
+})
+
 const EventItem: React.FC<EventItemProps> = ({
     dateTime,
     endDate,
@@ -162,7 +168,7 @@ const EventItem: React.FC<EventItemProps> = ({
     usePlacePhoto,
 }) => {
     const arrowRef = React.useRef<HTMLDivElement | null>(null);
-    const [copiedIn, setCopiedIn] = React.useState(false);
+    const [shared, setShared] = React.useState(false);
     const { x, y, reference, floating, strategy, middlewareData } = useFloating({
         placement: 'left',
         middleware: [
@@ -171,13 +177,25 @@ const EventItem: React.FC<EventItemProps> = ({
         ],
     });
 
-    const onCopy = React.useCallback(async (_ev: React.MouseEvent<SVGElement>) => {
-        await window.navigator.clipboard.writeText(`${window.location.host}${permaLink}`);
-        setCopiedIn(true);
-        setTimeout(() => {
-            setCopiedIn(false);
-        }, 2000);
+    const onClick = React.useCallback(async (_ev: React.MouseEvent<SVGElement>) => {
+        // await window.navigator.clipboard.writeText(`${window.location.host}${permaLink}`);
+        // setCopiedIn(true);
+        // setTimeout(() => {
+        //     setCopiedIn(false);
+        // }, 2000);
         // console.log('copied');
+        const shareData: ShareData = {
+            title: titleStringBase + 'Event | ' + formatInTimeZone(parseISO(dateTime), timezone, 'EEE, MMMM dd, yyyy, h:mmaaa z'),
+            text: name,
+            url: window.location.host + permaLink,
+        };
+        if (navigator.canShare(shareData)) {
+            await navigator.share(shareData);
+            setShared(true);
+            setTimeout(() => {
+                setShared(false);
+            }, 2000);
+        }
     }, [permaLink]);
 
     const DateChildren = <EventDate dateTime={dateTime} endDate={endDate} timezone={timezone} isMobile={isMobile} />;
@@ -208,10 +226,10 @@ const EventItem: React.FC<EventItemProps> = ({
                 {collaborators.length !== 0 && <EventCollaborators collaborators={collaborators} />}
                 {pieces.length !== 0 && <EventProgram program={pieces} />}
 
-                {website && <EventWebsiteButton website={website} />}
-                {/* <StyledShareIcon width={36} height={36} onClick={onCopy} ref={reference} /> */}
+                <Links>{website && <EventWebsiteButton website={website} />}
+                <StyledShareIcon width={36} height={36} onClick={onClick} ref={reference} />
                 <Transition<undefined>
-                    in={copiedIn}
+                    in={shared}
                     onEnter={fadeOnEnter(0, 0.15)}
                     onExit={fadeOnExit(0, 0.15)}
                     timeout={250}
@@ -220,9 +238,10 @@ const EventItem: React.FC<EventItemProps> = ({
                 >
                     <CopiedTooltip x={x ?? 0} y={y ?? 0} strategy={strategy} ref={floating}>
                         <Arrow y={middlewareData.arrow?.y ?? 0} ref={arrowRef} />
-                        <CopiedDiv>Link Copied!</CopiedDiv>
+                        <CopiedDiv>Link Shared!</CopiedDiv>
                     </CopiedTooltip>
                 </Transition>
+                </Links>
             </DetailsContainer>
             </Right>
         </ItemContainer>

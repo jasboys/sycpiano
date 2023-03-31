@@ -1,10 +1,10 @@
-import { isBefore, parseISO, startOfDay } from 'date-fns';
+import { isBefore, isValid, parseISO, startOfDay } from 'date-fns';
 import * as express from 'express';
 import * as sequelize from 'sequelize';
 import { Op } from 'sequelize';
 
 import db from '../models';
-import { calendar } from '../models/calendar';
+import { CalendarAttributes, calendar } from '../models/calendar';
 const models = db.models;
 
 // const { and, eq, gt, lt, or } = Sequelize.Op;
@@ -31,17 +31,18 @@ const calendarIncludeBase = [
     },
 ];
 
-function getEventsBefore(before: string | Date, limit?: number) {
+const calendarOptionsBase: sequelize.FindOptions<CalendarAttributes> = {
+    attributes: {
+        exclude: ['created_at', 'updated_at', '_search', 'createdAt', 'updatedAt'],
+    },
+    include: calendarIncludeBase,
+};
+
+
+function getEventsBefore(before: Date, limit?: number) {
     return models.calendar.findAll({
-        attributes: {
-            exclude: ['created_at', 'updated_at', 'createdAt', 'updatedAt'],
-        },
-        include: calendarIncludeBase,
-        where: {
-            dateTime: {
-                [Op.lt]: before,
-            },
-        },
+        ...calendarOptionsBase,
+        where: sequelize.where(sequelize.literal('date_time::date'), Op.lt, before),
         limit,
         order: [
             ['dateTime', 'DESC'],
@@ -52,17 +53,10 @@ function getEventsBefore(before: string | Date, limit?: number) {
 }
 
 // Includes the date specified (greater than)
-function getEventsAfter(after: string | Date, limit?: number) {
+function getEventsAfter(after: Date, limit?: number) {
     return models.calendar.findAll({
-        attributes: {
-            exclude: ['created_at', 'updated_at', 'createdAt', 'updatedAt'],
-        },
-        include: calendarIncludeBase,
-        where: {
-            dateTime: {
-                [Op.gte]: after,
-            },
-        },
+        ...calendarOptionsBase,
+        where: sequelize.where(sequelize.literal('date_time::date'), Op.gte, after),
         limit,
         order: [
             ['dateTime', 'ASC'],
@@ -72,24 +66,26 @@ function getEventsAfter(after: string | Date, limit?: number) {
     });
 }
 
-// The interval is open side.
-function getEventsBetween(start: string | Date, end: string | Date, order: 'ASC' | 'DESC') {
+// The interval is open right side.
+function getEventsBetween(start: Date, end: Date, order: 'ASC' | 'DESC') {
     return models.calendar.findAll({
-        attributes: {
-            exclude: ['created_at', 'updated_at', 'createdAt', 'updatedAt'],
-        },
-        include: calendarIncludeBase,
-        where: {
-            dateTime: {
-                [Op.gt]: start,
-                [Op.lt]: end,
-            },
-        },
+        ...calendarOptionsBase,
+        where: sequelize.and(
+            sequelize.where(sequelize.literal('date_time::date'), Op.gte, start),
+            sequelize.where(sequelize.literal('date_time::date'), Op.lt, end),
+        ),
         order: [
             ['dateTime', order],
             [models.collaborator, models.calendarCollaborator, 'order', 'ASC'],
             [models.piece, models.calendarPiece, 'order', 'ASC'],
         ],
+    });
+}
+
+function getEventAt(at: Date) {
+    return models.calendar.findOne({
+        ...calendarOptionsBase,
+        where: sequelize.where(sequelize.literal('date_time::date'), Op.eq, at),
     });
 }
 
@@ -107,6 +103,7 @@ interface CalendarQuery {
     after?: string;
     date?: string;
     limit?: string;
+    at?: string;
 }
 
 // Hey, think about implementing before:[date] or after:[date], or even [month year] search.
@@ -128,7 +125,7 @@ calendarRouter.get('/search', async (req: express.Request<any, any, any, Calenda
         where: {
             [Op.or]: [
                 sequelize.where(
-                    calendar.rawAttributes.id,
+                    db.models.calendar.rawAttributes.id,
                     Op.in,
                     sequelize.literal(`(SELECT cs.id from calendar_search('${tokens}') cs)`)),
                 ...splitTokens.map(t => {
@@ -207,13 +204,13 @@ calendarRouter.get('/search', async (req: express.Request<any, any, any, Calenda
 calendarRouter.get('/', async (req: express.Request<any, any, any, CalendarQuery>, res) => {
     const model = models.calendar;
 
-    const limit = (req.query.limit === undefined) ? undefined : parseInt(req.query.limit);
-    const date = req.query.date;
-    const before = req.query.before;
-    const after = req.query.after;
+    const limit = !!req.query.limit && parseInt(req.query.limit) || undefined;
+    const date = !!req.query.date && parseISO(req.query.date);
+    const before = !!req.query.before && parseISO(req.query.before);
+    const after = !!req.query.after && parseISO(req.query.after);
+    const at = !!req.query.at && parseISO(req.query.at);
 
     // let type;
-    const parsedDate = (date === undefined) ? undefined : parseISO(date);
     const now = startOfDay(new Date());
 
     let response;
@@ -222,61 +219,34 @@ calendarRouter.get('/', async (req: express.Request<any, any, any, CalendarQuery
     let pastEvents;
 
     console.log(req.query);
-
-    if (parsedDate === undefined) {
-        if (before) {
+    if (at && isValid(at)) {
+        response = [await getEventAt(at)];
+    } else if (!date || !isValid(date)) {
+        if (before && isValid(before)) {
             // type = BEFORE;
             response = await getEventsBefore(before, limit);
-        } else if (after) {
+        } else if (after && isValid(after)) {
             // type = AFTER;
             response = await getEventsAfter(after, limit);
         } else {
             // type = ALL;
             response = await model.findAll({ include: calendarIncludeBase });
         }
-    } else if (isBefore(now, parsedDate)) {
+    } else if (isBefore(now, date)) {
         // type = FUTURE;
         [betweenEvents, futureEvents] = await Promise.all([
-            getEventsBetween(now.toISOString(), parsedDate, 'ASC'),
-            getEventsAfter(parsedDate, 25),
+            getEventsBetween(now, date, 'ASC'),
+            getEventsAfter(date, 25),
         ]);
         response = [...betweenEvents, ...futureEvents];
     } else {
         // type = PAST;
         [betweenEvents, pastEvents] = await Promise.all([
-            getEventsBetween(parsedDate, now.toISOString(), 'DESC'),
-            getEventsBefore(parsedDate, 25),
+            getEventsBetween(date, now, 'DESC'),
+            getEventsBefore(date, 25),
         ]);
         response = [...betweenEvents.reverse(), ...pastEvents];
     }
-
-    // switch (type) {
-    //     case FUTURE:
-    //         [betweenEvents, futureEvents] = await Promise.all([
-    //             getEventsBetween(now.toISOString(), date!, 'ASC'),
-    //             getEventsAfter(date, 25),
-    //         ]);
-    //         response = [...betweenEvents, ...futureEvents];
-    //         break;
-    //     case PAST:
-    //         [betweenEvents, pastEvents] = await Promise.all([
-    //             getEventsBetween(date, now.toISOString(), 'DESC'),
-    //             getEventsBefore(date, 25),
-    //         ]);
-    //         response = [...betweenEvents.reverse(), ...pastEvents];
-    //         break;
-    //     case ALL:
-    //         response = await model.findAll({ include: calendarIncludeBase });
-    //         break;
-    //     case AFTER:
-    //         response = await getEventsAfter(after, limit);
-    //         break;
-    //     case BEFORE:
-    //         response = await getEventsBefore(before, limit);
-    //         break;
-    //     default:
-    //         break;
-    // }
 
     res.json(response);
 });

@@ -313,7 +313,7 @@ const StyledWebsiteButton = styled.a({
     backgroundColor: 'var(--light-blue)',
     color: 'white',
     transition: 'all 0.25s',
-    marginTop: '0.6rem',
+    marginRight: '1rem',
     '&:hover': {
         backgroundColor: mix(0.75, lightBlue, 'white'),
         color: 'white',
@@ -322,7 +322,6 @@ const StyledWebsiteButton = styled.a({
 
     [toMedia(screenXS)]: {
         fontSize: '1.0rem',
-        marginBottom: 0,
     }
 });
 

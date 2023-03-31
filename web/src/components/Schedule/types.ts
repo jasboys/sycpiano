@@ -1,11 +1,10 @@
 import { addMonths, compareAsc, compareDesc, endOfMonth, getMonth, getYear, isSameDay, isSameMonth, parseISO, startOfMonth, subMonths } from 'date-fns';
 import binarySearch from 'binary-search';
 import { utcToZonedTime } from 'date-fns-tz';
-import { current } from '@reduxjs/toolkit';
 
 export type EventType = 'concerto' | 'chamber' | 'solo' | 'masterclass';
 
-export type EventListName = 'upcoming' | 'archive' | 'search' ;
+export type EventListName = 'upcoming' | 'archive' | 'search' | 'event';
 
 export interface Collaborator {
     name: string;
@@ -238,9 +237,7 @@ function monthGroupDescend(a: MonthGroup, b: MonthGroup) {
 
 export interface EventItemsStateShape {
     items: MonthGroups;
-    currentItem?: EventItem;
     currentLatLng: LatLngLiteral;
-    hasEventBeenSelected: boolean;
     isFetchingList: boolean;
     isFetchingLatLng: boolean;
     minDate?: string;
@@ -259,13 +256,14 @@ export interface FetchEventsArguments {
     date?: Date;
     after?: Date;
     before?: Date;
-    scrollTo?: boolean;
+    at?: Date;
 }
 
 export interface FetchEventsAPIParams {
     date?: string;
     after?: string;
     before?: string;
+    at?: string;
     limit: number;
 }
 

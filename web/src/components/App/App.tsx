@@ -127,6 +127,8 @@ const useCustomMatch = (): [RouterMatchPaths, TransitionMatchPaths] => {
         aboutRoot, mediaRoot, scheduleRoot, shopRoot
     ].reduce((prev, curr) => prev ?? curr, null);
 
+    console.log(reducedForRouter);
+
     return [reducedForRouter, reducedForTransition];
 }
 
@@ -281,7 +283,7 @@ const App: React.FC<Record<never, unknown>> = () => {
                         <FadingContainer shouldBlur={isMobile && (cartOpen || menuOpen) && delayedRouteBase !== '/'}>
                             <Routes location={{
                                 ...location,
-                                pathname: routerMatch?.pathnameBase,
+                                pathname: routerMatch?.pathname,
                                 search: location.search
                             }}>
                                 <Route path="about/*" element={<Container />}>
@@ -310,14 +312,6 @@ const App: React.FC<Record<never, unknown>> = () => {
                                     } />
                                 </Route>
                                 <Route path="schedule/*">
-                                    <Route path=":date" Component={
-                                        (props) => {
-                                            const [sp, _setSp] = useSearchParams();
-                                            return (
-                                                <div>{sp}</div>
-                                            )
-                                        }
-                                    } />
                                     <Route path=":type/*" element={
                                         <AsyncComponent<ScheduleProps> moduleProvider={Schedule} type={(routerMatch?.params as Params<"*" | "type">).type as EventListName} />
                                     } />

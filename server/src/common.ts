@@ -27,7 +27,7 @@ export const descriptions: {
     contact: `Contact information for Sean Chen and for booking performances.`,
     upcoming: 'Upcoming recitals, concerti, and masterclasses.',
     archive: 'Past recitals, concerti, and masterclasses.',
-    search: 'Search recitals, concerti, and masterclasses,',
+    search: 'Search recitals, concerti, and masterclasses.',
     searchResults: (query: string) =>
         `Search results for "${query}"`,
     videos: `A playlist of Sean Chen's YouTube clips.`,

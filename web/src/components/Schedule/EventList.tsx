@@ -8,14 +8,12 @@ import styled from '@emotion/styled';
 import debounce from 'lodash-es/debounce';
 
 import { LoadingInstance } from 'src/components/LoadingSVG';
-import { fetchEvents, searchEvents, selectEvent } from 'src/components/Schedule/reducers';
+import { fetchEvents, searchEvents } from 'src/components/Schedule/reducers';
 import EventItem from 'src/components/Schedule/EventItem';
 import {
     EventListName,
     FetchEventsArguments,
-    EventItem as EventItemType,
-    MonthGroups,
-    findDateInMonthGroups,
+    MonthGroup as MonthGroupType,
 } from 'src/components/Schedule/types';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { lato2 } from 'src/styles/fonts';
@@ -25,15 +23,11 @@ import { GlobalStateShape } from 'src/store';
 import { metaDescriptions, titleStringBase } from 'src/utils';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import parseISO from 'date-fns/parseISO';
-import parseDate from 'date-fns/parse';
 import startOfDay from 'date-fns/startOfDay';
-import isBefore from 'date-fns/isBefore';
 import format from 'date-fns-tz/format';
-import formatInTimeZone from 'date-fns-tz/formatInTimeZone';
 import { useSearchParams } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
 import { gsap } from 'gsap';
-import { css } from '@emotion/react';
 import { mqSelectors } from 'src/components/App/reducers';
 
 interface EventListProps {
@@ -102,7 +96,6 @@ const scheduleListSelector = createCachedSelector(
     (state, type) => ({
         eventItems: state[type].items,
         eventItemsLength: state[type].items.length,
-        currentItem: state[type].currentItem,
         minDate: state[type].minDate,
         maxDate: state[type].maxDate,
         hasMore: state[type].hasMore,
@@ -136,7 +129,7 @@ const MonthGroup = styled.div({
     width: '100vw',
 })
 
-const MonthBar = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
+export const MonthBar = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
     fontSize: 'min(10vw, 2.0rem)',
     position: 'sticky',
     top: 0,
@@ -155,7 +148,7 @@ const MonthBar = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
     }
 }));
 
-const MonthText = styled.div<{ isMobile: boolean }>(
+export const MonthText = styled.div<{ isMobile: boolean }>(
     {
         paddingRight: '0.3rem',
         flex: '0 0 max(calc(50% - 200px), 100px)',
@@ -164,12 +157,57 @@ const MonthText = styled.div<{ isMobile: boolean }>(
     }
 );
 
-const YearText = styled.div<{ isMobile: boolean }>(
+export const YearText = styled.div<{ isMobile: boolean }>(
     {
         paddingLeft: '0.3rem',
         flex: 1,
     }
 );
+
+interface MonthEventsProps {
+    type: EventListName;
+    lastQuery?: string;
+    idx: number;
+    isHamburger: boolean;
+    monthGroup: MonthGroupType;
+}
+
+const MonthEvents: React.FC<MonthEventsProps> = ({
+    type,
+    lastQuery,
+    idx,
+    isHamburger,
+    monthGroup,
+}) => {
+    return (
+        <MonthGroup key={`${type}-${lastQuery!}-${idx}-month`}>
+            <MonthBar isMobile={isHamburger}>
+                <MonthText isMobile={isHamburger}>
+                    {format(parseISO(monthGroup.dateTime), 'MMMM')}
+                </MonthText>
+                <YearText isMobile={isHamburger}>
+                    {format(parseISO(monthGroup.dateTime), 'yyyy')}
+                </YearText>
+            </MonthBar>
+            <Events>
+                {
+                    monthGroup.events.map((event, idx) => {
+                        const permaLink = `/schedule/event/${encodeURIComponent(format(parseISO(event.dateTime), `yyyyMMdd'T'HHmmssXX`))}`;
+                        return (
+                            <EventItem
+                                key={`${type}-${lastQuery!}-${idx}-event`}
+                                listType={type}
+                                isMobile={isHamburger}
+                                permaLink={permaLink}
+                                {...event}
+                            />
+                        );
+                    })
+                }
+            </Events>
+        </MonthGroup>
+    );
+}
 
 const loadingOnEnter = (el: HTMLElement) => {
     gsap.fromTo(el, { y: 200 }, { duration: 0.25, y: 0, ease: "back.out(1)" });
@@ -179,18 +217,9 @@ const loadingOnExit = (el: HTMLElement) => {
     gsap.fromTo(el, { y: 0 }, { duration: 0.25, y: 200, ease: "back.in(1)" });
 }
 
-interface PrevProps {
-    currentItem?: EventItemType;
-    type?: EventListName;
-}
-
 export const EventList: React.FC<EventListProps> = (props) => {
-    const updatedCurrent = React.useRef(true);
-    const _eventItems = React.useRef<MonthGroups>();
-    const prevProps = React.useRef<PrevProps>({ currentItem: undefined, type: undefined });
     const {
         eventItems,
-        currentItem,
         minDate,
         maxDate,
         hasMore,
@@ -199,102 +228,54 @@ export const EventList: React.FC<EventListProps> = (props) => {
         lastQuery,
     } = useAppSelector((state) => scheduleListSelector(state, props.type));
     const navigate = useNavigate();
-    const { date: dateParam } = useParams();
     const dispatch = useAppDispatch();
+    const routeParams = useParams();
+    const { '*': date } = routeParams;
     const [params, _setParams] = useSearchParams();
     const isHamburger = useAppSelector(mqSelectors.isHamburger);
 
     const searchQ = params.get('q');
-
-    const [firstEffectRan, setFirstEffectRan] = React.useState(false);
+    console.log(routeParams);
 
     const onMountOrUpdate = React.useCallback(() => {
-        const date = dateParam === undefined ? undefined : startOfDay(parseDate(dateParam, 'yyyy-MM-dd', new Date()));
+        console.log(searchQ);
         if (searchQ !== null) {
             if (searchQ === '') {
                 navigate('/schedule/upcoming');
+                return;
             }
             // run search fetch
             dispatch(searchEvents({
                 name: 'search',
                 q: searchQ
             }));
-        } else {
-            // Empty List
-            if (eventItemsLength === 0) {
-                let fetchParams: FetchEventsArguments;
-                if (date) {
-                    fetchParams = {
-                        name: props.type,
-                        date: date,
-                        scrollTo: true,
-                    };
-                } else {
-                    fetchParams = {
-                        name: props.type,
-                        [fetchDateParam(props.type)]: startOfDay(new Date()),
-                        scrollTo: false,
-                    };
-                }
-                dispatch(fetchEvents(fetchParams));
-                return;
-            } else if (
-                date &&
-                findDateInMonthGroups(eventItems, date) !== undefined
-            ) {
-                const fetchParams: FetchEventsArguments = {
-                    name: props.type,
-                    date: date,
-                    scrollTo: true,
-                };
-                dispatch(fetchEvents(fetchParams));
+        } else if (props.type === 'event') {
+            console.log(date);
+            if (!date) {
+                navigate('/schedule/upcoming');
                 return;
             }
+            console.log('single event');
+            // get single event
+            const fetchParams: FetchEventsArguments = {
+                name: 'event',
+                at: parseISO(date),
+            };
+            dispatch(fetchEvents(fetchParams));
+            return;
+        } else if (eventItemsLength === 0) {
+            const fetchParams: FetchEventsArguments = {
+                name: props.type,
+                [fetchDateParam(props.type)]: startOfDay(new Date()),
+            };
+            dispatch(fetchEvents(fetchParams));
+            return;
         }
-    }, [dateParam, searchQ, props.type, eventItemsLength]);
+    }, [searchQ, date, props.type, eventItemsLength]);
 
     React.useEffect(() => {
-        const strDate = dateParam;
-        const date = dateParam === undefined ? undefined : startOfDay(parseDate(dateParam, 'yyyy-MM-dd', new Date()));
-        if (date) {
-            if (isBefore(date, new Date()) && props.type === 'upcoming') {
-                navigate(`archive/${strDate}`);
-                return;
-            } else if (!isBefore(date, new Date()) && props.type === 'archive') {
-                navigate(`upcoming/${strDate}`);
-                return;
-            }
-        }
-
         onMountOrUpdate();
-        prevProps.current = {
-            currentItem,
-            type: props.type
-        };
-        setFirstEffectRan(true);
-    }, []);
-
-    React.useEffect(() => {
-        _eventItems.current = eventItems;
-    }, [eventItems])
-
-    React.useEffect(() => {
-        if (firstEffectRan) {
-            onMountOrUpdate();
-        }
-    }, [currentItem, props.type, searchQ]);
-
-    React.useEffect(() => {
-        if (firstEffectRan) {
-            updatedCurrent.current = true;
-        }
-    }, [currentItem]);
-
-    React.useEffect(() => {
-        if (firstEffectRan) {
-            currentItem && selectEvent({ name: props.type, event: undefined });
-        }
-    }, [props.type, currentItem]);
+    }, [props.type, searchQ]);
 
     const getScrollFetchParams: {
         [key: string]: () => FetchEventsArguments;
@@ -316,7 +297,7 @@ export const EventList: React.FC<EventListProps> = (props) => {
             !!maxDate &&
             !!minDate
         ) {
-            if (props.type !== 'search') {
+            if (props.type !== 'search' && props.type !== 'event') {
                 dispatch(fetchEvents(getScrollFetchParams[props.type]()));
             }
         }
@@ -326,41 +307,14 @@ export const EventList: React.FC<EventListProps> = (props) => {
         () => debounce(onScroll, 100, { leading: true })
         , [props.type, hasMore, isFetchingList, maxDate, minDate]);
 
-    // const getScrollTarget = React.useCallback(() => {
-    //     if (updatedCurrent.current && eventItemsLength) {
-    //         if (currentItem) {
-    //             updatedCurrent.current = false;
-    //             return getScrollIndex(currentItem);
-    //         } else {
-    //             updatedCurrent.current = false;
-    //             return 0;
-    //         }
-    //     } else {
-    //         return -1;
-    //     }
-    // }, [currentItem, eventItemsLength]);
+    const title =
+        titleStringBase +
+        'Schedule | ' +
+        (props.type === 'archive' ? 'Archived' : startCase(props.type)) +
+        'Events' +
+        (searchQ ? ': ' + searchQ : '');
 
-    // const getScrollIndex = React.useCallback((currentItem: DayItem) => (
-    //     Math.max(0, eventItems.findIndex(
-    //         (item) => (
-    //             item && itemIsDay(item) &&
-    //             isSameDay(parseISO(item.dateTime), parseISO(currentItem.dateTime))
-    //         ),
-    //     ))
-    // ), [eventItems]);
-
-    const item = (eventItemsLength && dateParam !== undefined) ?
-        findDateInMonthGroups(eventItems, (parseDate(dateParam, 'yyy-MM-dd', new Date())))
-        : undefined;
-
-    const title = `${titleStringBase} | Schedule` + (item
-        ? ` | ${formatInTimeZone(parseISO(item.dateTime), item.timezone, 'EEEE MMMM dd, yyyy, HH:mm zzz')}`
-        : ` | ${props.type === 'archive' ? 'Archived' : startCase(props.type)} Events${searchQ ? ': ' + searchQ : ''
-        }`);
-
-    const description = item
-        ? `${startCase(props.type)} ${startCase(item.type)}: ${item.name}`
-        : metaDescriptions[props.type];
+    const description = metaDescriptions[props.type];
 
     return (
         <React.Fragment>
@@ -385,60 +339,25 @@ export const EventList: React.FC<EventListProps> = (props) => {
                     debouncedFetch({ scrollTop, scrollHeight, clientHeight });
                 }}
             >
-                {/* <div
-                    css={{
-                        position: 'absolute',
-                        top: 0,
-                        backgroundColor: 'rgb(238 238 238)',
-                        width: '100%',
-                        maxWidth: 800,
-                        height: 40,
-                        margin: 'auto',
-                        left: 0,
-                        right: 0,
-                        zIndex: 5
-                    }}
-                /> */}
-                {eventItemsLength ?
-                    eventItems.monthGroups.map((monthGroup, idx) =>
-                        <MonthGroup key={`${props.type}-${lastQuery!}-${idx}-month`}>
-                            <MonthBar isMobile={isHamburger}>
-                                <MonthText isMobile={isHamburger}>
-                                    {format(parseISO(monthGroup.dateTime), 'MMMM')}
-                                </MonthText>
-                                <YearText isMobile={isHamburger}>
-                                    {format(parseISO(monthGroup.dateTime), 'yyyy')}
-                                </YearText>
-                            </MonthBar>
-                            <Events>
-                                {
-                                    monthGroup.events.map((event, idx) => {
-                                        const permaLink = `/schedule/${format(parseISO(event.dateTime), 'yyyy-MM-dd')}`;
-                                        return (
-                                            <EventItem
-                                                key={`${props.type}-${lastQuery!}-${idx}-event`}
-                                                listType={props.type}
-                                                isMobile={isHamburger}
-                                                permaLink={permaLink}
-                                                {...event}
-                                            />
-                                        );
-                                    })
-                                }
-                            </Events>
-                        </MonthGroup>
-                    )
+                {eventItemsLength
+                    ? eventItems.monthGroups.map((monthGroup, idx) =>
+                        <MonthEvents
+                            key={idx}
+                            type={props.type}
+                            idx={idx}
+                            monthGroup={monthGroup}
+                            isHamburger={isHamburger}
+                            lastQuery={lastQuery}
+                        />)
                     : <div />
                 }
-                {
-                    <EndOfList>
-                        {eventItemsLength === 0 ?
-                            'No events fetched'
-                            : (hasMore ?
-                                ''
-                                : 'No more events')}
-                    </EndOfList>
-                }
+                <EndOfList>
+                    {eventItemsLength === 0 ?
+                        'No events fetched'
+                        : (hasMore ?
+                            ''
+                            : 'No more events')}
+                </EndOfList>
             </ScrollingContainer>
             <Transition<undefined>
                 in={isFetchingList}

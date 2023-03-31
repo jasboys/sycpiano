@@ -226,8 +226,6 @@ const main = async () => {
         cookieParser(process.env.COOKIE_SECRET),
         csrfHandler,
         async (req, res) => {
-
-            console.log(res.getHeaders());
             // if (isProduction && !req.get('host')?.match(/^www\..*/i)) {
             //     res.redirect(301, `https://www.${req.get('host')}${req.originalUrl}`);
             // }

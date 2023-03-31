@@ -17,8 +17,6 @@ import { ThunkAPIType } from 'src/types';
 import axios from 'axios';
 
 import { transformCachedEventsToListItems } from './utils';
-import parseISO from 'date-fns/parseISO';
-import differenceInDays from 'date-fns/differenceInDays';
 
 // addEvents(events: EventItem[]) {
 //     const groupedByMonths = tidy(
@@ -42,7 +40,6 @@ const FETCH_LIMIT = 25;
 interface FetchEventsReturn {
     name: EventListName;
     events: EventItem[];
-    currentItem?: EventItem;
     hasMore: boolean;
     lastQuery?: string;
 }
@@ -58,7 +55,7 @@ export const fetchEvents = createAsyncThunk<FetchEventsReturn, FetchEventsArgume
             after,
             before,
             date,
-            scrollTo
+            at,
         } = args;
 
         if (date) {
@@ -67,28 +64,15 @@ export const fetchEvents = createAsyncThunk<FetchEventsReturn, FetchEventsArgume
             params.after = after.toISOString();
         } else if (before) {
             params.before = before.toISOString();
+        } else if (at) {
+            params.at = at.toISOString();
         }
         const { data: cachedEvents } = await axios.get<CachedEvent[]>('/api/calendar', { params });
         const events = transformCachedEventsToListItems(cachedEvents);
-        let currentItem: EventItem | undefined = undefined;
-        const desiredDate: Date | undefined = date || after || before;
-        // find closest event to desired date.
-        if (scrollTo && desiredDate) {
-            currentItem = events.reduce((acc: EventItem | undefined, item: EventItem) => {
-                if (acc === undefined) {
-                    return item;
-                }
-                return (
-                    differenceInDays(parseISO(item.dateTime), desiredDate) <
-                    differenceInDays(parseISO(acc.dateTime), desiredDate) ? item : acc
-                );
-            }, undefined);
-        }
         const hasMore = !!events.length && events.length === FETCH_LIMIT;
         return {
             name,
             events,
-            currentItem,
             hasMore,
         };
     },
@@ -127,12 +111,10 @@ export const searchEvents = createAsyncThunk<FetchEventsReturn, SearchEventsArgu
 )
 
 const initialState = (order: 'asc' | 'desc' = 'desc'): EventItemsStateShape => ({
-    currentItem: undefined,
     currentLatLng: {
         lat: 39.0997,
         lng: -94.5786,
     },
-    hasEventBeenSelected: false,
     isFetchingList: false,
     isFetchingLatLng: false,
     minDate: undefined,
@@ -149,10 +131,10 @@ const initialScheduleState: ScheduleStateShape = {
         ...initialState(),
         lastQuery: '',
     },
+    event: initialState(),
 };
 
 export const clearList = createAction<EventListName>('calendar/clearList');
-export const selectEvent = createAction<{ name: EventListName; event?: EventItem }>('calendar/selectEvent');
 export const hasMore = createAction<{ name: EventListName; hasMore: boolean }>('calendar/hasMore');
 
 const scheduleSlice = createSlice({
@@ -177,11 +159,6 @@ const scheduleSlice = createSlice({
                 const { name, hasMore } = action.payload;
                 state[name].hasMore = hasMore;
             })
-            .addCase(selectEvent, (state, action) => {
-                const { name, event } = action.payload;
-                state[name].hasEventBeenSelected = true;
-                state[name].currentItem = event;
-            })
             .addCase(searchEvents.pending, (state, _action) => {
                 state.search.isFetchingList = true;
                 state.search.items = { order: state.search.items.order, length: 0, monthGroups: [] }
@@ -199,7 +176,6 @@ const scheduleSlice = createSlice({
             .addMatcher(isAnyOf(fetchEvents.fulfilled, searchEvents.fulfilled), (state, action) => {
                 const {
                     name,
-                    currentItem,
                     hasMore,
                     lastQuery,
                     events
@@ -209,7 +185,6 @@ const scheduleSlice = createSlice({
                 state[name] = {
                     ...state[name],
                     isFetchingList: false,
-                    currentItem: currentItem || state[name].currentItem,
                     items: mergedItems,
                     minDate: mergedItems.monthGroups.length === 0 ? new Date().toISOString() : minOfMonthGroups(mergedItems).dateTime,
                     maxDate: mergedItems.monthGroups.length === 0 ? new Date().toISOString() : maxOfMonthGroups(mergedItems).dateTime,

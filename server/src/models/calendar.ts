@@ -228,7 +228,7 @@ const beforeCreateHook = async (c: calendar, _: any) => {
 const beforeUpdateHook = async (c: calendar, _: any) => {
     console.log(`[Calendar Hook beforeUpdate]`);
 
-    const dateTimeChanged = c.changed('dateTime') || c.timezone === null;
+    // const dateTimeChanged = c.changed('dateTime') || c.timezone === null;
     const locationChanged = c.changed('location') || c.timezone === null;
     const websiteChanged = c.changed('website');
 
@@ -242,15 +242,15 @@ const beforeUpdateHook = async (c: calendar, _: any) => {
         console.log(timezone);
     }
 
-    if (dateTimeChanged || locationChanged) {
-        console.log(`Updating dateTime with new tz.`);
-        const previous = c.previous('timezone') || 'America/Chicago';
-        const dateWithTz = zonedTimeToUtc(utcToZonedTime(c.dateTime, previous), timezone);
-        /* eslint-disable require-atomic-updates */
-        c.dateTime = dateWithTz;
-        c.timezone = timezone;
-        /* eslint-enable require-atomic-updates */
-    }
+    // We're going to always re-convert timezone, just in case.
+    console.log(`Updating dateTime with new tz.`);
+    const previous = c.previous('timezone') || 'America/Chicago';
+    const dateWithTz = zonedTimeToUtc(utcToZonedTime(c.dateTime, previous), timezone);
+    /* eslint-disable require-atomic-updates */
+    console.log(dateWithTz);
+    c.dateTime = dateWithTz;
+    c.timezone = timezone;
+    /* eslint-enable require-atomic-updates */
 
     if (locationChanged) {
         try {

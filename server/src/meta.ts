@@ -1,13 +1,13 @@
 import axios from 'axios';
 import { createHash } from 'crypto';
 import { add, differenceInCalendarYears, isValid, parse, parseISO, startOfDay } from 'date-fns';
-import { format } from 'date-fns-tz';
+import { format, formatInTimeZone } from 'date-fns-tz';
 import * as dotenv from 'dotenv';
 import { bind, startCase } from 'lodash';
 import * as regexp from 'path-to-regexp';
 import { ParamParseKey, PathMatch, PathPattern, matchPath } from 'react-router-dom';
 
-import { Op } from 'sequelize';
+import { Op, col, fn, literal, where } from 'sequelize';
 import db from './models';
 import _ = require('lodash');
 import { baseString, descriptions } from './common';
@@ -191,6 +191,7 @@ export const getMetaFromPathAndSanitize = async (url: string, query?: string): P
                     description: query ? descriptions.searchResults(query) : descriptions.search,
                 };
             }
+
             if (!eventISO) {
                 if (type === 'event') {
                     throw new MatchException(type);
@@ -204,18 +205,15 @@ export const getMetaFromPathAndSanitize = async (url: string, query?: string): P
             if (!isValid(date)) {
                 throw new MatchException(eventISO);
             }
-            const events = (await models.calendar.findAll({
-                where: {
-                    dateTime: date,
-                },
-                attributes: ['dateTime', 'name', 'type', 'location'],
+            const event = (await models.calendar.findOne({
+                where: where(literal('date_time::date'), date.toISOString()),
+                attributes: ['dateTime', 'name', 'type', 'location', 'timezone'],
             }));
-            if (events.length !== 1) {
+            if (event === null) {
                 throw new MatchException(eventISO);
             }
-            const event = events[0];
             return {
-                title: baseString + format(event.dateTime, 'MMM dd, yyyy, HH:mm zzz'),
+                title: baseString + 'Schedule | ' + formatInTimeZone(event.dateTime, event.timezone, 'EEE, MMMM dd, yyyy, h:mmaaa z'),
                 description: event.name + ' | ' + event.location,
             };
         } catch (e) {
