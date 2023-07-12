@@ -1,13 +1,13 @@
 import * as bodyParser from 'body-parser';
 import { Router } from 'express';
 
-import acclaimsHandler from './apis/acclaims';
-import bioHandler from './apis/bio';
-import calendarRouter from './apis/calendar';
-import discHandler from './apis/disc';
-import musicHandler from './apis/music';
-import photosHandler from './apis/photos';
-import shopHandler from './apis/shop';
+import acclaimsHandler from './apis/acclaims.js';
+import bioHandler from './apis/bio.js';
+import calendarRouter from './apis/calendar.js';
+import discHandler from './apis/disc.js';
+import musicHandler from './apis/music.js';
+import photosHandler from './apis/photos.js';
+import shopHandler from './apis/shop.js';
 
 const apiRouter = Router();
 // Since webhooks need to use raw body, don't use bodyParser before

@@ -1,9 +1,9 @@
 import * as dotenv from 'dotenv';
 import Stripe from 'stripe';
-import * as uniqid from 'uniqid';
-import { ProductAttributes } from './models/product';
+import uniqid from 'uniqid';
+import { Product } from './models/Product.js';
 
-dotenv.config();
+dotenv.config({ override: true });
 
 type CustomerReturn = Stripe.Customer | Stripe.DeletedCustomer;
 type ProductReturn = string | Stripe.Product | Stripe.DeletedProduct;
@@ -139,20 +139,20 @@ export const constructEvent = (body: string | Buffer, sig: string | string[]): S
     return event;
 };
 
-export const createProduct = async (attributes: Omit<ProductAttributes, 'createdAt' | 'updatedAt' | 'id'>): Promise<string[]> => {
+export const createProduct = async (attributes: Product): Promise<string[]> => {
     try {
         const product = await stripe.products.create({
             name: attributes.name,
             description: attributes.description,
             metadata: {
                 format: 'pdf',
-                file: attributes.file,
-                pages: attributes.pages,
-                sample: attributes.sample,
-                permalink: attributes.permalink,
-                type: attributes.type,
+                file: attributes.file ?? null,
+                pages: attributes.pages ?? null,
+                sample: attributes.sample ?? null,
+                permalink: attributes.permalink ?? null,
+                type: attributes.type ?? null,
             },
-            images: attributes.images.map((img) =>
+            images: attributes.images?.map((img) =>
                 `${THUMBNAIL_STATIC}${img}`
             ),
             default_price_data: {
@@ -180,18 +180,21 @@ export const deleteProduct = async (id: string): Promise<Stripe.Response<Stripe.
     }
 };
 
-export const updateProduct = async (attributes: Omit<ProductAttributes, 'createdAt' | 'updatedAt'>): Promise<string[]> => {
+export const updateProduct = async (attributes: Product): Promise<string[]> => {
     try {
-        let price = await stripe.prices.retrieve(attributes.priceID);
-        if (attributes.price !== price.unit_amount) {
-            await stripe.prices.update(attributes.priceID, { active: false });
-            const prodId = typeof price.product === 'string' ? price.product : price.product.id
+        let price: Stripe.Price | undefined = undefined;
+        if (!!attributes.priceId) {
+            price = await stripe.prices.retrieve(attributes.priceId);
+        }
+        if (price !== undefined && attributes.price !== price.unit_amount) {
+            await stripe.prices.update(price.id, { active: false });
+        }
+        if (price === undefined || attributes.price !== price.unit_amount) {
             price = await stripe.prices.create({
                 currency: CURRENCY,
                 unit_amount: attributes.price,
-                product: prodId,
+                product: attributes.id,
             });
-            // return [product.id, newPrice.id];
         }
         const product = await stripe.products.update(
             attributes.id,
@@ -200,13 +203,13 @@ export const updateProduct = async (attributes: Omit<ProductAttributes, 'created
                 description: attributes.description,
                 metadata: {
                     format: 'pdf',
-                    file: attributes.file,
-                    pages: attributes.pages,
-                    sample: attributes.sample,
-                    type: attributes.type,
-                    permalink: attributes.permalink,
+                    file: attributes.file ?? null,
+                    pages: attributes.pages ?? null,
+                    sample: attributes.sample ?? null,
+                    type: attributes.type ?? null,
+                    permalink: attributes.permalink ?? null,
                 },
-                images: attributes.images.map((img) =>
+                images: attributes.images?.map((img) =>
                     `${THUMBNAIL_STATIC}${img}`
                 ),
                 default_price: price.id,

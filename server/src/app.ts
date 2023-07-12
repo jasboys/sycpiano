@@ -1,20 +1,26 @@
-import * as express from 'express';
-import * as bodyParser from 'body-parser';
+import 'reflect-metadata';
+
+import { RequestContext } from '@mikro-orm/core';
+import rootPath from 'app-root-path';
+import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import csurf from 'csurf';
+import express, { RequestHandler } from 'express';
+import { readFileSync } from 'fs';
 import helmet from 'helmet';
-import * as path from 'path';
-import * as mustacheExpress from 'mustache-express';
-import { ApiRouter } from './api-router';
-import { AdminRest } from './rest';
-import { Resized } from './resized';
-import { getMetaFromPathAndSanitize } from './meta';
-import { AuthRouter, authAndGetRole, checkAdmin } from './authorization';
 import { createProxyMiddleware } from 'http-proxy-middleware';
-import * as cookieParser from 'cookie-parser';
-import * as csurf from 'csurf';
-import * as cors from 'cors';
-import * as rootPath from 'app-root-path';
-import { precheck } from './precheck';
+import mustacheExpress from 'mustache-express';
+import path from 'path';
 import { Options } from 'pino-http';
+
+import { ApiRouter } from './api-router.js';
+import { AuthRouter, authAndGetRole, checkAdmin } from './authorization.js';
+import orm from './database.js';
+import { getMetaFromPathAndSanitize } from './meta.js';
+import { precheck } from './precheck.js';
+import { Resized } from './resized.js';
+import { AdminRest } from './rest.js';
 
 const main = async () => {
     await precheck();
@@ -40,7 +46,7 @@ const main = async () => {
                 },
             } as Options);
         } else {
-            const morgan = await import('morgan');
+            const { default: morgan } = await import('morgan');
             return morgan('dev');
         }
     })();
@@ -48,7 +54,7 @@ const main = async () => {
     // Stupid favicon
     await (async () => {
         if (!isProduction) {
-            const fav = await import('serve-favicon');
+            const { default: fav } = await import('serve-favicon');
             app.use(fav(path.resolve(process.env.IMAGE_ASSETS_DIR || './', 'favicon.png')));
         }
     })();
@@ -113,10 +119,14 @@ const main = async () => {
         crossOriginEmbedderPolicy: false
     }));
 
+    const ormHandler: RequestHandler = (_, __, next) => {
+        RequestContext.create(orm.em, next);
+    }
+
     // Non-admin routes.
     // Don't inject bodyParser unless needed
     // and non-admin routes don't need POST
-    app.use(/\/api/, ApiRouter);
+    app.use(/\/api/, ormHandler, ApiRouter);
 
     // app.use(bodyParser.urlencoded({ extended: true }));
     // app.use(bodyParser.json())
@@ -177,7 +187,14 @@ const main = async () => {
     app.use(/\/auth/, adminMiddlewares, AuthRouter);
 
     // Custom api endpoint
-    app.use(/\/rest/, adminMiddlewares, authAndGetRole, checkAdmin, AdminRest);
+    app.use(
+        /\/rest/,
+        adminMiddlewares,
+        ormHandler,
+        authAndGetRole,
+        checkAdmin,
+        AdminRest
+    );
 
     // Resize images
     app.use(/\/resized/, Resized);
@@ -226,9 +243,6 @@ const main = async () => {
         cookieParser(process.env.COOKIE_SECRET),
         csrfHandler,
         async (req, res) => {
-            // if (isProduction && !req.get('host')?.match(/^www\..*/i)) {
-            //     res.redirect(301, `https://www.${req.get('host')}${req.originalUrl}`);
-            // }
             delete req.query.fbclid;    // NO FACEBOOK
             const { sanitize = '', ...meta } = await getMetaFromPathAndSanitize(req.path, req.query.q as string);
             if (sanitize) {
@@ -267,7 +281,29 @@ const main = async () => {
             }
         });
 
-    app.listen(port, '127.0.0.1', () => console.log(`App listening on port ${port}.`));
+    if (isProduction) {
+        app.listen(port, '127.0.0.1', () => console.log(`App listening on port ${port}.`));
+    } else {
+        if (!process.env.DEV_HTTPS_CERT_PATH) {
+            console.log('Necessary env paths not found for HTTPS; using HTTP.');
+            app.listen(port, '127.0.0.1', () => console.log(`App listening on port ${port}.`));
+        } else {
+            const https = await import('https');
+            const httpsOptions = {
+                key: readFileSync(path.resolve(
+                    process.env.DEV_HTTPS_CERT_PATH,
+                    'cert.key'
+                )),
+                cert: readFileSync(path.resolve(
+                    process.env.DEV_HTTPS_CERT_PATH,
+                    'cert.pem'
+                )),
+            };
+            const server = https.createServer(httpsOptions, app);
+            server.listen(port, 'localhost', () => console.log(`App listening for https on port ${port}.`))
+        }
+
+    }
 }
 
 main();

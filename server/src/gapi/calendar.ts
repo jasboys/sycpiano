@@ -1,9 +1,10 @@
-import axios, { AxiosResponse } from 'axios';
-import { getToken } from './oauth';
-
-import { Sequelize } from 'sequelize';
-import { GCalEvent } from '../types';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { add, format, getUnixTime } from 'date-fns';
+import { JSDOM } from 'jsdom';
+
+import { Calendar } from '../models/orm/Calendar.js';
+import { GCalEvent } from '../types.js';
+import { getToken } from './oauth.js';
 
 // From google api console; use general dev or server prod keys for respective environments.
 // Make sure it's set in .env
@@ -14,8 +15,8 @@ const calendarId = (process.env.NODE_ENV === 'production' && process.env.SERVER_
     : 'c7dolt217rdb9atggl25h4fspg@group.calendar.google.com';
 const uriEncCalId = encodeURIComponent(calendarId);
 
-export const getCalendarSingleEvent = async (sequelize: Sequelize, id: string): Promise<AxiosResponse<any>> => {
-    const token = await getToken(sequelize);
+export const getCalendarSingleEvent = async (id: string): Promise<AxiosResponse<any>> => {
+    const token = await getToken();
     const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events/${id}`;
     return axios.get(url, {
         headers: {
@@ -30,8 +31,8 @@ interface EventsListResponse {
     nextSyncToken: string;
 }
 
-export const getCalendarEvents = async (sequelize: Sequelize, nextPageToken?: string, syncToken?: string): Promise<AxiosResponse<EventsListResponse>> => {
-    const token = await getToken(sequelize);
+export const getCalendarEvents = async (nextPageToken?: string, syncToken?: string): Promise<AxiosResponse<EventsListResponse>> => {
+    const token = await getToken();
     const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events`;
     return axios.get(url, {
         params: {
@@ -45,8 +46,8 @@ export const getCalendarEvents = async (sequelize: Sequelize, nextPageToken?: st
     });
 };
 
-export const deleteCalendarEvent = async (sequelize: Sequelize, id: string): Promise<AxiosResponse<any>> => {
-    const token = await getToken(sequelize);
+export const deleteCalendarEvent = async (id: string): Promise<AxiosResponse<any>> => {
+    const token = await getToken();
     const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events/${id}`;
     return axios.delete(url, {
         headers: {
@@ -63,10 +64,10 @@ export interface GoogleCalendarParams {
     startDatetime: Date;
     timeZone: string;
     allDay: boolean;
-    endDate: Date;
+    endDate?: Date;
 }
 
-export const createCalendarEvent = async (sequelize: Sequelize, {
+export const createCalendarEvent = async ({
     summary,
     description,
     location,
@@ -75,7 +76,7 @@ export const createCalendarEvent = async (sequelize: Sequelize, {
     allDay,
     endDate,
 }: GoogleCalendarParams): Promise<AxiosResponse<any>> => {
-    const token = await getToken(sequelize);
+    const token = await getToken();
     const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events`;
     const eventResource = {
         summary,
@@ -99,7 +100,7 @@ export const createCalendarEvent = async (sequelize: Sequelize, {
     });
 };
 
-export const updateCalendar = async (sequelize: Sequelize, {
+export const updateCalendar = async ({
     id,
     summary,
     description,
@@ -109,7 +110,7 @@ export const updateCalendar = async (sequelize: Sequelize, {
     allDay,
     endDate,
 }: GoogleCalendarParams): Promise<AxiosResponse<any>> => {
-    const token = await getToken(sequelize);
+    const token = await getToken();
     const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events/${id}`;
     const eventResource = {
         summary,
@@ -194,5 +195,63 @@ export const getTimeZone = async (lat: number, lng: number, timestamp?: Date): P
     } catch (e) {
         console.log(e);
         throw e;
+    }
+};
+
+export const transformModelToGoogle = () => {
+    // const collaborators = c.collaborators.toArray();
+    // const pieces = c.pieces.toArray();
+    // const data: GoogleCalendarParams = {
+    //     summary: c.name,
+    //     location: c.location,
+    //     startDatetime: c.dateTime,
+    //     endDate: c.endDate ? new Date(c.endDate) : undefined,
+    //     allDay: c.allDay,
+    //     timeZone: c.timezone ?? '',
+    //     description: JSON.stringify({
+    //         collaborators: collaborators.map(({ name, instrument }) => ({
+    //             name,
+    //             instrument,
+    //         })),
+    //         pieces: pieces.map(({ composer, piece }) => ({
+    //             composer,
+    //             piece,
+    //         })),
+    //         type: c.type,
+    //         website: encodeURI(c.website ?? ''),
+    //         imageUrl: encodeURI(c.imageUrl ?? ''),
+    //         placeId: c.placeId,
+    //         photoReference: c.photoReference,
+    //     }),
+    // };
+    // if (!!c.id) {
+    //     data.id = c.id;
+    // }
+    // return data;
+};
+
+export const getImageFromMetaTag = async (website: string) => {
+    try {
+        const page = await axios.get<string>(website);
+        const { document } = new JSDOM(page.data).window;
+        return document.querySelector('meta[name="twitter:image"]')?.getAttribute('content')
+            ?? document.querySelector('meta[property="og:image"]')?.getAttribute('content')
+            ?? '';
+    } catch (e) {
+        // console.log(e);
+        try {
+            // Even if website doesn't exist anymore
+            // Response could contain usable images.
+            const err = e as AxiosError<string>;
+            const page = err.response?.data;
+            const { document } = new JSDOM(page).window;
+            return document.querySelector('meta[name="twitter:image"]')?.getAttribute('content')
+                ?? document.querySelector('meta[property="og:image"]')?.getAttribute('content')
+                ?? '';
+        } catch (ee) {
+            // Really can't use it.
+            console.log(ee);
+            return '';
+        }
     }
 };

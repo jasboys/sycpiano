@@ -1,46 +1,18 @@
-import { DataTypes, Model, Sequelize } from 'sequelize';
-import { ModelExport } from '../types';
+import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
 
-export interface BioAttributes {
-    id: number;
-    paragraph: number;
-    text: string;
+@Entity()
+export class Bio {
+
+  @PrimaryKey()
+  paragraph!: number;
+
+  @Property({ columnType: 'text' })
+  text!: string;
+
+  @Property({ length: 6, nullable: true })
+  createdAt?: Date;
+
+  @Property({ length: 6, nullable: true })
+  updatedAt?: Date;
+
 }
-
-export interface BioCreateAttributes extends Omit<BioAttributes, 'id'> {}
-
-export class bio extends Model<BioAttributes, BioCreateAttributes> implements BioAttributes {
-    declare id: number;
-    declare paragraph: number;
-    declare text: string;
-    declare readonly createdAt?: Date | string;
-    declare readonly updatedAt?: Date | string;
-}
-
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<bio> => {
-    bio.init({
-        paragraph: {
-            type: dataTypes.INTEGER,
-            allowNull: false,
-            primaryKey: true,
-        },
-        text: {
-            type: dataTypes.TEXT,
-            allowNull: false,
-        },
-        id: {
-            type: dataTypes.VIRTUAL,
-            get() {
-                return this.paragraph;
-            },
-            set() {
-                return;
-            },
-        },
-    }, {
-            sequelize,
-            tableName: 'bio',
-        });
-
-    return { model: bio };
-};

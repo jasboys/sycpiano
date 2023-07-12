@@ -26,6 +26,7 @@ export default new Sequelize(database, username, password, {
     dialectOptions: {
         charSet: 'utf8',
         collate: 'utf8_unicode_ci',
+        client_encoding: 'utf8',
     },
     pool: { max: 5, min: 0, idle: 10000 },
     define,

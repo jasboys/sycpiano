@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import styled from '@emotion/styled';
 
-import { SearchIconInstance, SearchIconSVG } from 'src/components/Schedule/SearchIconSVG';
+import { SearchIconInstance } from 'src/components/Schedule/SearchIconSVG';
 
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { lato1, lato2 } from 'src/styles/fonts';
@@ -66,7 +66,7 @@ const Container = styled.div<{ dirty: boolean; expanded: boolean; }>(
         alignItems: 'center',
         boxShadow: '0 1px 5px -2px rgba(0 0 0 / 0.4)',
         flexDirection: 'row-reverse',
-        transition: 'padding 250ms, width 250ms, background-color 250ms, box-shadow 250ms',
+        transition: 'all 250ms',
         overflow: 'hidden',
 
         [toMedia(screenXSandPortrait)]: {
@@ -74,19 +74,35 @@ const Container = styled.div<{ dirty: boolean; expanded: boolean; }>(
             margin: '0.8rem auto 0',
             maxWidth: 'unset',
         },
+        'svg': {
+            transition: 'all 250ms',
+        },
+        '&::after': {
+            content: '""',
+            height: 50,
+            width: 50,
+            right: 0,
+            position: 'fixed',
+            margin: '1rem 1.5rem',
+            opacity: 0,
+            boxShadow: '0 2px 6px -2px rgba(0 0 0 / 0.6)',
+            borderRadius: '50%',
+            transition: 'all 250ms',
+        }
     },
     props => ({
         'svg': {
             fill: props.expanded ?
                 (props.dirty ? lightBlue : unfocusedGray)
                 : 'white',
-            transition: 'fill 250ms, filter 250ms',
         },
         '&:hover': {
             'svg': {
-                filter: props.expanded ? '' : 'drop-shadow(0 0 1px white)',
+                filter: 'drop-shadow(0 0 1px white)',
             },
-            boxShadow: props.expanded ? '' : '0 2px 6px -2px rgba(0 0 0 / 0.6)',
+            '&::after': {
+                opacity: props.expanded ? 0 : 1.0,
+            }
         },
         width: props.expanded ? `calc(min(90%, 25rem))` : 50,
         paddingRight: props.expanded ? '1rem' : 9,
@@ -266,7 +282,6 @@ export const Search: React.FC<SearchProps> = ({ }) => {
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
             <Container dirty={formState.isDirty} expanded={expanded} onClick={onClick}>
-                <SearchIconSVG />
                 <SubmitButton disabled={!formState.isDirty} expanded={expanded} dirty={formState.isDirty}>
                     <SearchIconInstance />
                 </SubmitButton>

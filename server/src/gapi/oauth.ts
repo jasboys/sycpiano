@@ -1,6 +1,6 @@
 import { JWT } from 'google-auth-library';
-import { token } from '../models/token';
-import * as Sequelize from 'sequelize';
+import orm from '../database.js';
+import { Token } from '../models/Token.js';
 
 const authorize = async () => {
     const jwt = new JWT(
@@ -19,9 +19,8 @@ const authorize = async () => {
     }
 };
 
-export const getToken = async (sequelize: Sequelize.Sequelize): Promise<string> => {
-    const tokenModel = sequelize.models.token as Sequelize.ModelStatic<token>;
-    const tokenInstance = await tokenModel.findByPk('access_token');
+export const getToken = async (): Promise<string> => {
+    const tokenInstance = await orm.em.findOne(Token, { id: 'access_token' });
     if (tokenInstance) {
         const expired = (tokenInstance.expires === undefined) ? undefined : Date.now() > tokenInstance.expires.valueOf();
         if (expired !== undefined && !expired) {
@@ -39,11 +38,15 @@ export const getToken = async (sequelize: Sequelize.Sequelize): Promise<string> 
     ) {
         throw new Error('Not authorized, or no expiry date');
     }
-    await tokenModel.upsert({
-        id: 'access_token',
-        token: credentials.access_token,
-        expires: new Date(credentials.expiry_date),
-    });
+    await orm.em.upsert(
+        Token,
+        {
+            id: 'access_token',
+            token: credentials.access_token,
+            expires: new Date(credentials.expiry_date),
+        }
+    );
+    await orm.em.flush();
 
     return credentials.access_token;
 };

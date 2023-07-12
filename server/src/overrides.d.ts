@@ -6,6 +6,7 @@ declare namespace Express {
 
  declare namespace NodeJS {
     export interface ProcessEnv {
+      NODE_ENV: string;
       SMTP_PORT: string;
       SMTP_HOST: string;
       SMTP_USERNAME: string;
@@ -13,7 +14,7 @@ declare namespace Express {
       DKIM_PRIVATE_KEY_FILE: string;
       IMAGE_ASSETS_DIR: string;
       PRODUCTS_DIR: string;
-      DB_URL: string;
+      DATABASE_URL: string;
       DB_USER: string;
       DB_PASS: string;
       DB_HOST: string;

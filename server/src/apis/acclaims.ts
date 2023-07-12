@@ -1,28 +1,18 @@
-import { Request, Response, NextFunction } from 'express';
-import * as Sequelize from 'sequelize';
+import { QueryOrder } from '@mikro-orm/core';
+import { NextFunction, Request, Response } from 'express';
 
-import db from '../models';
-const models = db.models;
+import orm from '../database.js';
+import { Acclaim } from '../models/Acclaim.js';
 
 interface RequestWithCount extends Request {
     params: {
-        count: string;
+        count?: string;
     };
 }
 
 const getAcclaims = async (req: RequestWithCount, res: Response, _: NextFunction): Promise<void> => {
-    const params: Sequelize.FindOptions = {
-        attributes: {
-            exclude: ['short', 'shortAuthor', 'created_at', 'updated_at'],
-        },
-        order: [
-            ['date', 'DESC'],
-        ],
-    };
-    if (Object.prototype.hasOwnProperty.call(req.params, 'count')) {
-        params.limit = parseInt(req.params.count);
-    }
-    const acclaims = await models.acclaim.findAll(params);
+    const limit = req.params.count ? parseInt(req.params.count) : undefined;
+    const acclaims = await orm.em.find(Acclaim, {}, { limit, orderBy: [{ date: QueryOrder.DESC }] });
     res.json(acclaims);
 };
 

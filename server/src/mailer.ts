@@ -1,15 +1,13 @@
-import * as nodemailer from 'nodemailer';
-import db from './models';
-import { Op } from 'sequelize';
-import * as path from 'path';
-import * as mustache from 'mustache';
-import { promises as fsAsync, readFileSync } from 'fs';
-import * as root from 'app-root-path';
+import root from 'app-root-path';
+import archiver from 'archiver';
 import { getYear } from 'date-fns';
-import * as archiver from 'archiver';
+import { promises as fsAsync, readFileSync } from 'fs';
+import mustache from 'mustache';
+import * as nodemailer from 'nodemailer';
 import { Attachment } from 'nodemailer/lib/mailer';
-
-const models = db.models;
+import * as path from 'path';
+import orm from './database.js';
+import { Product } from './models/Product.js';
 
 if (process.env.SMTP_HOST === undefined ||
     process.env.SMTP_PASSWORD === undefined ||
@@ -138,14 +136,14 @@ export const emailPDFs = async (productIDs: string[], email: string, clientRef?:
         }
         const transport = nodemailer.createTransport(transportOptions);
 
-        const products = await models.product.findAll({
-            attributes: ['id', 'file', 'name'],
-            where: {
+        const products = await orm.em.find(
+            Product,
+            {
                 id: {
-                    [Op.in]: productIDs,
+                    $in: productIDs,
                 },
             },
-        });
+        );
 
         let attachments: Attachment[] = [
             {

@@ -1,23 +1,24 @@
 import axios from 'axios';
 import { createHash } from 'crypto';
-import { add, differenceInCalendarYears, isValid, parse, parseISO, startOfDay } from 'date-fns';
-import { format, formatInTimeZone } from 'date-fns-tz';
+import { isValid, parseISO } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import * as dotenv from 'dotenv';
 import { bind, startCase } from 'lodash';
-import * as regexp from 'path-to-regexp';
 import { ParamParseKey, PathMatch, PathPattern, matchPath } from 'react-router-dom';
 
-import { Op, col, fn, literal, where } from 'sequelize';
-import db from './models';
-import _ = require('lodash');
-import { baseString, descriptions } from './common';
+import { literal, where } from 'sequelize';
+import _ from 'lodash';
+import { baseString, descriptions } from '../../common/src/common.js';
+import orm from './database.js';
+import { MusicFile } from './models/MusicFile.js';
+import { Calendar } from './models/Calendar.js';
+import { expr } from '@mikro-orm/core';
 
-dotenv.config();
+dotenv.config({ override: true });
 
 const YoutubeAPIKey = process.env.GAPI_KEY_SERVER;
 const YoutubeVideoUrl = 'https://www.googleapis.com/youtube/v3/playlistItems';
 const playlistId = 'PLzauXr_FKIlhzArviStMMK08Xc4iuS0n9';
-const models = db.models;
 
 // const { gte, lt } = Op;
 
@@ -111,20 +112,14 @@ export const getMetaFromPathAndSanitize = async (url: string, query?: string): P
 
             const hash = createHash('sha1').update('/' + music).digest('base64');
 
-            const musicFiles = (await models.musicFile.findAll({
-                where: { hash },
-                attributes: ['name'],
-                include: [
-                    {
-                        model: db.models.music,
-                        attributes: ['composer', 'piece', 'contributors'],
-                    },
-                ],
-            }));
-            if (musicFiles.length !== 1) {
+            const musicFile = await orm.em.findOne(
+                MusicFile,
+                { hash },
+                { populate: ['music'] });
+            if (musicFile === null) {
                 throw new MatchException(music);
             }
-            const musicFile = musicFiles[0];
+
             const {
                 composer,
                 piece,
@@ -205,10 +200,10 @@ export const getMetaFromPathAndSanitize = async (url: string, query?: string): P
             if (!isValid(date)) {
                 throw new MatchException(eventISO);
             }
-            const event = (await models.calendar.findOne({
-                where: where(literal('date_time::date'), date.toISOString()),
-                attributes: ['dateTime', 'name', 'type', 'location', 'timezone'],
-            }));
+            const event = await orm.em.findOne(
+                Calendar,
+                { [expr('date_time::date')]: date.toISOString() }
+            );
             if (event === null) {
                 throw new MatchException(eventISO);
             }

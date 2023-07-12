@@ -1,5 +1,7 @@
 import * as argon2 from 'argon2';
-import db from './models';
+import { randomUUID } from 'crypto';
+import orm from './database.js';
+import { User } from './models/User.js';
 
 async function main() {
     console.log(process.argv);
@@ -12,11 +14,15 @@ async function main() {
     try {
         const passHash = await argon2.hash(password, { type: argon2.argon2id });
 
-        await db.models.user.create({
-            username,
-            passHash,
-            role: 'admin',
-        });
+        const user = orm.em.create(
+            User,
+            {
+                id: randomUUID(),
+                username,
+                passHash,
+                role: 'admin',
+            });
+        orm.em.persist(user).flush();
         console.log('Successfully created Admin user.');
     } catch (e) {
         console.log('Failed to create Admin user.');

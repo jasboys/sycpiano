@@ -1,26 +1,17 @@
 import * as dotenv from 'dotenv';
 import * as express from 'express';
-import { Attributes, FindOptions, fn, literal, Model, ModelStatic, Op, Order, UUID, ValidationError, where, WhereOptions } from 'sequelize';
 import crud from 'express-crud-router';
-import * as stripeClient from './stripe';
-import { ProductCreationAttributes, ProductTypes } from './models/product';
-import * as Promise from 'bluebird';
+import * as stripeClient from './stripe.js';
+import  Promise from 'bluebird';
 
-dotenv.config();
+dotenv.config({ override: true });
 
-import db from './models';
-
-const models = db.models;
-
-import { calendar, CalendarAttributes, getImageFromMetaTag } from './models/calendar';
-import { ActionsRouter } from './actions';
-import { flatten, isObject, transform, uniqBy } from 'lodash';
-import { collaborator, CollaboratorAttributes } from './models/collaborator';
-import { piece, PieceAttributes } from './models/piece';
-import { CalendarPieceAttributes } from './models/calendarPiece';
-import { CalendarCollaboratorAttributes } from './models/calendarCollaborator';
-import { Actions } from './types';
-import { getPhotos } from './gapi/places';
+import { flatten, isObject, overSome, transform, uniqBy } from 'lodash';
+import { Actions } from './types.js';
+import { getPhotos } from './gapi/places.js';
+import { BaseEntity, EntityClass, EntityData, EntityName, FilterQuery, FindOptions, Loaded, ObjectQuery, Primary, PrimaryKeyProp, PrimaryKeyType, QueryOperator, ValidationError, wrap } from '@mikro-orm/core';
+import orm from './database.js';
+import { P } from 'pino';
 
 const adminRest = express.Router();
 
@@ -31,9 +22,7 @@ export const respondWithError = (error: any, res: express.Response): void => {
     console.error(error);
     if (error instanceof ValidationError) {
         res.status(400).json({
-            error: (error as ValidationError).errors.reduce((reduce, err) => {
-                return reduce + err.message + ',';
-            }, ''),
+            error: (error as ValidationError).message,
         });
     } else {
         res.status(400).json({
@@ -52,8 +41,6 @@ export interface RequestWithBody extends express.Request {
     };
 }
 
-adminRest.use('/\/actions/', ActionsRouter);
-
 const replaceKeysDeep = (obj: { [k: string]: any }, keysMap: { [k: string]: string }) => { // keysMap = { oldKey1: newKey1, oldKey2: newKey2, etc...
     return transform(obj, (result: { [k: string]: any }, value, key) => { // transform to a new object
 
@@ -65,97 +52,94 @@ const replaceKeysDeep = (obj: { [k: string]: any }, keysMap: { [k: string]: stri
 
 const EXCLUDE_TIMESTAMPS = ['created_at', 'updated_at', 'createdAt', 'updatedAt'];
 
-const sequelizeCrud = <I extends string | number, M extends Model, R extends Attributes<M>>(
-    model: ModelStatic<M>,
-): Omit<Actions<I, R>, 'search'> => {
+
+const mikroSearchFields = <R extends Object>(
+    entity: EntityClass<R>,
+    searchableFields: (keyof R)[]
+) =>
+    async (q: string, limit: number) => {
+        const filter = searchableFields.map(field => {
+            orm.schema.getTargetSchema().getTable(entity.name)?.getColumn(field as string)?.type
+            if (typeof entity[field] === 'string') {
+                return {
+                    [field]: {
+                        $ilike: q
+                    }
+                }
+            };
+        })
+
+        const results = await orm.em.findAndCount(
+            entity,
+            {
+                $or: filter
+            } as FilterQuery<R>,
+            {
+                limit
+            }
+        )
+
+        return { rows: results[0], count: results[1] }
+    }
+
+
+const mikroCrud = <I extends string, R extends object>(
+    entity: EntityClass<R>,
+    searchableFields: (keyof R)[],
+): Actions<I, R> => {
     return {
-        create: async body =>
-            (await model.create(body)).get(), // get for type happiness, don't need for js
+        create: async body => {
+            const created = orm.em.create(entity, body);
+            await orm.em.persist(created).flush();
+            return created as R & { id: I };
+        },
         update: async (id, body) => {
-            const record = await model.findByPk(id, {
-                attributes: {
-                    exclude: EXCLUDE_TIMESTAMPS,
-                },
-            });
+            const record = await orm.em.findOne(entity, id as NonNullable<Primary<R>>);
             if (!record) {
                 throw new Error('Record not found');
             }
-            return record.update(body)
+            wrap(record).assign(body);
+            orm.em.flush();
         },
         updateMany: async (ids, body) => {
-            const records = await model.update(body,
-                {
-                    where: {
-                        id: ids as any
-                    },
-                    returning: true,
-                },
-            );
+            const records = await orm.em.findAndCount(entity, { id: { $in: ids } } as R);
+            for (const record of records) {
+                wrap(record).assign(body);
+            }
+            orm.em.flush();
             return {
-                count: records[0],
-                rows: records[1],
+                count: records[1],
+                rows: records[0],
             };
         },
         getOne: async id => {
-            const m = await model.findByPk(id, {
-                attributes: {
-                    exclude: EXCLUDE_TIMESTAMPS,
-                },
-            });
-            if (m === null) {
-                throw new Error('record not found');
-            }
-            return m.get();
+            const record = await orm.em.findOneOrFail(entity, id as NonNullable<Primary<R>>);
+            return record;
         },
         getList: async ({ filter, limit, offset, order }) => {
             order = Array.isArray(order[0][0]) ? order[0] as any : order;
-            const result = await model.findAndCountAll({
-                attributes: {
-                    exclude: EXCLUDE_TIMESTAMPS,
-                },
-                limit,
-                offset,
-                order,
-                where: filter
-            });
+            const result = await orm.em.findAndCount(
+                entity,
+                filter,
+                {
+                    limit,
+                    offset,
+                    orderBy: order,
+                }
+            );
             return {
-                count: result.count,
-                rows: result.rows.map((row) => row.get()),
+                count: result[1],
+                rows: result[0],
             };
         },
         destroy: async id => {
-            const record = await model.findByPk(id)
-            if (!record) {
-                throw new Error('Record not found')
-            }
-            await record.destroy()
+            const record = await orm.em.getReference(entity, id as NonNullable<Primary<R>>);
+            await orm.em.remove(record).flush();
             return { id }
         },
+        search: microSearchFields(entity, search)
     }
 }
-
-const sequelizeSearchFields =
-    <M extends Model, R extends M['_attributes']>(
-        model: ModelStatic<M>,
-        searchableFields: (keyof R)[],
-        comparator: symbol = Op.iLike
-    ) =>
-        async (q: string, limit: number, scope: WhereOptions<R> = {}) => {
-            const resultChunks = await Promise.all(
-                prepareQueries<R>(model, searchableFields)(q, comparator).map(
-                    query =>
-                        model.findAll({
-                            limit,
-                            where: { ...query!, ...scope },
-                            raw: true,
-                        })
-                )
-            )
-
-            const rows = uniqBy(flatten(resultChunks).slice(0, limit), 'id')
-
-            return { rows, count: rows.length }
-        }
 
 const getSearchTerm = <Attributes extends object>(
     model: ModelStatic<Model<Attributes>>,
@@ -176,7 +160,7 @@ const prepareQueries =
         model: ModelStatic<Model<Attributes>>,
         searchableFields: (keyof Attributes)[]
     ) =>
-        (q: string, comparator: symbol = Op.iLike): WhereOptions<Attributes>[] => {
+        (q: string, comparator = $like): WhereOptions<Attributes>[] => {
             if (!searchableFields) {
                 // TODO: we could propose a default behavior based on model rawAttributes
                 // or (maybe better) based on existing indexes. This can be complexe
@@ -307,14 +291,12 @@ const collaboratorReducer = (acc: CollaboratorWithOrder[], val: collaborator) =>
     }
     if (calendarCollaborator.order === undefined) {
         acc.push({
-            ...rest,
-            through: calendarCollaborator.id,
+            ...rest
         });
     } else {
         acc[calendarCollaborator.order] = {
             ...rest,
-            order: calendarCollaborator.order,
-            through: calendarCollaborator.id,
+            order: calendarCollaborator.order
         };
     }
     return acc;
@@ -370,40 +352,45 @@ adminRest.use(crud('/calendars', {
         const splitTokens = tokens.split('|').map(t => t.split('&'));
         const calendarResults = await db.models.calendar.findAndCountAll({
             where: {
-                [Op.or]: [
-                    where(
-                        calendar.rawAttributes.id,
-                        Op.in,
-                        literal(`(SELECT cs.id from calendar_search('${tokens}') cs)`)),
-                    ...splitTokens.map(t => {
-                        return {
-                            [Op.and]: t.map(v => {
-                                return {
-                                    [Op.or]: [
-                                        {
-                                            name: {
-                                                [Op.iLike]: `%${v}%`,
-                                            }
-                                        },
-                                        {
-                                            location: {
-                                                [Op.iLike]: `%${v}%`,
-
-                                            }
-                                        },
-                                        {
-                                            type: {
-                                                [Op.iLike]: `%${v}%`,
-
-                                            }
-                                        },
-                                    ]
-                                };
-                            }),
-                        };
-                    }),
-                ],
+                id: {
+                    [Op.any]: literal(`(SELECT id from calendar_search_matview cs where _search @@ to_tsquery('en', ${tokens}))`)
+                },
             },
+            // where: {
+            //     [Op.or]: [
+            //         where(
+            //             calendar.rawAttributes.id,
+            //             Op.in,
+            //             literal(`(SELECT id from calendar_search_matview cs where _search @@ to_tsquery('en', ${tokens}))`)),
+            //         // ...splitTokens.map(t => {
+            //         //     return {
+            //         //         [Op.and]: t.map(v => {
+            //         //             return {
+            //         //                 [Op.or]: [
+            //         //                     {
+            //         //                         name: {
+            //         //                             [Op.iLike]: `%${v}%`,
+            //         //                         }
+            //         //                     },
+            //         //                     {
+            //         //                         location: {
+            //         //                             [Op.iLike]: `%${v}%`,
+
+            //         //                         }
+            //         //                     },
+            //         //                     {
+            //         //                         type: {
+            //         //                             [Op.iLike]: `%${v}%`,
+
+            //         //                         }
+            //         //                     },
+            //         //                 ]
+            //         //             };
+            //         //         }),
+            //         //     };
+            //         // }),
+            //     ],
+            // },
             attributes: {
                 exclude: EXCLUDE_TIMESTAMPS,
             },
@@ -632,7 +619,7 @@ interface CalendarCollaboratorCreate extends CalendarCollaboratorAttributes {
 adminRest.use(crud('/calendar-collaborators', {
     ...sequelizeCrud(models.calendarCollaborator),
     create: async (body: CalendarCollaboratorAttributes) => {
-        const cal = await db.models.calendar.findByPk(body.id);
+        const cal = await db.models.calendar.findByPk(body.calendarId);
         if (cal === null) {
             throw new Error('record not found');
         }
@@ -666,7 +653,7 @@ adminRest.use(crud('/calendar-collaborators', {
 adminRest.use(crud('/calendar-pieces', {
     ...sequelizeCrud(models.calendarPiece),
     create: async (body: CalendarPieceAttributes) => {
-        const cal = await db.models.calendar.findByPk(body.id);
+        const cal = await db.models.calendar.findByPk(body.pieceId);
         if (cal === null) {
             throw new Error('record not found');
         }

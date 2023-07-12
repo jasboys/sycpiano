@@ -1,9 +1,11 @@
 {
+    "$schema": "https://json.schemastore.org/swcrc",
     "jsc": {
         "parser": {
             "syntax": "typescript",
             "tsx": true,
-            "dynamicImport": true
+            "dynamicImport": true,
+            "decorators": true
         },
         "paths": {
             "*": [
@@ -12,13 +14,15 @@
             ]
         },
         "baseUrl": "..",
-        "target": "es2017"
+        "target": "es2017",
+        "transform": {
+            "legacyDecorator": true,
+            "decoratorMetadata": true
+        }
     },
     "sourceMaps": "inline",
     "module": {
-        "type": "commonjs",
-        "noInterop": true,
-        "ignoreDynamic": false
+        "type": "es6"
     },
     "env": {
         "targets": {

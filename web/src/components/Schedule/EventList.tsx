@@ -29,6 +29,8 @@ import { useSearchParams } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
 import { gsap } from 'gsap';
 import { mqSelectors } from 'src/components/App/reducers';
+import { formatInTimeZone } from 'date-fns-tz';
+import { BackIconInstance } from 'src/components/Schedule/BackIconSVG';
 
 interface EventListProps {
     readonly type: EventListName;
@@ -107,17 +109,17 @@ const scheduleListSelector = createCachedSelector(
 );
 
 const ScrollingContainer = styled.div<{ isSearch: boolean; }>((props) => ({
-        width: '100%',
-        height: '100%',
-        overflowY: 'scroll',
-        overflowX: 'hidden',
-        marginTop: 0,
-        [toMedia(screenXSandPortrait)]: {
-            paddingTop: 0,
-            marginTop: props.isSearch ? 'calc(80px + 1.2rem)' : 'calc(50px + 1.2rem)',
-            height: props.isSearch ? 'calc(100% - (80px + 1.2rem))' : 'calc(100% - (50px + 1.2rem))'
-        }
-    })
+    width: '100%',
+    height: '100%',
+    overflowY: 'scroll',
+    overflowX: 'hidden',
+    marginTop: 0,
+    [toMedia(screenXSandPortrait)]: {
+        paddingTop: 0,
+        marginTop: props.isSearch ? 'calc(80px + 1.2rem)' : 'calc(50px + 1.2rem)',
+        height: props.isSearch ? 'calc(100% - (80px + 1.2rem))' : 'calc(100% - (50px + 1.2rem))'
+    }
+})
 );
 
 const Events = styled.div({
@@ -129,7 +131,7 @@ const MonthGroup = styled.div({
     width: '100vw',
 })
 
-export const MonthBar = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
+const MonthBar = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
     fontSize: 'min(10vw, 2.0rem)',
     position: 'sticky',
     top: 0,
@@ -148,7 +150,7 @@ export const MonthBar = styled.div<{ isMobile: boolean }>(({ isMobile }) => ({
     }
 }));
 
-export const MonthText = styled.div<{ isMobile: boolean }>(
+const MonthText = styled.div<{ isMobile: boolean }>(
     {
         paddingRight: '0.3rem',
         flex: '0 0 max(calc(50% - 200px), 100px)',
@@ -157,12 +159,29 @@ export const MonthText = styled.div<{ isMobile: boolean }>(
     }
 );
 
-export const YearText = styled.div<{ isMobile: boolean }>(
+const YearText = styled.div<{ isMobile: boolean }>(
     {
         paddingLeft: '0.3rem',
         flex: 1,
     }
 );
+
+const BackButton = styled.div({
+    width: 'min(10vw, 2.0rem)',
+    height: 'min(10vw, 2.0rem)',
+    borderRadius: '50%',
+    border: '1px var(--logo-blue) solid',
+    position: 'absolute',
+    stroke: 'var(--logo-blue)',
+    strokeWidth: '1.5px',
+    alignSelf: 'center',
+    transition: 'all 250ms',
+    '&:hover': {
+        cursor: 'pointer',
+        stroke: 'var(--light-blue)',
+        borderColor: 'var(--light-blue)'
+    }
+});
 
 interface MonthEventsProps {
     type: EventListName;
@@ -179,9 +198,19 @@ const MonthEvents: React.FC<MonthEventsProps> = ({
     isHamburger,
     monthGroup,
 }) => {
+    const navigate = useNavigate();
+    const backOnClick = React.useCallback(() => {
+        navigate('/schedule/upcoming');
+    }, []);
+
     return (
         <MonthGroup key={`${type}-${lastQuery!}-${idx}-month`}>
             <MonthBar isMobile={isHamburger}>
+                {(type === 'event') &&
+                    <BackButton>
+                        <BackIconInstance onClick={backOnClick}/>
+                    </BackButton>
+                }
                 <MonthText isMobile={isHamburger}>
                     {format(parseISO(monthGroup.dateTime), 'MMMM')}
                 </MonthText>
@@ -192,7 +221,7 @@ const MonthEvents: React.FC<MonthEventsProps> = ({
             <Events>
                 {
                     monthGroup.events.map((event, idx) => {
-                        const permaLink = `/schedule/event/${encodeURIComponent(format(parseISO(event.dateTime), `yyyyMMdd'T'HHmmssXX`))}`;
+                        const permaLink = `/schedule/event/${encodeURIComponent(formatInTimeZone(parseISO(event.dateTime), 'Zulu', `yyyyMMdd'T'HHmmssX`))}`;
                         return (
                             <EventItem
                                 key={`${type}-${lastQuery!}-${idx}-event`}
@@ -351,13 +380,14 @@ export const EventList: React.FC<EventListProps> = (props) => {
                         />)
                     : <div />
                 }
-                <EndOfList>
+                {(props.type !== 'event') && <EndOfList>
                     {eventItemsLength === 0 ?
                         'No events fetched'
                         : (hasMore ?
                             ''
                             : 'No more events')}
                 </EndOfList>
+                }
             </ScrollingContainer>
             <Transition<undefined>
                 in={isFetchingList}

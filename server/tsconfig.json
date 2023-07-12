@@ -12,13 +12,13 @@
             ]
         },
         "typeRoots": [
-            "node_modules/@types",
-            "@types"
+            "../node_modules/@types",
+            "../@types"
         ],
-        "module": "commonjs",
-        "target": "es2017",
+        "module": "ESNext",
+        "target": "ESNext",
         "allowJs": true,
-        "moduleResolution": "node",
+        "moduleResolution": "NodeNext",
         "strict": true,
         "noImplicitAny": true,
         "noUnusedLocals": true,
@@ -28,12 +28,19 @@
         "sourceMap": false,
         "skipLibCheck": true,
         "outDir": "build",
-        "baseUrl": ".."
+        "baseUrl": "..",
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "esModuleInterop": true
+    },
+    "ts-node": {
+        "esm": true
     },
     "exclude": [
         "**/node_modules/*"
     ],
     "include": [
-        "./src"
+        "./src",
+        "../common/src"
     ]
 }

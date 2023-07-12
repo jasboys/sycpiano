@@ -1,49 +1,15 @@
-import { DataTypes, Model, Sequelize } from 'sequelize';
-import { ModelExport, ModelMap } from '../types';
+import type { Rel } from '@mikro-orm/core';
+import { Entity, ManyToOne } from '@mikro-orm/core';
+import { Product } from './Product.js';
+import { User } from './User.js';
 
-export interface UserProductAttributes {
-    id: string;
-    userId: string;
-    productId: string;
+@Entity()
+export class UserProduct {
+
+  @ManyToOne({ entity: () => User, onDelete: 'cascade', primary: true, index: 'user_product_user_idx' })
+  user!: Rel<User>;
+
+  @ManyToOne({ entity: () => Product, onDelete: 'cascade', primary: true, index: 'user_product_product_idx' })
+  product!: Rel<Product>;
+
 }
-
-export class userProduct extends Model<UserProductAttributes, UserProductAttributes> implements UserProductAttributes {
-    declare id: string;
-    declare userId: string;
-    declare productId: string;
-    declare readonly createdAt?: Date | string;
-    declare readonly updatedAt?: Date | string;
-}
-
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<userProduct> => {
-    userProduct.init({
-        id: {
-            allowNull: false,
-            defaultValue: dataTypes.UUIDV4,
-            primaryKey: true,
-            type: dataTypes.UUID,
-            unique: true,
-        },
-        userId: {
-            type: dataTypes.STRING,
-            field: 'user_id',
-        },
-        productId: {
-            type: dataTypes.STRING,
-            field: 'product_id',
-        },
-    }, {
-            sequelize,
-            tableName: 'user_product',
-        });
-
-    const associate = (models: ModelMap) => {
-        userProduct.belongsTo(models.user);
-        userProduct.belongsTo(models.product);
-    };
-
-    return {
-        model: userProduct,
-        associate,
-    };
-};

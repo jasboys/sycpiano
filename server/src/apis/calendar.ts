@@ -1,92 +1,81 @@
+import { expr } from '@mikro-orm/core';
 import { isBefore, isValid, parseISO, startOfDay } from 'date-fns';
 import * as express from 'express';
-import * as sequelize from 'sequelize';
-import { Op } from 'sequelize';
 
-import db from '../models';
-import { CalendarAttributes, calendar } from '../models/calendar';
-const models = db.models;
-
-// const { and, eq, gt, lt, or } = Sequelize.Op;
-// const { gt, lt } = Sequelize.Op;
-
-const calendarIncludeBase = [
-    {
-        model: models.collaborator,
-        attributes: {
-            exclude: ['id', 'created_at', 'updated_at', 'createdAt', 'updatedAt', 'calendarCollaborators', '_search'],
-        },
-        through: {
-            attributes: ['order'],
-        },
-    },
-    {
-        model: models.piece,
-        attributes: {
-            exclude: ['id', 'created_at', 'updated_at', 'createdAt', 'updatedAt', 'calendarPieces', '_search'],
-        },
-        through: {
-            attributes: ['order'],
-        },
-    },
-];
-
-const calendarOptionsBase: sequelize.FindOptions<CalendarAttributes> = {
-    attributes: {
-        exclude: ['created_at', 'updated_at', '_search', 'createdAt', 'updatedAt'],
-    },
-    include: calendarIncludeBase,
-};
+import orm from '../database.js';
+import { Calendar } from '../models/Calendar.js';
 
 
 function getEventsBefore(before: Date, limit?: number) {
-    return models.calendar.findAll({
-        ...calendarOptionsBase,
-        where: sequelize.where(sequelize.literal('date_time::date'), Op.lt, before),
-        limit,
-        order: [
-            ['dateTime', 'DESC'],
-            [models.collaborator, models.calendarCollaborator, 'order', 'ASC'],
-            [models.piece, models.calendarPiece, 'order', 'ASC'],
-        ],
-    });
+    return orm.em.find(
+        Calendar,
+        {
+            [expr('date_time::date')]: { $lt: before }
+        },
+        {
+            limit,
+            populate: ['collaborators', 'pieces'],
+            orderBy: [
+                { dateTime: 'DESC' },
+                { collaborators: { calendarCollaborators: { order: 'ASC' } } },
+                { pieces: { calendarPieces: { order: 'ASC' } } },
+            ],
+        }
+    );
 }
 
 // Includes the date specified (greater than)
 function getEventsAfter(after: Date, limit?: number) {
-    return models.calendar.findAll({
-        ...calendarOptionsBase,
-        where: sequelize.where(sequelize.literal('date_time::date'), Op.gte, after),
-        limit,
-        order: [
-            ['dateTime', 'ASC'],
-            [models.collaborator, models.calendarCollaborator, 'order', 'ASC'],
-            [models.piece, models.calendarPiece, 'order', 'ASC'],
-        ],
-    });
+    return orm.em.find(
+        Calendar,
+        {
+            [expr('date_time::date')]: { $gte: after }
+        },
+        {
+            limit,
+            populate: ['collaborators', 'pieces'],
+            orderBy: [
+                { dateTime: 'DESC' },
+                { collaborators: { calendarCollaborators: { order: 'ASC' } } },
+                { pieces: { calendarPieces: { order: 'ASC' } } },
+            ],
+        }
+    );
 }
 
 // The interval is open right side.
 function getEventsBetween(start: Date, end: Date, order: 'ASC' | 'DESC') {
-    return models.calendar.findAll({
-        ...calendarOptionsBase,
-        where: sequelize.and(
-            sequelize.where(sequelize.literal('date_time::date'), Op.gte, start),
-            sequelize.where(sequelize.literal('date_time::date'), Op.lt, end),
-        ),
-        order: [
-            ['dateTime', order],
-            [models.collaborator, models.calendarCollaborator, 'order', 'ASC'],
-            [models.piece, models.calendarPiece, 'order', 'ASC'],
-        ],
-    });
+    return orm.em.find(
+        Calendar,
+        {
+            $and: [
+                { [expr('date_time::date')]: { $gte: start } },
+                { [expr('date_time::date')]: { $lt: end } },
+            ],
+        },
+        {
+            populate: ['collaborators', 'pieces'],
+            orderBy: [
+                { dateTime: order },
+                { collaborators: { calendarCollaborators: { order: 'ASC' } } },
+                { pieces: { calendarPieces: { order: 'ASC' } } },
+            ],
+        }
+    );
 }
 
 function getEventAt(at: Date) {
-    return models.calendar.findOne({
-        ...calendarOptionsBase,
-        where: sequelize.where(sequelize.literal('date_time::date'), Op.eq, at),
-    });
+    orm.em.findOne(
+        Calendar,
+        { [expr('date_time::date')]: at },
+        {
+            populate: ['collaborators', 'pieces'],
+            orderBy: [
+                { collaborators: { calendarCollaborators: { order: 'ASC' } } },
+                { pieces: { calendarPieces: { order: 'ASC' } } },
+            ],
+        },
+    );
 }
 
 // const AFTER = 2;
@@ -121,89 +110,31 @@ calendarRouter.get('/search', async (req: express.Request<any, any, any, Calenda
     console.log(tokens);
     console.log(splitTokens);
 
-    const calendarMatch: calendar[] = await db.models.calendar.findAll({
-        where: {
-            [Op.or]: [
-                sequelize.where(
-                    db.models.calendar.rawAttributes.id,
-                    Op.in,
-                    sequelize.literal(`(SELECT cs.id from calendar_search('${tokens}') cs)`)),
-                ...splitTokens.map(t => {
-                    return {
-                        [Op.and]: t.map(v => {
-                            return {
-                                [Op.or]: [
-                                    {
-                                        name: {
-                                            [Op.iLike]: `%${v}%`,
-                                        }
-                                    },
-                                    {
-                                        location: {
-                                            [Op.iLike]: `%${v}%`,
-                                        }
-                                    },
-                                    {
-                                        type: {
-                                            [Op.iLike]: `%${v}%`,
-                                        }
-                                    },
-                                    {
-                                        '$pieces.composer$': {
-                                            [Op.iLike]: `%${v}%`,
-                                        }
-                                    },
-                                    {
-                                        '$pieces.piece$': {
-                                            [Op.iLike]: `%${v}%`,
-                                        }
-                                    },
-                                    {
-                                        '$collaborators.name$': {
-                                            [Op.iLike]: `%${v}%`,
-                                        }
-                                    },
-                                    {
-                                        '$collaborators.instrument$': {
-                                            [Op.iLike]: `%${v}%`,
-                                        }
-                                    },
-                                ]
-                            };
-                        }),
-                    };
-                }),
+
+    const calendarResults = await orm.em.find(
+        Calendar,
+        {
+            calendarSearchMatview: {
+                Search: {
+                    $fulltext: tokens
+                },
+            },
+        },
+        {
+            populate: ['collaborators', 'pieces'],
+            orderBy: [
+                { dateTime: 'ASC' },
+                { collaborators: { calendarCollaborators: { order: 'ASC' } } },
+                { pieces: { calendarPieces: { order: 'ASC' } } },
             ],
-        },
-        attributes: {
-            exclude: ['created_at', 'updated_at', '_search', 'createdAt', 'updatedAt'],
-        },
-        include: calendarIncludeBase,
-    });
+        }
 
-    const calendarIds = calendarMatch.map((c) => c.id);
-
-    const calendarResults = await db.models.calendar.findAll({
-        where: {
-            id: calendarIds,
-        },
-        attributes: {
-            exclude: ['created_at', 'updated_at', '_search', 'createdAt', 'updatedAt'],
-        },
-        include: calendarIncludeBase,
-        order: [
-            ['dateTime', 'DESC'],
-            [models.collaborator, models.calendarCollaborator, 'order', 'ASC'],
-            [models.piece, models.calendarPiece, 'order', 'ASC'],
-        ],
-    })
+    )
 
     res.json(calendarResults);
 });
 
 calendarRouter.get('/', async (req: express.Request<any, any, any, CalendarQuery>, res) => {
-    const model = models.calendar;
-
     const limit = !!req.query.limit && parseInt(req.query.limit) || undefined;
     const date = !!req.query.date && parseISO(req.query.date);
     const before = !!req.query.before && parseISO(req.query.before);
@@ -230,7 +161,17 @@ calendarRouter.get('/', async (req: express.Request<any, any, any, CalendarQuery
             response = await getEventsAfter(after, limit);
         } else {
             // type = ALL;
-            response = await model.findAll({ include: calendarIncludeBase });
+            response = await orm.em.find(
+                Calendar,
+                {},
+                {
+                    populate: ['collaborators', 'pieces'],
+                    orderBy: [
+                        { dateTime: 'ASC' },
+                        { collaborators: { calendarCollaborators: { order: 'ASC' } } },
+                        { pieces: { calendarPieces: { order: 'ASC' } } },
+                    ],
+                });
         }
     } else if (isBefore(now, date)) {
         // type = FUTURE;

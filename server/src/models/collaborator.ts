@@ -1,55 +1,35 @@
-import { BelongsToManyCountAssociationsMixin, DataTypes, Model, Sequelize } from 'sequelize';
-import { ModelMap, ModelExport } from '../types';
-import { calendarCollaborator } from './calendarCollaborator';
+import { Collection, Entity, Index, ManyToMany, OptionalProps, PrimaryKey, Property } from '@mikro-orm/core';
+import { Calendar } from './Calendar.js';
+import { CalendarCollaborator } from './CalendarCollaborator.js';
 
-export interface CollaboratorAttributes {
-    id: string;
-    name: string;
-    instrument: string;
-    _search: string;
+@Entity()
+export class Collaborator {
+
+  [OptionalProps]?: 'id';
+
+  @PrimaryKey({ columnType: 'uuid', defaultRaw: `gen_random_uuid()` })
+  id!: string;
+
+  @Property({ columnType: 'text', nullable: true })
+  name?: string;
+
+  @Property({ length: 6, nullable: true })
+  createdAt?: Date;
+
+  @Property({ length: 6, nullable: true })
+  updatedAt?: Date;
+
+  @Property({ columnType: 'text', nullable: true })
+  instrument?: string;
+
+  @Index({ name: 'collaborator_search' })
+  @Property({ fieldName: '_search', columnType: 'tsvector', nullable: true })
+  Search?: unknown;
+
+  @ManyToMany({ entity: () => CalendarCollaborator, mappedBy: cc => cc.collaborator })
+  calendarCollaborators = new Collection<CalendarCollaborator>(this);
+
+  @ManyToMany({ entity: () => Calendar, mappedBy: c => c.collaborators})
+  collaborators = new Collection<Collaborator>(this);
+
 }
-
-export interface CollaboratorCreationAttributes extends Omit<CollaboratorAttributes, 'id' | '_search'> {}
-
-export class collaborator extends Model<CollaboratorAttributes, CollaboratorCreationAttributes> implements CollaboratorAttributes {
-    declare id: string;
-    declare name: string;
-    declare instrument: string;
-    declare readonly _search: string;
-    declare readonly createdAt?: Date | string;
-    declare readonly updatedAt?: Date | string;
-    declare readonly calendarCollaborator?: calendarCollaborator;
-
-    declare countCalendars: BelongsToManyCountAssociationsMixin;
-}
-
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<collaborator> => {
-    collaborator.init({
-        id: {
-            allowNull: false,
-            defaultValue: dataTypes.UUIDV4,
-            primaryKey: true,
-            type: dataTypes.UUID,
-            unique: true,
-        },
-        name: dataTypes.STRING,
-        instrument: dataTypes.STRING,
-        _search: {
-            type: dataTypes.STRING,
-            field: '_search',
-        },
-    }, {
-        sequelize,
-        tableName: 'collaborator',
-    });
-
-    const associate = (models: ModelMap) => {
-        collaborator.hasMany(models.calendarCollaborator);
-        collaborator.belongsToMany(models.calendar, { through: models.calendarCollaborator });
-    };
-
-    return {
-        model: collaborator,
-        associate,
-    };
-};

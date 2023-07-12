@@ -14,7 +14,9 @@ import { EventListName } from 'src/components/Schedule/types';
 import styled from '@emotion/styled';
 import { SwitchTransition, Transition } from 'react-transition-group';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
-import { ShareIconSVG } from './ShareIconSVG';
+import { ShareIconSVG } from 'src/components/Schedule/ShareIconSVG';
+import { BackIconSVG } from 'src/components/Schedule/BackIconSVG';
+import { SearchIconSVG } from 'src/components/Schedule/SearchIconSVG';
 
 const ScheduleContainer = styled.div(
     pushed,
@@ -73,6 +75,8 @@ const Schedule: React.FC<ScheduleProps> = ({ type }) => {
             {/* <TrebleIconSVG /> */}
             {/* <LinkIconSVG /> */}
             <ShareIconSVG />
+            <BackIconSVG />
+            <SearchIconSVG />
         </ScheduleContainer>
     );
 };

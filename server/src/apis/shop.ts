@@ -1,17 +1,19 @@
 
 import * as bodyParser from 'body-parser';
-import * as express from 'express';
-import { Stripe } from 'stripe';
-import { ParamsDictionary } from 'express-serve-static-core';
-
-import { ShopItem } from '../types';
-import * as stripeClient from '../stripe';
-import { emailPDFs } from '../mailer';
-import db from '../models';
-import { Op } from 'sequelize';
-import { ProductTypes } from '../models/product';
-import { pick } from 'lodash';
 import { add, isBefore } from 'date-fns';
+import * as express from 'express';
+import { ParamsDictionary } from 'express-serve-static-core';
+import { pick } from 'lodash';
+import { Stripe } from 'stripe';
+
+import orm from '../database.js';
+import { emailPDFs } from '../mailer.js';
+import { Faq } from '../models/Faq.js';
+import { Product, ProductTypes } from '../models/Product.js';
+import { User } from '../models/User.js';
+import { UserProduct } from '../models/UserProduct.js';
+import * as stripeClient from '../stripe.js';
+import { ShopItem } from '../types.js';
 
 const shopRouter = express.Router();
 
@@ -37,17 +39,21 @@ shopRouter.post('/webhook', bodyParser.raw({ type: 'application/json' }), async 
     if (event.type === 'checkout.session.completed') {
         const session = event.data.object as Stripe.Checkout.Session;
         try {
-            const customerID = session.customer as string;
-            const productIDs = await stripeClient.getProductIDsFromPaymentIntent(session.payment_intent as string);
-            const email = await stripeClient.getEmailFromCustomer(customerID);
+            const customerId = session.customer as string;
+            const productIds = await stripeClient.getProductIDsFromPaymentIntent(session.payment_intent as string);
+            const email = await stripeClient.getEmailFromCustomer(customerId);
             // Add associations to local model
-            const customer = await db.models.user.findOne({ where: { id: customerID } });
-            if (customer === null) {
+            const user = await orm.em.findOne(User, { id: customerId });
+            if (user === null) {
                 throw new Error('no customer found');
             }
-            customer.addProducts(productIDs);
+            for (const id of productIds) {
+                const items = orm.em.create(UserProduct, { product: id, user: customerId });
+                orm.em.persist(items);
+            }
+            orm.em.flush();
 
-            await emailPDFs(productIDs, email, session.client_reference_id!);
+            await emailPDFs(productIds, email, session.client_reference_id!);
         } catch (e) {
             console.error('Failed to send email: ', e);
         }
@@ -63,16 +69,15 @@ const productSortPredicate = (a: ShopItem, b: ShopItem) => {
 }
 
 shopRouter.get('/items', async (_, res) => {
-    const products = await db.models.product.findAll();
+    const products = await orm.em.find(Product, {});
     const storeItems: Partial<Record<typeof ProductTypes[number], ShopItem[]>> =
         ProductTypes.reduce((acc, type) => {
             const prods =
                 products
                     .filter(({ type: t }) => t === type)
                     .map((product) => {
-                        const prod = product.get();
                         return {
-                            ...prod,
+                            ...product,
                             format: 'pdf',
                         };
                     })
@@ -86,25 +91,22 @@ shopRouter.get('/items', async (_, res) => {
 });
 
 shopRouter.get('/faqs', async (_, res) => {
-    const faqs = await db.models.faq.findAll();
+    const faqs = await orm.em.find(Faq, {});
     res.json(faqs);
 });
 
 const getOrCreateLocalCustomer = async (email: string) => {
     try {
-        const localCustomer = await db.models.user.findOne({
-            where: {
-                username: email
-            }
-        });
+        const localCustomer = await orm.em.findOne(User, { username: email }, { populate: [ 'products' ]});
 
         if (localCustomer === null) {
             const stripeCustomer = await stripeClient.getOrCreateCustomer(email);
-            return await db.models.user.create({
+            const user = orm.em.create(User, {
                 id: stripeCustomer.id,
                 username: email,
                 role: 'customer',
             });
+            await orm.em.persist(user).flush();
         } else {
             return localCustomer;
         }
@@ -132,10 +134,10 @@ shopRouter.get<ParamsDictionary, any, any, { session_id: string }>('/checkout-su
 shopRouter.post('/checkout', async (req, res) => {
     const {
         email,
-        productIDs,
+        productIds,
     }: {
         email: string;
-        productIDs: string[];
+        productIds: string[];
     } = req.body;
 
     try {
@@ -144,11 +146,11 @@ shopRouter.post('/checkout', async (req, res) => {
             throw new Error('customer not found');
         }
 
-        const previouslyPurchased = await customer.getProducts();
-        const previouslyPurchasedIDs = previouslyPurchased.map((prod) => prod.id);
+        const previouslyPurchased = customer.products;
+        const previouslyPurchasedIds = previouslyPurchased.toArray().map((prod) => prod.id);
 
-        const duplicates = productIDs.reduce((acc, pID) => {
-            if (previouslyPurchasedIDs.includes(pID)) {
+        const duplicates = productIds.reduce((acc, pID) => {
+            if (previouslyPurchasedIds.includes(pID)) {
                 return [pID, ...acc];
             } else {
                 return acc;
@@ -162,20 +164,13 @@ shopRouter.post('/checkout', async (req, res) => {
             return;
         }
 
-        const prods = await db.models.product.findAll({
-            where: {
-                id: {
-                    [Op.or]: productIDs,
-                }
-            },
-            attributes: ['priceID'],
-        });
+        const prods = await orm.em.find(Product, { id: { $in: productIds } });
 
-        const priceIDs = prods.map((prod) => prod.priceID);
+        const priceIds = prods.map((prod) => prod.priceId);
 
         const sessionId = await stripeClient.createCheckoutSession(
-            productIDs,
-            priceIDs,
+            productIds,
+            priceIds,
             customer.id,
         );
         res.json({
@@ -193,9 +188,11 @@ shopRouter.post('/get-purchased', async (req, res) => {
     } = req.body;
 
     try {
-        const localCustomer = await db.models.user.findAll({ where: { username: email } });
-        const purchased = await localCustomer[0].getProducts();
-        const purchasedIDs = purchased.map((prod) => prod.id);
+        const localCustomer = await orm.em.findOneOrFail(User, { username: email }, { populate: ['products'] });
+
+        const purchased = localCustomer.products;
+        const purchasedIDs = purchased.toArray().map((prod) => prod.id);
+
         res.json({
             skus: purchasedIDs,
         });
@@ -212,21 +209,22 @@ shopRouter.post('/resend-purchased', async (req, res) => {
     } = req.body;
 
     try {
-        const localCustomer = await db.models.user.findAll({ where: { username: email } });
-        const lastSent = localCustomer[0].lastRequest;
+        const localCustomer = await orm.em.findOneOrFail(User, { username: email }, { populate: ['products'] });
+        const lastSent = localCustomer.lastRequest;
         if (lastSent) {
             const threshold = add(lastSent, { hours: 12 });
             if (isBefore(new Date(), threshold)) {
                 throw Error('Resending too soon.');
             }
         }
-        const purchased = await localCustomer[0].getProducts();
+        const purchased = localCustomer.products;
         if (purchased.length === 0) {
             throw Error('No products purchased');
         }
-        const purchasedIDs = purchased.map((prod) => prod.id);
+        const purchasedIDs = purchased.toArray().map((prod) => prod.id);
         await emailPDFs(purchasedIDs, email);
-        await localCustomer[0].update({ lastRequest: new Date() });
+        localCustomer.lastRequest = new Date();
+        orm.em.flush();
         res.sendStatus(200);
     } catch (e) {
         console.error(`Failed to resend purchased pdfs of email: ${email}`, e);

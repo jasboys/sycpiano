@@ -1,6 +1,6 @@
 import { createHash } from 'crypto';
 
-const getLastName = (name: string) => {
+export const getLastName = (name: string) => {
     return /([^\s]+)\s?(?:\(.*\))?$/.exec(name)?.[1];
 };
 

@@ -1,20 +1,17 @@
-import { differenceInCalendarYears } from 'date-fns';
-import { Response, Request, NextFunction } from 'express';
+import { QueryOrder } from '@mikro-orm/core';
+import { NextFunction, Request, Response } from 'express';
 
-import db from '../models';
-const models = db.models;
+import { getAge } from '../../../common/src/common.js';
+import orm from '../database.js';
+import { Bio } from '../models/Bio.js';
 
 const getBio = async (_: Request, res: Response, __: NextFunction): Promise<void> => {
-    const bio = await models.bio.findAll({
-        attributes: ['paragraph', 'text'],
-        order: [['paragraph', 'ASC']],
-    });
+    const bio = await orm.em.find(Bio, {}, { orderBy: [{ paragraph: QueryOrder.ASC }] });
 
-    const age = differenceInCalendarYears(new Date(), new Date(1988, 7, 27));
+    const age = getAge();
 
-
-    const [, ...rest] = bio;
-    const first = { paragraph: bio[0].paragraph, text: bio[0].text.replace('##', age.toString()) };
+    const [firstOrig, ...rest] = bio;
+    const first = { paragraph: firstOrig.paragraph, text: firstOrig.text.replace('##', age.toString()) };
     const bioWithAge = [first, ...rest];
     res.json(bioWithAge);
 };

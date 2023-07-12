@@ -1,50 +1,28 @@
-import { DataTypes, Model, Sequelize } from 'sequelize';
-import { ModelExport, ModelMap } from '../types';
+import type { Rel } from '@mikro-orm/core';
+import { Entity, ManyToOne, OptionalProps, PrimaryKey, Property } from '@mikro-orm/core';
+import { Disc } from './Disc.js';
 
-export interface DiscLinkAttributes {
-    id: string;
-    type: string;
-    url: string;
-    discId: string;
+@Entity()
+export class DiscLink {
+
+  [OptionalProps]?: 'id';
+
+  @PrimaryKey({ columnType: 'uuid', defaultRaw: `gen_random_uuid()` })
+  id!: string;
+
+  @Property({ columnType: 'text', nullable: true })
+  type?: string;
+
+  @Property({ columnType: 'text', nullable: true })
+  url?: string;
+
+  @ManyToOne({ entity: () => Disc, onDelete: 'cascade', index: 'disc_link_disc_idx' })
+  disc!: Rel<Disc>;
+
+  @Property({ length: 6, nullable: true })
+  createdAt?: Date;
+
+  @Property({ length: 6, nullable: true })
+  updatedAt?: Date;
+
 }
-
-export interface DiscLinkCreationAttributes extends Omit<DiscLinkAttributes, 'id'> {}
-
-export class discLink extends Model<DiscLinkAttributes, DiscLinkCreationAttributes> implements DiscLinkAttributes {
-    declare id: string;
-    declare type: string;
-    declare url: string;
-    declare discId: string;
-    declare readonly createdAt?: Date | string;
-    declare readonly updatedAt?: Date | string;
-}
-
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<discLink> => {
-    discLink.init({
-        id: {
-            type: dataTypes.UUID,
-            defaultValue: dataTypes.UUIDV4,
-            primaryKey: true,
-            allowNull: false,
-            unique: true,
-        },
-        type: dataTypes.STRING,
-        url: dataTypes.STRING,
-        discId: {
-            type: dataTypes.UUID,
-            field: 'disc_id',
-        },
-    }, {
-        sequelize,
-        tableName: 'disc_link',
-    });
-
-    const associate = (models: ModelMap) => {
-        discLink.belongsTo(models.disc);
-    };
-
-    return {
-        model: discLink,
-        associate,
-    };
-};

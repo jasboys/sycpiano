@@ -24,6 +24,7 @@ import { Transition } from 'react-transition-group';
 import { fadeOnEnter, fadeOnExit, titleStringBase } from 'src/utils';
 import { formatInTimeZone } from 'date-fns-tz';
 import { parseISO } from 'date-fns';
+import startCase from 'lodash-es/startCase';
 
 const getGooglePlacePhoto = (photoReference: string, maxHeight: number) =>
     `https://maps.googleapis.com/maps/api/place/photo?maxheight=${maxHeight}&photo_reference=${photoReference}&key=${GAPI_KEY}`;
@@ -126,7 +127,6 @@ const CopiedDiv = styled.div({
     backgroundColor: 'white',
     fontFamily: lato2,
     position: 'relative',
-    borderRadius: 4,
 });
 
 const Arrow = styled.div<{ y: number; }>({
@@ -135,7 +135,7 @@ const Arrow = styled.div<{ y: number; }>({
     width: 8,
     height: 8,
     transform: 'rotate(45deg)',
-    right: -4,
+    left: -4,
     boxShadow: cardShadow,
 },
 (props) => ({
@@ -168,32 +168,36 @@ const EventItem: React.FC<EventItemProps> = ({
     usePlacePhoto,
 }) => {
     const arrowRef = React.useRef<HTMLDivElement | null>(null);
-    const [shared, setShared] = React.useState(false);
+    const [shared, setShared] = React.useState<'shared' | 'copied' | undefined>();
     const { x, y, reference, floating, strategy, middlewareData } = useFloating({
-        placement: 'left',
+        placement: 'right',
         middleware: [
             offset(4),
             arrow({ element: arrowRef })
         ],
     });
 
-    const onClick = React.useCallback(async (_ev: React.MouseEvent<SVGElement>) => {
-        // await window.navigator.clipboard.writeText(`${window.location.host}${permaLink}`);
-        // setCopiedIn(true);
-        // setTimeout(() => {
-        //     setCopiedIn(false);
-        // }, 2000);
-        // console.log('copied');
+    const onClick = React.useCallback(async (ev: React.MouseEvent<HTMLAnchorElement>) => {
+        ev.preventDefault();
         const shareData: ShareData = {
             title: titleStringBase + 'Event | ' + formatInTimeZone(parseISO(dateTime), timezone, 'EEE, MMMM dd, yyyy, h:mmaaa z'),
             text: name,
             url: window.location.host + permaLink,
         };
-        if (navigator.canShare(shareData)) {
-            await navigator.share(shareData);
-            setShared(true);
+        console.log(navigator);
+        try {
+            if (window.navigator.canShare(shareData)) {
+                await window.navigator.share(shareData);
+                setShared('shared');
+                setTimeout(() => {
+                    setShared(undefined);
+                }, 2000);
+            }
+        } catch (e) {
+            await window.navigator.clipboard.writeText(`${window.location.protocol}//${window.location.host}${permaLink}`);
+            setShared('copied');
             setTimeout(() => {
-                setShared(false);
+                setShared(undefined);
             }, 2000);
         }
     }, [permaLink]);
@@ -227,9 +231,11 @@ const EventItem: React.FC<EventItemProps> = ({
                 {pieces.length !== 0 && <EventProgram program={pieces} />}
 
                 <Links>{website && <EventWebsiteButton website={website} />}
-                <StyledShareIcon width={36} height={36} onClick={onClick} ref={reference} />
+                <a href={permaLink} target="_blank" rel="noopener" onClick={onClick}>
+                    <StyledShareIcon width={36} height={36} ref={reference} />
+                </a>
                 <Transition<undefined>
-                    in={shared}
+                    in={!!shared}
                     onEnter={fadeOnEnter(0, 0.15)}
                     onExit={fadeOnExit(0, 0.15)}
                     timeout={250}
@@ -238,7 +244,7 @@ const EventItem: React.FC<EventItemProps> = ({
                 >
                     <CopiedTooltip x={x ?? 0} y={y ?? 0} strategy={strategy} ref={floating}>
                         <Arrow y={middlewareData.arrow?.y ?? 0} ref={arrowRef} />
-                        <CopiedDiv>Link Shared!</CopiedDiv>
+                        <CopiedDiv>Link {startCase(shared)}!</CopiedDiv>
                     </CopiedTooltip>
                 </Transition>
                 </Links>

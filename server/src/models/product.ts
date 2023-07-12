@@ -1,112 +1,82 @@
-import { DataTypes, Sequelize, CreateOptions, Optional, InstanceUpdateOptions, Model } from 'sequelize';
-import { createProduct, deleteProduct, updateProduct } from '../stripe';
-import { ModelExport, ModelMap } from '../types';
+import { AfterDelete, BeforeCreate, BeforeUpdate, Collection, Entity, EventArgs, ManyToMany, PrimaryKey, Property } from '@mikro-orm/core';
+import { createProduct, deleteProduct, updateProduct } from '../stripe.js';
+import { User } from './User.js';
 
 export const ProductTypes = ['arrangement', 'cadenza', 'original'] as const;
 
-export interface ProductAttributes {
-    id: string;
-    file: string;
-    name: string;
-    permalink: string;
-    description: string;
-    sample: string;
-    images: string[];
-    pages: number;
-    price: number; // in cents
-    priceID: string;
-    type: typeof ProductTypes[number];
-}
+@Entity()
+export class Product {
 
-export interface ProductCreationAttributes extends Optional<ProductAttributes, 'sample' | 'images'> {}
+    @PrimaryKey({ columnType: 'text' })
+    id!: string;
 
-export class product extends Model<ProductAttributes, ProductCreationAttributes> implements ProductAttributes {
-    declare id: string;
-    declare file: string;
-    declare name: string;
-    declare permalink: string;
-    declare description: string;
-    declare sample: string;
-    declare images: string[];
-    declare pages: number;
-    declare price: number; // in cents
-    declare priceID: string;
-    declare type: typeof ProductTypes[number];
-    declare readonly createdAt?: Date | string;
-    declare readonly updatedAt?: Date | string;
-}
+    @Property({ columnType: 'text' })
+    name!: string;
 
-const beforeCreateHook = async (p: product, _: CreateOptions) => {
-    try {
-        const [productID, priceID] = await createProduct(p);
-        p.id = productID;
-        p.priceID = priceID;
-    } catch (e) {
-        console.log('Failed to get IDs for new product', e);
-    }
-};
+    @Property({ columnType: 'text' })
+    file!: string;
 
-const beforeUpdateHook = async (p: product, _: InstanceUpdateOptions<ProductAttributes>) => {
-    try {
-        const [productID, priceID] = await updateProduct(p);
-        p.id = productID;
-        p.priceID = priceID;
-    } catch (e) {
-        console.log('Failed to get IDs for updated product', e);
-    }
-};
+    @Property({ columnType: 'text', nullable: true })
+    description?: string;
 
-const beforeDestroyHook = async (p: product) => {
-    try {
-        await deleteProduct(p.id);
-    } catch (e) {
-        console.log('Failed to call delete Stripe product API');
-    }
-};
+    @Property({ columnType: 'text', nullable: true })
+    sample?: string;
 
-export default (sequelize: Sequelize, dataTypes: typeof DataTypes): ModelExport<product> => {
-    product.init({
-            id: {
-                type: dataTypes.STRING,
-                primaryKey: true,
-                unique: true,
-            },
-            name: dataTypes.STRING,
-            permalink: dataTypes.STRING,
-            file: dataTypes.STRING,
-            images: dataTypes.ARRAY(dataTypes.STRING),
-            description: dataTypes.TEXT,
-            sample: dataTypes.STRING,
-            pages: dataTypes.INTEGER,
-            price: dataTypes.INTEGER,
-            priceID: {
-                type: dataTypes.STRING,
-                field: 'price_id',
-            },
-            type: {
-                type: dataTypes.STRING,
-                validate: {
-                    isIn: [[...ProductTypes]]
-                }
-            }
-        }, {
-            sequelize,
-            tableName: 'product',
-            hooks: {
-                beforeCreate: beforeCreateHook,
-                beforeUpdate: beforeUpdateHook,
-                beforeDestroy: beforeDestroyHook,
-            },
+    @Property({ nullable: true })
+    images?: string[];
+
+    @Property({ nullable: true })
+    pages?: number;
+
+    @Property({})
+    price!: number;
+
+    @Property({ columnType: 'text', nullable: true })
+    type?: string;
+
+    @Property({ columnType: 'text' })
+    priceId!: string;
+
+    @Property({ length: 6, nullable: true })
+    createdAt?: Date;
+
+    @Property({ length: 6, nullable: true })
+    updatedAt?: Date;
+
+    @Property({ columnType: 'text', nullable: true })
+    permalink?: string;
+
+    @ManyToMany({ entity: () => User, mappedBy: u => u.products })
+    users = new Collection<User>(this);
+
+    @BeforeCreate()
+    async beforeCreate(args: EventArgs<Product>) {
+        try {
+            const [productId, priceId] = await createProduct(args.entity);
+            args.entity.id = productId;
+            args.entity.priceId = priceId;
+        } catch (e) {
+            console.log('Failed to get IDs for new product', e);
         }
-    );
+    }
 
-    const associate = (models: ModelMap) => {
-        product.hasMany(models.userProduct)
-        product.belongsToMany(models.user, { through: models.userProduct });
-    };
+    @BeforeUpdate()
+    async beforeUpdate(args: EventArgs<Product>) {
+        try {
+            const [productId, priceId] = await updateProduct(args.entity);
+            args.entity.id = productId;
+            args.entity.priceId = priceId;
+        } catch (e) {
+            console.log('Failed to get IDs for new product', e);
+        }
+    }
 
-    return {
-        model: product,
-        associate,
-    };
-};
+    @AfterDelete()
+    async afterDelete(args: EventArgs<Product>) {
+        try {
+            await deleteProduct(args.entity.id);
+        } catch (e) {
+            console.log('Failed to call delete Stripe product API');
+        }
+    }
+}

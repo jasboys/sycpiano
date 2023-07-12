@@ -1,61 +1,8 @@
 import * as dotenv from 'dotenv';
-import { Dialect } from 'sequelize/types';
-dotenv.config();
+dotenv.config({ override: true });
 
-const config = () => {
-    let username: string;
-    let password: string;
-    let host: string;
-    let database: string;
-    let port: number;
-    const dbUrl = process.env.DATABASE_URL;
-    if (dbUrl) {
-        let portString;
-        const match = dbUrl.match(/postgres:\/\/(.+):(.+)@(.+):(.+)\/(.+)/);
-        if (match === null) {
-            throw new Error('database url is improperly formed');
-        }
-        [
-            ,
-            username,
-            password,
-            host,
-            portString,
-            /* tslint:disable-next-line:trailing-comma */
-            database
-        ] = match;
-        port = parseInt(portString, 10);
-    } else {
-        if (
-            process.env.DB_USER === undefined ||
-            process.env.DB_PASS === undefined ||
-            process.env.DB_NAME === undefined
-        ) {
-            throw new Error('Missing env variables');
-        }
-        username = process.env.DB_USER;
-        password = process.env.DB_PASS;
-        host = process.env.DB_HOST || '127.0.0.1';
-        database = process.env.DB_NAME;
-        port = parseInt(process.env.DB_PORT || '5432', 10);
-    }
-    return {
-        username,
-        password,
-        host,
-        database,
-        port,
-        dialect: 'postgres' as Dialect,
-        logging: () => { return; },
-        define: { freezeTableName: true, underscored: true },
-    };
+const config = {
+    databaseUrl: process.env.DATABASE_URL,
 };
 
-export const development = {
-    ...config(),
-    logging: (str: string) => {
-        console.log(str);
-    }
-}
-export const test = config();
-export const production = config();
+export default config;

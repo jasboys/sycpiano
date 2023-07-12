@@ -1,7 +1,6 @@
 import * as dotenv from 'dotenv';
-import { umzug } from './migrate';
 
-dotenv.config();
+dotenv.config({ override: true });
 
 const required = [
     'PORT',
@@ -23,7 +22,7 @@ const required = [
 
 export const precheck = async () => {
     // Check DB stuff
-    if (!process.env.DB_URL) {
+    if (!process.env.DATABASE_URL) {
         const dbRequired = ['DB_USER', 'DB_PASS'];
         dbRequired.forEach((key) => {
             const value = process.env[key];
@@ -40,5 +39,5 @@ export const precheck = async () => {
     });
 
     // run migrations!
-    await umzug.up();
+    // await umzug.up();
 };

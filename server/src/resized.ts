@@ -1,14 +1,14 @@
-import * as Promise from 'bluebird';
-import * as express from 'express';
+import arp from 'app-root-path';
+import Promise from 'bluebird';
+import express from 'express';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as arp from 'app-root-path';
 
 const root = arp.toString();
 
-import mkdirp from 'mkdirp';
-import * as Sharp from 'sharp';
 import { OutgoingHttpHeaders } from 'http';
+import mkdirp from 'mkdirp';
+import Sharp from 'sharp';
 
 const statAsync = Promise.promisify(fs.stat);
 

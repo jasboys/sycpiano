@@ -1,20 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
+import orm from '../database.js';
+import { Disc } from '../models/Disc.js';
 
-import db from '../models';
-const models = db.models;
 
 const discHandler = async (_: Request, res: Response, __: NextFunction): Promise<void> => {
-    const model = models.disc;
-    const response = await model.findAll({
-        attributes: {
-            exclude: ['created_at', 'updated_at'],
-        },
-        include: [{
-            model: models.discLink,
-            attributes: {
-                exclude: ['created_at', 'updated_at'],
-            },
-        }],
+    const response = await orm.em.find(Disc, {}, {
+        populate: ['discLinks'],
+        orderBy: { releaseDate: 'DESC' }
     });
     res.json(response);
 };
