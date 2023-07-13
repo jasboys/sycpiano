@@ -123,7 +123,7 @@ export class Calendar {
         /* eslint-enable require-atomic-updates */
         console.log(`[Hook: BeforeCreate] Creating google calendar event '${args.entity.name}' on ${args.entity.dateTime.toISOString()}`);
         const googleParams = await transformModelToGoogle(args.entity);
-        const createResponse = await createCalendarEvent(googleParams);
+        const createResponse = await createCalendarEvent(args.em, googleParams);
 
         const id = createResponse.data.id;
         console.log(`[Hook: BeforeCreate] Received response id: ${id}.`);
@@ -197,7 +197,7 @@ export class Calendar {
         if (!_.isEmpty(args.changeSet?.payload)) {
             const data = await transformModelToGoogle(args.entity);
             console.log(`[Hook: BeforeUpdate] Updating google calendar event: ${args.entity.id}`);
-            await updateCalendar(data);
+            await updateCalendar(args.em, data);
         }
         console.log(`[Hook: BeforeUpdate] End\n`);
     }
@@ -205,7 +205,7 @@ export class Calendar {
     @AfterDelete()
     async AfterDelete(args: EventArgs<Calendar>) {
         console.log(`[Hook: AfterDelete] Start`);
-        await deleteCalendarEvent(args.entity.id);
+        await deleteCalendarEvent(args.em, args.entity.id);
         console.log(`[Hook: AfterDelete] Deleted calendar id: ${args.entity.id}`);
     }
 }

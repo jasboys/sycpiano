@@ -7,7 +7,7 @@ import { Collaborator } from './Collaborator.js';
 const hook = async (args: EventArgs<CalendarCollaborator>) => {
     const cal = args.entity.calendar;
     const data = await transformModelToGoogle(cal);
-    await updateCalendar(data);
+    await updateCalendar(args.em, data);
 };
 
 @Entity()

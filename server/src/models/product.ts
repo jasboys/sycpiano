@@ -1,4 +1,4 @@
-import { AfterDelete, BeforeCreate, BeforeUpdate, Collection, Entity, EventArgs, ManyToMany, PrimaryKey, Property } from '@mikro-orm/core';
+import { AfterDelete, BeforeCreate, BeforeUpdate, Collection, Entity, type EventArgs, ManyToMany, PrimaryKey, Property } from '@mikro-orm/core';
 import { createProduct, deleteProduct, updateProduct } from '../stripe.js';
 import { User } from './User.js';
 

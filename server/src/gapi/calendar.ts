@@ -2,9 +2,11 @@ import axios, { AxiosError, AxiosResponse } from 'axios';
 import { add, format, getUnixTime } from 'date-fns';
 import { JSDOM } from 'jsdom';
 
-import { Calendar } from '../models/orm/Calendar.js';
+// import { Calendar } from '../models/orm/Calendar.js';
 import { GCalEvent } from '../types.js';
 import { getToken } from './oauth.js';
+import { EntityManager } from '@mikro-orm/core';
+import { Calendar } from '../models/Calendar.js';
 
 // From google api console; use general dev or server prod keys for respective environments.
 // Make sure it's set in .env
@@ -15,8 +17,8 @@ const calendarId = (process.env.NODE_ENV === 'production' && process.env.SERVER_
     : 'c7dolt217rdb9atggl25h4fspg@group.calendar.google.com';
 const uriEncCalId = encodeURIComponent(calendarId);
 
-export const getCalendarSingleEvent = async (id: string): Promise<AxiosResponse<any>> => {
-    const token = await getToken();
+export const getCalendarSingleEvent = async (em: EntityManager, id: string): Promise<AxiosResponse<GCalEvent>> => {
+    const token = await getToken(em);
     const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events/${id}`;
     return axios.get(url, {
         headers: {
@@ -31,8 +33,8 @@ interface EventsListResponse {
     nextSyncToken: string;
 }
 
-export const getCalendarEvents = async (nextPageToken?: string, syncToken?: string): Promise<AxiosResponse<EventsListResponse>> => {
-    const token = await getToken();
+export const getCalendarEvents = async (em: EntityManager, nextPageToken?: string, syncToken?: string): Promise<AxiosResponse<EventsListResponse>> => {
+    const token = await getToken(em);
     const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events`;
     return axios.get(url, {
         params: {
@@ -46,8 +48,8 @@ export const getCalendarEvents = async (nextPageToken?: string, syncToken?: stri
     });
 };
 
-export const deleteCalendarEvent = async (id: string): Promise<AxiosResponse<any>> => {
-    const token = await getToken();
+export const deleteCalendarEvent = async (em: EntityManager, id: string): Promise<AxiosResponse<any>> => {
+    const token = await getToken(em);
     const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events/${id}`;
     return axios.delete(url, {
         headers: {
@@ -67,16 +69,19 @@ export interface GoogleCalendarParams {
     endDate?: Date;
 }
 
-export const createCalendarEvent = async ({
-    summary,
-    description,
-    location,
-    startDatetime,
-    timeZone,
-    allDay,
-    endDate,
-}: GoogleCalendarParams): Promise<AxiosResponse<any>> => {
-    const token = await getToken();
+export const createCalendarEvent = async (
+    em: EntityManager,
+    {
+        summary,
+        description,
+        location,
+        startDatetime,
+        timeZone,
+        allDay,
+        endDate,
+    }: GoogleCalendarParams
+): Promise<AxiosResponse<any>> => {
+    const token = await getToken(em);
     const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events`;
     const eventResource = {
         summary,
@@ -100,38 +105,41 @@ export const createCalendarEvent = async ({
     });
 };
 
-export const updateCalendar = async ({
-    id,
-    summary,
-    description,
-    location,
-    startDatetime,
-    timeZone,
-    allDay,
-    endDate,
-}: GoogleCalendarParams): Promise<AxiosResponse<any>> => {
-    const token = await getToken();
-    const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events/${id}`;
-    const eventResource = {
+export const updateCalendar = async (
+    em: EntityManager,
+    {
+        id,
         summary,
         description,
         location,
-        start: (allDay ?
-            { date: format(startDatetime, 'yyyy-MM-dd') } :
-            { dateTime: startDatetime.toISOString(), timeZone }),
-        end: (endDate ?
-            { date: endDate } :
-            (allDay ?
-                { date: format(add(startDatetime, { days: 1 }), 'yyyy-MM-dd') } :
-                { dateTime: add(startDatetime, { hours: 2 }).toISOString(), timeZone }
-            )
-        ),
-    };
-    return axios.put(url, eventResource, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
+        startDatetime,
+        timeZone,
+        allDay,
+        endDate,
+    }: GoogleCalendarParams
+): Promise<AxiosResponse<any>> => {
+    // const token = await getToken(em);
+    // const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events/${id}`;
+    // const eventResource = {
+    //     summary,
+    //     description,
+    //     location,
+    //     start: (allDay ?
+    //         { date: format(startDatetime, 'yyyy-MM-dd') } :
+    //         { dateTime: startDatetime.toISOString(), timeZone }),
+    //     end: (endDate ?
+    //         { date: endDate } :
+    //         (allDay ?
+    //             { date: format(add(startDatetime, { days: 1 }), 'yyyy-MM-dd') } :
+    //             { dateTime: add(startDatetime, { hours: 2 }).toISOString(), timeZone }
+    //         )
+    //     ),
+    // };
+    // return axios.put(url, eventResource, {
+    //     headers: {
+    //         Authorization: `Bearer ${token}`,
+    //     },
+    // });
 };
 
 export const extractEventDescription = (event: GCalEvent): Record<string, unknown> => {
@@ -146,15 +154,15 @@ export const extractEventDescription = (event: GCalEvent): Record<string, unknow
 };
 
 interface GeocodeResponse {
-        results: {
-            geometry: {
-                location: {
-                    lat: number;
-                    lng: number;
-                };
+    results: {
+        geometry: {
+            location: {
+                lat: number;
+                lng: number;
             };
-            formattedAddress: string;
-        }[];
+        };
+        formattedAddress: string;
+    }[];
 }
 
 export const getLatLng = async (address: string): Promise<{ latlng: { lat: number; lng: number }; formattedAddress: string }> => {
@@ -198,36 +206,36 @@ export const getTimeZone = async (lat: number, lng: number, timestamp?: Date): P
     }
 };
 
-export const transformModelToGoogle = () => {
-    // const collaborators = c.collaborators.toArray();
-    // const pieces = c.pieces.toArray();
-    // const data: GoogleCalendarParams = {
-    //     summary: c.name,
-    //     location: c.location,
-    //     startDatetime: c.dateTime,
-    //     endDate: c.endDate ? new Date(c.endDate) : undefined,
-    //     allDay: c.allDay,
-    //     timeZone: c.timezone ?? '',
-    //     description: JSON.stringify({
-    //         collaborators: collaborators.map(({ name, instrument }) => ({
-    //             name,
-    //             instrument,
-    //         })),
-    //         pieces: pieces.map(({ composer, piece }) => ({
-    //             composer,
-    //             piece,
-    //         })),
-    //         type: c.type,
-    //         website: encodeURI(c.website ?? ''),
-    //         imageUrl: encodeURI(c.imageUrl ?? ''),
-    //         placeId: c.placeId,
-    //         photoReference: c.photoReference,
-    //     }),
-    // };
-    // if (!!c.id) {
-    //     data.id = c.id;
-    // }
-    // return data;
+export const transformModelToGoogle = (c: Calendar) => {
+    const collaborators = c.collaborators.toArray();
+    const pieces = c.pieces.toArray();
+    const data: GoogleCalendarParams = {
+        summary: c.name,
+        location: c.location,
+        startDatetime: c.dateTime,
+        endDate: c.endDate ? new Date(c.endDate) : undefined,
+        allDay: c.allDay,
+        timeZone: c.timezone ?? '',
+        description: JSON.stringify({
+            collaborators: collaborators.map(({ name, instrument }) => ({
+                name,
+                instrument,
+            })),
+            pieces: pieces.map(({ composer, piece }) => ({
+                composer,
+                piece,
+            })),
+            type: c.type,
+            website: encodeURI(c.website ?? ''),
+            imageUrl: encodeURI(c.imageUrl ?? ''),
+            placeId: c.placeId,
+            photoReference: c.photoReference,
+        }),
+    };
+    if (!!c.id) {
+        data.id = c.id;
+    }
+    return data;
 };
 
 export const getImageFromMetaTag = async (website: string) => {

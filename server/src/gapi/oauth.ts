@@ -1,5 +1,5 @@
+import { EntityManager } from '@mikro-orm/core';
 import { JWT } from 'google-auth-library';
-import orm from '../database.js';
 import { Token } from '../models/Token.js';
 
 const authorize = async () => {
@@ -19,8 +19,8 @@ const authorize = async () => {
     }
 };
 
-export const getToken = async (): Promise<string> => {
-    const tokenInstance = await orm.em.findOne(Token, { id: 'access_token' });
+export const getToken = async (em: EntityManager): Promise<string> => {
+    const tokenInstance = await em.findOne(Token, { id: 'access_token' });
     if (tokenInstance) {
         const expired = (tokenInstance.expires === undefined) ? undefined : Date.now() > tokenInstance.expires.valueOf();
         if (expired !== undefined && !expired) {
@@ -38,7 +38,7 @@ export const getToken = async (): Promise<string> => {
     ) {
         throw new Error('Not authorized, or no expiry date');
     }
-    await orm.em.upsert(
+    await em.upsert(
         Token,
         {
             id: 'access_token',
@@ -46,7 +46,7 @@ export const getToken = async (): Promise<string> => {
             expires: new Date(credentials.expiry_date),
         }
     );
-    await orm.em.flush();
+    await em.flush();
 
     return credentials.access_token;
 };
