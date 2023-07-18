@@ -32,6 +32,7 @@ module.exports = {
         '@typescript-eslint/no-empty-function': 'off',
         '@typescript-eslint/explicit-module-boundary-types': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
+        '@typescript-eslint/no-inferrable-types': 'off',
         // These rules don't add much value, are better covered by TypeScript and good definition files
         'react/no-direct-mutation-state': 'off',
         'react/no-deprecated': 'off',

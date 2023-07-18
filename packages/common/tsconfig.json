@@ -1,0 +1,36 @@
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+        "lib": [
+            "ESNext"
+        ],
+        "paths": {
+            "*": [
+                "node_modules/*",
+                "node_modules/@types/*",
+                "@types/*",
+            ]
+        },
+        "module": "ESNext",
+        "target": "ESNext",
+        "allowJs": true,
+        "moduleResolution": "NodeNext",
+        "strict": true,
+        "noImplicitAny": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "removeComments": false,
+        "preserveConstEnums": true,
+        "sourceMap": false,
+        "skipLibCheck": true,
+        "outDir": "dist",
+        "baseUrl": ".",
+        "declaration": true
+    },
+    "exclude": [
+        "**/node_modules/*"
+    ],
+    "include": [
+        "./src",
+    ]
+}

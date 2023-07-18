@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/package.json",
+  "name": "common",
+  "packageManager": "yarn@3.6.1",
+  "types": "dist/index.d.ts",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "cross-env NODE_ENV=production tsc",
+    "watch": "cross-env NODE_ENV=development tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "date-fns": "^2.30.0"
+  }
+}

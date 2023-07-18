@@ -1,0 +1,20 @@
+export declare const baseString = "Sean Chen: Pianist, Composer, Arranger | ";
+export declare const getAge: () => number;
+export declare const descriptions: {
+    home: string;
+    biography: string;
+    discography: string;
+    contact: string;
+    upcoming: string;
+    archive: string;
+    search: string;
+    videos: string;
+    music: string;
+    photos: string;
+    press: string;
+    scores: string;
+    faqs: string;
+    getMusic: (piece: string, contributors?: string) => string;
+    searchResults: (query: string) => string;
+    [key: string]: any;
+};

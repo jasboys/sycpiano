@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "sycpiano-193703",
+  "private_key_id": "0cf939b1e2e91d2752c8a9ddc28518b2dbf5bca1",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC5aKUnNfrjDy8+\n+Uk+i9qDM+nRDcH4bZqsodj3j399li6oj1yS8iJB9Czvie8SKquDGFVVMuBw4Fll\n1J0XDVtZzHw5zkNYmXf1TTDRb0RQEtYY93rrrpcf7vCurm94705VeXd/g3t0RHfS\n2LTjeuP4cymzZcd5/xaEpf9KiNtnk/4Yg0GyF1JcMwC2G/T43vBszwAw7ftrB58s\nSk366Uol0+zGeb02SV0gyk0Q7xtIVzfBc0Y7ugtoKF+DN36dPmDekXwvdxyPYb7x\n2TdhEty7oUc72Uw7InV40H9zfQzIPp4RGwdeqMDyyvuvjaaqc9WBoFh+bFuVQdK/\nH2+ONFy1AgMBAAECggEACHdLR0GTPaf1V9JJMmZvaVtG+2k96KqUi/pt7kvqneDs\nK300VG9i+hD8tkldlb5GC5viVZwXnH/aBSjSrXlKKQ0JxRfygkqrrBNEveNvQprB\nlO1D+xwDQY2HBurnIyYGNSfxOWzXB8WSlRmZFOQJIdCcYFku5RatQAxWXmBmaFHJ\nMfozf5MDK8xqmO0zc2Q7UWjMVbAtBRWY5wfiXCg7Ehl6JJtWMEK/YZVMiHbDAlJR\nTvRQgGBLP/ZkCtVW9F7NLi+mM5aZ+YeoGd0wkW1VNgSd3pb5zrTPoadG2IE5YFao\n2JZxffUZ2qla0rjZjyntOoyV4LslkC+aUx29+e5D0QKBgQDoWezGD4kM5VvBvJKt\nI/KZfdiavs7xDPf/bqsSXqx8HaZIrhRemsTpy7j+punMVYsYIeduDcgEHBIgeesz\ndRxk0hfgubd4Fynl51dwM2Ag5EZpjxv3fiaeF3pkRG/Exp0D1uE+UO+JnWVhtEGK\n2ScZjbXSKDS3IkNw+qh+CKCb/QKBgQDMR5m8XuMSBhUFHZGhxtXHrC7WJ8ei4DYJ\nKquPnTarL5yIPhTNNjEzcWk9J2WjCMFKapUAdLXgx28WKxlpQF0M8gNDJ6kuUVNi\nABaM6S7vvQVp9FsWvmKY7w2a4bYTeZuvFG6PqPDhdunb2K28mjVjlaiz0iFf+6Qg\n8lrgROz1GQKBgEd6SnWPl+iosjaCTVkIIvyHE1hfdIgBJlWk9OmcyFESSfI34zpL\nQGJv8oQcUvYyJq0Q2QIpKSvies0U1H8q+sYlP4U5fLBr5867AVIZ6+uSbfrRNJhJ\nbZXawSMRTpTpSKpCs14ZRec+zU5mRndxYC7jQljZV4Yy+y5JXgYPn2D9AoGAQzPq\n54VvviYyFBS+LDJ1cdK7NciwbGzGWg2nkv9tVLO9EzUZMsl5NitBK9UiIphmvkyB\n6Dx8+Q2jBe/31CBQfEnBuP37Mjme7MaKpKCxyDyu40R4EutfFGDQYPuQIqgHB3n5\nRVmWpRWxqZmGzl0M404Ayed/A0yNmikgrFcAfUECgYEAg+ybBpyG8JSgRTSBH8jd\nGqm6F9gOf/hNZE+y6bxHXImOLT2RteLcVeaH2SxRFAWISWF/ZznKn8G91wJZ/PkA\nefHhjyz0go3E88OmeWQG+TXWYhEBNLNIg1PYNTZatEaSfqn3wG3ZaRg4mkscLvJf\n03ui88EWN2vvoC5KtXPke0k=\n-----END PRIVATE KEY-----\n",
+  "client_email": "calendar@sycpiano-193703.iam.gserviceaccount.com",
+  "client_id": "117354637546843595817",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/calendar%40sycpiano-193703.iam.gserviceaccount.com"
+}

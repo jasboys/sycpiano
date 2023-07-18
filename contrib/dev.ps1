@@ -1,1 +1,0 @@
-start wt '-d C:\programming\sycpiano powershell.exe -NoExit & "yarn run watchDev" ; split-pane -H -d C:\programming\sycpiano powershell.exe -NoExit & "yarn watchAndCheckApp" ; split-pane -V -d C:\programming\sycpiano powershell.exe -NoExit & "yarn gulp watchAndCheckServer"'

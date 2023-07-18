@@ -1,0 +1,14 @@
+{
+    "$schema": "https://turbo.build/schema.json",
+    "pipeline": {
+        "watch": {
+            "cache": false,
+            "persistent": true
+        },
+        "//#watch": {
+            "dependsOn": ["^watch"],
+            "cache": false,
+            "persistent": true
+        }
+    }
+}
