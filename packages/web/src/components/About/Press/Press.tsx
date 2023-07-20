@@ -27,6 +27,7 @@ const PressContainer = styled.div(
             marginTop: 0,
             height: '100%',
         },
+        backgroundColor: 'rgb(244 244 244)'
     },
 );
 

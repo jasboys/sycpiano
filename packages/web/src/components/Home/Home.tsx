@@ -3,7 +3,7 @@ import * as React from 'react';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
-import { lato1, lato2 } from 'src/styles/fonts';
+import { interFont, latoFont } from 'src/styles/fonts';
 import {
     generateSrcsetWidths,
     homeBackground,
@@ -55,31 +55,31 @@ const ContentContainer = styled.div<{ menuExpanded: boolean; hiDpx: boolean; }>(
 );
 
 const Name = styled.div(
+    interFont(200),
     {
-        fontFamily: lato2,
         fontSize: 'calc(100vh / 8)',
         position: 'absolute',
         textTransform: 'uppercase',
         width: '100%',
         top: 'calc(35.9% - 46px)',
-        [toMedia({ and: [isHamburger, screenPortrait]})]: {
+        [toMedia({ and: [isHamburger, screenPortrait] })]: {
             fontSize: 'calc(100vw / 6.2)',
             bottom: '63%',
             top: 'unset',
         },
     }
-    );
+);
 
 const Skills = styled.div(
+    latoFont(200),
     {
         position: 'absolute',
-        fontFamily: lato2,
         fontSize: 'calc(100vh / 16)',
         color: '#fff6b0',
         textShadow: `0 0 6px ${textShadowColor}`,
         width: '100%',
         top: 'calc(50.8% - 35.8px)',
-        [toMedia({ and: [isHamburger, screenPortrait]})]: {
+        [toMedia({ and: [isHamburger, screenPortrait] })]: {
             fontSize: 'calc(100vw / 16)',
             bottom: '58%',
             top: 'unset',
@@ -180,19 +180,20 @@ const NavBarGradient = styled.div<{ hiDpx: boolean; isHamburger: boolean }>(
     })
 );
 
-const StyledCopyright = styled.div({
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    fontFamily: lato1,
-    fontWeight: 'bold',
-    color: 'white',
-    padding: '20px 30px',
+const StyledCopyright = styled.div(
+    latoFont(200),
+    {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        fontWeight: 'bold',
+        color: 'white',
+        padding: '20px 30px',
 
-    [toMedia(screenXSandPortrait)]: {
-        width: '100%',
-    },
-});
+        [toMedia(screenXSandPortrait)]: {
+            width: '100%',
+        },
+    });
 
 const MobileBackground = styled.div({
     visibility: 'hidden',

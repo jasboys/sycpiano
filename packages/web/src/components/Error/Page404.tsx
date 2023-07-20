@@ -3,19 +3,20 @@ import { Helmet } from 'react-helmet-async';
 
 import styled from '@emotion/styled';
 
-import { lato2 } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 import { titleStringBase } from 'src/utils';
 
-const StyledDiv = styled.div`
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    font-size: 3em;
-    font-family: ${lato2};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-`;
+const StyledDiv = styled.div(
+    latoFont(200),
+    {
+        height: '100%',
+        width: '100%',
+        position: 'absolute',
+        fontSize: '3rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    });
 
 const Page404: React.FunctionComponent<unknown> = () => (
     <>

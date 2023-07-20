@@ -6,28 +6,29 @@ import { lightBlue, logoBlue } from 'src/styles/colors';
 import mix from 'polished/lib/color/mix';
 import { noHighlight } from 'src/styles/mixins';
 import { toggleCartList } from 'src/components/Cart/reducers';
-import { lato4 } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 import { gsap } from 'gsap';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { css } from '@emotion/react';
 import { toggleExpanded } from 'src/components/App/NavBar/reducers';
 import { mqSelectors } from '../reducers';
 
-const cartStyle = ({ isHamburger }: { isHamburger: boolean }) => css({
-    noHighlight,
-    fill: isHamburger ? logoBlue : '#4d4d4d',
-    textDecoration: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.5s',
-    webkitTapHighlightColor: 'transparent',
-    paddingBottom: isHamburger ? '' : 12,
-    marginRight: isHamburger ? '1rem' : 'unset',
-    fontFamily: lato4,
-    '&:hover': {
+const cartStyle = ({ isHamburger }: { isHamburger: boolean }) => css(
+    latoFont(400),
+    {
+        noHighlight,
+        fill: isHamburger ? logoBlue : '#4d4d4d',
+        textDecoration: 'none',
         cursor: 'pointer',
-        fill: mix(0.5, logoBlue, '#444'),
-    },
-});
+        transition: 'all 0.5s',
+        webkitTapHighlightColor: 'transparent',
+        paddingBottom: isHamburger ? '' : 12,
+        marginRight: isHamburger ? '1rem' : 'unset',
+        '&:hover': {
+            cursor: 'pointer',
+            fill: mix(0.5, logoBlue, '#444'),
+        },
+    });
 
 const cartHomeStyle = ({ isHamburger, cartOpened }: { isHamburger: boolean, cartOpened: boolean }) => css({
     fill: (isHamburger && cartOpened) ? lightBlue : 'white',

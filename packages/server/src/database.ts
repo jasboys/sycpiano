@@ -24,14 +24,12 @@ export class FixedPostgresql extends PostgreSqlDriver {
     protected readonly platform = new FixedPlatform;
 }
 
-console.log(process.cwd());
-
 const orm = await MikroORM.init<FixedPostgresql>({
     entities: ['packages/server/build/models'],
     entitiesTs: ['packages/server/src/models'],
     metadataProvider: ReflectMetadataProvider,
     clientUrl: databaseUrl,
-    debug: true,
+    debug: process.env.NODE_ENV === 'development',
     driver: FixedPostgresql,
     loadStrategy: LoadStrategy.JOINED
 });

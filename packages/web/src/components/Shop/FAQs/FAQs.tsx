@@ -4,12 +4,12 @@ import Markdown from 'markdown-to-jsx';
 import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { pushed } from 'src/styles/mixins';
-import { lato2, } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 
 const Container = styled.div(
+    latoFont(200),
     pushed,
     {
-        fontFamily: lato2,
         display: 'flex',
         flexDirection: 'column',
         marginLeft: 'auto',

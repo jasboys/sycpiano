@@ -1,6 +1,10 @@
-import * as React from 'react';
-
 import styled from '@emotion/styled';
+import { arrow, offset, useFloating } from '@floating-ui/react-dom';
+import { parseISO } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
+import { startCase } from 'lodash-es';
+import * as React from 'react';
+import { Transition } from 'react-transition-group';
 
 import {
     EventCollaborators,
@@ -11,20 +15,14 @@ import {
     EventTime,
     EventWebsiteButton,
 } from 'src/components/Schedule/EventDetails';
-import { EventItem as EventItemType, EventListName } from 'src/components/Schedule/types';
-
-import { arrow, offset, useFloating } from '@floating-ui/react-dom';
-import { parseISO } from 'date-fns';
-import { formatInTimeZone } from 'date-fns-tz';
-import startCase from 'lodash-es/startCase';
-import { Transition } from 'react-transition-group';
-import { toMedia } from 'src/mediaQuery';
-import { screenXS } from 'src/screens';
-import { lightBlue } from 'src/styles/colors';
-import { lato2 } from 'src/styles/fonts';
-import { cardShadow } from 'src/styles/mixins';
-import { fadeOnEnter, fadeOnExit, titleStringBase } from 'src/utils';
-import { ShareIconInstance } from './ShareIconSVG';
+import { toMedia } from 'src/mediaQuery.js';
+import { screenXS } from 'src/screens.js';
+import { lightBlue } from 'src/styles/colors.js';
+import { latoFont } from 'src/styles/fonts.js';
+import { cardShadow } from 'src/styles/mixins.js';
+import { fadeOnEnter, fadeOnExit, titleStringBase } from 'src/utils.js';
+import { ShareIconInstance } from './ShareIconSVG.jsx';
+import { EventItem as EventItemType, EventListName } from './types.js';
 
 const getGooglePlacePhoto = (photoReference: string, maxHeight: number) =>
     `https://maps.googleapis.com/maps/api/place/photo?maxheight=${maxHeight}&photo_reference=${photoReference}&key=${GAPI_KEY}`;
@@ -32,31 +30,35 @@ const getGooglePlacePhoto = (photoReference: string, maxHeight: number) =>
 type EventItemProps = EventItemType & { className?: string; isMobile: boolean; permaLink: string; listType: EventListName };
 
 const ItemContainer = styled.div({
-    margin: '1.8rem auto',
+    margin: '4rem auto',
     width: '80vw',
     maxWidth: 800,
-    overflow: 'hidden',
-    boxShadow: cardShadow,
     backgroundColor: 'transparent',
     display: 'flex',
+    '&:first-of-type': {
+        marginTop: '2rem',
+    },
+    '&:last-of-type': {
+        marginBottom: '2rem',
+    },
+    [toMedia(screenXS)]: {
+        margin: '2rem auto',
+        '&:first-of-type': {
+            marginTop: '1.5rem',
+        },
+        '&:last-of-type': {
+            marginBottom: '1.5rem',
+        },
+    }
 });
 
 const Left = styled.div({
-    flex: '0 0 max(calc(50% - 200px), 100px)',
+    flex: '0 0 max(calc(50% - 200px), 60px)',
     display: 'flex',
     justifyContent: 'end',
     backgroundColor: lightBlue,
-    overflow: 'hidden',
+    // overflow: 'hidden',
     position: 'relative',
-});
-
-const Overlay = styled.div({
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    zIndex: 4,
-    backgroundColor: `#14141473`,
-    backdropFilter: 'blur(1px)',
 });
 
 const Image = styled.img({
@@ -64,27 +66,29 @@ const Image = styled.img({
     height: '100%',
     width: '100%',
     position: 'absolute',
+    boxShadow: '0px 3px 5px -2px rgba(0 0 0 / 0.5)',
     zIndex: 3,
     [toMedia(screenXS)]: {
         left: 0,
     }
 });
 
-const DetailsContainer = styled.div({
-    flex: 1,
-    padding: '1.5rem',
-    display: 'flex',
-    flexDirection: 'column',
-    fontFamily: lato2,
-    position: 'relative',
-    zIndex: 10,
-    // backdropFilter: 'blur(2px) contrast(0.1) brightness(1.8)',
-    backgroundColor: 'rgba(255 255 255 / 0.92)',
-    height: '100%',
-    [toMedia(screenXS)]: {
-        padding: '1.0rem',
-    },
-});
+const DetailsContainer = styled.div(
+    latoFont(300),
+    {
+        flex: 1,
+        padding: '1.5rem 2rem 1.5rem 3rem',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+        zIndex: 10,
+        // backdropFilter: 'blur(2px) contrast(0.1) brightness(1.8)',
+        // backgroundColor: 'rgba(255 255 255 / 0.92)',
+        height: '100%',
+        [toMedia(screenXS)]: {
+            padding: '1.0rem',
+        },
+    });
 
 const Right = styled.div({
     flex: 1,
@@ -97,57 +101,62 @@ const StyledShareIcon = styled(ShareIconInstance, {
     position: 'relative',
     fill: 'var(--light-blue)',
     stroke: 'var(--light-blue)',
-    width: 32,
-    height: 32,
+    width: 28,
+    height: 28,
     transition: 'opacity 250ms',
-    // filter: 'drop-shadow(0 0 1px var(--light-blue))',
     '&:hover': {
         cursor: 'pointer',
         opacity: 0.6,
     },
     [toMedia(screenXS)]: {
-        height: 24,
-        width: 24,
+        height: 22,
+        width: 22,
     },
 });
 
-const CopiedTooltip = styled.div<{ x: number; y: number; strategy: 'absolute' | 'fixed' }>({
-    width: 'max-content',
-    height: 'min-content',
-    boxShadow: cardShadow,
-},
-(props) => ({
-    position: props.strategy,
-    left: props.x,
-    top: props.y,
-}));
+const CopiedTooltip = styled.div<{ x: number; y: number; strategy: 'absolute' | 'fixed' }>(
+    {
+        width: 'max-content',
+        height: 'min-content',
+        boxShadow: cardShadow,
+    },
+    (props) => ({
+        position: props.strategy,
+        left: props.x,
+        top: props.y,
+    })
+);
 
-const CopiedDiv = styled.div({
-    padding: '0.5rem',
-    backgroundColor: 'white',
-    fontFamily: lato2,
-    position: 'relative',
-});
+const CopiedDiv = styled.div(
+    latoFont(200),
+    {
+        padding: '0.5rem',
+        backgroundColor: 'white',
+        position: 'relative',
+    }
+);
 
-const Arrow = styled.div<{ y: number; }>({
-    position: 'absolute',
-    background: 'white',
-    width: 8,
-    height: 8,
-    transform: 'rotate(45deg)',
-    left: -4,
-    boxShadow: cardShadow,
-},
-(props) => ({
-    top: props.y,
-}));
+const Arrow = styled.div<{ y: number; }>(
+    {
+        position: 'absolute',
+        background: 'white',
+        width: 8,
+        height: 8,
+        transform: 'rotate(45deg)',
+        left: -4,
+        boxShadow: cardShadow,
+    },
+    (props) => ({
+        top: props.y,
+    }),
+);
 
 const Links = styled.div({
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: '0.6rem',
-})
+});
 
 const EventItem: React.FC<EventItemProps> = ({
     dateTime,
@@ -162,7 +171,6 @@ const EventItem: React.FC<EventItemProps> = ({
     website,
     permaLink,
     timezone,
-    // listType,
     imageUrl,
     photoReference,
     usePlacePhoto,
@@ -208,47 +216,46 @@ const EventItem: React.FC<EventItemProps> = ({
         <ItemContainer>
             <Left>
                 {DateChildren}
-                <Overlay />
                 <Image src={((usePlacePhoto && !!photoReference) ? getGooglePlacePhoto(photoReference, 300) : imageUrl) ?? ''} />
 
             </Left>
             <Right>
 
-            <DetailsContainer>
+                <DetailsContainer>
 
-                <EventName name={name} isMobile={isMobile} permaLink={permaLink} eventType={type} />
+                    <EventName name={name} isMobile={isMobile} permaLink={permaLink} eventType={type} />
 
-                {!allDay && (
-                    <EventTime
-                        dateTime={dateTime}
-                        isMobile={isMobile}
-                        timezone={timezone}
-                    />
-                )}
+                    {!allDay && (
+                        <EventTime
+                            dateTime={dateTime}
+                            isMobile={isMobile}
+                            timezone={timezone}
+                        />
+                    )}
 
-                <EventLocation location={location} isMobile={isMobile} />
-                {collaborators.length !== 0 && <EventCollaborators collaborators={collaborators} />}
-                {pieces.length !== 0 && <EventProgram program={pieces} />}
+                    <EventLocation location={location} isMobile={isMobile} />
+                    {collaborators.length !== 0 && <EventCollaborators collaborators={collaborators} />}
+                    {pieces.length !== 0 && <EventProgram program={pieces} />}
 
-                <Links>{website && <EventWebsiteButton website={website} />}
-                <a href={permaLink} target="_blank" rel="noopener" onClick={onClick}>
-                    <StyledShareIcon width={36} height={36} ref={reference} />
-                </a>
-                <Transition<undefined>
-                    in={!!shared}
-                    onEnter={fadeOnEnter(0, 0.15)}
-                    onExit={fadeOnExit(0, 0.15)}
-                    timeout={250}
-                    mountOnEnter={true}
-                    unmountOnExit={true}
-                >
-                    <CopiedTooltip x={x ?? 0} y={y ?? 0} strategy={strategy} ref={floating as React.MutableRefObject<HTMLDivElement>}>
-                        <Arrow y={middlewareData.arrow?.y ?? 0} ref={arrowRef} />
-                        <CopiedDiv>Link {startCase(shared)}!</CopiedDiv>
-                    </CopiedTooltip>
-                </Transition>
-                </Links>
-            </DetailsContainer>
+                    <Links>{website && <EventWebsiteButton website={website} />}
+                        <a href={permaLink} target="_blank" rel="noopener" onClick={onClick}>
+                            <StyledShareIcon width={36} height={36} ref={reference} />
+                        </a>
+                        <Transition<undefined>
+                            in={!!shared}
+                            onEnter={fadeOnEnter(0, 0.15)}
+                            onExit={fadeOnExit(0, 0.15)}
+                            timeout={250}
+                            mountOnEnter={true}
+                            unmountOnExit={true}
+                        >
+                            <CopiedTooltip x={x ?? 0} y={y ?? 0} strategy={strategy} ref={floating as React.MutableRefObject<HTMLDivElement>}>
+                                <Arrow y={middlewareData.arrow?.y ?? 0} ref={arrowRef} />
+                                <CopiedDiv>Link {startCase(shared)}!</CopiedDiv>
+                            </CopiedTooltip>
+                        </Transition>
+                    </Links>
+                </DetailsContainer>
             </Right>
         </ItemContainer>
     );

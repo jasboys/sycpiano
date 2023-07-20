@@ -7,7 +7,7 @@ import { LoadingInstance } from 'src/components/LoadingSVG';
 import { PauseButton, PauseIcon, PlayButton, PlayIcon, SkipButton } from 'src/components/Media/Music/Buttons';
 import { cartesianToPolar } from 'src/components/Media/Music/utils';
 
-import { HEIGHT_ADJUST_DESKTOP, HEIGHT_ADJUST_MOBILE } from 'src/components/Media/Music/audioVisualizerBase';
+import { HEIGHT_ADJUST_DESKTOP, HEIGHT_ADJUST_MOBILE } from 'src/components/Media/Music/AudioVisualizerBase';
 import { lightBlue } from 'src/styles/colors';
 import { screenM, screenPortrait, screenXS } from 'src/screens';
 import { navBarHeight, playlistContainerWidth } from 'src/styles/variables';

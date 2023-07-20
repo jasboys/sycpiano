@@ -17,6 +17,8 @@ export interface MusicFileItem {
     readonly music: string;
     readonly composer?: string;
     readonly piece?: string;
+    readonly contributors?: string;
+    readonly year?: number;
     readonly hash: string;
 }
 

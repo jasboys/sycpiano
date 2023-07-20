@@ -7,21 +7,38 @@ import { link } from 'src/styles/mixins';
 import { camel2prop, camel2var, CSSVariables, desktopPlaylistWidth, navBarHeight, toPx } from 'src/styles/variables';
 import { CSSVariableKeys } from 'src/types';
 
+const fontsFolder = '/static/fonts'
+
 // font face helper
-const loadFont = (fileName: string, fontFamily: string) => ({
-    '@font-face': {
-        fontFamily: fontFamily,
-        src: `
-            url('/static/fonts/${fileName}.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-            url('/static/fonts/${fileName}.woff2') format('woff2'), /* Modern Browsers */
-            url('/static/fonts/${fileName}.woff') format('woff'), /* Modern Browsers */
-            url('/static/fonts/${fileName}.ttf') format('truetype'),
-            url('/static/fonts/${fileName}.svg#${fontFamily}') format('svg')
-        `,
-        fontWeight: 'normal',
-        fontStyle: 'normal',
+type loadFont = (
+    fileName: string,
+    fontFamily: string,
+    fontWeight?: string | number,
+    options?: {
+        fontStyle?: 'normal' | 'italic' | 'bold';
+        textRendering?: 'optimizeLegibility';
+        fontDisplay?: 'swap';
+        q?: 'v=3.19';
+        fontNamedInstance?: string
     }
-});
+) => Record<'@font-face', any>;
+
+const loadFont: loadFont = (fontFamily, fileName, fontWeight, options) => {
+    const { fontStyle = 'normal', textRendering, q, fontNamedInstance } = options || {};
+    return {
+        '@font-face': {
+            fontFamily,
+            src: `
+                url('${fontsFolder}/${fileName}.woff2${q ? `?${q}` : ''}') format('woff2'), /* Modern Browsers */
+                url('${fontsFolder}/${fileName}.woff${q ? `?${q}` : ''}') format('woff'); /* Modern Browsers */
+            `,
+            fontWeight,
+            fontStyle,
+            textRendering,
+            fontNamedInstance
+        }
+    };
+};
 
 // global CSS to be injected by <Global> component in App.tsx
 export const globalCss = css([
@@ -70,22 +87,43 @@ export const globalCss = css([
 
         'a': link(logoBlue),
     },
-    loadFont('lato-hairline', 'LatoHairline'),
-    loadFont('lato-thin', 'LatoThin'),
-    loadFont('lato-light', 'LatoLight'),
-    loadFont('lato-black', 'LatoBlack'),
-    loadFont('lato-medium', 'LatoMedium'),
-    loadFont('lato-bold', 'LatoBold'),
-    loadFont('lato-semibold', 'LatoSemibold'),
-    loadFont('lato-regular', 'LatoRegular'),
-    loadFont('lato-heavy', 'LatoHeavy'),
-    loadFont('lato-hairlineitalic', 'LatoHairlineItalic'),
-    loadFont('lato-thinitalic', 'LatoThinItalic'),
-    loadFont('lato-lightitalic', 'LatoLightItalic'),
-    loadFont('lato-blackitalic', 'LatoBlackItalic'),
-    loadFont('lato-mediumitalic', 'LatoMediumItalic'),
-    loadFont('lato-bolditalic', 'LatoBoldItalic'),
-    loadFont('lato-semibolditalic', 'LatoSemiboldItalic'),
-    loadFont('lato-italic', 'LatoItalic'),
-    loadFont('lato-heavyitalic', 'LatoHeavyItalic'),
+    loadFont('Lato', 'Lato-Hairline', 100, { textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'Lato-HairlineItalic', 100, { fontStyle: 'italic', textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'Lato-Thin', 200, { textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'Lato-ThinItalic', 200, { fontStyle: 'italic', textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'Lato-Light', 300, { textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'Lato-LightItalic', 300, { fontStyle: 'italic', textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'Lato-Regular', 400, { textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'Lato-Italic', 400, { fontStyle: 'italic', textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'Lato-Medium', 500, { textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'Lato-MediumItalic', 500, { fontStyle: 'italic', textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'Lato-Semibold', 600, { textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'Lato-SemiboldItalic', 600, { fontStyle: 'italic', textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'Lato-Bold', 700, { textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'Lato-BoldItalic', 700, { fontStyle: 'italic', textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'Lato-Heavy', 800, { textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'Lato-HeavyItalic', 800, { fontStyle: 'italic', textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'Lato-Black', 900, { textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'Lato-BlackItalic', 900, { fontStyle: 'italic', 'textRendering': 'optimizeLegibility' }),
+
+    loadFont('Inter', 'Inter-Thin', 100, { fontDisplay: 'swap', q: 'v=3.19' }),
+    loadFont('Inter', 'Inter-ThinItalic', 100, { fontDisplay: 'swap', fontStyle: 'italic', q: 'v=3.19' }),
+    loadFont('Inter', 'Inter-ExtraLight', 200, { fontDisplay: 'swap', q: 'v=3.19' }),
+    loadFont('Inter', 'Inter-ExtraLightItalic', 200, { fontDisplay: 'swap', fontStyle: 'italic', q: 'v=3.19' }),
+    loadFont('Inter', 'Inter-Light', 300, { fontDisplay: 'swap', q: 'v=3.19' }),
+    loadFont('Inter', 'Inter-LightItalic', 300, { fontDisplay: 'swap', fontStyle: 'italic', q: 'v=3.19' }),
+    loadFont('Inter', 'Inter-Regular', 400, { fontDisplay: 'swap', q: 'v=3.19' }),
+    loadFont('Inter', 'Inter-Italic', 400, { fontDisplay: 'swap', fontStyle: 'italic', q: 'v=3.19' }),
+    loadFont('Inter', 'Inter-Medium', 500, { fontDisplay: 'swap', q: 'v=3.19' }),
+    loadFont('Inter', 'Inter-MediumItalic', 500, { fontDisplay: 'swap', fontStyle: 'italic', q: 'v=3.19' }),
+    loadFont('Inter', 'Inter-SemiBold', 600, { fontDisplay: 'swap', q: 'v=3.19' }),
+    loadFont('Inter', 'Inter-SemiBoldItalic', 600, { fontDisplay: 'swap', fontStyle: 'italic', q: 'v=3.19' }),
+    loadFont('Inter', 'Inter-Bold', 700, { fontDisplay: 'swap', q: 'v=3.19' }),
+    loadFont('Inter', 'Inter-BoldItalic', 700, { fontDisplay: 'swap', fontStyle: 'italic', q: 'v=3.19' }),
+    loadFont('Inter', 'Inter-ExtraBold', 800, { fontDisplay: 'swap', q: 'v=3.19' }),
+    loadFont('Inter', 'Inter-ExtraBoldItalic', 800, { fontDisplay: 'swap', fontStyle: 'italic', q: 'v=3.19' }),
+
+    loadFont('Inter var', 'Inter-roman.var', '100 900', { fontDisplay: 'swap', q: 'v=3.19', fontNamedInstance: 'Regular'}),
+    loadFont('Inter var', 'Inter-italic.var', '100 900', { fontStyle: 'italic', fontDisplay: 'swap', q: 'v=3.19', fontNamedInstance: 'Italic'}),
+
 ]);

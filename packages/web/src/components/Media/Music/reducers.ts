@@ -40,6 +40,8 @@ export const fetchPlaylist = createAsyncThunk<ThunkReturn, void, ThunkAPIType>(
                             ...response[category]![idx].musicFiles[idy],
                             piece: _music.piece,
                             composer: _music.composer,
+                            contributors: _music.contributors,
+                            year: _music.year,
                         };
                         flatItems.push(response[category]![idx].musicFiles[idy]);
                     });

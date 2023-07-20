@@ -4,7 +4,7 @@ import { Transition } from 'react-transition-group';
 
 import { Elastic, gsap } from 'gsap';
 
-import { lato2i } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 import { staticImage } from 'src/imageUrls';
 import { noHighlight } from 'src/styles/mixins';
 import { screenXS, screenPortrait, isHamburger } from 'src/screens';
@@ -35,21 +35,22 @@ const Handle = styled('div')`
     }
 `;
 
-const HandleText = styled('span')({
-    fontFamily: lato2i,
-    fontSize: 'min(2rem, calc(100vh / 20))',
-    color: 'white',
-    textShadow: `0 0 6px ${textShadowColor}`,
-    textDecoration: 'underline',
-    animation: `${pulse} 4s ease infinite`,
-    '&:hover': {
-        cursor: 'pointer',
-        animationPlayState: 'paused',
-    },
-    [toMedia({and: [isHamburger, screenPortrait]})]: {
-        fontSize: 'min(3rem, calc(100vw / 16))'
-    },
-})
+const HandleText = styled('span')(
+    latoFont(200, true),
+    {
+        fontSize: 'min(2rem, calc(100vh / 20))',
+        color: 'white',
+        textShadow: `0 0 6px ${textShadowColor}`,
+        textDecoration: 'underline',
+        animation: `${pulse} 4s ease infinite`,
+        '&:hover': {
+            cursor: 'pointer',
+            animationPlayState: 'paused',
+        },
+        [toMedia({ and: [isHamburger, screenPortrait] })]: {
+            fontSize: 'min(3rem, calc(100vw / 16))'
+        },
+    })
 
 const SocialContainer = styled('div')({
     position: 'absolute',
@@ -57,7 +58,7 @@ const SocialContainer = styled('div')({
     top: 'calc(59.6% - 43.3px)',
     left: '50%',
     transform: 'translateX(-50%)',
-    [toMedia({and: [isHamburger, screenPortrait]})]: {
+    [toMedia({ and: [isHamburger, screenPortrait] })]: {
         bottom: '12%',
         top: 'unset',
     }

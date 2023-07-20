@@ -286,3 +286,10 @@ export declare class LatLng {
     /* Converts to JSON representation. This function is intended to be used via JSON.stringify. */
     toJSON(): LatLngLiteral;
 }
+
+export interface EventDateTimeProps {
+    dateTime: string;
+    endDate?: string;
+    timezone: string;
+    isMobile: boolean;
+}

@@ -3,7 +3,7 @@ import * as React from 'react';
 import styled from '@emotion/styled';
 
 import { lightBlue } from 'src/styles/colors';
-import { lato2 } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 import { staticImage } from 'src/imageUrls';
 import { screenXS, screenPortrait } from 'src/screens';
 import { toMedia } from 'src/mediaQuery';
@@ -41,13 +41,14 @@ const StyledLink = styled.a({
     alignItems: 'center',
 });
 
-const StyledText = styled.span({
-    fontFamily: lato2,
-    fontSize: '1.25rem',
-    color: 'white',
-    marginLeft: '1rem',
-    flex: '0 1 auto',
-});
+const StyledText = styled.span(
+    latoFont(200),
+    {
+        fontSize: '1.25rem',
+        color: 'white',
+        marginLeft: '1rem',
+        flex: '0 1 auto',
+    });
 
 const StyledImg = styled.img({ flex: '0 1 auto', marginRight: '0.2rem' });
 

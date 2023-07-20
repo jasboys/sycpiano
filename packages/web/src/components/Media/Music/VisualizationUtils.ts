@@ -287,12 +287,11 @@ class ConstantQ {
         })
     )
 
-    apply(input: Float32Array): Float32Array {
+    apply(input: Float32Array, output: Float32Array): void {
         if (this.matrix) {
             this.input._data = [Array.from(input)];
-            return Float32Array.from(multiply(this.input, this.matrix).toArray()[0]);
+            output.set(multiply(this.input, this.matrix).toArray()[0]);
         }
-        return input;
     }
 }
 

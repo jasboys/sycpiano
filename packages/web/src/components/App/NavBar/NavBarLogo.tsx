@@ -6,7 +6,7 @@ import styled from '@emotion/styled';
 import { SycLogo, sycLogoSize } from 'src/components/App/NavBar/SycLogo';
 
 import { lightBlue, logoBlue } from 'src/styles/colors';
-import { lato2 } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
@@ -44,9 +44,9 @@ const LogoText = styled.div<{ hiDpx: boolean }>(
 const StyledLink = styled(Link, {
     shouldForwardProp: prop => prop !== 'isHome' && prop !== 'isExpanded',
 })<{ isHome: boolean; isExpanded: boolean }>(
+    latoFont(300),
     {
         display: 'inline-flex',
-        fontFamily: lato2,
         fontSize: `${navBarFontSizeREM}rem`,
         letterSpacing: `${letterSpacing}rem`,
         height: '100%',

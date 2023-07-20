@@ -6,7 +6,7 @@ import styled from '@emotion/styled';
 import { SearchIconInstance } from 'src/components/Schedule/SearchIconSVG';
 
 import { lightBlue, logoBlue } from 'src/styles/colors';
-import { lato1, lato2 } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { screenPortrait, screenXS, screenXSandPortrait } from 'src/screens';
 import { toMedia } from 'src/mediaQuery';
@@ -26,32 +26,34 @@ type SearchProps = {
     className?: string;
 };
 
-const ResultsContainer = styled.div({
-    width: 'fit-content',
-    maxWidth: '25rem',
-    height: 80,
-    right: 48,
-    position: 'fixed',
-    padding: '0.2rem 1rem',
-    margin: '1rem 1.5rem',
-    fontFamily: lato2,
-    borderRadius: 5,
-    zIndex: 14,
-    display: 'flex',
-    alignItems: 'flex-end',
-    justifyContent: 'flex-end',
-    backgroundColor: lighten(0.35, lightBlue),
-    border: `1px solid ${lightBlue}`,
-    color: logoBlue,
-    boxShadow: '0 1px 5px -2px rgba(0 0 0 / 0.4)',
-    [toMedia([screenXS, screenPortrait])]: {
-        left: 0,
-        margin: '0.8rem auto 0',
-        borderRadius: 2,
-    },
-});
+const ResultsContainer = styled.div(
+    latoFont(200),
+    {
+        width: 'fit-content',
+        maxWidth: '25rem',
+        height: 80,
+        right: 48,
+        position: 'fixed',
+        padding: '0.2rem 1rem',
+        margin: '1rem 1.5rem',
+        borderRadius: 5,
+        zIndex: 14,
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'flex-end',
+        backgroundColor: lighten(0.35, lightBlue),
+        border: `1px solid ${lightBlue}`,
+        color: logoBlue,
+        boxShadow: '0 1px 5px -2px rgba(0 0 0 / 0.4)',
+        [toMedia([screenXS, screenPortrait])]: {
+            left: 0,
+            margin: '0.8rem auto 0',
+            borderRadius: 2,
+        },
+    });
 
 const Container = styled.div<{ dirty: boolean; expanded: boolean; }>(
+    latoFont(100),
     {
         height: 50,
         zIndex: 15,
@@ -60,7 +62,6 @@ const Container = styled.div<{ dirty: boolean; expanded: boolean; }>(
         padding: '9px 9px',
         display: 'flex',
         margin: '1rem 1.5rem',
-        fontFamily: lato1,
         border: `1px solid ${lightBlue}`,
         borderRadius: 30,
         alignItems: 'center',
@@ -144,14 +145,15 @@ const Span = styled.span<{ focused: boolean }>(
     })
 );
 
-const Input = styled.input({
-    flex: ' 1 1 auto',
-    border: 'none',
-    fontFamily: lato1,
-    fontSize: '1.3rem',
-    width: '100%',
-    backgroundColor: 'transparent',
-});
+const Input = styled.input(
+    latoFont(100),
+    {
+        flex: ' 1 1 auto',
+        border: 'none',
+        fontSize: '1.3rem',
+        width: '100%',
+        backgroundColor: 'transparent',
+    });
 
 const ResetButton = styled.div<{ focused: boolean; show: boolean; }>(
     noHighlight,
@@ -165,10 +167,10 @@ const ResetButton = styled.div<{ focused: boolean; show: boolean; }>(
             cursor: 'pointer',
         },
     },
-(props) => ({
-    opacity: props.show ? '' : 0,
-    pointerEvents: props.show ? undefined : 'none'
-}));
+    (props) => ({
+        opacity: props.show ? '' : 0,
+        pointerEvents: props.show ? undefined : 'none'
+    }));
 
 const SubmitButton = styled.button<{ dirty: boolean; expanded: boolean; }>(
     {

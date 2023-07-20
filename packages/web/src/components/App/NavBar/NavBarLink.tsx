@@ -14,7 +14,7 @@ import SubNav from 'src/components/App/NavBar/SubNav/SubNav';
 import { LinkShape } from 'src/components/App/NavBar/types';
 
 import { lightBlue, logoBlue, navFontColor } from 'src/styles/colors';
-import { lato2 } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { minRes, webkitMinDPR } from 'src/screens';
 import { navBarHeight, navBarMarginTop } from 'src/styles/variables';
@@ -172,10 +172,10 @@ const exitAnimation = (el: HTMLElement, isHamburger: boolean, path: string) => {
 };
 
 const StyledLi = styled.li<{ isHamburger: boolean }>(
+    latoFont(300),
     {
         fontSize: '1.4rem',
         position: 'relative',
-        fontFamily: lato2,
         letterSpacing: 0,
         display: 'inline-block',
         padding: '0 1px 0 1px',

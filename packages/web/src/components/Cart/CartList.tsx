@@ -8,7 +8,7 @@ import {
 } from 'src/components/Cart/reducers';
 
 import { cartWidth } from 'src/styles/variables';
-import { lato2, lato3 } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 import { theme, lightBlue, logoBlue } from 'src/styles/colors';
 import mix from 'polished/lib/color/mix';
 import { formatPrice } from 'src/utils';
@@ -17,7 +17,7 @@ import { CartItem } from 'src/components/Cart/CartItem';
 import { Product } from 'src/components/Shop/ShopList/types';
 import { noHighlight } from 'src/styles/mixins';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { ThemeProvider } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/system';
 import TextField from '@mui/material/TextField';
 import { isHamburger } from 'src/screens';
 import { toMedia } from 'src/mediaQuery';
@@ -25,12 +25,12 @@ import { toMedia } from 'src/mediaQuery';
 const ARROW_SIDE = 32;
 
 const CartListDiv = styled.div(
+    latoFont(200),
     {
         backgroundColor: 'rgba(255 255 255 / 0.4)',
         position: 'relative',
         width: cartWidth,
         margin: `${ARROW_SIDE / 2}px 1.5rem`,
-        fontFamily: lato2,
         fontSize: '0.8rem',
         borderRadius: '4px',
         border: '4px solid transparent',
@@ -82,6 +82,7 @@ const getHoverStyle = (isMouseDown: boolean) => ({
 });
 
 const StyledCheckoutButton = styled.button<{ disabled: boolean; isMouseDown: boolean }>(
+    latoFont(300),
     {
         position: 'relative',
         fontSize: '0.8rem',
@@ -91,7 +92,6 @@ const StyledCheckoutButton = styled.button<{ disabled: boolean; isMouseDown: boo
         marginBottom: '2rem',
         textAlign: 'center',
         borderRadius: 50,
-        fontFamily: lato3,
         backgroundColor: lightBlue,
         color: 'white',
         transition: 'all 0.25s',

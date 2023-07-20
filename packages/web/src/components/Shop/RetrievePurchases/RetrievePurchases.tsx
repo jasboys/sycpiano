@@ -2,7 +2,7 @@ import axios from 'axios';
 import * as React from 'react';
 import styled from '@emotion/styled';
 import { noHighlight, pushed } from 'src/styles/mixins';
-import { lato2, lato3, } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 import { lightBlue, logoBlue, theme } from 'src/styles/colors';
 import { validateEmail } from 'src/utils';
 import mix from 'polished/lib/color/mix';
@@ -11,9 +11,9 @@ import TextField from '@mui/material/TextField';
 import { ThemeProvider } from '@mui/system';
 
 const Container = styled.div(
+    latoFont(200),
     pushed,
     {
-        fontFamily: lato2,
         display: 'flex',
         flexDirection: 'column',
         marginLeft: 'auto',
@@ -48,6 +48,7 @@ const getHoverStyle = (isMouseDown: boolean) => ({
 });
 
 const StyledSubmitButton = styled.button<{ disabled: boolean; isMouseDown: boolean; isSuccess: boolean }>(
+    latoFont(300),
     {
         position: 'relative',
         fontSize: '0.8rem',
@@ -57,7 +58,6 @@ const StyledSubmitButton = styled.button<{ disabled: boolean; isMouseDown: boole
         marginBottom: '2rem',
         textAlign: 'center',
         borderRadius: 50,
-        fontFamily: lato3,
         backgroundColor: lightBlue,
         color: 'white',
         transition: 'all 0.25s',

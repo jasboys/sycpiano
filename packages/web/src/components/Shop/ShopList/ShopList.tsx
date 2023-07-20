@@ -5,7 +5,7 @@ import { ShopItem } from 'src/components/Shop/ShopList/ShopItem';
 import { Product, ProductTypes } from 'src/components/Shop/ShopList/types';
 import { pushed } from 'src/styles/mixins';
 import styled from '@emotion/styled';
-import { lato2 } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 import { logoBlue } from 'src/styles/colors';
 import { useAppSelector } from 'src/hooks';
 import { useParams } from 'react-router-dom';
@@ -27,19 +27,20 @@ const Category = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => !isHa
     flexDirection: 'column',
 }));
 
-const CategoryTitle = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => ({
-    color: logoBlue,
-    fontFamily: lato2,
-    fontSize: '1.6rem',
-    padding: '0 2rem',
-    position: 'sticky',
-    top: 0,
-    background: `linear-gradient(white 0% 86%, ${logoBlue} 86% 88%, white 88%, rgba(255, 255, 255, 0))`,
-    zIndex: 5,
-    width: '100%',
-    maxWidth: isHamburger ? 'unset' : '800px',
-    margin: isHamburger ? 'unset' : '0 auto',
-}));
+const CategoryTitle = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => (
+    latoFont(200),
+    {
+        color: logoBlue,
+        fontSize: '1.6rem',
+        padding: '0 2rem',
+        position: 'sticky',
+        top: 0,
+        background: `linear-gradient(white 0% 86%, ${logoBlue} 86% 88%, white 88%, rgba(255, 255, 255, 0))`,
+        zIndex: 5,
+        width: '100%',
+        maxWidth: isHamburger ? 'unset' : '800px',
+        margin: isHamburger ? 'unset' : '0 auto',
+    }));
 
 const CategoryTitleText = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => ({
     width: 'min-content',

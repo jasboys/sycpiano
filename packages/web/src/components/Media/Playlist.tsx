@@ -8,7 +8,7 @@ import { gsap } from 'gsap';
 import PlaylistToggler from 'src/components/Media/PlaylistToggler';
 import { PlaylistProps } from 'src/components/Media/types';
 import { playlistBackground } from 'src/styles/colors';
-import { lato1 } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { screenM, screenXS, screenPortrait } from 'src/screens';
 import { playlistContainerWidth, playlistWidth } from 'src/styles/variables';
@@ -23,26 +23,27 @@ const slideRight = (element: HTMLElement, amount: number, delay = 0) => {
 };
 
 // need to add in css from parent
-const playlistContainerStyle = css`
-    position: absolute;
-    height: 100%;
-    right: 0;
-    width: ${playlistContainerWidth.desktop};
-    transform: translateX(${playlistWidth.desktop});
-    font-family: ${lato1};
-    z-index: 50;
-    display: flex;
-    ${noHighlight}
+const playlistContainerStyle = css(
+    latoFont(100),
+    noHighlight,
+    {
+        position: 'absolute',
+        height: '100%',
+        right: 0,
+        width: playlistContainerWidth.desktop,
+        transform: `translateX(${playlistWidth.desktop})`,
+        zIndex: 50,
+        display: 'flex',
 
-    ${toMedia(screenM)} {
-        width: ${playlistContainerWidth.tablet};
-        transform: translateX(${playlistWidth.tablet});
-    }
+        [toMedia(screenM)]: {
+            width: playlistContainerWidth.tablet,
+            transform: `translateX(${playlistWidth.tablet})`,
+        },
 
-    ${toMedia([screenXS, screenPortrait])} {
-        width: 100%;
-    }
-`;
+        [toMedia([screenXS, screenPortrait])]: {
+            width: '100%',
+        },
+});
 
 const playlistStyle = css`
     padding: 0;

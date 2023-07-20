@@ -59,33 +59,6 @@ export const getAudioContext = (): AudioContext => {
     return acx;
 };
 
-declare global {
-    interface Document {
-        webkitHidden?: boolean;
-        msHidden?: boolean;
-    }
-}
-
-export const visibilityChangeApi = (typeof document.hidden !== 'undefined') ?
-    {
-        hidden: 'hidden',
-        visibilityChange: 'visibilitychange',
-    }
-    : (typeof document.webkitHidden !== 'undefined') ?
-        {
-            hidden: 'webkitHidden',
-            visibilityChange: 'webkitvisibilitychange',
-        }
-        : (typeof document.msHidden !== 'undefined') ?
-            {
-                hidden: 'msHidden',
-                visibilityChange: 'msvisibilitychange',
-            }
-            : {
-                hidden: '',
-                visibilityChange: '',
-            };
-
 export const getLastName = (name: string): string | undefined => {
     return /([^\s]+)\s?(?:\(.*\))?$/.exec(name)?.[1];
 };

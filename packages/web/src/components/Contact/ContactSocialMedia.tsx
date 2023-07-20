@@ -5,7 +5,7 @@ import styled from '@emotion/styled';
 import { ContactSocialMediaShape } from 'src/components/Contact/types';
 import { staticImage } from 'src/imageUrls';
 import { minRes, webkitMinDPR } from 'src/screens';
-import { lato3 } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 import { toMedia } from 'src/mediaQuery';
 
 const SocialMediaLinkContainer = styled.div` padding-top: 20px; `;
@@ -26,12 +26,13 @@ const SocialMediaImg = styled.img`
     }
 `;
 
-const StyledLink = styled.a`
-    flex: 1 0 auto;
-    text-align: center;
-    display: block;
-    font-family: ${lato3};
-`;
+const StyledLink = styled.a(
+    latoFont(300),
+    {
+        flex: '1 0 auto',
+        textAlign: 'center',
+        display: 'block',
+    });
 
 interface SocialMediaLinkProps {
     className?: string;

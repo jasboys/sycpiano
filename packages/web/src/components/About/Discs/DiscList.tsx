@@ -4,16 +4,18 @@ import styled from '@emotion/styled';
 
 import DiscListItem from 'src/components/About/Discs/DiscListItem';
 
-import { lato2, lato3 } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 import { camel2var } from 'src/styles/variables';
 import { useAppSelector } from 'src/hooks';
 import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
 import { mqSelectors } from 'src/components/App/reducers';
+import { logoBlue } from 'src/styles/colors.js';
 
 type DiscListProps = Record<never, unknown>;
 
 const DiscListUL = styled.ul(
+    latoFont(300),
     {
         width: 'fit-content',
         maxWidth: 800,
@@ -21,7 +23,6 @@ const DiscListUL = styled.ul(
         padding: 0,
         margin: '0 auto',
         listStyleType: 'none',
-        fontFamily: lato2,
         [toMedia(isHamburger)]: {
             paddingBottom: 60,
             paddingTop: camel2var('navBarHeight'),
@@ -29,12 +30,14 @@ const DiscListUL = styled.ul(
     }
 );
 
-const Title = styled.li({
-    fontFamily: lato3,
-    fontSize: '2rem',
-    width: '100%',
-    margin: '2rem auto',
-});
+const Title = styled.li(
+    latoFont(400),
+    {
+        fontSize: '1.5rem',
+        width: '100%',
+        margin: '2rem auto',
+        color: logoBlue,
+    });
 
 const DiscList: React.FunctionComponent<DiscListProps> = () => {
     const isHamburger = useAppSelector(mqSelectors.isHamburger);

@@ -8,7 +8,7 @@ import {
 } from 'src/components/Contact/types';
 
 import { contactPageLinkColor } from 'src/styles/colors';
-import { lato2, lato3 } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 import { link } from 'src/styles/mixins';
 import { screenXL } from 'src/screens';
 import { toMedia } from 'src/mediaQuery';
@@ -114,22 +114,24 @@ const PersonalContact: React.FC<PersonalContactShape> = ({
     </div>
 );
 
-const StyledPersonalContact = styled(PersonalContact)`
-    flex: 1 0 auto;
-    font-family: ${lato3};
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-`;
+const StyledPersonalContact = styled(PersonalContact)(
+    latoFont(300),
+    {
+        flex: '1 0 auto',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-start'
+    });
 
-const InfoContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    padding: 30px 0 10px;
-    font-family: ${lato2};
-    box-sizing: border-box;
-`;
+const InfoContainer = styled.div(
+    latoFont(200),
+    {
+        display: 'flex',
+        flexDirection: 'column',
+        textAlign: 'center',
+        padding: '30px 0 10px',
+        boxSizing: 'border-box',
+    });
 
 type ContactInfoProps = PersonalContactShape & PersonalInfoShape;
 

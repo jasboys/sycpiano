@@ -3,12 +3,12 @@ import * as React from 'react';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
-const hamburgerLayerHeight = 3;
+const hamburgerLayerHeight = 2;
 const hamburgerLayerBorderRadius = '0px';
 const hamburgerLayerExpandRotation = 135;
 const hamburgerLayerOffsetMultiple = 10;
 
-const hamburgerMenuWidth = '35px';
+const hamburgerMenuWidth = '32px';
 const hamburgerMenuHeight = `${hamburgerLayerOffsetMultiple * 2 + hamburgerLayerHeight}px`;
 
 const hamburgerLayerStyles = (backgroundColor: string) => css`

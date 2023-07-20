@@ -4,7 +4,7 @@ import * as React from 'react';
 import { addToCartAction, removeItemFromCart } from 'src/components/Cart/reducers';
 import { Product } from 'src/components/Shop/ShopList/types';
 
-import { lato3, lato2 } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 import { logoBlue } from 'src/styles/colors';
 import mix from 'polished/lib/color/mix';
 import { GlobalStateShape } from 'src/store';
@@ -99,12 +99,12 @@ const baseItemNotInCart = css({
 });
 
 const CartButton = styled.button<{ isItemInCart: boolean; isMouseDown: boolean; isHamburger: boolean }>(
+    latoFont(300),
     {
         fontSize: '0.8em',
         width: 230,
         padding: 10,
         textAlign: 'center',
-        fontFamily: lato3,
         borderRadius: 20,
         transition: 'all 0.25s',
         letterSpacing: '0.1rem',
@@ -121,19 +121,20 @@ const CartButton = styled.button<{ isItemInCart: boolean; isMouseDown: boolean; 
     },
 );
 
-const ShopItemContainer = styled.div<{ isHamburger: boolean }>({
-    fontFamily: lato2,
-    height: 'auto',
-    display: 'flex',
-    borderRadius: 4,
-    margin: '2.5rem auto',
-    flex: '0 1 auto',
-    maxWidth: 600,
-    scrollMarginTop: '5rem',
-}, ({ isHamburger }) => isHamburger && ({
-    flexDirection: 'column',
-    alignItems: 'center',
-}));
+const ShopItemContainer = styled.div<{ isHamburger: boolean }>(
+    latoFont(200),
+    {
+        height: 'auto',
+        display: 'flex',
+        borderRadius: 4,
+        margin: '2.5rem auto',
+        flex: '0 1 auto',
+        maxWidth: 600,
+        scrollMarginTop: '5rem',
+    }, ({ isHamburger }) => isHamburger && ({
+        flexDirection: 'column',
+        alignItems: 'center',
+    }));
 
 const ItemName = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => ({
     margin: isHamburger ? '0.8rem 0' : '0 0 0.8rem 0',

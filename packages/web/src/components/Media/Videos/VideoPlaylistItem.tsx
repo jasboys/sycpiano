@@ -13,7 +13,7 @@ import intervalToDuration from 'date-fns/intervalToDuration';
 import parseISO from 'date-fns/parseISO';
 import { VideoItemShape } from 'src/components/Media/Videos/types';
 import { lightBlue, playlistBackground } from 'src/styles/colors';
-import { lato1, lato2 } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 
 // Helper functions
 
@@ -99,14 +99,18 @@ const StyledVideoItem = styled.li<{ active: boolean }>(
     `,
 );
 
-const Duration = styled.span<{ active: boolean; children: string }>(props => css`
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    color: ${(props.active) ? lighten(0.2, '#4E86A4') : '#fff'};
-    font-family: ${(props.active) ? lato2 : lato1};
-    padding-right: 3px;
-`);
+const Duration = styled.span<{ active: boolean; children: string }>(
+    {
+        position: 'absolute',
+        right: 0,
+        bottom: 0,
+        paddingRight: 3,
+    },
+    ({ active }) => ({
+        color: active ? lighten(0.2, lightBlue) : 'white',
+    }),
+    ({ active }) => latoFont(active ? 200 : 100),
+);
 
 const VideoInfo = styled.div`
     ${section}
@@ -175,7 +179,7 @@ const VideoPlaylistItem: React.FC<VideoPlaylistItemProps> = ({ item, currentItem
                 />
                 <TextBottom>
                     {item?.statistics?.viewCount || '--'} views
-                        | published on {
+                    | published on {
                         (item?.snippet?.publishedAt === undefined) ?
                             '--' :
                             publishedDateToDisplay(item.snippet.publishedAt)

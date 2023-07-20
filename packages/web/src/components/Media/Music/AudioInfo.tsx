@@ -9,7 +9,7 @@ import { gsap } from 'gsap';
 import { MusicFileItem } from 'src/components/Media/Music/types';
 import { formatTime } from 'src/components/Media/Music/utils';
 
-import { lato1 } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { minRes, screenM, screenPortrait, webkitMinDPR } from 'src/screens';
 import { navBarHeight, playlistContainerWidth } from 'src/styles/variables';
@@ -24,35 +24,37 @@ interface AudioInfoProps {
     matchParams: boolean;
 }
 
-const AudioInfoContainer = styled.div`
-    ${noHighlight}
-    width: calc(100% - ${playlistContainerWidth.desktop});
-    height: 100%;
-    z-index: 10;
-    position: absolute;
-    top: 0;
-    left: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    align-items: center;
-    text-align: center;
-    font-family: ${lato1};
-    letter-spacing: 2px;
-    color: white;
-    padding-bottom: 3rem;
+const AudioInfoContainer = styled.div(
+    noHighlight,
+    latoFont(100),
+    {
+        width: `calc(100% - ${playlistContainerWidth.desktop})`,
+        height: '100%',
+        zIndex: 10,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        textAlign: 'center',
+        letterSpacing: 2,
+        color: 'white',
+        paddingBlock: '3rem',
 
-    ${toMedia(screenM)} {
-        width: calc(100% - ${playlistContainerWidth.tablet});
-    }
+        [toMedia(screenM)]: {
+            width: `calc(100% - ${playlistContainerWidth.tablet})`
+        },
 
-    ${toMedia(screenPortrait)} {
-        width: 100%;
-        height: 360px;
-        top: ${navBarHeight.hiDpx}px;
-        padding-bottom: 1rem;
-    }
-`;
+        [toMedia(screenPortrait)]: {
+            width: '100%',
+            height: 360,
+            top: navBarHeight.hiDpx,
+            paddingBottom: '1rem',
+        },
+
+});
 
 const ComposerTitle = styled.div`
     padding: 0 20px;
@@ -160,7 +162,7 @@ class AudioInfo extends React.PureComponent<AudioInfoProps> {
             composer = '',
             contributors = '',
             year = null,
-        } = (this.props.currentTrack && this.props.currentTrack.musicItem) || {};
+        } = (this.props.currentTrack && this.props.currentTrack) || {};
 
         const {
             name: movement = '',

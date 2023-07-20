@@ -13,8 +13,8 @@ import { gsap } from 'gsap';
 import PortfolioButton from 'src/components/About/Bio/PortfolioButton';
 import { LazyImage } from 'src/components/LazyImage';
 
-import { offWhite } from 'src/styles/colors';
-import { lato2, lato3 } from 'src/styles/fonts';
+import { logoBlue, offWhite } from 'src/styles/colors';
+import { latoFont } from 'src/styles/fonts';
 import { generateSrcsetWidths, resizedImage, sycWithPianoBW } from 'src/imageUrls';
 import { pushed } from 'src/styles/mixins';
 import { isHamburger, screenLengths, screenM, screenPortrait, screenWidths, screenXS } from 'src/screens';
@@ -27,31 +27,31 @@ import { createStructuredSelector } from 'reselect';
 
 const pictureHeight = 250;
 
-const Paragraph = styled.p({
-    fontFamily: lato2,
-    fontSize: '1.2rem',
-    lineHeight: '2rem',
-    margin: '1.6rem 0',
+const Paragraph = styled.p(
+    {
+        fontSize: '1.0rem',
+        lineHeight: '2rem',
+        margin: '1.6rem 0',
 
-    [toMedia(isHamburger)]: {
-        '&:first-of-type': {
-            marginTop: 0,
+        [toMedia(isHamburger)]: {
+            '&:first-of-type': {
+                marginTop: 0,
+            }
+        },
+
+        [toMedia(screenM)]: {
+            fontSize: '1rem',
+        },
+
+        [toMedia([screenXS, screenPortrait])]: {
+            fontSize: '1rem',
+            lineHeight: '1.6rem',
+            margin: '1.3rem 0',
+            '&:last-of-type': {
+                marginBottom: '3rem'
+            }
         }
-    },
-
-    [toMedia(screenM)]: {
-        fontSize: '1rem',
-    },
-
-    [toMedia([screenXS, screenPortrait])]: {
-        fontSize: '1rem',
-        lineHeight: '1.6rem',
-        margin: '1.3rem 0',
-        '&:last-of-type': {
-            marginBottom: '3rem'
-        }
-    }
-});
+    });
 
 const SpaceFiller = styled.div({
     display: 'none',
@@ -65,13 +65,14 @@ const SpaceFiller = styled.div({
     }
 });
 
-const TextGroup = styled.div({
-    [toMedia([screenXS, screenPortrait])]: {
-        backgroundColor: 'white',
-        padding: '20px 20px',
-    },
-    fontFamily: lato2
-});
+const TextGroup = styled.div(
+    latoFont(300),
+    {
+        [toMedia([screenXS, screenPortrait])]: {
+            backgroundColor: 'white',
+            padding: '20px 20px',
+        },
+    });
 
 const TextContainer = styled.div({
     boxSizing: 'border-box',
@@ -98,14 +99,16 @@ const TextContainer = styled.div({
     },
 });
 
-const NameSpan = styled.span({
-    fontFamily: lato3,
-});
+const NameSpan = styled.span(latoFont(400),
+    {
+    });
 
-const Title = styled.div({
-    fontFamily: lato3,
-    fontSize: '2rem',
-});
+const Title = styled.div(
+    latoFont(400),
+    {
+        fontSize: '1.5rem',
+        color: logoBlue
+    });
 
 interface BioTextProps {
     bio: Blurb[];
@@ -116,7 +119,7 @@ const BioText: React.FunctionComponent<BioTextProps> = (props) => {
     return (
         <TextContainer>
             <SpaceFiller />
-            {props.needsTitle && <Title>Biography</Title> }
+            {props.needsTitle && <Title>Biography</Title>}
             <TextGroup>
                 {props.bio.map(({ text }, i) => {
                     return (
@@ -271,8 +274,7 @@ const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
                     }
                 }
                 : undefined
-            }
-        >
+        }>
             <ImageContainer
                 bgImage={bgImage}
                 ref={bgRef}
@@ -311,7 +313,7 @@ const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
                     destroyCb={onImageDestroy}
                 />
             </ImageContainer>
-            <MemoizedBioText bio={bio} needsTitle={!isHamburger}/>
+            <MemoizedBioText bio={bio} needsTitle={!isHamburger} />
             <PortfolioButton />
         </BioContainer>
     );

@@ -126,17 +126,17 @@ const DiscDescription = styled.div`
     flex-direction: column;
 `;
 
-const DiscTitle = styled.h4`
+const DiscTitle = styled.span`
     margin: 0;
     margin-bottom: 0.5rem;
     font-size: 1.5rem;
 `;
 
-const DiscLabel = styled.h5`
+const DiscLabel = styled.span`
     margin: 0.5rem;
 `;
 
-const DiscYear = styled.h5`
+const DiscYear = styled.span`
     margin: 0.5rem;
 `;
 

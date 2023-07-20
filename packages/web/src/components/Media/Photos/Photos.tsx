@@ -9,7 +9,7 @@ import { fetchPhotos, selectFirstPhoto, selectPhoto } from 'src/components/Media
 import { PhotoItem } from 'src/components/Media/Photos/types';
 import { idFromItem } from 'src/components/Media/Photos/utils';
 
-import { lato2 } from 'src/styles/fonts';
+import { latoFont } from 'src/styles/fonts';
 import { pushed } from 'src/styles/mixins';
 import { screenXS, screenPortrait } from 'src/screens';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
@@ -47,13 +47,14 @@ const StyledPhotoViewer = styled.div({
     }
 });
 
-const StyledCredit = styled.div({
-    position: 'absolute',
-    bottom: 0,
-    fontFamily: lato2,
-    color: 'black',
-    padding: 20,
-});
+const StyledCredit = styled.div(
+    latoFont(200),
+    {
+        position: 'absolute',
+        bottom: 0,
+        color: 'black',
+        padding: 20,
+    });
 
 const Photos: React.FC<Record<never, unknown>> = () => {
     const isHamburger = useAppSelector(mqSelectors.isHamburger);

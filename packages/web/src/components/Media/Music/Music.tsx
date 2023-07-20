@@ -15,9 +15,9 @@ import AudioUI from 'src/components/Media/Music/AudioUI';
 import MusicPlaylist from 'src/components/Media/Music/MusicPlaylist';
 import { fetchPlaylist } from 'src/components/Media/Music/reducers';
 import { getAudioContext, getLastName, getPermaLink, getRelativePermaLink, modulo, normalizeString } from 'src/components/Media/Music/utils';
-import { constantQ, firLoader, waveformLoader } from 'src/components/Media/Music/VisualizationUtils';
+import { firLoader, waveformLoader } from 'src/components/Media/Music/VisualizationUtils';
 
-import { AudioVisualizerType } from 'src/components/Media/Music/audioVisualizerBase';
+import { AudioVisualizerType } from 'src/components/Media/Music/AudioVisualizerBase.jsx';
 import { isMusicItem, MusicFileItem, MusicListItem } from 'src/components/Media/Music/types';
 
 import { pushed } from 'src/styles/mixins';
@@ -28,6 +28,7 @@ import { toMedia } from 'src/mediaQuery';
 import { NavigateFunction, PathMatch, useMatch, useNavigate } from 'react-router-dom';
 import module from 'src/module';
 import store, { AppDispatch, GlobalStateShape } from 'src/store';
+import { ConstantQNode } from './ConstantQNode.js';
 
 const register = module(store);
 
@@ -114,8 +115,8 @@ class Music extends React.Component<MusicProps, MusicState> {
     };
 
     audioCtx!: AudioContext;
-    analyzerL!: AnalyserNode;
-    analyzerR!: AnalyserNode;
+    analyzerL!: ConstantQNode;
+    analyzerR!: ConstantQNode;
 
     musicOrder!: number[];
     musicFileOrder!: number[];
@@ -171,9 +172,13 @@ class Music extends React.Component<MusicProps, MusicState> {
         this.audioCtx = getAudioContext();
         const audioSrc = this.audioCtx.createMediaElementSource(this.audio.current);
 
+        const sampleRate = this.audioCtx.sampleRate;
+        // smooth more when sampleRate is higher
+        const smoothing = 0.9 * Math.pow(sampleRate / 192000, 2);
+
         // source -> split(L, R) => analyzer(L, R) => merge -> dest
-        this.analyzerL = this.audioCtx.createAnalyser();
-        this.analyzerR = this.audioCtx.createAnalyser();
+        this.analyzerL = new ConstantQNode(this.audioCtx, { smoothingTimeConstant: smoothing });
+        this.analyzerR = new ConstantQNode(this.audioCtx, { smoothingTimeConstant: smoothing });
 
         const splitter = this.audioCtx.createChannelSplitter(2);
         const merger = this.audioCtx.createChannelMerger(2);
@@ -184,11 +189,7 @@ class Music extends React.Component<MusicProps, MusicState> {
         this.analyzerR.connect(merger, 0, 1);
         merger.connect(this.audioCtx.destination);
 
-        const sampleRate = this.audioCtx.sampleRate;
-        // smooth more when sampleRate is higher
-        this.analyzerL.smoothingTimeConstant = this.analyzerR.smoothingTimeConstant = 0.9 * Math.pow(sampleRate / 192000, 2);
-
-        console.log(this.analyzerL, this.analyzerR);
+        // console.log(this.analyzerL, this.analyzerR);
         this.audio.current.volume = 0;
 
         this.setState({ isLoading: true });
@@ -241,13 +242,9 @@ class Music extends React.Component<MusicProps, MusicState> {
                 ...this.props.matches?.params
             };
 
-            await Promise.all([
-                constantQ.loaded,
-                this.props.dispatch(fetchPlaylist()),
-            ]);
+            await this.props.dispatch(fetchPlaylist());
 
             const firstTrack = this.getFirstTrack(composer, piece, movement);
-            this.analyzerL.fftSize = this.analyzerR.fftSize = constantQ.numRows * 2;
 
             this.setState({
                 localFlat: this.props.flatItems,
@@ -256,7 +253,7 @@ class Music extends React.Component<MusicProps, MusicState> {
                 this.loadTrack(firstTrack);
             }
         } catch (err) {
-            console.error('constantQ or playlist init failed.', err);
+            console.error('Playlist init failed.', err);
         }
     }
 
@@ -420,7 +417,7 @@ class Music extends React.Component<MusicProps, MusicState> {
             });
         }
         try {
-            await Promise.all([constantQ.loaded, firLoader.loaded, waveformLoader.loaded]);
+            await Promise.all([firLoader.loaded, waveformLoader.loaded]);
         } catch (err) {
             console.error('music component init failed.', err);
         }
@@ -448,8 +445,8 @@ class Music extends React.Component<MusicProps, MusicState> {
 
     detectWebGL = () => {
         const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-        return (gl && gl instanceof WebGLRenderingContext);
+        const gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        return gl;
     }
 
     setHoverSeekring = (isHoverSeekring: boolean, angle?: number) => {
@@ -485,14 +482,25 @@ class Music extends React.Component<MusicProps, MusicState> {
 
     async componentDidMount() {
         this.initializeAudioPlayer();
-        if (this.detectWebGL()) {
-            const component = await register('visualizer', import(/* webpackChunkName: 'visualizerWebGL' */ 'src/components/Media/Music/AudioVisualizerWebGL'));
-            this.setState({
-                Visualizer: component,
-            });
+        const gl = this.detectWebGL();
+        if (!!gl) {
+            if (gl instanceof WebGL2RenderingContext) {
+                const component = await register('visualizer', import(/* webpackChunkName: 'visualizerWebGL2' */ 'src/components/Media/Music/AudioVisualizerWebGL2.js'));
+                console.log('Using WebGL2');
+                this.setState({
+                    Visualizer: component,
+                });
+            } else {
+                const component = await register('visualizer', import(/* webpackChunkName: 'visualizerWebGL' */ 'src/components/Media/Music/AudioVisualizerWebGL.js'));
+                console.log('Using WebGL');
+                this.setState({
+                    Visualizer: component,
+                });
+            }
         } else {
             const component = await register('visualizer', import(/* webpackChunkName: 'visualizerCanvas' */ 'src/components/Media/Music/AudioVisualizerCanvas'));
-            this.setState({
+                console.log('Using Canvas');
+                this.setState({
                 Visualizer: component,
             });
         }
@@ -560,8 +568,8 @@ class Music extends React.Component<MusicProps, MusicState> {
                 {Visualizer && (
                     <Visualizer
                         currentPosition={this.state.playbackPosition}
-                        analyzerL={this.analyzerL}
-                        analyzerR={this.analyzerR}
+                        leftAnalyzer={this.analyzerL}
+                        rightAnalyzer={this.analyzerR}
                         isPlaying={this.state.isPlaying}
                         duration={this.state.duration}
                         prevTimestamp={this.state.lastUpdateTimestamp}
