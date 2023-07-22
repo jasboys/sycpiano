@@ -1,4 +1,5 @@
 import { gsap } from 'gsap';
+import { hsl, opacify } from 'polished';
 
 import {
     AudioVisualizerBase,
@@ -20,6 +21,7 @@ declare global {
 }
 
 class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
+    pixelScaling!: number;
 
     initializeVisualizer = async (): Promise<void> => {
         if (this.visualization.current) {
@@ -32,8 +34,10 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         await this.initialize();
     };
 
-    drawConstantQBins = (context: CanvasRenderingContext2D, values: Float32Array, radius: number, color: string): void => {
-        context.beginPath();
+    drawConstantQBins = (radius: number, color: string): void => {
+        if (!this.renderingContext) return;
+        this.renderingContext.save();
+        this.renderingContext.beginPath();
         let currentInput = 0;
         let currentSample = 0;
         let currentFraction = 0;
@@ -52,7 +56,7 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
                 } else if (input >= this.CQ_BINS) {
                     input -= this.CQ_BINS;
                 }
-                const scale = values[input];
+                const scale = this.vizBins[input];
                 sum += scale * (firLoader.coeffs[i] + fractionalPart * firLoader.deltas[i]);
             }
             const result = radius + this.props.volume * sum * this.SCALE;
@@ -62,9 +66,9 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
 
             // if first sample, use moveTo instead of lineTo
             if (currentSample === 0) {
-                context.moveTo(x, y);
+                this.renderingContext.moveTo(x, y);
             } else {
-                context.lineTo(x, y);
+                this.renderingContext.lineTo(x, y);
             }
 
             // update for next sample
@@ -75,20 +79,22 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
                 currentFraction -= 1;
             }
         }
-        context.fillStyle = color;
-        context.fill();
+        this.renderingContext.fillStyle = color;
+        this.renderingContext.fill();
+        this.renderingContext.restore();
     };
 
-    drawWaveForm = (context: CanvasRenderingContext2D, centerAxis: number, color: string): void => {
+    drawWaveForm = (centerAxis: number, color: string): void => {
         const waveform = waveformLoader.waveform;
         const angles = waveformLoader.angles;
-        if (!waveform || waveform.length === 0) {
+        if (!waveform || waveform.length === 0 || !this.renderingContext) {
             return;
         }
 
         const waveformLength = waveform.length / 2;
         const volumeHeightScale = this.props.volume * this.WAVEFORM_HALF_HEIGHT;
-        context.beginPath();
+        this.renderingContext.save();
+        this.renderingContext.beginPath();
         // going through mins from start to end
         for (let j = 0; j < waveformLength; j++) {
             const scale = centerAxis + waveform[j * 2] * volumeHeightScale;
@@ -97,9 +103,9 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
             y *= scale;
 
             if (j === 0) {
-                context.moveTo(x, y);
+                this.renderingContext.moveTo(x, y);
             } else {
-                context.lineTo(x, y);
+                this.renderingContext.lineTo(x, y);
             }
         }
 
@@ -110,25 +116,29 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
             x *= scale;
             y *= scale;
 
-            context.lineTo(x, y);
+            this.renderingContext.lineTo(x, y);
         }
-        context.fillStyle = color;
-        context.fill();
+        this.renderingContext.fillStyle = color;
+        this.renderingContext.fill();
+        this.renderingContext.restore();
     };
 
-    drawPlaybackHead = (context: CanvasRenderingContext2D, angle: number, minRad: number, maxRad: number, color: string): void => {
+    drawPlaybackHead = (angle: number, minRad: number, maxRad: number, color: string): void => {
+        if (!this.renderingContext) return;
         const [xStart, yStart] = polarToCartesian(minRad, angle);
         const [xEnd, yEnd] = polarToCartesian(maxRad, angle);
-        context.beginPath();
-        context.moveTo(xStart, yStart);
-        context.lineTo(xEnd, yEnd);
-        context.strokeStyle = color;
-        context.stroke();
+        this.renderingContext.save();
+        this.renderingContext.beginPath();
+        this.renderingContext.moveTo(xStart, yStart);
+        this.renderingContext.lineTo(xEnd, yEnd);
+        this.renderingContext.strokeStyle = color;
+        this.renderingContext.stroke();
+        this.renderingContext.restore();
     };
 
-    drawSeekArea = (context: CanvasRenderingContext2D, radius: number, color: string, timestamp: number): void => {
+    drawSeekArea = (radius: number, color: string, timestamp: number): void => {
         const WAVEFORM_CENTER_AXIS = radius - this.WAVEFORM_HALF_HEIGHT;
-        this.drawWaveForm(context, WAVEFORM_CENTER_AXIS, color);
+        this.drawWaveForm(WAVEFORM_CENTER_AXIS, color);
 
         // interpolate playbackhead position with timestamp difference if audio object hasn't updated current position
         let playbackHead = this.props.currentPosition;
@@ -143,7 +153,6 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         }
         const angle = (this.props.currentPosition && this.props.duration) ? TWO_PI * playbackHead / this.props.duration : 0;
         this.drawPlaybackHead(
-            context,
             angle,
             WAVEFORM_CENTER_AXIS - this.props.volume * this.WAVEFORM_HALF_HEIGHT,
             WAVEFORM_CENTER_AXIS + this.props.volume * this.WAVEFORM_HALF_HEIGHT,
@@ -151,7 +160,6 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         );
         if (this.props.isHoverSeekring && this.props.hoverAngle !== undefined) {
             this.drawPlaybackHead(
-                context,
                 this.props.hoverAngle,
                 WAVEFORM_CENTER_AXIS - this.props.volume * this.WAVEFORM_HALF_HEIGHT,
                 WAVEFORM_CENTER_AXIS + this.props.volume * this.WAVEFORM_HALF_HEIGHT,
@@ -160,18 +168,42 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         }
     };
 
-    drawVisualization = (context: CanvasRenderingContext2D, lowFreq: number, values: Float32Array, lightness: number, timestamp: number): void => {
+    drawPhase = (radius: number, color: string): void => {
+        if (!this.renderingContext) return;
+        this.renderingContext.save();
+        this.renderingContext.fillStyle = 'rgba(0, 0, 0, 0)';
+        this.renderingContext.strokeStyle = color;
+        this.renderingContext.lineWidth = 1.0;
+        this.renderingContext.rotate(-Math.PI / 4.0);
+        this.renderingContext.beginPath();
+        this.renderingContext.moveTo(this.rightData[0], this.leftData[0]);
+
+        for (let i = 1; i < this.leftData.length; i++) {
+            this.renderingContext.lineTo(this.rightData[i] * radius, this.leftData[i] * radius);
+        }
+
+        this.renderingContext.stroke();
+        this.renderingContext.restore();
+    }
+
+    drawVisualization = (
+        lowFreq: number,
+        lightness: number,
+        timestamp: number
+    ): void => {
+        if (!this.renderingContext) return;
         // beware! we are rotating the whole thing by -half_pi so, we need to swap width and height values
-        context.clearRect(-this.height / 2 + this.HEIGHT_ADJUST, -this.width / 2, this.height, this.width);
+        this.renderingContext.clearRect(-this.height / 2 + this.HEIGHT_ADJUST, -this.width / 2, this.height, this.width);
         // hsl derived from @light-blue: #4E86A4;
-        const color = `hsl(201, ${36 + lightness * 64}%, ${47 + lightness * 53}%)`;
+        const color = hsl(201, (36 + lightness * 64) / 100, (47 + lightness * 53) / 100);
         // adjust large radius to change with the average of all values
         const radius = this.RADIUS_BASE + lowFreq * this.RADIUS_SCALE;
         this.props.setRadii(radius - 2 * this.WAVEFORM_HALF_HEIGHT, radius, this.RADIUS_BASE);
 
-        this.drawConstantQBins(context, values, radius, color);
-        drawCircleMask(context, radius + 0.25, [this.width, this.height]);
-        this.drawSeekArea(context, radius, color, timestamp);
+        this.drawConstantQBins(radius, color);
+        drawCircleMask(this.renderingContext, radius + 0.25, [this.width, this.height]);
+        this.drawSeekArea(radius, color, timestamp);
+        this.drawPhase(this.RADIUS_BASE, opacify(0.5)(color));
     };
 
     onResize = (): void => {
@@ -208,6 +240,7 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
             this.visualization.current.width = this.width * ratio;
             this.visualization.current.style.width = `${this.width}px`;
             this.visualization.current.style.height = `${this.height}px`;
+            this.pixelScaling = ratio;
             this.renderingContext.scale(ratio, ratio);
         } else {
             this.visualization.current.height = this.height;

@@ -116,7 +116,7 @@ const blurButtonStyle = css(
 
 const blurButtonHover = css` filter: blur(5px); `;
 
-const Button: React.FC<ButtonProps & React.SVGProps<SVGSVGElement>> = ({
+const Button = React.forwardRef<HTMLDivElement, ButtonProps & React.SVGProps<SVGSVGElement>>(({
     isHovering,
     onMouseOver,
     onMouseOut,
@@ -127,9 +127,10 @@ const Button: React.FC<ButtonProps & React.SVGProps<SVGSVGElement>> = ({
     verticalOffset,
     Component,
     className,
-}) => {
+}, ref) => {
     return (Component === undefined) ? null : (
         <StyledButton
+            ref={ref}
             onMouseMove={onMouseMove}
             verticalOffset={verticalOffset}
             width={width}
@@ -158,16 +159,25 @@ const Button: React.FC<ButtonProps & React.SVGProps<SVGSVGElement>> = ({
             />
         </StyledButton>
     );
-};
+});
 
-export const PlayButton: React.FC<ButtonProps & React.SVGProps<SVGSVGElement>> = React.memo(({ ...props }) =>
-    <Button Component={PlaySVG} {...props} />
+export const PlayButton = React.memo(
+    React.forwardRef<HTMLDivElement, ButtonProps & React.SVGProps<SVGSVGElement>>(
+        ({ ...props }, ref) =>
+            <Button Component={PlaySVG} {...props} ref={ref} />
+    )
 );
 
-export const PauseButton: React.FC<ButtonProps & React.SVGProps<SVGSVGElement>> = React.memo(({ ...props }) =>
-    <Button Component={PauseSVG} {...props} />
+export const PauseButton = React.memo(
+    React.forwardRef<HTMLDivElement, ButtonProps & React.SVGProps<SVGSVGElement>>(
+        ({ ...props }, ref) =>
+            <Button Component={PauseSVG} {...props} ref={ref} />
+    )
 );
 
-export const SkipButton: React.FC<ButtonProps & React.SVGProps<SVGSVGElement>> = React.memo(({ ...props }) =>
-    <Button Component={SkipSVG} {...props} />
+export const SkipButton = React.memo(
+    React.forwardRef<HTMLDivElement, ButtonProps & React.SVGProps<SVGSVGElement>>(
+        ({ ...props }, ref) =>
+            <Button Component={SkipSVG} {...props} ref={ref} />
+    )
 );

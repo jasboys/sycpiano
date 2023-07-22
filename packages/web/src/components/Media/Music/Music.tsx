@@ -14,10 +14,10 @@ import AudioInfo from 'src/components/Media/Music/AudioInfo';
 import AudioUI from 'src/components/Media/Music/AudioUI';
 import MusicPlaylist from 'src/components/Media/Music/MusicPlaylist';
 import { fetchPlaylist } from 'src/components/Media/Music/reducers';
-import { getAudioContext, getLastName, getPermaLink, getRelativePermaLink, modulo, normalizeString } from 'src/components/Media/Music/utils';
+import { getAudioContext, getLastName, getPermaLink, getRelativePermaLink, modulo, nextPow2, normalizeString } from 'src/components/Media/Music/utils';
 import { firLoader, waveformLoader } from 'src/components/Media/Music/VisualizationUtils';
 
-import { AudioVisualizerType } from 'src/components/Media/Music/AudioVisualizerBase.jsx';
+import { AudioVisualizerType, MOBILE_MSPF } from 'src/components/Media/Music/AudioVisualizerBase.jsx';
 import { isMusicItem, MusicFileItem, MusicListItem } from 'src/components/Media/Music/types';
 
 import { pushed } from 'src/styles/mixins';
@@ -118,6 +118,9 @@ class Music extends React.Component<MusicProps, MusicState> {
     analyzerL!: ConstantQNode;
     analyzerR!: ConstantQNode;
 
+    phaseAnalyzerL!: AnalyserNode;
+    phaseAnalyzerR!: AnalyserNode;
+
     musicOrder!: number[];
     musicFileOrder!: number[];
 
@@ -180,16 +183,24 @@ class Music extends React.Component<MusicProps, MusicState> {
         this.analyzerL = new ConstantQNode(this.audioCtx, { smoothingTimeConstant: smoothing });
         this.analyzerR = new ConstantQNode(this.audioCtx, { smoothingTimeConstant: smoothing });
 
+        const phaseSamples =
+            sampleRate *
+            ((this.props.isHamburger ? MOBILE_MSPF : (1000.0 / 60.0)) / 1000);
+
+        this.phaseAnalyzerL = new AnalyserNode(this.audioCtx, { fftSize: nextPow2(phaseSamples) });
+        this.phaseAnalyzerR = new AnalyserNode(this.audioCtx, { fftSize: nextPow2(phaseSamples) });
+
         const splitter = this.audioCtx.createChannelSplitter(2);
         const merger = this.audioCtx.createChannelMerger(2);
         audioSrc.connect(splitter);
+        splitter.connect(this.phaseAnalyzerL, 0);
+        splitter.connect(this.phaseAnalyzerR, 1);
         splitter.connect(this.analyzerL, 0);
         splitter.connect(this.analyzerR, 1);
         this.analyzerL.connect(merger, 0, 0);
         this.analyzerR.connect(merger, 0, 1);
         merger.connect(this.audioCtx.destination);
 
-        // console.log(this.analyzerL, this.analyzerR);
         this.audio.current.volume = 0;
 
         this.setState({ isLoading: true });
@@ -570,6 +581,8 @@ class Music extends React.Component<MusicProps, MusicState> {
                         currentPosition={this.state.playbackPosition}
                         leftAnalyzer={this.analyzerL}
                         rightAnalyzer={this.analyzerR}
+                        leftPhase={this.phaseAnalyzerL}
+                        rightPhase={this.phaseAnalyzerR}
                         isPlaying={this.state.isPlaying}
                         duration={this.state.duration}
                         prevTimestamp={this.state.lastUpdateTimestamp}
@@ -578,6 +591,7 @@ class Music extends React.Component<MusicProps, MusicState> {
                         isHoverSeekring={this.state.isHoverSeekring}
                         hoverAngle={this.state.angle}
                         setRadii={this.setRadii}
+                        sampleRate={this.audioCtx.sampleRate}
                     />
                 )}
             </MusicDiv>

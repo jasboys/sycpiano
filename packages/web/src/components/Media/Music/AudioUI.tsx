@@ -12,6 +12,8 @@ import { lightBlue } from 'src/styles/colors';
 import { screenM, screenPortrait, screenXS } from 'src/screens';
 import { navBarHeight, playlistContainerWidth } from 'src/styles/variables';
 import { toMedia } from 'src/mediaQuery';
+import { Transition } from 'react-transition-group';
+import { fadeOnEnter, fadeOnExit } from 'src/utils.js';
 
 interface AudioUIOwnProps {
     readonly currentPosition: number;
@@ -42,6 +44,7 @@ interface AudioUIState {
     isHoverPlaypause: boolean;
     isHoverNext: boolean;
     isHoverPrev: boolean;
+    showUI: boolean;
 }
 
 const loadingInstanceStyle = css`
@@ -87,6 +90,14 @@ const UIContainer = styled.div`
     }
 `;
 
+const ControlsContainer = styled.div({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    width: '100%',
+    height: '100%',
+});
+
 const StyledSeekRing = styled.canvas`
     position: absolute;
     width: 100%;
@@ -102,13 +113,25 @@ const flipped = css({
 type AggregateUIEvent<E> = React.MouseEvent<E> | React.TouchEvent<E> | TouchEvent;
 
 class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
-    state = {
+    state: AudioUIState = {
         isHoverPlaypause: false,
         isHoverNext: false,
         isHoverPrev: false,
+        showUI: true,
     };
-    playButton: HTMLDivElement | null = null;
-    pauseButton: HTMLDivElement | null = null;
+    playIcon: HTMLDivElement | null = null;
+    pauseIcon: HTMLDivElement | null = null;
+    buttonRefs: {
+        play: HTMLDivElement | null;
+        pause: HTMLDivElement | null;
+        prev: HTMLDivElement | null;
+        next: HTMLDivElement | null
+    } = {
+        play: null,
+        pause: null,
+        prev: null,
+        next: null,
+    };
 
     height!: number;
     width!: number;
@@ -125,12 +148,12 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
 
     listenerAdded = false;
 
-    setPlayButtonRef = (ref: HTMLDivElement | null): void => {
-        this.playButton = ref;
+    setPlayIconRef = (ref: HTMLDivElement | null): void => {
+        this.playIcon = ref;
     }
 
-    setPauseButtonRef = (ref: HTMLDivElement | null): void => {
-        this.pauseButton = ref;
+    setPauseIconRef = (ref: HTMLDivElement | null): void => {
+        this.pauseIcon = ref;
     }
 
     togglePlaying = <E extends Element>(event: React.KeyboardEvent<E> | React.MouseEvent<E> | KeyboardEvent | MouseEvent): void => {
@@ -229,7 +252,7 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
                     if (this.timerId) {
                         clearTimeout(this.timerId);
                     }
-                    this.timerId = setTimeout(() => this.props.setMouseMove(false), 1000);
+                    this.timerId = setTimeout(() => this.props.setMouseMove(false), 3000);
                 }
             } else {
                 this.seekRing.style.cursor = 'default';
@@ -238,7 +261,11 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
                     clearTimeout(this.timerId);
                 }
                 this.props.setMouseMove(true);
-                this.timerId = setTimeout(() => this.props.setMouseMove(false), 1000);
+                if (Object.values(this.buttonRefs).includes(event.currentTarget as HTMLDivElement)) {
+                    event.stopPropagation();
+                } else {
+                    this.timerId = setTimeout(() => this.props.setMouseMove(false), 3000);
+                }
             }
         }
     }
@@ -258,7 +285,7 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
                 if (this.timerId) {
                     clearTimeout(this.timerId);
                 }
-                this.timerId = setTimeout(() => this.props.setMouseMove(false), 1000);
+                this.timerId = setTimeout(() => this.props.setMouseMove(false), 3000);
             }
             if (this.isMouseEvent(event) && !this.isEventInSeekRing(event) && this.seekRing) {
                 this.seekRing.style.cursor = 'default';
@@ -311,13 +338,13 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
         if (prevProps.isPlaying !== this.props.isPlaying && !this.isDragging) {
             if (this.props.isPlaying) {
                 gsap.fromTo(
-                    this.playButton,
+                    this.playIcon,
                     { opacity: 1, scale: 1, duration: 0.25 },
                     { opacity: 0, scale: 5, delay: 0.1, force3D: true, clearProps: 'transform' },
                 );
             } else {
                 gsap.fromTo(
-                    this.pauseButton,
+                    this.pauseIcon,
                     { opacity: 1, scale: 1, duration: 0.25 },
                     { opacity: 0, scale: 5, delay: 0.1, force3D: true, clearProps: 'transform' },
                 );
@@ -337,101 +364,119 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
         this.seekRing?.removeEventListener('touchmove', this.handleActiveMousemove);
     }
 
-    render(): JSX.Element {
+    render() {
         const buttonLength = this.props.radii.base * Math.SQRT1_2;
         const verticalOffset = this.props.isMobile ? HEIGHT_ADJUST_MOBILE : HEIGHT_ADJUST_DESKTOP;
         return (
-            <UIContainer>
-                {this.props.isLoading && (
-                    <LoadingOverlay>
-                        <LoadingInstance
-                            width={200}
-                            height={200}
-                            css={loadingInstanceStyle}
-                        />
-                    </LoadingOverlay>
-                )}
-                <PauseIcon
-                    setRef={this.setPauseButtonRef}
-                    width={buttonLength}
-                    height={buttonLength}
-                    verticalOffset={verticalOffset}
-                />
-                <PlayIcon
-                    setRef={this.setPlayButtonRef}
-                    width={buttonLength}
-                    height={buttonLength}
-                    verticalOffset={verticalOffset}
-                />
-                <SkipButton
-                    key="prev-button"
-                    onClick={this.props.prev}
-                    isHovering={this.state.isHoverPrev}
-                    onMouseMove={this.handleMousemove}
-                    onMouseOver={this.handleMouseover('isHoverPrev')}
-                    onMouseOut={this.handleMouseout('isHoverPrev')}
-                    onMouseUp={this.handleMouseup}
-                    width={buttonLength * 4 / 5}
-                    height={buttonLength * 8 / 15}
-                    verticalOffset={verticalOffset}
-                    css={flipped}
-                />
-                {
-                    (this.props.isPlaying) ? (
-                        <PauseButton
-                            key="pause-button"
-                            onClick={this.togglePlaying}
-                            isHovering={this.state.isHoverPlaypause}
-                            onMouseMove={this.handleMousemove}
-                            onMouseOver={this.handleMouseover('isHoverPlaypause')}
-                            onMouseOut={this.handleMouseout('isHoverPlaypause')}
-                            onMouseUp={this.handleMouseup}
-                            width={buttonLength}
-                            height={buttonLength}
-                            verticalOffset={verticalOffset}
-                        />
-                    ) : (
-                        <PlayButton
-                            key="play-button"
-                            onClick={this.togglePlaying}
-                            isHovering={this.state.isHoverPlaypause}
-                            onMouseMove={this.handleMousemove}
-                            onMouseOver={this.handleMouseover('isHoverPlaypause')}
-                            onMouseOut={this.handleMouseout('isHoverPlaypause')}
-                            onMouseUp={this.handleMouseup}
-                            width={buttonLength}
-                            height={buttonLength}
-                            verticalOffset={verticalOffset}
-                        />
-                    )
-                }
-                <SkipButton
-                    key="next-button"
-                    onClick={this.props.next}
-                    isHovering={this.state.isHoverNext}
-                    onMouseMove={this.handleMousemove}
-                    onMouseOver={this.handleMouseover('isHoverNext')}
-                    onMouseOut={this.handleMouseout('isHoverNext')}
-                    onMouseUp={this.handleMouseup}
-                    width={buttonLength * 4 / 5}
-                    height={buttonLength * 8 / 15}
-                    verticalOffset={verticalOffset}
-                />
+            <UIContainer
+                onMouseMove={this.handleMousemove}
+                onMouseOver={this.handleMouseover('showUI')}
+                onMouseOut={this.handleMouseout('showUI')}
+                onMouseUp={this.handleMouseup}
+            >
+                <Transition
+                    in={this.props.isMouseMove}
+                    onEnter={fadeOnEnter()}
+                    onExit={fadeOnExit()}
+                    timeout={250}
+                >
+                    <ControlsContainer>
+                    {this.props.isLoading && (
+                        <LoadingOverlay>
+                            <LoadingInstance
+                                width={200}
+                                height={200}
+                                css={loadingInstanceStyle}
+                            />
+                        </LoadingOverlay>
+                    )}
+                    <PauseIcon
+                        setRef={el => this.pauseIcon = el}
+                        width={buttonLength}
+                        height={buttonLength}
+                        verticalOffset={verticalOffset}
+                    />
+                    <PlayIcon
+                        setRef={el => this.playIcon = el}
+                        width={buttonLength}
+                        height={buttonLength}
+                        verticalOffset={verticalOffset}
+                    />
+                    <SkipButton
+                        ref={el => this.buttonRefs.prev = el}
+                        key="prev-button"
+                        onClick={this.props.prev}
+                        isHovering={this.state.isHoverPrev}
+                        onMouseMove={this.handleMousemove}
+                        onMouseOver={this.handleMouseover('isHoverPrev')}
+                        onMouseOut={this.handleMouseout('isHoverPrev')}
+                        onMouseUp={this.handleMouseup}
+                        width={buttonLength * 4 / 5}
+                        height={buttonLength * 8 / 15}
+                        verticalOffset={verticalOffset}
+                        css={flipped}
+                    />
+                    {
+                        (this.props.isPlaying) ? (
+                            <PauseButton
+                                ref={el => this.buttonRefs.pause = el}
+                                key="pause-button"
+                                onClick={this.togglePlaying}
+                                isHovering={this.state.isHoverPlaypause}
+                                onMouseMove={this.handleMousemove}
+                                onMouseOver={this.handleMouseover('isHoverPlaypause')}
+                                onMouseOut={this.handleMouseout('isHoverPlaypause')}
+                                onMouseUp={this.handleMouseup}
+                                width={buttonLength}
+                                height={buttonLength}
+                                verticalOffset={verticalOffset}
+                            />
+                        ) : (
+                            <PlayButton
+                                ref={el => this.buttonRefs.play = el}
+                                key="play-button"
+                                onClick={this.togglePlaying}
+                                isHovering={this.state.isHoverPlaypause}
+                                onMouseMove={this.handleMousemove}
+                                onMouseOver={this.handleMouseover('isHoverPlaypause')}
+                                onMouseOut={this.handleMouseout('isHoverPlaypause')}
+                                onMouseUp={this.handleMouseup}
+                                width={buttonLength}
+                                height={buttonLength}
+                                verticalOffset={verticalOffset}
+                            />
+                        )
+                    }
+                    <SkipButton
+                        ref={el => this.buttonRefs.next = el}
+                        key="next-button"
+                        onClick={this.props.next}
+                        isHovering={this.state.isHoverNext}
+                        onMouseMove={this.handleMousemove}
+                        onMouseOver={this.handleMouseover('isHoverNext')}
+                        onMouseOut={this.handleMouseout('isHoverNext')}
+                        onMouseUp={this.handleMouseup}
+                        width={buttonLength * 4 / 5}
+                        height={buttonLength * 8 / 15}
+                        verticalOffset={verticalOffset}
+                    />
+                    </ControlsContainer>
+                </Transition>
                 <StyledSeekRing
-                    ref={(canvas) => {
-                        this.seekRing = canvas;
-                        if (this.seekRing && !this.listenerAdded) {
-                            this.seekRing.addEventListener('touchmove', this.handleActiveMousemove, { passive: false });
-                            this.listenerAdded = true;
-                        }
-                    }}
-                    onMouseMove={this.handleMousemove}
-                    onMouseUp={this.handleMouseup}
-                    onMouseDown={this.handleMousedown}
-                    onTouchStart={this.handleMousedown}
-                    onTouchMove={this.handleMousemove}
-                    onTouchEnd={this.handleMouseup}
-                />
+                        ref={(canvas) => {
+                            this.seekRing = canvas;
+                            if (this.seekRing && !this.listenerAdded) {
+                                this.seekRing.addEventListener('touchmove', this.handleActiveMousemove, { passive: false });
+                                this.listenerAdded = true;
+                            }
+                        }}
+                        onMouseMove={this.handleMousemove}
+                        onMouseUp={this.handleMouseup}
+                        onMouseDown={this.handleMousedown}
+                        onTouchStart={this.handleMousedown}
+                        onTouchMove={this.handleMousemove}
+                        onTouchEnd={this.handleMouseup}
+                    />
             </UIContainer>
         );
     }

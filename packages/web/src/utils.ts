@@ -40,15 +40,15 @@ export const validateEmail = (email: string): boolean => {
 
 export const fadeOnEnter = (delay = 0, duration = 0.25) => (element: HTMLElement, isEntering?: boolean): void => {
     if (element) {
-        console.log('enter', element);
-        console.log(isEntering);
+        // console.log('enter', element);
+        // console.log(isEntering);
         gsap.fromTo(element, { autoAlpha: 0 }, { autoAlpha: 1, delay: isEntering ? delay + 1 : delay, duration, ease: 'power1.inOut' });
     }
 };
 
 export const fadeOnExit = (delay = 0, duration = 0.25) => (element: HTMLElement): void => {
     if (element) {
-        console.log('exit', element);
+        // console.log('exit', element);
         gsap.fromTo(element, { autoAlpha: 1 }, { autoAlpha: 0, delay, duration, ease: 'power1.inOut' });
     }
 };

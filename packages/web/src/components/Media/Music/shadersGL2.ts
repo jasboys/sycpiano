@@ -54,3 +54,18 @@ export const lineVert = `#version 300 es
         gl_Position = vec4(uMatrix * p, 1.0);
     }
 `;
+
+export const phaseVert = `#version 300 es
+    in vec2 aPosition;
+    in vec2 aNormal;
+    in float aMiter;
+    uniform float uThickness;
+    uniform mat3 uMatrix;
+    uniform mat3 uRotate;
+
+    void main() {
+        //push the point along its normal by half thickness
+        vec3 p = vec3(aPosition + aNormal * uThickness / 2.0 * min(aMiter, 1.5), 1.0);
+        gl_Position = vec4(uMatrix * uRotate * p, 1.0);
+    }
+`;

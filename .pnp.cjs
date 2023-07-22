@@ -7685,6 +7685,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["gl-vec2", [\
+        ["npm:1.3.0", {\
+          "packageLocation": "./.yarn/cache/gl-vec2-npm-1.3.0-222f14be18-feaed02ee5.zip/node_modules/gl-vec2/",\
+          "packageDependencies": [\
+            ["gl-vec2", "npm:1.3.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["glob", [\
         ["npm:10.3.3", {\
           "packageLocation": "./.yarn/cache/glob-npm-10.3.3-2d9abea8c7-29190d3291.zip/node_modules/glob/",\
@@ -10233,6 +10242,26 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["polished", "npm:4.2.2"],\
             ["@babel/runtime", "npm:7.18.9"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["polyline-miter-util", [\
+        ["npm:1.0.1", {\
+          "packageLocation": "./.yarn/cache/polyline-miter-util-npm-1.0.1-ec992c13be-ce6cb87041.zip/node_modules/polyline-miter-util/",\
+          "packageDependencies": [\
+            ["polyline-miter-util", "npm:1.0.1"],\
+            ["gl-vec2", "npm:1.3.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["polyline-normals", [\
+        ["npm:2.0.2", {\
+          "packageLocation": "./.yarn/cache/polyline-normals-npm-2.0.2-845843d959-0568260bcd.zip/node_modules/polyline-normals/",\
+          "packageDependencies": [\
+            ["polyline-normals", "npm:2.0.2"],\
+            ["polyline-miter-util", "npm:1.0.1"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -12846,6 +12875,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["parse-iso-duration", "npm:1.1.0"],\
             ["path-browserify", "npm:1.0.1"],\
             ["polished", "npm:4.2.2"],\
+            ["polyline-normals", "npm:2.0.2"],\
             ["qs", "npm:6.11.2"],\
             ["re-reselect", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:4.0.1"],\
             ["react", "npm:18.2.0"],\

@@ -9,6 +9,7 @@ import { categoryMap, isMusicItem, MusicFileItem, MusicItem as MusicItemType, Mu
 import { formatTime, getRelativePermaLink } from 'src/components/Media/Music/utils';
 
 import { lightBlue, playlistBackground } from 'src/styles/colors';
+import { latoFont } from 'src/styles/fonts.js';
 
 interface MusicPlaylistItemProps {
     readonly play: () => void;
@@ -18,15 +19,17 @@ interface MusicPlaylistItemProps {
     readonly userInteracted: boolean;
 }
 
-const baseItemStyle = css({
-    backgroundColor: playlistBackground,
-    listStyle: 'none',
-    cursor: 'pointer',
-    width: '100%',
-    '&:hover': {
-        backgroundColor: 'white',
-    }
-});
+const baseItemStyle = css(
+    latoFont(300),
+    {
+        backgroundColor: playlistBackground,
+        listStyle: 'none',
+        cursor: 'pointer',
+        width: '100%',
+        '&:hover': {
+            backgroundColor: 'white',
+        }
+    });
 
 const StyledMusicItem = styled.li(baseItemStyle);
 
@@ -62,9 +65,9 @@ const h4style = css({
     lineHeight: '1rem',
 });
 
-const TextLeft = styled.h4(h4style);
+const TextLeft = styled.span(h4style);
 
-const TextRight = styled.h4(
+const TextRight = styled.span(
     h4style,
     {
         margin: '0 0 0 10px',
@@ -84,6 +87,7 @@ const StyledCollectionTitleContainer = styled.div({
 });
 
 const StyledInfo = styled.div(
+    latoFont(300),
     section,
     {
         width: '100%',
@@ -99,14 +103,16 @@ const StyledInfo = styled.div(
     },
 );
 
-const StyledCategory = styled.div({
-    backgroundColor: '#eee',
-    padding: '12px 0 12px 22px',
-    fontSize: '1.2rem',
-    position: 'relative',
-    zIndex: 5,
-    boxShadow: '0 2px 6px -2px rgba(0, 0, 0, 0.5)',
-});
+const StyledCategory = styled.div(
+    latoFont(300),
+    {
+        backgroundColor: '#eee',
+        padding: '12px 0 12px 22px',
+        fontSize: '1.2rem',
+        position: 'relative',
+        zIndex: 5,
+        boxShadow: '0 2px 6px -2px rgba(0, 0, 0, 0.5)',
+    });
 
 const getComposerTitleYear = (composer: string, piece: string, year?: number) => {
     const compStr = composer === 'Sean Chen' ? '' : `${composer} `;

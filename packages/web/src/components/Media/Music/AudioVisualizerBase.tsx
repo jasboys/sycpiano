@@ -9,6 +9,8 @@ import { screenM, screenPortrait } from '../../../screens.js';
 import { ConstantQNode } from './ConstantQNode.js';
 import { CIRCLE_SAMPLES, constantQ, firLoader } from './VisualizationUtils.js';
 
+import { nextPow2 } from './utils.js';
+
 const VisualizerContainer = styled.div`
     position: absolute;
     left: 0;
@@ -43,8 +45,11 @@ export const HIGH_FREQ_SCALE = 10;
 export const MOBILE_MSPF = 1000 / 30;
 
 export interface AudioVisualizerProps {
+    readonly sampleRate: number;
     readonly leftAnalyzer?: ConstantQNode;
     readonly rightAnalyzer?: ConstantQNode;
+    readonly leftPhase?: AnalyserNode;
+    readonly rightPhase?: AnalyserNode;
     readonly currentPosition: number;
     readonly duration: number;
     readonly isPlaying: boolean;
@@ -80,6 +85,9 @@ export abstract class AudioVisualizerBase<C extends RenderingContext> extends Re
     rightCQResult!: Float32Array;
     vizBins!: Float32Array;
 
+    leftData!: Float32Array;
+    rightData!: Float32Array;
+
     MAX_BIN!: number;
     HIGH_PASS_BIN!: number;
     LOW_PASS_BIN!: number;
@@ -97,11 +105,12 @@ export abstract class AudioVisualizerBase<C extends RenderingContext> extends Re
     requestId = 0;
     lastCallback!: number;
 
-    abstract drawConstantQBins: (context: C, values: Float32Array, radius: number, color: ColorType<C>) => void;
-    abstract drawWaveForm: (context: C, centerAxis: number, color: ColorType<C>) => void;
-    abstract drawPlaybackHead: (context: C, angle: number, minRad: number, maxRad: number, color: ColorType<C>) => void;
-    abstract drawSeekArea: (context: C, radius: number, color: ColorType<C>, timestamp: number) => void;
-    abstract drawVisualization: (context: C, lowFreq: number, values: Float32Array, lightness: number, timestamp: number) => void;
+    abstract drawConstantQBins: (radius: number, color: ColorType<C>) => void;
+    abstract drawWaveForm: (centerAxis: number, color: ColorType<C>) => void;
+    abstract drawPlaybackHead: (angle: number, minRad: number, maxRad: number, color: ColorType<C>) => void;
+    abstract drawSeekArea: (radius: number, color: ColorType<C>, timestamp: number) => void;
+    abstract drawPhase: (radius: number, color: ColorType<C>) => void;
+    abstract drawVisualization: (lowFreq: number, lightness: number, timestamp: number) => void;
     abstract onResize: () => void;
     abstract initializeVisualizer: () => Promise<void>;
 
@@ -136,6 +145,13 @@ export abstract class AudioVisualizerBase<C extends RenderingContext> extends Re
             this.vizBins = new Float32Array(this.CQ_BINS);
             this.leftCQResult = new Float32Array(constantQ.numCols);
             this.rightCQResult = new Float32Array(constantQ.numCols);
+
+            const phaseSamples =
+                constantQ.sampleRate *
+                ((this.props.isMobile ? MOBILE_MSPF : (1000.0 / 60.0)) / 1000);
+
+            this.leftData = new Float32Array(nextPow2(phaseSamples));
+            this.rightData = new Float32Array(nextPow2(phaseSamples));
             this.idleStart = performance.now();
 
             gsap.ticker.add(this.onAnalyze);
@@ -155,6 +171,8 @@ export abstract class AudioVisualizerBase<C extends RenderingContext> extends Re
             !this.renderingContext ||
             !this.props.leftAnalyzer ||
             !this.props.rightAnalyzer ||
+            !this.props.leftPhase ||
+            !this.props.rightPhase ||
             this.props.isMobile && this.lastCallback && (timestamp - this.lastCallback) < MOBILE_MSPF
         ) {
             return;
@@ -192,6 +210,9 @@ export abstract class AudioVisualizerBase<C extends RenderingContext> extends Re
             // FFT -> CQ
             const { lowFreq: leftLow, highFreq: leftHigh } = this.props.leftAnalyzer.getConstantQ(this.leftCQResult);
             const { lowFreq: rightLow, highFreq: rightHigh } = this.props.rightAnalyzer.getConstantQ(this.rightCQResult);
+            this.props.leftPhase!.getFloatTimeDomainData(this.leftData);
+            this.props.rightPhase!.getFloatTimeDomainData(this.rightData);
+
 
             // concat the results, store in vizBins
             this.vizBins.set(this.leftCQResult);
@@ -202,7 +223,7 @@ export abstract class AudioVisualizerBase<C extends RenderingContext> extends Re
             const lowFreq = (leftLow + rightLow) / 2;
             highFreq = HIGH_FREQ_SCALE * highFreq;
 
-            this.drawVisualization(this.renderingContext, lowFreq, this.vizBins, highFreq, timestamp);
+            this.drawVisualization(lowFreq, highFreq, timestamp);
         }
     };
 

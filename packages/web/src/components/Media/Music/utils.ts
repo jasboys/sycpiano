@@ -78,3 +78,14 @@ export const getRelativePermaLink = (composer: string, piece: string, movement?:
 export const modulo = (n: number, m: number): number => {
     return ((n % m) + m) % m;
 };
+
+export const nextPow2 = (v: number): number => {
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v++;
+    return v;
+};
