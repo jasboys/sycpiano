@@ -123,7 +123,14 @@ export const globalCss = css([
     loadFont('Inter', 'Inter-ExtraBold', 800, { fontDisplay: 'swap', q: 'v=3.19' }),
     loadFont('Inter', 'Inter-ExtraBoldItalic', 800, { fontDisplay: 'swap', fontStyle: 'italic', q: 'v=3.19' }),
 
-    loadFont('Inter var', 'Inter-roman.var', '100 900', { fontDisplay: 'swap', q: 'v=3.19', fontNamedInstance: 'Regular'}),
-    loadFont('Inter var', 'Inter-italic.var', '100 900', { fontStyle: 'italic', fontDisplay: 'swap', q: 'v=3.19', fontNamedInstance: 'Italic'}),
-
+    loadFont('Inter var', 'Inter-roman.var', '100 900', { fontDisplay: 'swap', q: 'v=3.19', fontNamedInstance: 'Regular' }),
+    loadFont('Inter var', 'Inter-italic.var', '100 900', { fontStyle: 'italic', fontDisplay: 'swap', q: 'v=3.19', fontNamedInstance: 'Italic' }),
+    {
+        '@font-face': {
+            fontFamily: 'Noto Sans TC',
+            src: `
+                url('${fontsFolder}/NotoSansCJKtc-VF.otf') format('opentype'),
+                url('${fontsFolder}/NotoSansCJKtc-VF.ttf') format('truetype');`,
+        }
+    },
 ]);

@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import styled from '@emotion/styled';
 import parseISO from 'date-fns/parseISO';
 import startOfDay from 'date-fns/startOfDay';
-import { gsap } from 'gsap';
+import { gsap, Back } from 'gsap';
 import debounce from 'lodash-es/debounce';
 import startCase from 'lodash-es/startCase';
 import { createCachedSelector } from 're-reselect';
@@ -18,6 +18,7 @@ import { fetchEvents, searchEvents } from 'src/components/Schedule/reducers';
 import {
     EventListName,
     FetchEventsArguments,
+    eventListNamesArr,
 } from 'src/components/Schedule/types';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { toMedia } from 'src/mediaQuery';
@@ -46,16 +47,24 @@ const LoadingDiv = styled.div({
     flexDirection: 'column',
     alignItems: 'center',
     pointerEvents: 'none',
+    zIndex: 20
 });
 
 const SpinnerContainer = styled.div({
     margin: '0.7rem',
     display: 'flex',
+    padding: '0.5rem',
+    borderRadius: '50%',
+    backgroundColor: 'rgba(255 255 255 / 0.6)',
+    backdropFilter: 'blur(3px)',
+    boxShadow: '0px 3px 5px -2px rgba(0 0 0 / 0.5)',
+    'svg': {
+        fill: 'none',
+        stroke: lightBlue,
+    }
 });
 
 const loadingStyle = css({
-    fill: 'none',
-    stroke: lightBlue,
     margin: '0.5rem',
 });
 
@@ -104,17 +113,17 @@ const ScrollingContainer = styled.div<{ isSearch: boolean; }>((props) => ({
     marginTop: 0,
     [toMedia(screenXSandPortrait)]: {
         paddingTop: 0,
-        marginTop: props.isSearch ? 'calc(80px + 1.2rem)' : 'calc(50px + 1.2rem)',
+        marginTop: props.isSearch ? 'calc(80px + 1.2rem)' : 'calc(50px + 2rem)',
         height: props.isSearch ? 'calc(100% ,- (80px + 1.2rem))' : 'calc(100% - (50px + 1.2rem))'
     }
 }));
 
 const loadingOnEnter = (el: HTMLElement) => {
-    gsap.fromTo(el, { y: 200 }, { duration: 0.25, y: 0, ease: "back.out(1)" });
+    gsap.fromTo(el, { y: 200 }, { duration: 0.5, y: 0, ease: Back.easeOut.config(1)});
 };
 
 const loadingOnExit = (el: HTMLElement) => {
-    gsap.fromTo(el, { y: 0 }, { duration: 0.25, y: 200, ease: "back.in(1)" });
+    gsap.fromTo(el, { y: 0 }, { duration: 0.5, y: 200, ease: Back.easeIn.config(1), clearProps: 'translate,rotate,scale,transform' });
 };
 
 export const EventList: React.FC<EventListProps> = (props) => {
@@ -216,6 +225,8 @@ export const EventList: React.FC<EventListProps> = (props) => {
 
     const description = metaDescriptions[props.type];
 
+    const loadingDimension = isHamburger ? 50 : 72;
+
     return (
         <React.Fragment>
             <Helmet
@@ -268,7 +279,7 @@ export const EventList: React.FC<EventListProps> = (props) => {
             >
                 <LoadingDiv>
                     <SpinnerContainer>
-                        <LoadingInstance css={loadingStyle} width={72} height={72} />
+                        <LoadingInstance css={loadingStyle} width={loadingDimension} height={loadingDimension} />
                     </SpinnerContainer>
                 </LoadingDiv>
             </Transition>

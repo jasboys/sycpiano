@@ -10,6 +10,8 @@ import { logoBlue } from 'src/styles/colors';
 import { useAppSelector } from 'src/hooks';
 import { useParams } from 'react-router-dom';
 import { mqSelectors } from 'src/components/App/reducers';
+import { toMedia } from 'src/mediaQuery.js';
+import { screenPortrait, screenXS } from 'src/screens.js';
 
 type ShopListProps = Record<never, unknown>;
 
@@ -28,26 +30,31 @@ const Category = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => !isHa
 }));
 
 const CategoryTitle = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => (
-    latoFont(200),
     {
         color: logoBlue,
-        fontSize: '1.6rem',
+        fontSize: 'min(10vw, 2rem)',
         padding: '0 2rem',
         position: 'sticky',
         top: 0,
-        background: `linear-gradient(white 0% 86%, ${logoBlue} 86% 88%, white 88%, rgba(255, 255, 255, 0))`,
+        // background: `linear-gradient(white 0% 48%, ${logoBlue} 48% 52%, white 52%, rgba(255, 255, 255, 0))`,
         zIndex: 5,
         width: '100%',
-        maxWidth: isHamburger ? 'unset' : '800px',
+        maxWidth: isHamburger ? 'unset' : '750px',
         margin: isHamburger ? 'unset' : '0 auto',
-    }));
+    })
+);
 
-const CategoryTitleText = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => ({
-    width: 'min-content',
-    background: `linear-gradient(white 88%, rgba(255, 255, 255, 0) 88%)`,
-    padding: isHamburger ? '1.6rem 0.5rem 0' : '2.5rem 0.5rem 0',
-    whiteSpace: 'nowrap',
-}));
+const CategoryTitleText = styled.div<{ isHamburger: boolean }>(
+    latoFont(300),
+    {
+        width: '100%',
+        background: `linear-gradient(white 92%, rgba(255, 255, 255, 0) 100%)`,
+        padding: '2rem 0 0.5rem 0',
+        whiteSpace: 'nowrap',
+        [toMedia([screenXS, screenPortrait])]: {
+            paddingTop: '2.5rem'
+        }
+    });
 
 const CategoryToLabel: Record<typeof ProductTypes[number], string> = {
     arrangement: 'Arrangements',

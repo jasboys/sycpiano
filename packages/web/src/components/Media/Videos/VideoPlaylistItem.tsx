@@ -14,8 +14,12 @@ import parseISO from 'date-fns/parseISO';
 import { VideoItemShape } from 'src/components/Media/Videos/types';
 import { lightBlue, playlistBackground } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
+import { screenPortrait, screenXS } from 'src/screens.js';
+import { toMedia } from 'src/mediaQuery.js';
 
 // Helper functions
+
+const cjkRegex = /[\u4E00-\u9FCC\u3400-\u4DB5\uFA0E\uFA0F\uFA11\uFA13\uFA14\uFA1F\uFA21\uFA23\uFA24\uFA27-\uFA29]|[\ud840-\ud868][\udc00-\udfff]|\ud869[\udc00-\uded6\udf00-\udfff]|[\ud86a-\ud86c][\udc00-\udfff]|\ud86d[\udc00-\udf34\udf40-\udfff]|\ud86e[\udc00-\udc1d]/
 
 function videoDurationToDisplay(durationString: string) {
     const helperDate = new Date();
@@ -54,34 +58,36 @@ const thumbnailWidth = (itemHeight - padding * 2) * aspectRatio;
 
 const section = ` vertical-align: middle; `;
 
-const ImageContainer = styled.div`
-    ${section}
-    height: 100%;
-    width: ${thumbnailWidth}px;
-    position: relative;
-
-    img {
-        width: 100%;
-        filter: saturate(50%) brightness(60%);
-        vertical-align: middle;
+const ImageContainer = styled.div(
+    section,
+    {
+        height: '100%',
+        width: thumbnailWidth,
+        position: 'relative',
+        overflow: 'hidden',
+        borderRadius: 5,
     }
-`;
+);
+
+const ImgStyle = (active: boolean) => css({
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    filter: active ? 'brightness(75%)' : 'saturate(75%) brightness(75%)',
+    verticalAlign: 'middle',
+    [toMedia([screenXS, screenPortrait])]: {
+        filter: active ? 'unset' : 'brightness(75%)',
+    }
+});
 
 const StyledVideoItem = styled.li<{ active: boolean }>(
-    props => props.active && css`
-        ${`${ImageContainer} img`} {
-            filter: brightness(60%);
-        }
-    `,
     css`
-        background-color: ${playlistBackground};
         list-style: none;
         cursor: pointer;
         width: 100%;
         height: ${itemHeight}px;
         padding: ${padding}px 0 ${padding}px 15px;
         border-left: 7px solid transparent;
-        border-bottom: 1px solid rgba(120 120 120 / 0.3);
         transition: all 0.15s;
         display: flex;
 
@@ -89,7 +95,7 @@ const StyledVideoItem = styled.li<{ active: boolean }>(
             background-color: rgba(255 255 255 / 1);
 
             ${`${ImageContainer} img`} {
-                filter: brightness(60%);
+                filter: brightness(80%);
             }
         }
     `,
@@ -100,45 +106,63 @@ const StyledVideoItem = styled.li<{ active: boolean }>(
 );
 
 const Duration = styled.span<{ active: boolean; children: string }>(
+    // latoFont(300),
     {
         position: 'absolute',
         right: 0,
         bottom: 0,
         paddingRight: 3,
+        fontSize: '0.8rem',
     },
     ({ active }) => ({
         color: active ? lighten(0.2, lightBlue) : 'white',
     }),
-    ({ active }) => latoFont(active ? 200 : 100),
+    ({ active }) => latoFont(active ? 400 : 300),
 );
 
-const VideoInfo = styled.div`
-    ${section}
-    width: calc(80% - 20px);
-    padding: 0 20px;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-`;
+const VideoInfo = styled.div(
+    section,
+    {
+        width: 'calc(80% - 20px)',
+        padding: '0 1.2rem',
+        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between'
+    }
+);
 
 const h4style = css`
     margin: 0;
     color: black;
 `;
 
-const TextTop = styled(ClampLines)`
-    ${h4style}
-    padding-top: 5;
-    font-size: 1rem;
-    font-weight: bold;
-`;
+const TextTop = styled(ClampLines)<{ isCJK: boolean }>(
+    h4style,
+    {
+        paddingTop: 8,
+        fontSize: '0.95rem',
+        [toMedia([screenXS, screenPortrait])]: {
+            fontSize: '0.85rem',
+        }
+    },
+    ({ isCJK }) => isCJK && ({
+        fontFamily: 'Noto Sans TC, sans-serif',
+        fontWeight: 100,
+    })
+);
 
-const TextBottom = styled.h4`
-    ${h4style}
-    padding-bottom: 5;
-    font-size: 0.8rem;
-`;
+const TextBottom = styled.span(
+    h4style,
+    latoFont(400),
+    {
+        paddingBottom: 5,
+        fontSize: '0.8rem',
+        textAlign: 'right',
+        [toMedia([screenXS, screenPortrait])]: {
+            fontSize: '0.65rem',
+        }
+})
 
 const VideoPlaylistItem: React.FC<VideoPlaylistItemProps> = ({ item, currentItemId, onClick, isMobile }) => {
     const navigate = useNavigate();
@@ -149,9 +173,12 @@ const VideoPlaylistItem: React.FC<VideoPlaylistItemProps> = ({ item, currentItem
             item.snippet.thumbnails.medium?.url ||
             item.snippet.thumbnails.standard?.url
         );
+    const active = currentItemId === item.id;
+    const isCJK = !!item?.snippet?.title && !!item?.snippet?.title.match(cjkRegex);
+    // const isCJK = false;
     return (
         <StyledVideoItem
-            active={currentItemId === item.id}
+            active={active}
             onClick={() => {
                 navigate(`/media/videos/${item.id}`);
                 if (item.id !== undefined) {
@@ -160,8 +187,8 @@ const VideoPlaylistItem: React.FC<VideoPlaylistItemProps> = ({ item, currentItem
             }}
         >
             <ImageContainer>
-                <img alt="Sean Chen Piano Video" src={thumbnailUrl} />
-                <Duration active={currentItemId === item.id}>
+                <img css={ImgStyle(active)} alt="Sean Chen Piano Video" src={thumbnailUrl} />
+                <Duration active={active}>
                     {
                         (item?.contentDetails?.duration === undefined) ?
                             '' :
@@ -171,6 +198,7 @@ const VideoPlaylistItem: React.FC<VideoPlaylistItemProps> = ({ item, currentItem
             </ImageContainer>
             <VideoInfo>
                 <TextTop
+                    isCJK={isCJK}
                     id={`${item.id}-info`}
                     text={item?.snippet?.title || ''}
                     lines={2}

@@ -42,12 +42,13 @@ const ItemContainer = styled.div({
         marginBottom: '2rem',
     },
     [toMedia(screenXS)]: {
-        margin: '2rem auto',
+        width: '90vw',
+        margin: '1.75rem auto',
         '&:first-of-type': {
-            marginTop: '1.5rem',
+            marginTop: '0.85rem',
         },
         '&:last-of-type': {
-            marginBottom: '1.5rem',
+            marginBottom: '0.85rem',
         },
     }
 });
@@ -59,6 +60,9 @@ const Left = styled.div({
     backgroundColor: lightBlue,
     // overflow: 'hidden',
     position: 'relative',
+    borderRadius: '0.6rem',
+    boxShadow: '0px 3px 5px -2px rgba(0 0 0 / 0.5)',
+    overflow: 'hidden',
 });
 
 const Image = styled.img({
@@ -66,18 +70,18 @@ const Image = styled.img({
     height: '100%',
     width: '100%',
     position: 'absolute',
-    boxShadow: '0px 3px 5px -2px rgba(0 0 0 / 0.5)',
+    // boxShadow: '0px 3px 5px -2px rgba(0 0 0 / 0.5)',
     zIndex: 3,
     [toMedia(screenXS)]: {
         left: 0,
     }
 });
 
-const DetailsContainer = styled.div(
+const Right = styled.div(
     latoFont(300),
     {
         flex: 1,
-        padding: '1.5rem 2rem 1.5rem 3rem',
+        padding: '1.5rem 0 1.5rem 3rem',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
@@ -90,9 +94,10 @@ const DetailsContainer = styled.div(
         },
     });
 
-const Right = styled.div({
-    flex: 1,
-    position: 'relative',
+const DetailsContainer = styled.div({
+    borderLeft: `3px solid var(--light-blue)`,
+    paddingLeft: '0.5rem',
+    marginLeft: '0.2rem',
 });
 
 const StyledShareIcon = styled(ShareIconInstance, {
@@ -221,10 +226,8 @@ const EventItem: React.FC<EventItemProps> = ({
             </Left>
             <Right>
 
+                <EventName name={name} isMobile={isMobile} permaLink={permaLink} eventType={type} />
                 <DetailsContainer>
-
-                    <EventName name={name} isMobile={isMobile} permaLink={permaLink} eventType={type} />
-
                     {!allDay && (
                         <EventTime
                             dateTime={dateTime}
@@ -236,26 +239,26 @@ const EventItem: React.FC<EventItemProps> = ({
                     <EventLocation location={location} isMobile={isMobile} />
                     {collaborators.length !== 0 && <EventCollaborators collaborators={collaborators} />}
                     {pieces.length !== 0 && <EventProgram program={pieces} />}
-
-                    <Links>{website && <EventWebsiteButton website={website} />}
-                        <a href={permaLink} target="_blank" rel="noopener" onClick={onClick}>
-                            <StyledShareIcon width={36} height={36} ref={reference} />
-                        </a>
-                        <Transition<undefined>
-                            in={!!shared}
-                            onEnter={fadeOnEnter(0, 0.15)}
-                            onExit={fadeOnExit(0, 0.15)}
-                            timeout={250}
-                            mountOnEnter={true}
-                            unmountOnExit={true}
-                        >
-                            <CopiedTooltip x={x ?? 0} y={y ?? 0} strategy={strategy} ref={floating as React.MutableRefObject<HTMLDivElement>}>
-                                <Arrow y={middlewareData.arrow?.y ?? 0} ref={arrowRef} />
-                                <CopiedDiv>Link {startCase(shared)}!</CopiedDiv>
-                            </CopiedTooltip>
-                        </Transition>
-                    </Links>
                 </DetailsContainer>
+
+                <Links>{website && <EventWebsiteButton website={website} />}
+                    <a href={permaLink} target="_blank" rel="noopener" onClick={onClick}>
+                        <StyledShareIcon width={36} height={36} ref={reference} />
+                    </a>
+                    <Transition<undefined>
+                        in={!!shared}
+                        onEnter={fadeOnEnter(0, 0.15)}
+                        onExit={fadeOnExit(0, 0.15)}
+                        timeout={250}
+                        mountOnEnter={true}
+                        unmountOnExit={true}
+                    >
+                        <CopiedTooltip x={x ?? 0} y={y ?? 0} strategy={strategy} ref={floating as React.MutableRefObject<HTMLDivElement>}>
+                            <Arrow y={middlewareData.arrow?.y ?? 0} ref={arrowRef} />
+                            <CopiedDiv>Link {startCase(shared)}!</CopiedDiv>
+                        </CopiedTooltip>
+                    </Transition>
+                </Links>
             </Right>
         </ItemContainer>
     );

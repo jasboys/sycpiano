@@ -3,7 +3,7 @@ import * as React from 'react';
 import styled from '@emotion/styled';
 import { toMedia } from 'src/mediaQuery.js';
 import { screenXS } from 'src/screens.js';
-import { offWhite, logoBlue } from 'src/styles/colors.js';
+import { logoBlue } from 'src/styles/colors.js';
 import { latoFont } from 'src/styles/fonts.js';
 import { format, parseISO } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
@@ -30,12 +30,14 @@ const MonthBar = styled.div<{ isMobile: boolean }>(
         zIndex: 11,
         width: '86vw',
         display: 'flex',
-        background: `linear-gradient(${offWhite} 0% 95%, rgba(255, 255, 255, 0))`,
+        // background: `linear-gradient(${offWhite} 0% 95%, rgba(255, 255, 255, 0))`,
+        backgroundColor: 'white',
         color: logoBlue,
         paddingTop: '2rem',
+        paddingBottom: '0.5rem',
         [toMedia(screenXS)]: {
-            ...latoFont(400),
-            paddingTop: '0.5rem',
+            width: '92vw',
+            padding: '0.2rem 0',
             fontSize: '1.6rem',
         }
     },

@@ -25,7 +25,7 @@ import { toMedia } from 'src/mediaQuery';
 const ARROW_SIDE = 32;
 
 const CartListDiv = styled.div(
-    latoFont(200),
+    latoFont(300),
     {
         backgroundColor: 'rgba(255 255 255 / 0.4)',
         position: 'relative',
@@ -85,13 +85,12 @@ const StyledCheckoutButton = styled.button<{ disabled: boolean; isMouseDown: boo
     latoFont(300),
     {
         position: 'relative',
-        fontSize: '0.8rem',
-        letterSpacing: '0.1rem',
-        width: 200,
-        padding: 10,
+        fontSize: '1rem',
+        width: 160,
+        padding: 12,
         marginBottom: '2rem',
         textAlign: 'center',
-        borderRadius: 50,
+        borderRadius: 8,
         backgroundColor: lightBlue,
         color: 'white',
         transition: 'all 0.25s',
@@ -136,7 +135,7 @@ const Subtotal = styled.div({
     backgroundColor: lightBlue,
     color: 'white',
     fontSize: '1rem',
-    fontWeight: 'bold',
+    fontWeight: 400,
     padding: '1rem',
     display: 'flex',
     'div:nth-of-type(1)': {

@@ -7,12 +7,12 @@ import { latoFont } from 'src/styles/fonts';
 import { titleStringBase } from 'src/utils';
 
 const StyledDiv = styled.div(
-    latoFont(200),
+    latoFont(300),
     {
         height: '100%',
         width: '100%',
         position: 'absolute',
-        fontSize: '3rem',
+        fontSize: '2rem',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

@@ -20,7 +20,7 @@ const ContactContainer = styled.div(
     {
         display: 'flex',
         flexFlow: 'row wrap',
-        justifyContent: 'center',
+        justifyContent: 'space-evenly',
         height: '100%',
         width: '100%',
         position: 'absolute',
@@ -31,7 +31,7 @@ const ContactContainer = styled.div(
             height: '100%',
             marginTop: 0,
             overflowY: 'scroll',
-            justifyContent: 'space-around',
+            justifyContent: 'unset',
         },
     });
 

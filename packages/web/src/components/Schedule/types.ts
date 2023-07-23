@@ -4,7 +4,9 @@ import { utcToZonedTime } from 'date-fns-tz';
 
 export type EventType = 'concerto' | 'chamber' | 'solo' | 'masterclass';
 
-export type EventListName = 'upcoming' | 'archive' | 'search' | 'event';
+export const eventListNamesArr = ['upcoming', 'archive', 'search', 'event'] as const;
+
+export type EventListName = typeof eventListNamesArr[number];
 
 export interface Collaborator {
     name: string;

@@ -17,7 +17,6 @@ import { fadeOnEnter, fadeOnExit } from 'src/utils';
 import { ShareIconSVG } from 'src/components/Schedule/ShareIconSVG';
 import { BackIconSVG } from 'src/components/Schedule/BackIconSVG';
 import { SearchIconSVG } from 'src/components/Schedule/SearchIconSVG';
-import { offWhite } from 'src/styles/colors.js';
 
 const ScheduleContainer = styled.div(
     pushed,
@@ -26,7 +25,7 @@ const ScheduleContainer = styled.div(
         fontSize: '100%',
         width: '100%',
         boxSizing: 'border-box',
-        backgroundColor: offWhite,
+        backgroundColor: 'white',
         // backgroundImage: 'linear-gradient(90deg, var(--light-blue) calc(50vw - 200px), rgb(238 238 238) calc(50vw - 200px))',
         // backgroundImage: `url('/static/images/Van_Cliburn_Sean_Chen-0044.jpg')`,
         // backgroundSize: 'cover',

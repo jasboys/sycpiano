@@ -168,21 +168,50 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         }
     };
 
-    drawPhase = (radius: number, color: string): void => {
+    drawPhaseVerts = (verts: Float32Array, color: string) => {
         if (!this.renderingContext) return;
-        this.renderingContext.save();
         this.renderingContext.fillStyle = 'rgba(0, 0, 0, 0)';
         this.renderingContext.strokeStyle = color;
         this.renderingContext.lineWidth = 1.0;
-        this.renderingContext.rotate(-Math.PI / 4.0);
         this.renderingContext.beginPath();
-        this.renderingContext.moveTo(this.rightData[0], this.leftData[0]);
+        this.renderingContext.moveTo(verts[0], verts[1]);
 
-        for (let i = 1; i < this.leftData.length; i++) {
-            this.renderingContext.lineTo(this.rightData[i] * radius, this.leftData[i] * radius);
+        for (let i = 2; i < verts.length; i += 2) {
+            this.renderingContext.lineTo(verts[i], verts[i+1]);
         }
 
         this.renderingContext.stroke();
+    }
+
+    drawPhase = (radius: number, color: string): void => {
+        if (!this.renderingContext) return;
+
+        let verts: number[] = [];
+
+        for (let i = 1; i < this.leftData.length; i++) {
+            verts.push(this.rightData[i] * radius, this.leftData[i] * radius);
+        }
+
+        this.renderingContext.save();
+        this.renderingContext.rotate(-Math.PI / 4.0);
+
+        if (this.props.isMobile) {
+
+        } else {
+            this.history.push(new Float32Array(verts));
+            if (this.history.length > this.maxHistoryLength) {
+                this.history.shift();
+            }
+
+            let i = 1;
+            for (const phase of this.history) {
+                // color[3] = Math.pow(0.8, maxLength - i);
+                const opacified = opacify(Math.pow(i / this.maxHistoryLength, 4))(color);
+                this.drawPhaseVerts(phase, opacified);
+                i++;
+            }
+
+        }
         this.renderingContext.restore();
     }
 

@@ -13,6 +13,7 @@ export interface PlaylistProps {
     readonly extraStyles?: {
         div?: SerializedStyles;
         ul?: SerializedStyles;
+        toggler?: SerializedStyles;
     };
     readonly children?: React.ReactNode;
     readonly hasToggler: boolean;

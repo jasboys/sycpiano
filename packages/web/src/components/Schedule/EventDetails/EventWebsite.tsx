@@ -3,7 +3,7 @@ import { mix } from "polished";
 import { toMedia } from "src/mediaQuery.js";
 import { screenXS } from "src/screens.js";
 import { lightBlue } from "src/styles/colors.js";
-import { latoFont } from "src/styles/fonts.js";
+import { interFont } from "src/styles/fonts.js";
 
 
 interface EventWebsiteButtonProps {
@@ -12,25 +12,26 @@ interface EventWebsiteButtonProps {
 }
 
 const StyledWebsiteButton = styled.a(
-    latoFont(200),
+    interFont(300),
     {
         display: 'block',
-        fontSize: '1.1rem',
+        fontSize: '0.85rem',
         width: 'fit-content',
         padding: 11,
         textAlign: 'center',
-        backgroundColor: 'var(--light-blue)',
-        color: 'white',
+        color: 'var(--light-blue)',
         transition: 'all 0.25s',
         marginRight: '1rem',
+        borderRadius: 4,
+        border: '1px solid var(--light-blue)',
         '&:hover': {
             backgroundColor: mix(0.75, lightBlue, 'white'),
             color: 'white',
             cursor: 'pointer',
         },
-
         [toMedia(screenXS)]: {
-            fontSize: '1.0rem',
+            fontSize: '0.75rem',
+            padding: 8,
         }
     });
 

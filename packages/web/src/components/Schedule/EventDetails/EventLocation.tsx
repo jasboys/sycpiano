@@ -5,6 +5,7 @@ import { screenXS } from 'src/screens.js';
 import { lightBlue, logoBlue } from 'src/styles/colors.js';
 import { LocationIconInstance } from '../LocationIconSVG.jsx';
 import { getGoogleMapsSearchUrl } from '../utils.js';
+import styled from '@emotion/styled';
 
 
 const locationIconDimension = 24;
@@ -42,7 +43,8 @@ const eventLocationStyle = css({
     width: 'fit-content',
     textDecoration: 'underline solid transparent',
     transition: 'text-decoration-color 0.2s',
-    margin: '0.3rem 0 0.3rem -6px',
+    margin: '0.3rem 0',
+    marginLeft: 1,
     '&:hover': {
         color: logoBlue,
         textDecorationColor: logoBlue,
@@ -52,6 +54,13 @@ const eventLocationStyle = css({
         marginTop: 0,
     }
 });
+
+const VenueSpan = styled.span({
+    marginLeft: 10,
+    [toMedia(screenXS)]: {
+        marginLeft: 5,
+    }
+})
 
 export const EventLocation: React.FC<EventLocationProps> = ({ location, isMobile }) => {
     return (
@@ -63,11 +72,9 @@ export const EventLocation: React.FC<EventLocationProps> = ({ location, isMobile
         >
             <LocationIconInstance css={locationIconStyle} />
 
-            <span
-                css={{ marginLeft: isMobile ? 2 : 10 }}
-            >
+            <VenueSpan>
                 {getVenueName(location)}
-            </span>
+            </VenueSpan>
         </a>
     );
 };

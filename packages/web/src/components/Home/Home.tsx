@@ -181,12 +181,11 @@ const NavBarGradient = styled.div<{ hiDpx: boolean; isHamburger: boolean }>(
 );
 
 const StyledCopyright = styled.div(
-    latoFont(200),
+    latoFont(300),
     {
         position: 'absolute',
         bottom: 0,
         right: 0,
-        fontWeight: 'bold',
         color: 'white',
         padding: '20px 30px',
 

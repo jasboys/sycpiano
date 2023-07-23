@@ -10,7 +10,7 @@ import { useAppDispatch } from 'src/hooks';
 import { useSearchParams } from 'react-router-dom';
 
 const Container = styled.div(
-    latoFont(200),
+    latoFont(300),
     pushed,
     {
         display: 'flex',
@@ -51,6 +51,19 @@ const Questions = styled.div({
     }
 });
 
+const Error = styled.div(
+    latoFont(300),
+    {
+        height: '100%',
+        width: '100%',
+        position: 'absolute',
+        fontSize: '2rem',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+    }
+);
+
 interface CheckoutSuccessResponse {
     session: {
         customer_details: {
@@ -69,7 +82,6 @@ const CheckoutSuccess: React.FC<Record<never, unknown>> = () => {
     const [items, setItems] = React.useState<string[]>([]);
 
     React.useEffect(() => {
-        dispatch(clearCart());
         const fetchData = async () => {
             try {
                 const {
@@ -77,7 +89,7 @@ const CheckoutSuccess: React.FC<Record<never, unknown>> = () => {
                 }: { data: CheckoutSuccessResponse } = await axios.get('/api/shop/checkout-success', {
                     params: { session_id: search.get('session_id') }
                 });
-
+                dispatch(clearCart());
                 setEmail(session.customer_details.email);
                 setClientRef(session.client_reference_id);
                 setItems(lineItems);
@@ -89,23 +101,27 @@ const CheckoutSuccess: React.FC<Record<never, unknown>> = () => {
         fetchData();
     }, []);
 
-    return !email ? null : (
-        <Container>
-            <Thanks>Thank you for your purchase!</Thanks>
-            <div css={{ fontSize: '1.2rem' }}>Reference ID: {clientRef}</div>
-            <EmailedTo>
-                These scores will be emailed to <span css={{ fontWeight: 'bold' }}>{email}</span>:
-            </EmailedTo>
-            <ul>
-                {items.map((item, idx) => (
-                    <LineItem key={idx}>
-                        {item}
-                    </LineItem>
-                ))}
-            </ul>
-            <Questions>Questions? Email <a href="mailto:seanchen@seanchenpiano.com">seanchen@seanchenpiano.com</a></Questions>
-        </Container>
-    );
+    return !email ?
+        <Error>
+            There was a problem with the request.
+        </Error>
+        : (
+            <Container>
+                <Thanks>Thank you for your purchase!</Thanks>
+                <div css={{ fontSize: '1.2rem' }}>Reference ID: {clientRef}</div>
+                <EmailedTo>
+                    These scores will be emailed to <span css={{ fontWeight: 400 }}>{email}</span>:
+                </EmailedTo>
+                <ul>
+                    {items.map((item, idx) => (
+                        <LineItem key={idx}>
+                            {item}
+                        </LineItem>
+                    ))}
+                </ul>
+                <Questions>Questions? Email <a css={{ fontWeight: 400 }} href="mailto:seanchen@seanchenpiano.com">seanchen@seanchenpiano.com</a></Questions>
+            </Container>
+        );
 };
 
 export default CheckoutSuccess;

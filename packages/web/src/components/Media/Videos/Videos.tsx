@@ -15,7 +15,7 @@ import VideoPlaylist from 'src/components/Media/Videos/VideoPlaylist';
 import { fetchVideoPlaylist, playerIsReady, playVideo, resetPlayer } from 'src/components/Media/Videos/reducers';
 
 import { pushed } from 'src/styles/mixins';
-import { minRes, webkitMinDPR } from 'src/screens';
+import { minRes, screenPortrait, screenXS, webkitMinDPR } from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
 import { titleStringBase } from 'src/utils';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
@@ -57,11 +57,34 @@ const LoadingOverlayDiv = styled.div`
     position: absolute;
     top: 0;
     left: 0;
-    background-color: rgba(60 60 60 / 0.8);
+    background-color: rgba(255 255 255 / 0.5);
+    backdrop-filter: blur(2px);
     display: flex;
     align-items: center;
     justify-content: center;
 `;
+
+const LoadingInstanceContainer = styled.div({
+    padding: '0.5rem',
+    borderRadius: '50%',
+    backdropFilter: 'blur(2px)',
+    backgroundColor: 'rgba(255 255 255 / 0.8)',
+    display: 'flex',
+    boxShadow: '0px 3px 5px -2px rgba(0 0 0 / 0.5)',
+    'svg': {
+        fill: 'none',
+        stroke: 'var(--light-blue)',
+        width: 120,
+        height: 120,
+    },
+    [toMedia(screenXS)]: {
+        padding: '0.75rem',
+        'svg': {
+            width: 100,
+            height: 100,
+        }
+    }
+});
 
 const Videos: React.FC<VideosProps> = () => {
     const isHamburger = useAppSelector(mqSelectors.isHamburger);
@@ -120,7 +143,9 @@ const Videos: React.FC<VideosProps> = () => {
                     unmountOnExit={true}
                 >
                     <LoadingOverlayDiv>
-                        <LoadingInstance width={120} height={120} />
+                        <LoadingInstanceContainer>
+                            <LoadingInstance />
+                        </LoadingInstanceContainer>
                     </LoadingOverlayDiv>
                 </Transition>
                 <VideoPlaylist />

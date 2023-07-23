@@ -15,16 +15,16 @@ import { toMedia } from 'src/mediaQuery';
 
 const dividerColor = '#888';
 
-const NameContainer = styled.div`
-    flex: 0 0 auto;
-    font-size: 2rem;
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-
-    ${toMedia(screenXL)} {
-        font-size: 2.4rem;
-    }
-`;
+const NameContainer = styled.div(
+    latoFont(400),
+    {
+        flex: '0 0 auto',
+        fontSize: '2em',
+        marginBottom: '0.5rem',
+        [toMedia(screenXL)]: {
+            fontSize: '2.4rem',
+        }
+    });
 
 const SubInfo = styled.div`
     flex: 1 0 auto;
@@ -34,7 +34,7 @@ const SubInfo = styled.div`
 `;
 
 const SubInfoTitle = styled.div`
-    font-size: 20px;
+    font-size: 1.2em;
     margin-top: 0.6rem;
     margin-bottom: 0.6rem;
 `;
@@ -49,10 +49,10 @@ const PersonalInfo: React.FC<PersonalInfoShape> = ({
 
         {position.map((pos) => (
             <SubInfo key={pos.title}>
-                <SubInfoTitle><strong>{pos.title}</strong></SubInfoTitle>
+                <SubInfoTitle>{pos.title}</SubInfoTitle>
                 {pos.organization && (
                     <div>
-                        <strong>{pos.organization}</strong>
+                        {pos.organization}
                     </div>
                 )}
             </SubInfo>
@@ -115,7 +115,7 @@ const PersonalContact: React.FC<PersonalContactShape> = ({
 );
 
 const StyledPersonalContact = styled(PersonalContact)(
-    latoFont(300),
+    latoFont(400),
     {
         flex: '1 0 auto',
         display: 'flex',
@@ -124,7 +124,7 @@ const StyledPersonalContact = styled(PersonalContact)(
     });
 
 const InfoContainer = styled.div(
-    latoFont(200),
+    latoFont(300),
     {
         display: 'flex',
         flexDirection: 'column',

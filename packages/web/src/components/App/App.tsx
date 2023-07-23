@@ -3,7 +3,7 @@ import { parse, stringify } from 'qs';
 import * as React from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { useMedia } from 'react-media';
-import { Params, PathMatch, Route, Routes, useLocation, useMatch, useNavigate } from 'react-router-dom';
+import { Navigate, Params, PathMatch, Route, Routes, useLocation, useMatch, useNavigate } from 'react-router-dom';
 import { SwitchTransition, Transition } from 'react-transition-group';
 
 import Container from 'src/components/App/Container';
@@ -45,7 +45,7 @@ import { useFloating, offset, arrow, shift } from '@floating-ui/react-dom';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import format from 'date-fns/format';
 import { fetchShopItems } from 'src/components/Shop/ShopList/reducers';
-import { EventListName } from 'src/components/Schedule/types';
+import { EventListName, eventListNamesArr } from 'src/components/Schedule/types';
 import { setMatches } from './reducers';
 
 const register = extractModule(store);
@@ -116,15 +116,16 @@ const useCustomMatch = (): [RouterMatchPaths, TransitionMatchPaths] => {
     const shop = useMatch('shop/:shop/*');
     const shopRoot = useMatch('shop');
     const scheduleWithoutType = useMatch('schedule/*');
+    const error = useMatch('not-found');
 
     const reducedForRouter = [
         root, home, about, contact, media, schedule, shop,
-        aboutRoot, mediaRoot, scheduleRoot, shopRoot
+        aboutRoot, mediaRoot, scheduleRoot, shopRoot, error
     ].reduce((prev, curr) => prev ?? curr, null);
 
     const reducedForTransition = [
         root, home, about, contact, media, scheduleWithoutType, shop,
-        aboutRoot, mediaRoot, scheduleRoot, shopRoot
+        aboutRoot, mediaRoot, scheduleRoot, shopRoot, error
     ].reduce((prev, curr) => prev ?? curr, null);
 
     console.log(reducedForRouter);
@@ -215,25 +216,6 @@ const App: React.FC<Record<never, unknown>> = () => {
 
     const isMobile = isHamburger;
 
-    React.useEffect(() => {
-        switch (routerMatch?.pathnameBase) {
-            case '/about':
-                navigate('/about/biography');
-                break;
-            case '/schedule':
-                navigate('/schedule/upcoming');
-                break;
-            case '/shop':
-                navigate('/shop/scores');
-                break;
-            case '/media':
-                navigate('/media/videos');
-                break;
-            default:
-                break;
-        }
-    }, [routerMatch?.pathnameBase, navigate]);
-
     return (
         <HelmetProvider>
             <Global styles={globalCss} />
@@ -296,6 +278,12 @@ const App: React.FC<Record<never, unknown>> = () => {
                                     <Route path="discography" element={
                                         <AsyncComponent<DiscsProps> moduleProvider={Discs} />
                                     } />
+                                    <Route index element={
+                                        <Navigate to="/about/biography" />
+                                    } />
+                                    <Route path="*" element={
+                                        <Navigate to="/not-found" />
+                                    } />
                                 </Route>
                                 <Route path="contact" element={
                                     <AsyncComponent<ContactProps> moduleProvider={Contact} />
@@ -310,10 +298,28 @@ const App: React.FC<Record<never, unknown>> = () => {
                                     <Route path="photos" element={
                                         <AsyncComponent<PhotosProps> moduleProvider={Photos} />
                                     } />
+                                    <Route index element= {
+                                        <Navigate to="/media/videos" />
+                                    } />
+                                    <Route path="*" element={
+                                        <Navigate to="/not-found" />
+                                    } />
                                 </Route>
                                 <Route path="schedule/*">
-                                    <Route path=":type/*" element={
-                                        <AsyncComponent<ScheduleProps> moduleProvider={Schedule} type={(routerMatch?.params as Params<"*" | "type">).type as EventListName} />
+                                    {eventListNamesArr.map((type) => (
+                                        <Route
+                                            key={`schedule-${type}`}
+                                            path={type}
+                                            element={
+                                                <AsyncComponent<ScheduleProps> moduleProvider={Schedule} type={type} />
+                                            }
+                                        />
+                                    ))}
+                                    <Route index element= {
+                                        <Navigate to="/schedule/upcoming" />
+                                    } />
+                                    <Route path="*" element={
+                                        <Navigate to="/not-found" />
                                     } />
                                 </Route>
                                 <Route path="shop/*" element={
@@ -331,7 +337,16 @@ const App: React.FC<Record<never, unknown>> = () => {
                                     <Route path="checkout-success" element={
                                         <AsyncComponent<CheckoutSuccessProps> moduleProvider={CheckoutSuccess} />
                                     } />
+                                    <Route index element= {
+                                        <Navigate to="/shop/scores" />
+                                    } />
+                                    <Route path="*" element={
+                                        <Navigate to="/not-found" />
+                                    } />
                                 </Route>
+                                <Route path="not-found" element={
+                                    <AsyncComponent<object> moduleProvider={Page404} />
+                                } />
                                 <Route index element={
                                     <AsyncComponent<HomeProps> moduleProvider={Home} />
                                 } />

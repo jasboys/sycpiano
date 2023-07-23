@@ -105,6 +105,9 @@ export abstract class AudioVisualizerBase<C extends RenderingContext> extends Re
     requestId = 0;
     lastCallback!: number;
 
+    history: Float32Array[] = [];
+    maxHistoryLength = 30;
+
     abstract drawConstantQBins: (radius: number, color: ColorType<C>) => void;
     abstract drawWaveForm: (centerAxis: number, color: ColorType<C>) => void;
     abstract drawPlaybackHead: (angle: number, minRad: number, maxRad: number, color: ColorType<C>) => void;

@@ -5,9 +5,11 @@ import { Link } from 'react-router-dom';
 import styled from '@emotion/styled';
 import { pushed } from 'src/styles/mixins';
 import { latoFont } from 'src/styles/fonts';
+import { logoBlue } from 'src/styles/colors.js';
+import { useAppSelector } from 'src/hooks.js';
 
 const Container = styled.div(
-    latoFont(200),
+    latoFont(300),
     pushed,
     {
         display: 'flex',
@@ -20,7 +22,7 @@ const Container = styled.div(
 );
 
 const Question = styled.div({
-    fontWeight: 'bold',
+    fontWeight: 400,
 });
 
 const Answer = styled.div({
@@ -32,12 +34,26 @@ const Anchor: React.FC<{ href: string; children: React.ReactNode}> = (props) =>
         <a css={{ textDecoration: 'underline' }} href={props.href} children={props.children} />
         : <Link css={{ textDecoration: 'underline' }} to={props.href!} children={props.children} />;
 
+const Title = styled.div(
+    latoFont(400),
+    {
+        textAlign: 'left',
+        fontSize: '1.5rem',
+        color: logoBlue,
+        width: '100%',
+        maxWidth: 800,
+        paddingLeft: '1rem',
+        marginBottom: '0.5rem',
+    }
+);
+
 interface FAQ {
     question: string;
     answer: string;
 }
 
 const FAQs: React.FC<Record<never, unknown>> = () => {
+    const isHamburger = useAppSelector((state) => state.mediaQuery.isHamburger);
     const [faqs, setFaqs] = React.useState<FAQ[]>([]);
 
     React.useEffect(() => {
@@ -59,13 +75,14 @@ const FAQs: React.FC<Record<never, unknown>> = () => {
     return (
         faqs && (
             <Container>
-                <ul css={{ paddingRight: '1rem' }}>
+                {!isHamburger && <Title>Frequently Asked Questions</Title>}
+                <ul css={{ maxWidth: 800 }}>
                     {faqs.map((faq, idx) => (
                         <li key={idx}>
                             <Markdown
                                 options={{
                                     overrides: {
-                                        p: Question,
+                                        span: Question,
                                     }
                                 }}
                             >

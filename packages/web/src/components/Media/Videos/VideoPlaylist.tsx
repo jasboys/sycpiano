@@ -11,6 +11,7 @@ import { screenXS, screenPortrait } from 'src/screens';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { toMedia } from 'src/mediaQuery';
 import { mqSelectors } from 'src/components/App/reducers';
+import { latoFont } from 'src/styles/fonts.js';
 
 const StyledPlaylistContainer = styled.div`
     width: fit-content;
@@ -28,12 +29,24 @@ const StyledPlaylistContainer = styled.div`
     }
 `;
 
-const videoPlaylistStyle = css`
-    ${toMedia([screenXS, screenPortrait])} {
-        position: relative;
-        overflow: visible;
+const videoPlaylistStyle = css(
+    latoFont(300),
+    {
+        [toMedia([screenXS, screenPortrait])]: {
+            position: 'relative',
+            overflow: 'visible',
+        }
     }
-`;
+);
+
+const videoULStyle = css({
+    backgroundColor: 'rgba(255 255 255 / 0.9)',
+    backdropFilter: 'blur(5px)',
+    [toMedia([screenXS, screenPortrait])]: {
+        backgroundColor: 'rgba(255 255 255 / 0.95)',
+        backdropFilter: 'none',
+    }
+})
 
 const VideoPlaylist: React.FC<Record<never, unknown>> = () => {
     const isHamburger = useAppSelector(mqSelectors.isHamburger);
@@ -53,7 +66,7 @@ const VideoPlaylist: React.FC<Record<never, unknown>> = () => {
     return (
         <StyledPlaylistContainer>
             <Playlist
-                extraStyles={{ div: videoPlaylistStyle }}
+                extraStyles={{ div: videoPlaylistStyle, ul: videoULStyle, toggler: videoULStyle }}
                 isShow={isShow}
                 hasToggler={!isHamburger}
                 togglePlaylist={toggleDispatch}

@@ -83,7 +83,7 @@ const main = async () => {
                     "https://www.youtube.com/embed/",
                 ],
                 'img-src': [
-                    // "'self'",
+                    "'self'",
                     "https:",
                     "data:",
                     // "https://i.ytimg.com/vi/",

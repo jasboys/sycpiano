@@ -88,12 +88,13 @@ const Playlist = React.forwardRef<HTMLElement, PlaylistProps>((props, ref) => {
             <div
                 css={[
                     playlistContainerStyle,
-                    props.extraStyles && props.extraStyles.div,
+                    props.extraStyles?.div,
                 ]}
             >
                 {props.hasToggler && (
                     <PlaylistToggler
                         isPlaylistVisible={props.isShow}
+                        style={props.extraStyles?.toggler}
                         onClick={() => {
                             props.togglePlaylist?.();
                         }}
@@ -113,7 +114,7 @@ const Playlist = React.forwardRef<HTMLElement, PlaylistProps>((props, ref) => {
                     }}
                     css={[
                         playlistStyle,
-                        props.extraStyles && props.extraStyles.ul,
+                        props.extraStyles?.ul,
                     ]}
                     onScroll={props.onScroll}
                 >

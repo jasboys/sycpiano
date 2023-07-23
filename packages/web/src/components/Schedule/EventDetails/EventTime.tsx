@@ -8,7 +8,6 @@ import { ClockIconInstance } from 'src/components/Schedule/ClockIconSVG.jsx';
 import { EventDateTimeProps } from '../types.js';
 
 const eventTimeStyle = css({
-    marginLeft: -6,
     fontSize: '1rem',
     display: 'flex',
     flexDirection: 'row',
@@ -33,11 +32,18 @@ const clockStyle = css({
     },
 });
 
+const timeStyle = css({
+    marginLeft: 10,
+    [toMedia(screenXS)]: {
+        marginLeft: 5,
+    },
+});
+
 export const EventTime: React.FC<Omit<EventDateTimeProps, 'rounded'>> = ({ dateTime, timezone, isMobile }) => (
     <div css={eventTimeStyle}>
         <div css={{ margin: '0 3px', display: 'flex' }}>
             <ClockIconInstance css={clockStyle} date={utcToZonedTime(dateTime, timezone)} />
         </div>
-        <div css={{ marginLeft: isMobile ? 0 : 10 }}>{formatInTimeZone(parseISO(dateTime), timezone, 'h:mm a z')}</div>
+        <div css={timeStyle}>{formatInTimeZone(parseISO(dateTime), timezone, 'h:mm a z')}</div>
     </div>
 );

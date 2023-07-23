@@ -99,16 +99,15 @@ const TextContainer = styled.div({
     },
 });
 
-const NameSpan = styled.span(latoFont(400),
-    {
-    });
+const NameSpan = styled.span(latoFont(400));
 
 const Title = styled.div(
     latoFont(400),
     {
         fontSize: '1.5rem',
         color: logoBlue
-    });
+    }
+);
 
 interface BioTextProps {
     bio: Blurb[];

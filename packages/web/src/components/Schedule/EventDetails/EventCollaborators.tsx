@@ -12,19 +12,21 @@ interface EventCollaboratorsProps {
 }
 
 const eventCollaboratorsStyle = css(
-    latoFont(200),
+    latoFont(400),
     {
         listStyle: 'none',
         padding: 0,
-        fontSize: '1rem',
-        margin: '0.5rem 0',
+        fontSize: '0.9rem',
+        margin: '0.8rem 0 0.8rem 0.5rem',
         [toMedia(screenXS)]: {
             fontSize: '0.8rem',
+            margin: '0.5rem 0 0.5rem 0.5rem',
+
         }
     });
 
 const CollaboratorName = styled.span({
-    fontWeight: 'bold',
+    // fontWeight: 'bold',
 });
 
 export const EventCollaborators: React.FC<EventCollaboratorsProps> = ({ collaborators }) => (
@@ -33,7 +35,7 @@ export const EventCollaborators: React.FC<EventCollaboratorsProps> = ({ collabor
             collaborator.name && collaborator.instrument && (
                 <div key={i}>
                     <CollaboratorName>{collaborator.name}</CollaboratorName>{' - '}
-                    <span css={{ fontSize: '0.8em' }}>{startCase(collaborator.instrument)}</span>
+                    <span css={{ fontSize: '0.8em', fontWeight: 300 }}>{startCase(collaborator.instrument)}</span>
                 </div>
             )
         ))}

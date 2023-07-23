@@ -14,7 +14,7 @@ const SocialMediaImg = styled.img`
     transition: all 0.2s;
     vertical-align: middle;
     margin: 0 20px;
-    width: 3em;
+    width: 2.5em;
 
     ${toMedia([minRes, webkitMinDPR])} {
         width: 2em;
@@ -27,7 +27,7 @@ const SocialMediaImg = styled.img`
 `;
 
 const StyledLink = styled.a(
-    latoFont(300),
+    latoFont(400),
     {
         flex: '1 0 auto',
         textAlign: 'center',

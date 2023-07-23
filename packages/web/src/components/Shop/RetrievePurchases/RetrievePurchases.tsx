@@ -9,9 +9,10 @@ import mix from 'polished/lib/color/mix';
 import { Link } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import { ThemeProvider } from '@mui/system';
+import { useAppSelector } from 'src/hooks.js';
 
 const Container = styled.div(
-    latoFont(200),
+    latoFont(300),
     pushed,
     {
         display: 'flex',
@@ -20,7 +21,7 @@ const Container = styled.div(
         marginRight: 'auto',
         alignItems: 'center',
         padding: '2rem 2rem',
-        maxWidth: 500,
+        maxWidth: 600,
     },
 );
 
@@ -51,13 +52,12 @@ const StyledSubmitButton = styled.button<{ disabled: boolean; isMouseDown: boole
     latoFont(300),
     {
         position: 'relative',
-        fontSize: '0.8rem',
-        letterSpacing: '0.1rem',
+        fontSize: '1.0rem',
         width: 200,
-        padding: 10,
+        padding: 8,
         marginBottom: '2rem',
         textAlign: 'center',
-        borderRadius: 50,
+        borderRadius: 8,
         backgroundColor: lightBlue,
         color: 'white',
         transition: 'all 0.25s',
@@ -82,6 +82,18 @@ const StyledSubmitButton = styled.button<{ disabled: boolean; isMouseDown: boole
     },
 );
 
+const Title = styled.div(
+    latoFont(400),
+    {
+        textAlign: 'center',
+        fontSize: '1.5rem',
+        color: logoBlue,
+        width: '100%',
+        maxWidth: 600,
+        marginBottom: '2rem',
+    }
+);
+
 enum SubmitState {
     initial = 0,
     submitting = 1,
@@ -89,6 +101,7 @@ enum SubmitState {
 }
 
 const RetrievalForm: React.FC<Record<never, unknown>> = () => {
+    const isHamburger = useAppSelector((state) => state.mediaQuery.isHamburger);
     const [isMouseDown, setIsMouseDown] = React.useState(false);
     const [email, setEmail] = React.useState('');
     const [error, setError] = React.useState(false);
@@ -113,6 +126,8 @@ const RetrievalForm: React.FC<Record<never, unknown>> = () => {
 
     return (
         <Container>
+            {!isHamburger && <Title>Retrieve Purchases</Title>}
+
             <div css={{ fontSize: '1.2rem', width: '100%' }}>
                 Enter your email to request previously purchased scores.
             </div>

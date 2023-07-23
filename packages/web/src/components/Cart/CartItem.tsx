@@ -7,6 +7,7 @@ import { formatPrice } from 'src/utils';
 import { removeItemFromCart } from 'src/components/Cart/reducers';
 import { staticImage } from 'src/imageUrls';
 import { useAppDispatch } from 'src/hooks';
+import { latoFont } from 'src/styles/fonts.js';
 
 const ItemContainer = styled.div({
     display: 'flex',
@@ -36,28 +37,29 @@ const ItemDescription = styled.div({
 const ItemName = styled(Link, {
     shouldForwardProp: prop =>
         isPropValid(prop) && prop !== 'error'
-})<{ error: boolean }>({
-    flex: '0 1 auto',
-    fontSize: '1rem',
-    fontWeight: 'bold',
-    color: 'black',
-    paddingRight: '1rem',
-    '&:hover': {
-        cursor: 'pointer',
-        textDecoration: 'underline',
-    },
-    '&:visited': {
-        color: '',
-    }
-}, ({ error }) => error && ({
-    color: 'darkred',
-    '&:visited': {
+})<{ error: boolean }>(
+    latoFont(400),
+    {
+        flex: '0 1 auto',
+        fontSize: '0.9rem',
+        color: 'black',
+        paddingRight: '1rem',
+        '&:hover': {
+            cursor: 'pointer',
+            textDecoration: 'underline',
+        },
+        '&:visited': {
+            color: '',
+        }
+    }, ({ error }) => error && ({
         color: 'darkred',
-    },
-    '&:hover': {
-        color: 'darkred',
-    },
-}));
+        '&:visited': {
+            color: 'darkred',
+        },
+        '&:hover': {
+            color: 'darkred',
+        },
+    }));
 
 const ItemPrice = styled.div({
     display: 'inline',
@@ -73,24 +75,24 @@ export const CartItem: React.FC<CartProps> = ({ item, error }) => {
 
     return (
         <ItemContainer>
-                <ItemThumbnail>
-                    <img src={staticImage('/products/thumbnails/' + item.images[0])} />
-                </ItemThumbnail>
-                <ItemDescription>
-                    <div css={{ display: 'flex', justifyContent: 'space-between', }}>
-                        <ItemName
-                            to={`/shop/scores/${item.permalink}`}
-                            error={error}
-                        >
-                            {item.name}
-                        </ItemName>
-                        <a css={{ flex: '0 0 auto' }} role="button" tabIndex={0} onClick={() => dispatch(removeItemFromCart(item.id))}>Remove</a>
-                    </div>
-                    <div css={{ marginTop: '0.5rem' }}>
-                        <ItemPrice>{formatPrice(item.price)}</ItemPrice>
-                        {/* <Divider>|</Divider> */}
-                    </div>
-                </ItemDescription>
+            <ItemThumbnail>
+                <img src={staticImage('/products/thumbnails/' + item.images[0])} />
+            </ItemThumbnail>
+            <ItemDescription>
+                <div css={{ display: 'flex', justifyContent: 'space-between', }}>
+                    <ItemName
+                        to={`/shop/scores/${item.permalink}`}
+                        error={error}
+                    >
+                        {item.name}
+                    </ItemName>
+                    <a css={{ flex: '0 0 auto', fontWeight: 300 }} role="button" tabIndex={0} onClick={() => dispatch(removeItemFromCart(item.id))}>Remove</a>
+                </div>
+                <div css={{ marginTop: '0.5rem' }}>
+                    <ItemPrice>{formatPrice(item.price)}</ItemPrice>
+                    {/* <Divider>|</Divider> */}
+                </div>
+            </ItemDescription>
         </ItemContainer>
     );
 };

@@ -10,7 +10,7 @@ import { toMedia } from 'src/mediaQuery';
 const StyledDiv = styled.div`
     position: fixed;
     bottom: 25px;
-    right: calc(${playlistWidth.desktop} / 2);
+    right: 150px;
     transform: translateX(50%);
     z-index: 50;
     filter: drop-shadow(0 2px 2px rgba(0 0 0 / 0.3));

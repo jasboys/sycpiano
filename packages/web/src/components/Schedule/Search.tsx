@@ -53,7 +53,7 @@ const ResultsContainer = styled.div(
     });
 
 const Container = styled.div<{ dirty: boolean; expanded: boolean; }>(
-    latoFont(100),
+    latoFont(200),
     {
         height: 50,
         zIndex: 15,
@@ -72,7 +72,7 @@ const Container = styled.div<{ dirty: boolean; expanded: boolean; }>(
 
         [toMedia(screenXSandPortrait)]: {
             left: 0,
-            margin: '0.8rem auto 0',
+            margin: '0.8rem auto 0.5rem',
             maxWidth: 'unset',
         },
         'svg': {
@@ -146,7 +146,7 @@ const Span = styled.span<{ focused: boolean }>(
 );
 
 const Input = styled.input(
-    latoFont(100),
+    latoFont(200),
     {
         flex: ' 1 1 auto',
         border: 'none',

@@ -117,13 +117,16 @@ shopRouter.get<{}, any, any, { session_id: string }>('/checkout-success', async 
     const {
         session_id: sessionId
     } = req.query;
+    try {
+        const { session, lineItems } = await stripeClient.getCheckoutSession(sessionId);
 
-    const { session, lineItems } = await stripeClient.getCheckoutSession(sessionId);
-
-    res.json({
-        session: pick(session, ['customer_details', 'client_reference_id']),
-        lineItems: lineItems.map((item) => item.description),
-    });
+        res.json({
+            session: pick(session, ['customer_details', 'client_reference_id']),
+            lineItems: lineItems.map((item) => item.description),
+        });
+    } catch (e) {
+        res.sendStatus(400);
+    }
 })
 
 // new stripe API: old skus = new prices

@@ -13,7 +13,7 @@ interface EventNameProps {
 }
 
 const eventNameStyle = css(
-    latoFont(400),
+    latoFont(300),
     {
         fontSize: '1.55rem',
         transition: 'color 0.2s',

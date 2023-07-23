@@ -329,22 +329,9 @@ class AudioVisualizer extends AudioVisualizerBase<WebGLRenderingContext> {
         }
     }
 
-    drawPhase = (radius: number, color: Float32Array) => {
+    drawPhaseVerts = (verts: Float32Array, color: Float32Array) => {
         if (!this.renderingContext) return;
-        const gl = this.renderingContext;
-        let tempArray: number[][] = [];
-        for (let i = 0; i < this.leftData.length; i++) {
-            tempArray.push([this.rightData[i] * radius, this.leftData[i] * radius]);
-            // tempArray.push([i, i]);
-        }
-        const normalData = getNormals(tempArray);
-        let vertsArray: number[] = [];
-        for (let i = 0; i < tempArray.length; i++) {
-            vertsArray.push(...tempArray[i], ...normalData[i][0], normalData[i][1]);
-            vertsArray.push(...tempArray[i], -normalData[i][0][0], -normalData[i][0][1], normalData[i][1]);
-        }
-
-        const verts = new Float32Array(vertsArray);
+        const gl = this.renderingContext
         gl.useProgram(this.phaseProgram.shader);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.phaseProgram.buffers.vertices);
@@ -360,9 +347,46 @@ class AudioVisualizer extends AudioVisualizerBase<WebGLRenderingContext> {
 
         gl.uniform4fv(this.phaseProgram.uniforms.globalColor, color);
 
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, vertsArray.length / 5);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, verts.length / 5);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    }
+
+    drawPhase = (radius: number, color: Float32Array) => {
+        if (!this.renderingContext) return;
+
+        let tempArray: number[][] = [];
+        for (let i = 0; i < this.leftData.length; i++) {
+            // const x = this.leftData[i] * this.leftData[i] - this.rightData[i] * this.rightData[i];
+            // const y = 2 * this.rightData[i] * this.leftData[i];
+            const x = this.leftData[i], y = this.rightData[i];
+            // tempArray.push([x * 2 * radius, (y < 0) ? -y * 2 * radius : y *2 * radius]);
+            tempArray.push([x * radius, y * radius]);
+            // tempArray.push([0, i]);
+        }
+        const normalData = getNormals(tempArray);
+        let vertsArray: number[] = [];
+        for (let i = 0; i < tempArray.length; i++) {
+            vertsArray.push(...tempArray[i], ...normalData[i][0], normalData[i][1]);
+            vertsArray.push(...tempArray[i], -normalData[i][0][0], -normalData[i][0][1], normalData[i][1]);
+        }
+        if (this.props.isMobile) {
+            this.drawPhaseVerts(new Float32Array(vertsArray), color);
+        } else {
+            const verts = new Float32Array(vertsArray);
+            this.history.push(verts);
+            if (this.history.length > this.maxHistoryLength) {
+                this.history.shift();
+            }
+
+            let i = 1;
+            for (const phase of this.history) {
+                // color[3] = Math.pow(0.8, maxLength - i);
+                color[3] = Math.pow(i / this.maxHistoryLength, 4);
+                this.drawPhaseVerts(phase, color);
+                i++;
+            }
+        }
     }
 
     drawVisualization = (lowFreq: number, lightness: number, timestamp: number): void => {

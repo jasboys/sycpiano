@@ -101,13 +101,12 @@ const baseItemNotInCart = css({
 const CartButton = styled.button<{ isItemInCart: boolean; isMouseDown: boolean; isHamburger: boolean }>(
     latoFont(300),
     {
-        fontSize: '0.8em',
+        fontSize: '0.9rem',
         width: 230,
         padding: 10,
         textAlign: 'center',
-        borderRadius: 20,
+        borderRadius: 8,
         transition: 'all 0.25s',
-        letterSpacing: '0.1rem',
         userSelect: 'none',
     },
     noHighlight,
@@ -122,14 +121,14 @@ const CartButton = styled.button<{ isItemInCart: boolean; isMouseDown: boolean; 
 );
 
 const ShopItemContainer = styled.div<{ isHamburger: boolean }>(
-    latoFont(200),
+    latoFont(300),
     {
         height: 'auto',
         display: 'flex',
         borderRadius: 4,
         margin: '2.5rem auto',
         flex: '0 1 auto',
-        maxWidth: 600,
+        maxWidth: 650,
         scrollMarginTop: '5rem',
     }, ({ isHamburger }) => isHamburger && ({
         flexDirection: 'column',
@@ -137,14 +136,14 @@ const ShopItemContainer = styled.div<{ isHamburger: boolean }>(
     }));
 
 const ItemName = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => ({
-    margin: isHamburger ? '0.8rem 0' : '0 0 0.8rem 0',
+    margin: isHamburger ? '0.8rem 0' : 'unset',
     fontSize: '1.2rem',
-    fontWeight: 'bold',
     textAlign: isHamburger ? 'center' : 'unset',
+    fontWeight: 400,
 }));
 
 const ItemDescription = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => ({
-    margin: isHamburger ? '1rem 2rem' : '2rem 0',
+    // margin: isHamburger ? '1rem 2rem' : '1rem 0',
     paddingLeft: isHamburger ? 'unset' : '1rem',
 }));
 
@@ -154,7 +153,7 @@ const ItemDetails = styled.span({
 
 const ItemPrice = styled.span({
     margin: '0.2rem 0',
-    fontWeight: 'bold',
+    fontWeight: 500,
 });
 
 const DetailContainer = styled.div<{ isHamburger: boolean }>({
@@ -171,10 +170,24 @@ const Separator = styled.span({
     fontSize: '1.5rem',
 });
 
-const SampleLink = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => ({
-    margin: isHamburger ? '1rem 2rem' : '2rem 0',
-    paddingLeft: isHamburger ? 'unset' : '1rem',
-}));
+const SampleLink = styled.div<{ isHamburger: boolean }>(
+    latoFont(400),
+    {
+        'a': {
+            color: 'var(--light-blue)'
+        }
+    },
+    ({ isHamburger }) => (
+        {
+            margin: isHamburger ? '1rem 2rem' : '1.5rem 0 0',
+            paddingLeft: isHamburger ? 'unset' : '1rem',
+        }));
+
+const leftHighlight = css({
+    margin: '1rem 0',
+    padding: '1rem 0',
+    borderLeft: '3px solid var(--light-blue)',
+});
 
 const formatCentsToDollars = (price: number) => `$${(price / 100).toFixed(2)}`;
 
@@ -199,10 +212,12 @@ export const ShopItem: React.FC<ShopItemProps> = ({ item, className }) => {
             <ContentContainer isHamburger={isHamburger}>
                 <div css={{ marginBottom: '24px' }}>
                     <ItemName isHamburger={isHamburger}>{item.name}</ItemName>
+                    <div css={leftHighlight}>
                     <ItemDescription isHamburger={isHamburger}>{item.description}</ItemDescription>
                     {item.sample && (
                         <SampleLink isHamburger={isHamburger}><a href={item.sample} target="seanchenpiano_sample">Listen to the work here.</a></SampleLink>
                     )}
+                    </div>
                     <DetailContainer isHamburger={isHamburger}>
                         <ItemDetails>{toUpper(item.format)} format</ItemDetails>
                         <Separator>|</Separator>

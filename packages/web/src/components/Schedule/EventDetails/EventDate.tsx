@@ -5,7 +5,7 @@ import * as React from 'react';
 
 import { toMedia } from 'src/mediaQuery.js';
 import { screenXS } from 'src/screens.js';
-import { latoFont } from 'src/styles/fonts.js';
+import { interFont } from 'src/styles/fonts.js';
 import { EventDateTimeProps } from '../types.js';
 
 
@@ -22,11 +22,23 @@ const Connector = styled.div({
             transparent calc(50% + 0.82px),
             transparent 100%
         )`,
-    margin: '0.2rem 0',
+    marginTop: '0.2rem',
+    [toMedia(screenXS)]: {
+        background:
+            `linear-gradient(
+                to right,
+                transparent 0%,
+                transparent calc(50% - 0.8px),
+                white calc(50% - 0.8px),
+                white calc(50% + 0.8px),
+                transparent calc(50% + 0.8px),
+                transparent 100%
+            )`,
+    },
 });
 
 const eventDateStyle = css(
-    latoFont(300),
+    interFont(300),
     {
         textAlign: 'center',
         background: 'none',
@@ -54,7 +66,7 @@ const MonthDay = styled.div({
     fontSize: '2.0rem',
     lineHeight: '2.2rem',
     [toMedia(screenXS)]: {
-        fontSize: '1.5rem',
+        fontSize: '1.6rem',
     }
 });
 
@@ -71,7 +83,7 @@ const Overlay = styled.div({
     width: '100%',
     height: '100%',
     zIndex: -1,
-    backgroundColor: `#0000008a`,
+    backgroundColor: `#00000020`,
     backdropFilter: 'blur(1px)',
 });
 

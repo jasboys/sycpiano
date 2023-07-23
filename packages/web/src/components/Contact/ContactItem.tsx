@@ -24,9 +24,6 @@ import { toMedia } from 'src/mediaQuery';
 import { useAppSelector } from 'src/hooks';
 import { mqSelectors } from '../App/reducers';
 
-const imageInsetShadowColor = '#222';
-const alternateBackgroundColor = '#eee';
-
 interface PhotoAttributes {
     jpg?: string;
     webp?: string;
@@ -52,7 +49,7 @@ const photosAttributesMap: Record<string, PhotoAttributes> = {
             backgroundColor: 'white',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'space-evenly',
         }),
         imgCss: css({
             width: '90%',
@@ -68,16 +65,13 @@ const ImageContainer = styled.div<ImageContainerProps>(
         backgroundRepeat: 'no-repeat',
         backgroundColor: 'black',
         visibility: 'hidden',
-        flex: '0 0 55%',
+        flex: '0 0 50%',
         boxShadow:
-            `inset 0 -15px 15px -15px ${imageInsetShadowColor}`,
+            `0 5px 11px -9px rgba(0 0 0 / 0.8)`,
 
         [toMedia([minRes, webkitMinDPR])]: {
-            height: '75vw',
+            height: '72vw',
             flex: 'unset',
-            boxShadow:
-                `inset 0 -15px 15px -15px ${imageInsetShadowColor},
-                inset 0 15px 15px -15px ${imageInsetShadowColor}`,
         }
     },
     ({ contact }) => photosAttributesMap[contact].css,
@@ -99,17 +93,16 @@ const StyledContactItem = styled.div({
     display: 'flex',
     flexDirection: 'column',
     backgroundColor: 'white',
-    flex: '0 1 600px',
+    flex: '0 1 400px',
     width: '100%',
-
-    '&:nth-of-type(2n)': {
-        backgroundColor: alternateBackgroundColor,
-    },
+    margin: '2rem',
 
     [toMedia([minRes, webkitMinDPR])]: {
+        margin: 'unset',
         height: 'fit-content',
-        paddingBottom: '3em',
+        padding: '1rem 1rem 3rem 1rem',
         marginTop: 0,
+        fontSize: 14,
         '&:first-of-type': {
             marginTop: navBarHeight.hiDpx,
         },
