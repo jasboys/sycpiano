@@ -1,4 +1,4 @@
-import parseToRgb from 'polished/lib/color/parseToRgb';
+import { parseToRgb } from 'polished';
 
 import { gsap } from 'gsap';
 import getNormals from 'polyline-normals';

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import styled from '@emotion/styled';
-import { toMedia } from 'src/mediaQuery.js';
+import { toMedia } from 'src/MediaQuery.js';
 import { screenXS } from 'src/screens.js';
 import { logoBlue } from 'src/styles/colors.js';
 import { latoFont } from 'src/styles/fonts.js';

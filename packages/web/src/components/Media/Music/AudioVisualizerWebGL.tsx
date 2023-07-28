@@ -1,4 +1,4 @@
-import parseToRgb from 'polished/lib/color/parseToRgb';
+import { hsl, parseToRgb } from 'polished';
 
 import { gsap } from 'gsap';
 import getNormals from 'polyline-normals';
@@ -13,7 +13,6 @@ import { CIRCLE_SAMPLES, constantQ, firLoader, waveformLoader } from 'src/compon
 
 import { cqFrag, genFrag, genVert, lineVert, phaseVert } from 'src/components/Media/Music/shaders';
 import { initShader } from 'src/components/Media/Music/webGLHelpers';
-import { hsl } from 'polished';
 
 
 interface ShaderProgram {

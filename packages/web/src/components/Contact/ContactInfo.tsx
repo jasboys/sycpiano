@@ -11,7 +11,7 @@ import { contactPageLinkColor } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { link } from 'src/styles/mixins';
 import { screenXL } from 'src/screens';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 
 const dividerColor = '#888';
 

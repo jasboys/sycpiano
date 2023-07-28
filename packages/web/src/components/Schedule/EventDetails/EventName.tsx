@@ -1,9 +1,9 @@
-import { css } from "@emotion/react";
-import { toMedia } from "src/mediaQuery.js";
-import { screenXS } from "src/screens.js";
-import { logoBlue } from "src/styles/colors.js";
-import { latoFont } from "src/styles/fonts.js";
-import { EventType } from "src/components/Schedule/types.js";
+import { css } from '@emotion/react';
+import { toMedia } from 'src/mediaQuery.js';
+import { screenXS } from 'src/screens.js';
+import { logoBlue } from 'src/styles/colors.js';
+import { latoFont } from 'src/styles/fonts.js';
+import { EventType } from 'src/components/Schedule/types.js';
 
 interface EventNameProps {
     name: string;

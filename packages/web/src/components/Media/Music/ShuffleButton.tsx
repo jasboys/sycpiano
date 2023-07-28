@@ -5,7 +5,7 @@ import { css, Interpolation, Theme } from '@emotion/react';
 import { lightBlue } from 'src/styles/colors';
 import { screenM, screenPortrait, screenXS } from 'src/screens';
 import { playlistWidth } from 'src/styles/variables';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 import { useAppSelector } from 'src/hooks';
 
 interface ShuffleButtonProps {

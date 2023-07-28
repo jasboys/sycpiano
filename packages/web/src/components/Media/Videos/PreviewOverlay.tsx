@@ -10,7 +10,7 @@ import { playVideo } from 'src/components/Media/Videos/reducers';
 import { cliburn1, generateSrcsetWidths, resizedImage } from 'src/imageUrls';
 import { minRes, screenLengths, screenWidths, webkitMinDPR,} from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 
 import { LazyImage } from 'src/components/LazyImage';
 import { useAppDispatch, useAppSelector } from 'src/hooks';

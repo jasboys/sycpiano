@@ -10,7 +10,7 @@ import { screenXS, screenPortrait } from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { fetchAcclaims } from 'src/components/About/Press/reducers';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 import { mqSelectors } from 'src/components/App/reducers';
 
 interface PressProps {

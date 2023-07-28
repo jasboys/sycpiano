@@ -7,10 +7,10 @@ const defaultMedia = Object.fromEntries(
     ((Object.keys(GLOBAL_QUERIES) as (keyof typeof GLOBAL_QUERIES)[]).map((k) => [k, false]) as Iterable<readonly [keyof MediaQueryStateShape, boolean]>)
 ) as MediaQueryStateShape;
 
-export const setMatches = createAction<MediaQueryStateShape>('mediaQuery/setMatches');
+export const setMatches = createAction<MediaQueryStateShape>('src/MediaQuery/setMatches');
 
 export const mediaQuerySlice = createSlice({
-    name: 'mediaQuery',
+    name: 'src/MediaQuery',
     initialState: defaultMedia,
     reducers: {},
     extraReducers: (builder) => {

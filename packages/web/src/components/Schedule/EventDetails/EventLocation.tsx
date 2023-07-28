@@ -1,6 +1,6 @@
 import { css } from '@emotion/react';
 import { desaturate } from 'polished';
-import { toMedia } from 'src/mediaQuery.js';
+import { toMedia } from 'src/MediaQuery.js';
 import { screenXS } from 'src/screens.js';
 import { lightBlue, logoBlue } from 'src/styles/colors.js';
 import { LocationIconInstance } from '../LocationIconSVG.jsx';

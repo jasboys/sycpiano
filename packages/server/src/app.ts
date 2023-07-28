@@ -4,11 +4,9 @@ import { RequestContext } from '@mikro-orm/core';
 import rootPath from 'app-root-path';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import csurf from 'csurf';
 import express, { RequestHandler, json, urlencoded } from 'express';
 import { readFileSync } from 'fs';
 import helmet from 'helmet';
-import { createProxyMiddleware } from 'http-proxy-middleware';
 import mustacheExpress from 'mustache-express';
 import path from 'path';
 
@@ -20,6 +18,7 @@ import { precheck } from './precheck.js';
 import { Resized } from './resized.js';
 import { AdminRest } from './rest.js';
 import type { Options } from 'pino-http';
+import { csrfMiddleware } from './csrf.js';
 
 const main = async () => {
     await precheck();
@@ -71,6 +70,7 @@ const main = async () => {
                     "'unsafe-inline'",
                     "'unsafe-eval'",
                     "http://localhost:5173",
+                    "http://localhost:5174",
                     "https://js.stripe.com",
                     "https://checkout.stripe.com",
                     "https://www.youtube.com/iframe_api",
@@ -96,6 +96,7 @@ const main = async () => {
                 'connect-src': [
                     "'self'",
                     "ws://localhost:5173/",
+                    "ws://localhost:5174/",
                     "https://api.stripe.com",
                     "https://checkout.stripe.com",
                     "https://www.googleapis.com/youtube/v3/",
@@ -137,24 +138,19 @@ const main = async () => {
         app.use('/static/images', express.static(path.resolve(rootPath.toString(), process.env.IMAGE_ASSETS_DIR)));
         app.use('/static', express.static(path.resolve(rootPath.toString(), 'assets')));
         // app.use('/static', express.static(path.resolve(rootPath.toString(), 'web/build')));
-        app.use('/static', createProxyMiddleware({
-            target: 'http://localhost:5173',
-            ws: true,
-        }));
+        // app.use('/static', createProxyMiddleware({
+        //     target: 'http://localhost:5173',
+        //     ws: true,
+        // }));
     }
 
     app.engine('html', mustacheExpress());
     app.set('view engine', 'html');
-    app.set('views', path.resolve(rootPath.toString(), 'partials'));
-
-    const csrfHandler = csurf({
-        cookie: {
-            signed: true,
-            secure: true,
-            httpOnly: true,
-            sameSite: 'strict',
-        },
-    });
+    app.set('views', [
+        path.resolve(rootPath.toString(), 'packages', 'web', 'build'),
+        path.resolve(rootPath.toString(), 'packages', 'admin', 'build'),
+        path.resolve(rootPath.toString(), 'partials'),
+    ]);
 
     let allowedOrigins = [/localhost:\d{4}$/, /https:\/\/\w*.googleapis\.com.*/];
     if (process.env.CORS_ORIGINS) {
@@ -175,18 +171,17 @@ const main = async () => {
     const adminMiddlewares = [
         cors(corsOptions),
         cookieParser(process.env.COOKIE_SECRET),
-        csrfHandler,
         urlencoded({ extended: true }),
         json(),
+        ormHandler,
     ];
 
-    app.use(/\/auth/, adminMiddlewares, AuthRouter);
+    app.use(/\/auth/, csrfMiddleware, adminMiddlewares, AuthRouter);
 
     // Custom api endpoint
     app.use(
         /\/rest/,
         adminMiddlewares,
-        ormHandler,
         authAndGetRole,
         checkAdmin,
         AdminRest
@@ -203,14 +198,34 @@ const main = async () => {
         /\/admin/,
         cors(corsOptions),
         cookieParser(process.env.COOKIE_SECRET),
-        csrfHandler,
-        createProxyMiddleware({
-            target: `http://127.0.0.1:${process.env.ADMIN_PORT}`,
-            ws: true,
-            onProxyReq: (proxyReq, req) => {
-                proxyReq.setHeader('csrf-inject', req.csrfToken());
-            }
-        }),
+        async (_req, res) => {
+            res.render('admin', {
+                vite: {
+                    refresh: `
+                        <script type="module">
+                            window.global = window;
+                            import RefreshRuntime from 'http://localhost:5174/@react-refresh';
+                            RefreshRuntime.injectIntoGlobalHook(window);
+                            window.$RefreshReg$ = () => {};
+                            window.$RefreshSig$ = () => (type) => type;
+                            window.__vite_plugin_react_preamble_installed__ = true;
+                        </script>
+                    `,
+                    srcs: `
+                        <!-- if development -->
+                        <script type="module" src="http://localhost:5174/@vite/client"></script>
+                        <script type="module" src="http://localhost:5174/main.tsx"></script>
+                    `,
+                }
+            })
+        },
+        // createProxyMiddleware({
+        //     target: `http://127.0.0.1:${process.env.ADMIN_PORT}`,
+        //     ws: true,
+        //     onProxyReq: (proxyReq, req) => {
+        //         proxyReq.setHeader('csrf-inject', req.csrfToken());
+        //     }
+        // }),
     );
 
     // Health-check endpoint.
@@ -224,7 +239,6 @@ const main = async () => {
         /\//,
         cors(corsOptions),
         cookieParser(process.env.COOKIE_SECRET),
-        csrfHandler,
         async (req, res) => {
             delete req.query.fbclid;    // NO FACEBOOK
             const { sanitize = '', ...meta } = await getMetaFromPathAndSanitize(req.path, req.query.q as string);
@@ -234,7 +248,6 @@ const main = async () => {
             } else {
                 meta.image = meta.image ?? `https://${req.get('host')}/static/images/syc_chair_meta.jpg`;
                 res.render('index', {
-                    csrf: req.csrfToken(),
                     ...meta,
                     twitter: meta,
                     facebook: {

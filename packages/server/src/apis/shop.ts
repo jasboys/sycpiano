@@ -12,6 +12,7 @@ import { User } from '../models/User.js';
 import { UserProduct } from '../models/UserProduct.js';
 import * as stripeClient from '../stripe.js';
 import { ShopItem } from '../types.js';
+import { csrfMiddleware } from '../csrf.js';
 
 const shopRouter = express.Router();
 
@@ -127,7 +128,10 @@ shopRouter.get<{}, any, any, { session_id: string }>('/checkout-success', async 
     } catch (e) {
         res.sendStatus(400);
     }
-})
+});
+
+// Enforce csrf mitigation for post routes.
+shopRouter.post('*', csrfMiddleware);
 
 // new stripe API: old skus = new prices
 // However, we are using the Product IDs in the front end, so have to fetch

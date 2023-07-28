@@ -3,7 +3,7 @@ import { parse, stringify } from 'qs';
 import * as React from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { useMedia } from 'react-media';
-import { Navigate, Params, PathMatch, Route, Routes, useLocation, useMatch, useNavigate } from 'react-router-dom';
+import { Navigate, PathMatch, Route, Routes, useLocation, useMatch, useNavigate } from 'react-router-dom';
 import { SwitchTransition, Transition } from 'react-transition-group';
 
 import Container from 'src/components/App/Container';

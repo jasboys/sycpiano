@@ -10,7 +10,7 @@ import {
 import { cartWidth } from 'src/styles/variables';
 import { latoFont } from 'src/styles/fonts';
 import { theme, lightBlue, logoBlue } from 'src/styles/colors';
-import mix from 'polished/lib/color/mix';
+import { mix } from 'polished';
 import { formatPrice } from 'src/utils';
 import isEmail from 'validator/es/lib/isEmail';
 import { CartItem } from 'src/components/Cart/CartItem';
@@ -20,7 +20,7 @@ import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { ThemeProvider } from '@mui/system';
 import TextField from '@mui/material/TextField';
 import { isHamburger } from 'src/screens';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 
 const ARROW_SIDE = 32;
 

@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import legacy from '@vitejs/plugin-legacy';
-import replace from '@rollup/plugin-replace';
+import { visualizer } from 'rollup-plugin-visualizer';
+import { splitVendorChunkPlugin } from 'vite';
 import * as path from 'path';
 require('dotenv').config({ override: true, path: '../../.env' });
 
@@ -11,9 +11,12 @@ export default defineConfig({
     root: path.resolve(__dirname, 'src'),
     resolve: {
         alias: {
-            'src': path.resolve(__dirname, 'src'),
-            'path': 'path-browserify',
+            src: path.resolve(__dirname, 'src'),
+            path: 'path-browserify',
+            gsap: 'gsap/dist/gsap'
         },
+        dedupe: ['polished']
+
     },
     define: {
         BINARY_PATH: JSON.stringify(staticPrefix + '/binary'),
@@ -22,27 +25,26 @@ export default defineConfig({
         VIDEOS_PATH: JSON.stringify(staticPrefix + '/videos'),
         GAPI_KEY: JSON.stringify(process.env.GAPI_KEY_APP),
         STRIPE_PUBLIC_KEY: JSON.stringify(process.env.STRIPE_PUBLIC_KEY),
-        global: 'window',
         preventAssignment: true,
     },
     plugins: [
-        replace({
-        }),
         react({
             jsxImportSource: '@emotion/react',
             babel: {
                 plugins: ['@emotion/babel-plugin'],
             },
         }),
-        legacy({
-            targets: ['es6'],
-        }),
+        visualizer(),
     ],
     build: {
+        target: ['es2015'],
         manifest: true,
         rollupOptions: {
             input: 'src/main.tsx',
+            treeshake: 'smallest',
         },
         outDir: path.resolve(__dirname, 'build'),
+        assetsDir: 'static/scripts',
+        emptyOutDir: true,
     },
 })

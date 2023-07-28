@@ -6,7 +6,7 @@ import { Product } from 'src/components/Shop/ShopList/types';
 
 import { latoFont } from 'src/styles/fonts';
 import { logoBlue } from 'src/styles/colors';
-import mix from 'polished/lib/color/mix';
+import { mix } from 'polished';
 import { GlobalStateShape } from 'src/store';
 import toUpper from 'lodash-es/toUpper';
 import { staticImage } from 'src/imageUrls';

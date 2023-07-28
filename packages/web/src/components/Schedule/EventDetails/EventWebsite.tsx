@@ -1,9 +1,9 @@
-import styled from "@emotion/styled";
-import { mix } from "polished";
-import { toMedia } from "src/mediaQuery.js";
-import { screenXS } from "src/screens.js";
-import { lightBlue } from "src/styles/colors.js";
-import { interFont } from "src/styles/fonts.js";
+import styled from '@emotion/styled';
+import { mix } from 'polished';
+import { toMedia } from 'src/mediaQuery.js';
+import { screenXS } from 'src/screens.js';
+import { lightBlue } from 'src/styles/colors.js';
+import { interFont } from 'src/styles/fonts.js';
 
 
 interface EventWebsiteButtonProps {
@@ -36,7 +36,7 @@ const StyledWebsiteButton = styled.a(
     });
 
 export const EventWebsiteButton: React.FC<EventWebsiteButtonProps> = ({ website }) => (
-    <StyledWebsiteButton href={website} target="_blank" rel="noopener noreferrer">
+    <StyledWebsiteButton href={website} target='_blank' rel='noopener noreferrer'>
         {`Tickets & Info`}
     </StyledWebsiteButton>
 );

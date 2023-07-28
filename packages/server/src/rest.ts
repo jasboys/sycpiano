@@ -24,12 +24,13 @@ import { User } from './models/User.js';
 import { Product, ProductTypes } from './models/Product.js';
 import { Faq } from './models/Faq.js';
 import { getImageFromMetaTag } from './gapi/calendar.js';
+import { csrfMiddleware } from './csrf.js';
 
 
 const adminRest = express.Router();
-
 adminRest.use(express.json());
 adminRest.use(express.urlencoded({ extended: true }));
+adminRest.post('*', csrfMiddleware);
 
 export const respondWithError = (error: any, res: express.Response): void => {
     console.error(error);
@@ -82,7 +83,7 @@ const mikroSearchFields = <R extends Object, K extends keyof R & string>(
 ) => {
     const mappedFields = mapSearchFields(entity, searchableFields);
     return async ({ q, limit } : SearchParams) => {
-        const tokens = q.replaceAll(', ', '|').replaceAll(' ', '&');
+        const tokens = q.trim().replaceAll(', ', '|').replaceAll(' ', '&');
         const splitTokens = tokens.split('|').map(t => t.split('&'));
 
         const where = {
@@ -138,7 +139,7 @@ class NotFoundError extends Error {
 
 interface CrudActions<I extends NonNullable<Primary<R>>, R extends object> {
     create: ((body: RequiredEntityData<R>, opts: RequestResponse) => Promise<EntityData<R> & { id: I | number | string }>) | null;
-    update: ((id: I, body: EntityData<R>, opts: RequestResponse) => Promise<EntityData<R>>) | null;
+    update: (<ExtraParams extends Record<string, string>>(id: I, body: EntityData<R> & ExtraParams, opts: RequestResponse) => Promise<EntityData<R>>) | null;
     updateMany: ((ids: I[], body: EntityData<R>, opts: RequestResponse) => Promise<ListReturn<R>>) | null;
     getOne: ((id: I, opts: RequestResponse) => Promise<EntityData<R>>) | null;
     getList: ((params: GetListParams<R>, opts: RequestResponse) => Promise<ListReturn<R>>) | null;
@@ -152,7 +153,11 @@ const orderArrayToObj = <R extends object, K extends keyof QueryOrderMap<R>>(arr
     const retObj: QueryOrderMap<R> = {};
     retObj[ent] = ord;
     return retObj;
-})
+});
+
+type Filter = Record<string, unknown> & {
+    q: string;
+};
 
 const parseQuery = <R extends object>(query: QueryString.ParsedQs, options?: FilterOptions<R>) => {
     const {
@@ -162,17 +167,16 @@ const parseQuery = <R extends object>(query: QueryString.ParsedQs, options?: Fil
     }: {
         range: string;
         sort: string;
-        filter: string;
+        filter: string | object;
     } = query as any;
-
     const [from, to] = range ? JSON.parse(range as string) : [undefined, undefined]
 
+    console.log(filter, typeof filter);
     const {
         q,
         ...filters
-    } : Record<string, unknown> & {
-        q: string;
-    } = JSON.parse(filter ?? '')
+    } : Filter = (typeof filter === 'string') ? JSON.parse(filter) : filter;
+    console.log('filters', filters);
 
     return {
         offset: from as number,
@@ -303,9 +307,9 @@ const mikroCrud = <I extends NonNullable<Primary<R>>, R extends object, K extend
             return created as R & { id: I };
         },
         update: async (id, body) => {
-            const record = await orm.em.findOneOrFail(entity, id, { failHandler: () => new NotFoundError() });
+            const record = await orm.em.findOneOrFail(entity, { id } as R, { failHandler: () => new NotFoundError() });
             wrap(record).assign(body, { mergeObjects: true });
-            orm.em.flush();
+            await orm.em.flush();
             return record;
         },
         updateMany: async (ids, body) => {
@@ -314,7 +318,7 @@ const mikroCrud = <I extends NonNullable<Primary<R>>, R extends object, K extend
                 wrap(record).assign(body, { mergeObjects: true });
                 // pojoRecords.push(wrap(record).toPOJO());
             }
-            orm.em.flush();
+            await orm.em.flush();
             return {
                 count,
                 rows: records,
@@ -355,13 +359,24 @@ adminRest.use(crud('/calendars', {
         const cal = await orm.em.findOneOrFail(
             Calendar,
             { id },
-            { populate: ['collaborators', 'pieces']}
+            {
+                populate: [
+                    'collaborators',
+                    'collaborators.calendarCollaborators',
+                    'pieces',
+                    'pieces.calendarPieces',
+                ]
+            }
         );
         const plainCal = wrap(cal).toPOJO();
         return {
             ...plainCal,
-            collaborators: plainCal.collaborators.map((val, idx) => ({ ...val, order: idx })),
-            pieces: plainCal.pieces.map((val, idx) => ({ ...val, order: idx })),
+            collaborators: plainCal.collaborators.map((val) => {
+                return { ...val, order: val.calendarCollaborators[0].order };
+            }),
+            pieces: plainCal.pieces.map((val) => {
+                return { ...val, order: val.calendarPieces[0].order };
+            }),
         };
     },
     getList: async ({ filter, limit, offset, order }) => {
@@ -372,9 +387,15 @@ adminRest.use(crud('/calendars', {
                 limit,
                 offset,
                 orderBy: order,
-                populate: ['collaborators', 'pieces']
+                populate: [
+                    'collaborators',
+                    'collaborators.calendarCollaborators',
+                    'pieces',
+                    'pieces.calendarPieces',
+                ]
             }
-        )
+        );
+
         return {
             count: cals[1],
             rows: cals[0].map((cal) => {
@@ -382,14 +403,18 @@ adminRest.use(crud('/calendars', {
                 return {
                     ...pojo,
                     // dateTime: transformDateTime(cal.dateTime, cal.timezone),
-                    collaborators: pojo.collaborators.map((val, idx) => ({ ...val, order: idx })),
-                    pieces: pojo.pieces.map((val, idx) => ({ ...val, order: idx })),
+                    collaborators: pojo.collaborators.map((val) => {
+                        return { ...val, order: val.calendarCollaborators[0].order };
+                    }),
+                    pieces: pojo.pieces.map((val) => {
+                        return { ...val, order: val.calendarPieces[0].order };
+                    }),
                 };
             }),
         }
     },
     search: async ({ q, limit }, _) => {
-        const tokens = q.replaceAll(', ', '|').replaceAll(' ', '&');
+        const tokens = q.trim().replaceAll(', ', '|').replaceAll(' ', '&');
         const calendarResults = await orm.em.findAndCount(
             Calendar,
             {
@@ -400,7 +425,12 @@ adminRest.use(crud('/calendars', {
                 },
             },
             {
-                populate: ['collaborators', 'pieces'],
+                populate: [
+                    'collaborators',
+                    'collaborators.calendarCollaborators',
+                    'pieces',
+                    'pieces.calendarPieces',
+                ],
                 orderBy: [
                     { dateTime: 'DESC' }
                 ],
@@ -413,8 +443,12 @@ adminRest.use(crud('/calendars', {
                     return {
                         ...pojo,
                         // dateTime: transformDateTime(cal.dateTime, cal.timezone),
-                        collaborators: pojo.collaborators.map((val, idx) => ({ ...val, order: idx })),
-                        pieces: pojo.pieces.map((val, idx) => ({ ...val, order: idx })),
+                        collaborators: pojo.collaborators.map((val) => {
+                            return { ...val, order: val.calendarCollaborators[0].order };
+                        }),
+                        pieces: pojo.pieces.map((val) => {
+                            return { ...val, order: val.calendarPieces[0].order };
+                        }),
                     };
                 }),
             }
@@ -424,7 +458,7 @@ adminRest.use(crud('/calendars', {
 adminRest.use(crud('/pieces', {
     ...mikroCrud({ entity: Piece, populate: ['calendars'] }),
     search: async ({ q, limit }) => {
-        const tokens = q.replaceAll(', ', '|').replaceAll(' ', '&');
+        const tokens = q.trim().replaceAll(', ', '|').replaceAll(' ', '&');
         const [rows, count] = await orm.em.findAndCount(
             Piece,
             { 'Search': { $fulltext: tokens }},
@@ -443,7 +477,7 @@ adminRest.use(crud('/pieces', {
 adminRest.use(crud('/collaborators', {
     ...mikroCrud({ entity: Collaborator, populate: ['calendars'] }),
     search: async ({ q, limit }) => {
-        const tokens = q.replaceAll(', ', '|').replaceAll(' ', '&');
+        const tokens = q.trim().replaceAll(', ', '|').replaceAll(' ', '&');
         const results = await orm.em.findAndCount(
             Collaborator,
             { 'Search': { $fulltext: tokens }},
@@ -478,9 +512,10 @@ interface CalendarCollaboratorCreate extends EntityData<CalendarCollaborator> {
 adminRest.use(crud('/calendar-collaborators', {
     ...mikroCrud({ entity: CalendarCollaborator }),
     create: async body => {
+        console.log(body);
         const createBody = body as CalendarCollaboratorCreate;
         const cal = await orm.em.findOneOrFail(Calendar, { id: createBody.calendarId });
-        const collab = createBody.ref ?? orm.em.create(Collaborator, {
+        const collab = createBody.id ?? orm.em.create(Collaborator, {
             name: createBody.name,
             instrument: createBody.instrument,
         });
@@ -497,15 +532,26 @@ adminRest.use(crud('/calendar-collaborators', {
             orm.em.persist(collab);
         }
         orm.em.persist(calCollab);
-        orm.em.flush();
+        await orm.em.flush();
 
         return {
             ...calCollab,
             id: cal.id,
         };
     },
+    update: async (id, body) => {
+        const record = await orm.em.findOneOrFail(CalendarCollaborator, { id }, { failHandler: () => new NotFoundError() });
+        if (!!body.name || !!body.instrument) {
+            const collab = await orm.em.findOneOrFail(Collaborator, { id: body.collaboratorId });
+            collab.instrument = body.instrument;
+            collab.name = body.name;
+        }
+        record.order = body.order!;
+        await orm.em.flush();
+        return record;
+    },
     destroy: async (id) => {
-        const calCollab = await orm.em.findOneOrFail(CalendarCollaborator, id);
+        const calCollab = await orm.em.findOneOrFail(CalendarCollaborator, { id });
         orm.em.remove(calCollab);
         await orm.em.flush();
         return { id };
@@ -517,7 +563,7 @@ adminRest.use(crud('/calendar-pieces', {
     create: async body => {
         const createBody = body as CalendarPieceCreate;
         const cal = await orm.em.findOneOrFail(Calendar, { id: createBody.calendarId });
-        const piece = createBody.ref ?? orm.em.create(Piece, {
+        const piece = createBody.id ?? orm.em.create(Piece, {
             piece: createBody.piece,
             composer: createBody.composer,
         });
@@ -534,15 +580,26 @@ adminRest.use(crud('/calendar-pieces', {
             orm.em.persist(piece);
         }
         orm.em.persist(calPiece);
-        orm.em.flush();
+        await orm.em.flush();
 
         return {
             ...calPiece,
             id: cal.id,
         };
     },
+    update: async (id, body) => {
+        const record = await orm.em.findOneOrFail(CalendarPiece, { id }, { failHandler: () => new NotFoundError() });
+        if (!!body.composer || !!body.piece) {
+            const piece = await orm.em.findOneOrFail(Piece, { id: body.pieceId });
+            piece.piece = body.pieceName;
+            piece.composer = body.composer;
+        }
+        record.order = body.order!;
+        await orm.em.flush();
+        return record;
+    },
     destroy: async (id) => {
-        const calPiece = await orm.em.findOneOrFail(CalendarPiece, id);
+        const calPiece = await orm.em.findOneOrFail(CalendarPiece, { id });
         orm.em.remove(calPiece);
         await orm.em.flush();
         return { id };

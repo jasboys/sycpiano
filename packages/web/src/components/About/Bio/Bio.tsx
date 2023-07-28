@@ -21,7 +21,7 @@ import { isHamburger, screenLengths, screenM, screenPortrait, screenWidths, scre
 import { camel2var, navBarHeight } from 'src/styles/variables';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { isImageElement } from 'src/utils';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 import { mqSelectors } from 'src/components/App/reducers';
 import { createStructuredSelector } from 'reselect';
 

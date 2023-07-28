@@ -1,0 +1,44 @@
+{
+    "compileOnSave": false,
+    "compilerOptions": {
+        "lib": [
+            "dom",
+            "ESNext",
+        ],
+        "paths": {
+            "*": [
+                "node_modules/*",
+                "@types/*",
+                "node_modules/@types/*"
+            ]
+        },
+        "typeRoots": [
+            "node_modules/@types",
+            "node_modules",
+            "@types"
+        ],
+        "module": "esnext",
+        "target": "esnext",
+        "jsx": "preserve",
+        "allowJs": true,
+        "noEmit": true,
+        "moduleResolution": "bundler",
+        "isolatedModules": true,
+        "esModuleInterop": true,
+        "noImplicitAny": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "removeComments": false,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "allowSyntheticDefaultImports": true,
+        "downlevelIteration": true,
+        "skipLibCheck": true,
+        "baseUrl": ".",
+        "strict": true,
+        "noErrorTruncation": true
+    },
+    "include": [
+        "src",
+    ]
+}

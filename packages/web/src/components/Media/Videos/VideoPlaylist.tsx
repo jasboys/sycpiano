@@ -9,7 +9,7 @@ import VideoPlaylistItem from 'src/components/Media/Videos/VideoPlaylistItem';
 
 import { screenXS, screenPortrait } from 'src/screens';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 import { mqSelectors } from 'src/components/App/reducers';
 import { latoFont } from 'src/styles/fonts.js';
 

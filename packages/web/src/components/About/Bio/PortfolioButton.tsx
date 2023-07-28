@@ -6,7 +6,7 @@ import { lightBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { staticImage } from 'src/imageUrls';
 import { screenXS, screenPortrait } from 'src/screens';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 
 const StyledDiv = styled.div`
     position: fixed;

@@ -5,7 +5,7 @@ import styled from '@emotion/styled';
 import { pushed } from 'src/styles/mixins';
 import { latoFont } from 'src/styles/fonts';
 import { screenPortrait, screenXS } from 'src/screens';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 import { useAppDispatch } from 'src/hooks';
 import { useSearchParams } from 'react-router-dom';
 

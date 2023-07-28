@@ -12,7 +12,7 @@ import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { screenM, screenXS, screenPortrait } from 'src/screens';
 import { playlistContainerWidth, playlistWidth } from 'src/styles/variables';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 
 const slideLeft = (element: HTMLElement, amount: number, delay = 0) => {
     gsap.fromTo(element, { x: amount, duration: 0.4 }, { x: 0, ease: 'Power3.easeOut', delay });

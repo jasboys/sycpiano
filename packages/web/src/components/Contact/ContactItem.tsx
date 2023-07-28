@@ -20,7 +20,7 @@ import {
 import { minRes, screenWidths, webkitMinDPR } from 'src/screens';
 import { isImageElement } from 'src/utils';
 import { navBarHeight } from 'src/styles/variables';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 import { useAppSelector } from 'src/hooks';
 import { mqSelectors } from '../App/reducers';
 

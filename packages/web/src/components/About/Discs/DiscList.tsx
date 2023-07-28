@@ -7,7 +7,7 @@ import DiscListItem from 'src/components/About/Discs/DiscListItem';
 import { latoFont } from 'src/styles/fonts';
 import { camel2var } from 'src/styles/variables';
 import { useAppSelector } from 'src/hooks';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 import { isHamburger } from 'src/screens';
 import { mqSelectors } from 'src/components/App/reducers';
 import { logoBlue } from 'src/styles/colors.js';

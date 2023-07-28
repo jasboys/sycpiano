@@ -10,7 +10,7 @@ import { logoBlue } from 'src/styles/colors';
 import { useAppSelector } from 'src/hooks';
 import { useParams } from 'react-router-dom';
 import { mqSelectors } from 'src/components/App/reducers';
-import { toMedia } from 'src/mediaQuery.js';
+import { toMedia } from 'src/MediaQuery.js';
 import { screenPortrait, screenXS } from 'src/screens.js';
 
 type ShopListProps = Record<never, unknown>;

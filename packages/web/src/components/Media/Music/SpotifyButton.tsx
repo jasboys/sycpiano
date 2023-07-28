@@ -5,7 +5,7 @@ import styled from '@emotion/styled';
 import { staticImage } from 'src/imageUrls';
 import { screenM, screenXS, screenPortrait } from 'src/screens';
 import { playlistWidth } from 'src/styles/variables';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 
 const StyledDiv = styled.div`
     position: fixed;

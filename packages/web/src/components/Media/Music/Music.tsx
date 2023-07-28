@@ -23,7 +23,7 @@ import { isMusicItem, MusicFileItem, MusicListItem } from 'src/components/Media/
 import { pushed } from 'src/styles/mixins';
 import { minRes, webkitMinDPR } from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 
 import { NavigateFunction, PathMatch, useMatch, useNavigate } from 'react-router-dom';
 import module from 'src/module';

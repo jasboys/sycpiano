@@ -1,7 +1,7 @@
 import { css } from '@emotion/react';
 import { parseISO } from 'date-fns';
 import { utcToZonedTime, formatInTimeZone } from 'date-fns-tz';
-import { toMedia } from 'src/mediaQuery.js';
+import { toMedia } from 'src/MediaQuery.js';
 import { screenXS } from 'src/screens.js';
 import { logoBlue } from 'src/styles/colors.js';
 import { ClockIconInstance } from 'src/components/Schedule/ClockIconSVG.jsx';

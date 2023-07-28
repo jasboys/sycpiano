@@ -12,7 +12,7 @@ import { MusicFileItem } from 'src/components/Media/Music/types';
 
 import { playlistBackground } from 'src/styles/colors';
 import { screenXS, screenPortrait } from 'src/screens';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 import { useAppSelector } from 'src/hooks';
 
 interface MusicPlaylistOwnProps {

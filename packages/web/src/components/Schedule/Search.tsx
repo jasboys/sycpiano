@@ -1,4 +1,4 @@
-import rgba from 'polished/lib/color/rgba';
+import { rgba, lighten } from 'polished';
 import * as React from 'react';
 
 import styled from '@emotion/styled';
@@ -9,13 +9,12 @@ import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { screenPortrait, screenXS, screenXSandPortrait } from 'src/screens';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 import { createSearchParams, useLocation, useMatch, useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { createSelector } from 'reselect';
 import { useAppSelector } from 'src/hooks';
 import { GlobalStateShape } from 'src/store';
-import lighten from 'polished/lib/color/lighten';
 import { Transition } from 'react-transition-group';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
 import { mqSelectors } from '../App/reducers';

@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 import { format, parseISO } from 'date-fns';
 import * as React from 'react';
 
-import { toMedia } from 'src/mediaQuery.js';
+import { toMedia } from 'src/MediaQuery.js';
 import { screenXS } from 'src/screens.js';
 import { interFont } from 'src/styles/fonts.js';
 import { EventDateTimeProps } from '../types.js';

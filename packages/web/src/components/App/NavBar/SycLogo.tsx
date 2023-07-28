@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 
 import { LogoInstance } from 'src/components/LogoSVG';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 import { hiDpx } from 'src/screens';
 
 export const sycLogoSize = {

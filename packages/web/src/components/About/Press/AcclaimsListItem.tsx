@@ -8,7 +8,7 @@ import { latoFont } from 'src/styles/fonts';
 import { screenXS, screenPortrait } from 'src/screens';
 import format from 'date-fns/format';
 import parseISO from 'date-fns/parseISO';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 
 const AcclaimContainer = styled.div({
     margin: '2rem auto 3rem',

@@ -5,7 +5,7 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-require('dotenv').config();
+require('dotenv').config({ override: true, path: '../../.env' });
 
 if (!process.env.STRIPE_PUBLIC_KEY) {
     throw Error('STRIPE_PUBLIC_KEY not defined');

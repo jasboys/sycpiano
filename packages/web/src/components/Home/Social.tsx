@@ -8,7 +8,7 @@ import { latoFont } from 'src/styles/fonts';
 import { staticImage } from 'src/imageUrls';
 import { noHighlight } from 'src/styles/mixins';
 import { screenXS, screenPortrait, isHamburger } from 'src/screens';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 
 import socials from 'src/components/Home/socials';
 import { keyframes } from '@emotion/react';

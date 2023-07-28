@@ -21,7 +21,7 @@ import {
     eventListNamesArr,
 } from 'src/components/Schedule/types';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 import { screenPortrait, screenXS, screenXSandPortrait } from 'src/screens';
 import { GlobalStateShape } from 'src/store';
 import { lightBlue, logoBlue } from 'src/styles/colors';

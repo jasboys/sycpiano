@@ -10,7 +10,7 @@ import { minRes, webkitMinDPR } from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { pushed } from 'src/styles/mixins';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 import { mqSelectors } from 'src/components/App/reducers';
 
 type ContactProps = Record<never, unknown>;

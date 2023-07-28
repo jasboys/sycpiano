@@ -5,8 +5,9 @@ import { Calendar } from './Calendar.js';
 import { Collaborator } from './Collaborator.js';
 
 const hook = async (args: EventArgs<CalendarCollaborator>) => {
-    const cal = args.entity.calendar;
-    const data = await transformModelToGoogle(cal);
+    const calendarId = args.entity.calendar.id;
+    const cal = await args.em.findOneOrFail(Calendar, calendarId, { populate: [ 'pieces', 'collaborators' ] })
+    const data = transformModelToGoogle(cal);
     await updateCalendar(args.em, data);
 };
 

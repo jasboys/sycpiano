@@ -5,7 +5,7 @@ import { noHighlight, pushed } from 'src/styles/mixins';
 import { latoFont } from 'src/styles/fonts';
 import { lightBlue, logoBlue, theme } from 'src/styles/colors';
 import { validateEmail } from 'src/utils';
-import mix from 'polished/lib/color/mix';
+import { mix } from 'polished';
 import { Link } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import { ThemeProvider } from '@mui/system';
@@ -111,9 +111,17 @@ const RetrievalForm: React.FC<Record<never, unknown>> = () => {
         const sendRequest = async () => {
             try {
                 setState(SubmitState.submitting);
-                await axios.post('/api/shop/resend-purchased', {
-                    email,
-                });
+                await axios.post(
+                    '/api/shop/resend-purchased',
+                    {
+                        email,
+                    },
+                    {
+                        headers: {
+                            'X-CSRF-TOKEN': 'sycpiano',
+                        },
+                    }
+                );
                 setState(SubmitState.success);
             } catch (e) {
                 // Return success, because even if email is not found, cannot reveal information to client for security.

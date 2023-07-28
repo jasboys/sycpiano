@@ -6,7 +6,7 @@ import { AudioPlaylistStateShape } from 'src/components/Media/Music/types';
 import { PhotoListReducerShape, PhotoViewerReducerShape } from 'src/components/Media/Photos/types';
 import { VideoPlayerStateShape, VideoPlaylistStateShape } from 'src/components/Media/Videos/types';
 import { ScheduleStateShape } from 'src/components/Schedule/types';
-import { ShopStateShape } from './components/Shop/ShopList/types';
+import { ShopStateShape } from 'src/components/Shop/ShopList/types';
 
 import { bioReducer } from 'src/components/About/Bio/reducers';
 import { discsReducer } from 'src/components/About/Discs/reducers';
@@ -18,11 +18,11 @@ import { scheduleReducer } from 'src/components/Schedule/reducers';
 import { shopReducer } from 'src/components/Shop/ShopList/reducers';
 
 import { Store } from 'redux';
-import { CartStateShape } from './components/Cart/types';
-import { cartReducer } from './components/Cart/reducers';
+import { CartStateShape } from 'src/components/Cart/types';
+import { cartReducer } from 'src/components/Cart/reducers';
 import { ComponentType } from 'react';
 import { AppDispatch, GlobalStateShape } from 'src/store';
-import { GLOBAL_QUERIES } from './screens';
+import { GLOBAL_QUERIES } from 'src/screens';
 import { CSSVariables } from 'src/styles/variables';
 import { colorVars } from 'src/styles/colors';
 import { mediaQueryReducer } from './components/App/reducers';

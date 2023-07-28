@@ -9,7 +9,7 @@ import NavBarLink from 'src/components/App/NavBar/NavBarLink';
 import { noHighlight, pushedHelper } from 'src/styles/mixins';
 import { hiDpx } from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 
 const StyledUL = styled.ul<{ isHamburger: boolean }>(
     {

@@ -12,7 +12,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import thunk from 'redux-thunk';
 
 import { navBarReducer } from 'src/components/App/NavBar/reducers';
-import { mediaQueryReducer } from './components/App/reducers';
+import { mediaQueryReducer } from 'src/components/App/reducers';
 import { cartReducer } from 'src/components/Cart/reducers';
 import { shopReducer } from 'src/components/Shop/ShopList/reducers';
 

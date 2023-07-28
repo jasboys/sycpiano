@@ -19,7 +19,8 @@ const authorize = async () => {
     }
 };
 
-export const getToken = async (em: EntityManager): Promise<string> => {
+export const getToken = async (_em: EntityManager): Promise<string> => {
+    const em = _em.fork();
     const tokenInstance = await em.findOne(Token, { id: 'access_token' });
     if (tokenInstance) {
         const expired = (tokenInstance.expires === undefined) ? undefined : Date.now() > tokenInstance.expires.valueOf();

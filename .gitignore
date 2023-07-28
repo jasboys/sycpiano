@@ -5,9 +5,10 @@ npm-debug.log
 node_modules/
 **/node_modules/
 
-pacakges/web/build/
+packages/web/build/
 packages/server/build/
-packages/common/dist
+packages/common/dist/
+packages/admin/build/
 
 **/gapi-key.json
 

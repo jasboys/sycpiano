@@ -11,7 +11,7 @@ import { HEIGHT_ADJUST_DESKTOP, HEIGHT_ADJUST_MOBILE } from 'src/components/Medi
 import { lightBlue } from 'src/styles/colors';
 import { screenM, screenPortrait, screenXS } from 'src/screens';
 import { navBarHeight, playlistContainerWidth } from 'src/styles/variables';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 import { Transition } from 'react-transition-group';
 import { fadeOnEnter, fadeOnExit } from 'src/utils.js';
 

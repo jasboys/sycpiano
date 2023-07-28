@@ -9,7 +9,7 @@ import { container, pushed } from 'src/styles/mixins';
 
 import { LocationIconSVG } from 'src/components/Schedule/LocationIconSVG';
 import { screenPortrait, screenXS } from 'src/screens';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 import { EventListName } from 'src/components/Schedule/types';
 import styled from '@emotion/styled';
 import { SwitchTransition, Transition } from 'react-transition-group';

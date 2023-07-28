@@ -7,8 +7,7 @@ import { lightBlue, navFontColor } from 'src/styles/colors';
 import { noHighlight } from 'src/styles/mixins';
 
 import { LinkShape } from 'src/components/App/NavBar/types';
-import darken from 'polished/lib/color/darken';
-import saturate from 'polished/lib/color/saturate';
+import { darken, saturate } from 'polished';
 
 interface SubNavLinkProps {
     readonly isHome: boolean;

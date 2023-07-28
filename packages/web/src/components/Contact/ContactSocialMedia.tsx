@@ -6,7 +6,7 @@ import { ContactSocialMediaShape } from 'src/components/Contact/types';
 import { staticImage } from 'src/imageUrls';
 import { minRes, webkitMinDPR } from 'src/screens';
 import { latoFont } from 'src/styles/fonts';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 
 const SocialMediaLinkContainer = styled.div` padding-top: 20px; `;
 

@@ -12,7 +12,7 @@ const CURRENCY = 'USD';
 export const THUMBNAIL_STATIC = 'https://seanchenpiano.com/static/images/products/thumbnails/';
 
 // const isDev = process.env.NODE_ENV === 'development';
-const host = process.env.STRIPE_CALLBACK_HOST;
+const host = process.env.CALLBACK_HOST;
 
 if (process.env.STRIPE_SECRET_KEY === undefined) {
     throw new Error('Stripe Secret Key undefined');

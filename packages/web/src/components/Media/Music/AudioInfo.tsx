@@ -14,7 +14,7 @@ import { noHighlight } from 'src/styles/mixins';
 import { minRes, screenM, screenPortrait, webkitMinDPR } from 'src/screens';
 import { navBarHeight, playlistContainerWidth } from 'src/styles/variables';
 import { metaDescriptions, titleStringBase } from 'src/utils';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 
 interface AudioInfoProps {
     currentTrack?: MusicFileItem;

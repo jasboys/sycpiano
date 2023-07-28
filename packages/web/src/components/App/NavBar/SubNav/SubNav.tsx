@@ -5,7 +5,7 @@ import styled from '@emotion/styled';
 import SubNavLink from 'src/components/App/NavBar/SubNav/SubNavLink';
 import { LinkShape } from 'src/components/App/NavBar/types';
 import { isHamburger } from 'src/screens';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 
 interface SubNavProps {
     readonly className?: string;

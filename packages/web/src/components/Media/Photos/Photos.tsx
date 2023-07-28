@@ -14,7 +14,7 @@ import { pushed } from 'src/styles/mixins';
 import { screenXS, screenPortrait } from 'src/screens';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { TransitionGroup } from 'react-transition-group';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 import { mqSelectors } from 'src/components/App/reducers';
 
 const StyledPhotos = styled.div(

@@ -1,8 +1,7 @@
 // Various CSS emotion mixins
 
 import { css } from '@emotion/react';
-import mix from 'polished/lib/color/mix';
-import darken from 'polished/lib/color/darken';
+import { mix, darken } from 'polished';
 
 import { hiDpx } from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';

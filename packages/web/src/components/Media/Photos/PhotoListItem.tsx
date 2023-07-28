@@ -13,7 +13,7 @@ import { ChildRendererProps } from 'src/components/Media/types';
 import { generateSrcsetWidths, resizedImage } from 'src/imageUrls';
 import { screenWidths, screenPortrait, screenXS } from 'src/screens';
 import { isImageElement } from 'src/utils';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 
 const PhotoRow = styled.div<{ isLoaded: boolean }>`
     position: relative;

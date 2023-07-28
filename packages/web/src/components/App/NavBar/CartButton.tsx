@@ -3,7 +3,7 @@ import * as React from 'react';
 import styled from '@emotion/styled';
 
 import { lightBlue, logoBlue } from 'src/styles/colors';
-import mix from 'polished/lib/color/mix';
+import { mix } from 'polished';
 import { noHighlight } from 'src/styles/mixins';
 import { toggleCartList } from 'src/components/Cart/reducers';
 import { latoFont } from 'src/styles/fonts';

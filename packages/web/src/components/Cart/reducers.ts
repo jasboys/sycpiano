@@ -82,6 +82,10 @@ export const checkoutAction = createAsyncThunk<void, string, ThunkAPIType & { re
             >('/api/shop/checkout', {
                 email,
                 productIDs: thunkAPI.getState().cart.items,
+            }, {
+                headers: {
+                    'X-CSRF-TOKEN': 'sycpiano',
+                },
             });
             const loadedStripe = await stripe;
             if (loadedStripe === null) {

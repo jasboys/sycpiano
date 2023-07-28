@@ -3,7 +3,7 @@ import * as React from 'react';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
-import mix from 'polished/lib/color/mix';
+import { mix } from 'polished';
 import { Link, LinkProps } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
 
@@ -19,7 +19,7 @@ import { noHighlight } from 'src/styles/mixins';
 import { minRes, webkitMinDPR } from 'src/screens';
 import { navBarHeight, navBarMarginTop } from 'src/styles/variables';
 import { useAppSelector, useAppDispatch } from 'src/hooks';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 
 interface HighlightProps {
     readonly active: boolean;

@@ -10,7 +10,7 @@ import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { isHamburger } from 'src/screens';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 import { mqSelectors } from 'src/components/App/reducers';
 
 const StyledDiscs = styled.div(

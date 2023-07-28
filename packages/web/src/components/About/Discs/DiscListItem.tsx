@@ -8,7 +8,7 @@ import { Disc } from 'src/components/About/Discs/types';
 import { staticImage } from 'src/imageUrls';
 import { isHamburger, screenXS, hiDpx } from 'src/screens';
 import { cardShadow } from 'src/styles/mixins';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 
 const LinkImage = styled.img`
     transition: all 0.2s;

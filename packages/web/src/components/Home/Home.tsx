@@ -21,7 +21,7 @@ import { Transition } from 'react-transition-group';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
 import { useAppSelector } from 'src/hooks';
 import format from 'date-fns/format';
-import { toMedia } from 'src/mediaQuery';
+import { toMedia } from 'src/MediaQuery';
 import { createStructuredSelector } from 'reselect';
 import { mqSelectors } from '../App/reducers';
 
