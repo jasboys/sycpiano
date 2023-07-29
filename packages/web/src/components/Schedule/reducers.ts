@@ -1,4 +1,12 @@
 import {
+    createAction,
+    createAsyncThunk,
+    createSlice,
+    isAnyOf,
+} from '@reduxjs/toolkit';
+import axios from 'axios';
+
+import {
     CachedEvent,
     EventItem,
     EventItemsStateShape,
@@ -8,19 +16,11 @@ import {
     ScheduleStateShape,
     SearchEventsArguments,
     createMonthGroups,
+    maxOfMonthGroups,
     mergeMonthGroups,
     minOfMonthGroups,
-    maxOfMonthGroups,
 } from 'src/components/Schedule/types';
-import {
-    createSlice,
-    createAsyncThunk,
-    createAction,
-    isAnyOf,
-} from '@reduxjs/toolkit';
 import { ThunkAPIType } from 'src/types';
-import axios from 'axios';
-
 import { transformCachedEventsToListItems } from './utils';
 
 // addEvents(events: EventItem[]) {

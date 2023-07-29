@@ -1,19 +1,19 @@
-import * as React from 'react';
-
 import styled from '@emotion/styled';
-import { toMedia } from 'src/MediaQuery.js';
-import { screenXS } from 'src/screens.js';
-import { logoBlue } from 'src/styles/colors.js';
-import { latoFont } from 'src/styles/fonts.js';
 import { format, parseISO } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
+import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import { toMedia } from 'src/MediaQuery.js';
 import { BackIconInstance } from 'src/components/Schedule/BackIconSVG.jsx';
 import EventItem from 'src/components/Schedule/EventItem.jsx';
 import {
     EventListName,
     MonthGroup as MonthGroupType,
 } from 'src/components/Schedule/types.js';
+import { screenXS } from 'src/screens.js';
+import { logoBlue } from 'src/styles/colors.js';
+import { latoFont } from 'src/styles/fonts.js';
 
 const Events = styled.div({
     overflowY: 'auto',

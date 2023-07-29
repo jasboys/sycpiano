@@ -1,17 +1,17 @@
 import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import * as React from 'react';
+import { useParams } from 'react-router-dom';
 
+import { toMedia } from 'src/MediaQuery.js';
+import { mqSelectors } from 'src/components/App/reducers';
 import { ShopItem } from 'src/components/Shop/ShopList/ShopItem';
 import { Product, ProductTypes } from 'src/components/Shop/ShopList/types';
-import { pushed } from 'src/styles/mixins';
-import styled from '@emotion/styled';
-import { latoFont } from 'src/styles/fonts';
-import { logoBlue } from 'src/styles/colors';
 import { useAppSelector } from 'src/hooks';
-import { useParams } from 'react-router-dom';
-import { mqSelectors } from 'src/components/App/reducers';
-import { toMedia } from 'src/MediaQuery.js';
 import { screenPortrait, screenXS } from 'src/screens.js';
+import { logoBlue } from 'src/styles/colors';
+import { latoFont } from 'src/styles/fonts';
+import { pushed } from 'src/styles/mixins';
 
 type ShopListProps = Record<never, unknown>;
 

@@ -1,7 +1,8 @@
-import { ProductMap, ShopStateShape } from 'src/components/Shop/ShopList/types';
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { ThunkAPIType } from 'src/types';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
+
+import { ProductMap, ShopStateShape } from 'src/components/Shop/ShopList/types';
+import { ThunkAPIType } from 'src/types';
 
 interface FetchReturn {
     items: ProductMap;

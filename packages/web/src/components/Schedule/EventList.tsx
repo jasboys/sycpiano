@@ -2,7 +2,7 @@ import { css } from '@emotion/css';
 import styled from '@emotion/styled';
 import parseISO from 'date-fns/parseISO';
 import startOfDay from 'date-fns/startOfDay';
-import { gsap, Back } from 'gsap';
+import { Back, gsap } from 'gsap';
 import debounce from 'lodash-es/debounce';
 import startCase from 'lodash-es/startCase';
 import { createCachedSelector } from 're-reselect';
@@ -17,8 +17,7 @@ import { MonthEvents } from 'src/components/Schedule/EventMonth.jsx';
 import { fetchEvents, searchEvents } from 'src/components/Schedule/reducers';
 import {
     EventListName,
-    FetchEventsArguments,
-    eventListNamesArr,
+    FetchEventsArguments
 } from 'src/components/Schedule/types';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { toMedia } from 'src/MediaQuery';

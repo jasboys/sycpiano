@@ -6,6 +6,7 @@ import { startCase } from 'lodash-es';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
 
+import { toMedia } from 'src/MediaQuery.js';
 import {
     EventCollaborators,
     EventDate,
@@ -15,7 +16,6 @@ import {
     EventTime,
     EventWebsiteButton,
 } from 'src/components/Schedule/EventDetails';
-import { toMedia } from 'src/MediaQuery.js';
 import { screenXS } from 'src/screens.js';
 import { lightBlue } from 'src/styles/colors.js';
 import { latoFont } from 'src/styles/fonts.js';

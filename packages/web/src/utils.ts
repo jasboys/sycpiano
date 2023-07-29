@@ -1,6 +1,6 @@
 import { gsap } from 'gsap';
 // import { gsap } from 'gsap'
-import { baseString, getAge as _getAge, descriptions } from 'common';
+import { getAge as _getAge, baseString, descriptions } from 'common';
 
 export interface FormattedLocationShape {
     venue: string;

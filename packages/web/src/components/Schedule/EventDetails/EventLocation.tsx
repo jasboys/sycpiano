@@ -1,11 +1,12 @@
 import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import { desaturate } from 'polished';
+
 import { toMedia } from 'src/MediaQuery.js';
 import { screenXS } from 'src/screens.js';
 import { lightBlue, logoBlue } from 'src/styles/colors.js';
 import { LocationIconInstance } from '../LocationIconSVG.jsx';
 import { getGoogleMapsSearchUrl } from '../utils.js';
-import styled from '@emotion/styled';
 
 const locationIconDimension = 24;
 

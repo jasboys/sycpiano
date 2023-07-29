@@ -1,5 +1,5 @@
-import getMinutes from 'date-fns/getMinutes';
 import getHours from 'date-fns/getHours';
+import getMinutes from 'date-fns/getMinutes';
 import * as React from 'react';
 
 import { polarToCartesian } from 'src/components/Media/Music/utils';

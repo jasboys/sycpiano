@@ -1,5 +1,6 @@
 import styled from '@emotion/styled';
 import { mix } from 'polished';
+
 import { toMedia } from 'src/mediaQuery.js';
 import { screenXS } from 'src/screens.js';
 import { lightBlue } from 'src/styles/colors.js';

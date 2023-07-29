@@ -29,14 +29,14 @@ import {
 import { scheduleReducer } from 'src/components/Schedule/reducers';
 import { shopReducer } from 'src/components/Shop/ShopList/reducers';
 
-import { Store } from 'redux';
-import { CartStateShape } from 'src/components/Cart/types';
-import { cartReducer } from 'src/components/Cart/reducers';
 import { ComponentType } from 'react';
-import { AppDispatch, GlobalStateShape } from 'src/store';
+import { Store } from 'redux';
+import { cartReducer } from 'src/components/Cart/reducers';
+import { CartStateShape } from 'src/components/Cart/types';
 import { GLOBAL_QUERIES } from 'src/screens';
-import { CSSVariables } from 'src/styles/variables';
+import { AppDispatch, GlobalStateShape } from 'src/store';
 import { colorVars } from 'src/styles/colors';
+import { CSSVariables } from 'src/styles/variables';
 import { mediaQueryReducer } from './components/App/reducers';
 
 export type MediaQueryStateShape = Record<keyof typeof GLOBAL_QUERIES, boolean>;

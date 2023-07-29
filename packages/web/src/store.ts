@@ -7,8 +7,8 @@
  * We make sure to namespace the states by their corresponding reducers.
  */
 
-import { combineReducers } from 'redux';
 import { configureStore } from '@reduxjs/toolkit';
+import { combineReducers } from 'redux';
 import thunk from 'redux-thunk';
 
 import { navBarReducer } from 'src/components/App/NavBar/reducers';

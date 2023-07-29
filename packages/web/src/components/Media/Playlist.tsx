@@ -5,44 +5,49 @@ import { css } from '@emotion/react';
 
 import { gsap } from 'gsap';
 
+import { toMedia } from 'src/MediaQuery';
 import PlaylistToggler from 'src/components/Media/PlaylistToggler';
 import { PlaylistProps } from 'src/components/Media/types';
+import { screenM, screenPortrait, screenXS } from 'src/screens';
 import { playlistBackground } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
-import { screenM, screenXS, screenPortrait } from 'src/screens';
 import { playlistContainerWidth, playlistWidth } from 'src/styles/variables';
-import { toMedia } from 'src/MediaQuery';
 
 const slideLeft = (element: HTMLElement, amount: number, delay = 0) => {
-    gsap.fromTo(element, { x: amount, duration: 0.4 }, { x: 0, ease: 'Power3.easeOut', delay });
+    gsap.fromTo(
+        element,
+        { x: amount, duration: 0.4 },
+        { x: 0, ease: 'Power3.easeOut', delay },
+    );
 };
 
 const slideRight = (element: HTMLElement, amount: number, delay = 0) => {
-    gsap.fromTo(element, { x: 0, duration: 0.4 }, { x: amount, ease: 'Power3.easeOut', delay });
+    gsap.fromTo(
+        element,
+        { x: 0, duration: 0.4 },
+        { x: amount, ease: 'Power3.easeOut', delay },
+    );
 };
 
 // need to add in css from parent
-const playlistContainerStyle = css(
-    latoFont(100),
-    noHighlight,
-    {
-        position: 'absolute',
-        height: '100%',
-        right: 0,
-        width: playlistContainerWidth.desktop,
-        transform: `translateX(${playlistWidth.desktop})`,
-        zIndex: 50,
-        display: 'flex',
+const playlistContainerStyle = css(latoFont(100), noHighlight, {
+    position: 'absolute',
+    height: '100%',
+    right: 0,
+    width: playlistContainerWidth.desktop,
+    transform: `translateX(${playlistWidth.desktop})`,
+    zIndex: 50,
+    display: 'flex',
 
-        [toMedia(screenM)]: {
-            width: playlistContainerWidth.tablet,
-            transform: `translateX(${playlistWidth.tablet})`,
-        },
+    [toMedia(screenM)]: {
+        width: playlistContainerWidth.tablet,
+        transform: `translateX(${playlistWidth.tablet})`,
+    },
 
-        [toMedia([screenXS, screenPortrait])]: {
-            width: '100%',
-        },
+    [toMedia([screenXS, screenPortrait])]: {
+        width: '100%',
+    },
 });
 
 const playlistStyle = css`
@@ -65,7 +70,7 @@ const Playlist = React.forwardRef<HTMLElement, PlaylistProps>((props, ref) => {
         } else {
             if (ulRef.current) {
                 const amount = ulRef.current.getBoundingClientRect().width;
-                slideLeft(el, amount, (isAppearing) ? 0.25 : 0);
+                slideLeft(el, amount, isAppearing ? 0.25 : 0);
             }
         }
     };
@@ -85,12 +90,7 @@ const Playlist = React.forwardRef<HTMLElement, PlaylistProps>((props, ref) => {
             onExit={onExit}
             timeout={400}
         >
-            <div
-                css={[
-                    playlistContainerStyle,
-                    props.extraStyles?.div,
-                ]}
-            >
+            <div css={[playlistContainerStyle, props.extraStyles?.div]}>
                 {props.hasToggler && (
                     <PlaylistToggler
                         isPlaylistVisible={props.isShow}
@@ -112,10 +112,7 @@ const Playlist = React.forwardRef<HTMLElement, PlaylistProps>((props, ref) => {
                             }
                         }
                     }}
-                    css={[
-                        playlistStyle,
-                        props.extraStyles?.ul,
-                    ]}
+                    css={[playlistStyle, props.extraStyles?.ul]}
                     onScroll={props.onScroll}
                 >
                     {props.children}

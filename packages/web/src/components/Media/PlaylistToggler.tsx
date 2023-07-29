@@ -1,11 +1,11 @@
 import * as React from 'react';
 
+import { SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
 
 import { lightBlue, playlistBackground } from 'src/styles/colors';
 import { noHighlight } from 'src/styles/mixins';
 import { playlistTogglerWidth } from 'src/styles/variables';
-import { SerializedStyles } from '@emotion/react';
 
 const playlistTogglerHeight = playlistTogglerWidth * 1.8;
 
@@ -31,7 +31,7 @@ const StyledToggler = styled.div({
     },
 
     zIndex: 50,
-    noHighlight
+    noHighlight,
 });
 
 interface PlaylistTogglerProps {
@@ -40,7 +40,11 @@ interface PlaylistTogglerProps {
     readonly style?: SerializedStyles;
 }
 
-const PlaylistToggler: React.FC<PlaylistTogglerProps> = ({ onClick, isPlaylistVisible, style }) => (
+const PlaylistToggler: React.FC<PlaylistTogglerProps> = ({
+    onClick,
+    isPlaylistVisible,
+    style,
+}) => (
     <StyledToggler css={style} onClick={onClick}>
         {isPlaylistVisible ? '\u25B6' : '\u25C0'}
     </StyledToggler>

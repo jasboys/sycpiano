@@ -1,23 +1,22 @@
+import { css } from '@emotion/react';
 import styled from '@emotion/styled';
+import { createSelector } from '@reduxjs/toolkit';
+import toUpper from 'lodash-es/toUpper';
+import { mix } from 'polished';
 import * as React from 'react';
 
+import { mqSelectors } from 'src/components/App/reducers';
 import {
     addToCartAction,
     removeItemFromCart,
 } from 'src/components/Cart/reducers';
 import { Product } from 'src/components/Shop/ShopList/types';
-
-import { latoFont } from 'src/styles/fonts';
-import { logoBlue } from 'src/styles/colors';
-import { mix } from 'polished';
-import { GlobalStateShape } from 'src/store';
-import toUpper from 'lodash-es/toUpper';
-import { staticImage } from 'src/imageUrls';
-import { getHoverStyle, noHighlight } from 'src/styles/mixins';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { createSelector } from '@reduxjs/toolkit';
-import { css } from '@emotion/react';
-import { mqSelectors } from 'src/components/App/reducers';
+import { staticImage } from 'src/imageUrls';
+import { GlobalStateShape } from 'src/store';
+import { logoBlue } from 'src/styles/colors';
+import { latoFont } from 'src/styles/fonts';
+import { getHoverStyle, noHighlight } from 'src/styles/mixins';
 
 interface ShopItemProps {
     item: Product;

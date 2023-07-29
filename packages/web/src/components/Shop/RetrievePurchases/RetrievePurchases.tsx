@@ -1,15 +1,16 @@
-import axios from 'axios';
-import * as React from 'react';
 import styled from '@emotion/styled';
-import { noHighlight, pushed } from 'src/styles/mixins';
-import { latoFont } from 'src/styles/fonts';
-import { lightBlue, logoBlue, theme } from 'src/styles/colors';
-import { validateEmail } from 'src/utils';
-import { mix } from 'polished';
-import { Link } from 'react-router-dom';
 import TextField from '@mui/material/TextField';
 import { ThemeProvider } from '@mui/system';
+import axios from 'axios';
+import { mix } from 'polished';
+import * as React from 'react';
+import { Link } from 'react-router-dom';
+
 import { useAppSelector } from 'src/hooks.js';
+import { lightBlue, logoBlue, theme } from 'src/styles/colors';
+import { latoFont } from 'src/styles/fonts';
+import { noHighlight, pushed } from 'src/styles/mixins';
+import { validateEmail } from 'src/utils';
 
 const Container = styled.div(latoFont(300), pushed, {
     display: 'flex',

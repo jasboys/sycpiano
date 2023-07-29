@@ -1,3 +1,4 @@
+import binarySearch from 'binary-search';
 import {
     addMonths,
     compareAsc,
@@ -11,7 +12,6 @@ import {
     startOfMonth,
     subMonths,
 } from 'date-fns';
-import binarySearch from 'binary-search';
 import { utcToZonedTime } from 'date-fns-tz';
 
 export type EventType = 'concerto' | 'chamber' | 'solo' | 'masterclass';

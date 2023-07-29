@@ -1,22 +1,19 @@
-import * as React from 'react';
-
 import { css } from '@emotion/react';
-
-import EventList from 'src/components/Schedule/EventList';
-import { Search } from 'src/components/Schedule/Search';
-
-import { container, pushed } from 'src/styles/mixins';
-
-import { LocationIconSVG } from 'src/components/Schedule/LocationIconSVG';
-import { screenPortrait, screenXS } from 'src/screens';
-import { toMedia } from 'src/MediaQuery';
-import { EventListName } from 'src/components/Schedule/types';
 import styled from '@emotion/styled';
+import * as React from 'react';
 import { SwitchTransition, Transition } from 'react-transition-group';
-import { fadeOnEnter, fadeOnExit } from 'src/utils';
-import { ShareIconSVG } from 'src/components/Schedule/ShareIconSVG';
+
+import { toMedia } from 'src/MediaQuery';
 import { BackIconSVG } from 'src/components/Schedule/BackIconSVG';
+import EventList from 'src/components/Schedule/EventList';
+import { LocationIconSVG } from 'src/components/Schedule/LocationIconSVG';
+import { Search } from 'src/components/Schedule/Search';
 import { SearchIconSVG } from 'src/components/Schedule/SearchIconSVG';
+import { ShareIconSVG } from 'src/components/Schedule/ShareIconSVG';
+import { EventListName } from 'src/components/Schedule/types';
+import { screenPortrait, screenXS } from 'src/screens';
+import { container, pushed } from 'src/styles/mixins';
+import { fadeOnEnter, fadeOnExit } from 'src/utils';
 
 const ScheduleContainer = styled.div(
     pushed,

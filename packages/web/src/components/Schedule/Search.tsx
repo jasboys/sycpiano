@@ -1,15 +1,7 @@
-import { rgba, lighten } from 'polished';
-import * as React from 'react';
-
 import styled from '@emotion/styled';
-
-import { SearchIconInstance } from 'src/components/Schedule/SearchIconSVG';
-
-import { lightBlue, logoBlue } from 'src/styles/colors';
-import { latoFont } from 'src/styles/fonts';
-import { noHighlight } from 'src/styles/mixins';
-import { screenPortrait, screenXS, screenXSandPortrait } from 'src/screens';
-import { toMedia } from 'src/MediaQuery';
+import { lighten, rgba } from 'polished';
+import * as React from 'react';
+import { useForm } from 'react-hook-form';
 import {
     createSearchParams,
     useLocation,
@@ -17,11 +9,18 @@ import {
     useNavigate,
     useSearchParams,
 } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
+import { Transition } from 'react-transition-group';
 import { createSelector } from 'reselect';
+
+import { toMedia } from 'src/MediaQuery';
+import { SearchIconInstance } from 'src/components/Schedule/SearchIconSVG';
+import { screenPortrait, screenXS, screenXSandPortrait } from 'src/screens';
+import { lightBlue, logoBlue } from 'src/styles/colors';
+import { latoFont } from 'src/styles/fonts';
+import { noHighlight } from 'src/styles/mixins';
+
 import { useAppSelector } from 'src/hooks';
 import { GlobalStateShape } from 'src/store';
-import { Transition } from 'react-transition-group';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
 import { mqSelectors } from '../App/reducers';
 

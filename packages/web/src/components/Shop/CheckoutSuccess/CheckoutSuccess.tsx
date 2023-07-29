@@ -1,13 +1,14 @@
+import styled from '@emotion/styled';
 import axios from 'axios';
 import * as React from 'react';
-import { clearCart } from 'src/components/Cart/reducers';
-import styled from '@emotion/styled';
-import { pushed } from 'src/styles/mixins';
-import { latoFont } from 'src/styles/fonts';
-import { screenPortrait, screenXS } from 'src/screens';
-import { toMedia } from 'src/MediaQuery';
-import { useAppDispatch } from 'src/hooks';
 import { useSearchParams } from 'react-router-dom';
+
+import { toMedia } from 'src/MediaQuery';
+import { clearCart } from 'src/components/Cart/reducers';
+import { useAppDispatch } from 'src/hooks';
+import { screenPortrait, screenXS } from 'src/screens';
+import { latoFont } from 'src/styles/fonts';
+import { pushed } from 'src/styles/mixins';
 
 const Container = styled.div(latoFont(300), pushed, {
     display: 'flex',
