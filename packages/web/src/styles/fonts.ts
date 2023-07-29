@@ -5,9 +5,11 @@ export const interFont = (fontWeight?: number, slant?: number) => ({
     fontWeight,
     '@supports (font-variation-settings: normal)': {
         fontFamily: 'Inter var, sans-serif',
-        fontVariationSettings: `${fontWeight ? `wght ${fontWeight}, ` : ''}slnt -${slant ?? 0}`
+        fontVariationSettings: `${
+            fontWeight ? `wght ${fontWeight}, ` : ''
+        }slnt -${slant ?? 0}`,
     },
-    fontFeatureSettings: 'cpsp, ss01, ss03, liga, calt, ccmp, kern'
+    fontFeatureSettings: 'cpsp, ss01, ss03, liga, calt, ccmp, kern',
 });
 
 export const latoFont = (fontWeight?: number, italics = false) => ({

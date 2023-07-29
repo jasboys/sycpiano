@@ -9,21 +9,17 @@ import { toMedia } from 'src/MediaQuery';
 import { useAppDispatch } from 'src/hooks';
 import { useSearchParams } from 'react-router-dom';
 
-const Container = styled.div(
-    latoFont(300),
-    pushed,
-    {
-        display: 'flex',
-        flexDirection: 'column',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        alignItems: 'center',
-        [toMedia([screenXS, screenPortrait])]: {
-            padding: '1rem',
-            alignItems: 'flex-start',
-        }
+const Container = styled.div(latoFont(300), pushed, {
+    display: 'flex',
+    flexDirection: 'column',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    alignItems: 'center',
+    [toMedia([screenXS, screenPortrait])]: {
+        padding: '1rem',
+        alignItems: 'flex-start',
     },
-);
+});
 
 const LineItem = styled.li({
     marginTop: '0.8rem',
@@ -35,7 +31,7 @@ const Thanks = styled.div({
     padding: '3rem 0 2rem 0',
     [toMedia([screenXS, screenPortrait])]: {
         padding: '2rem 0',
-    }
+    },
 });
 
 const EmailedTo = styled.div({
@@ -48,21 +44,18 @@ const Questions = styled.div({
     padding: '2rem',
     [toMedia([screenXS, screenPortrait])]: {
         padding: '1rem 0',
-    }
+    },
 });
 
-const Error = styled.div(
-    latoFont(300),
-    {
-        height: '100%',
-        width: '100%',
-        position: 'absolute',
-        fontSize: '2rem',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-    }
-);
+const ErrorDiv = styled.div(latoFont(300), {
+    height: '100%',
+    width: '100%',
+    position: 'absolute',
+    fontSize: '2rem',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+});
 
 interface CheckoutSuccessResponse {
     session: {
@@ -75,7 +68,7 @@ interface CheckoutSuccessResponse {
 }
 
 const CheckoutSuccess: React.FC<Record<never, unknown>> = () => {
-    const [ search, _setSearch ] = useSearchParams();
+    const [search, _setSearch] = useSearchParams();
     const dispatch = useAppDispatch();
     const [email, setEmail] = React.useState<string>();
     const [clientRef, setClientRef] = React.useState('');
@@ -85,43 +78,51 @@ const CheckoutSuccess: React.FC<Record<never, unknown>> = () => {
         const fetchData = async () => {
             try {
                 const {
-                    data: { session, lineItems }
-                }: { data: CheckoutSuccessResponse } = await axios.get('/api/shop/checkout-success', {
-                    params: { session_id: search.get('session_id') }
-                });
+                    data: { session, lineItems },
+                }: { data: CheckoutSuccessResponse } = await axios.get(
+                    '/api/shop/checkout-success',
+                    {
+                        params: { session_id: search.get('session_id') },
+                    },
+                );
                 dispatch(clearCart());
                 setEmail(session.customer_details.email);
                 setClientRef(session.client_reference_id);
                 setItems(lineItems);
             } catch (e) {
-                console.error(`Error trying to fetch checkout session ID.`);
+                console.error('Error trying to fetch checkout session ID.');
             }
         };
 
         fetchData();
     }, []);
 
-    return !email ?
-        <Error>
-            There was a problem with the request.
-        </Error>
-        : (
-            <Container>
-                <Thanks>Thank you for your purchase!</Thanks>
-                <div css={{ fontSize: '1.2rem' }}>Reference ID: {clientRef}</div>
-                <EmailedTo>
-                    These scores will be emailed to <span css={{ fontWeight: 400 }}>{email}</span>:
-                </EmailedTo>
-                <ul>
-                    {items.map((item, idx) => (
-                        <LineItem key={idx}>
-                            {item}
-                        </LineItem>
-                    ))}
-                </ul>
-                <Questions>Questions? Email <a css={{ fontWeight: 400 }} href="mailto:seanchen@seanchenpiano.com">seanchen@seanchenpiano.com</a></Questions>
-            </Container>
-        );
+    return !email ? (
+        <ErrorDiv>There was a problem with the request.</ErrorDiv>
+    ) : (
+        <Container>
+            <Thanks>Thank you for your purchase!</Thanks>
+            <div css={{ fontSize: '1.2rem' }}>Reference ID: {clientRef}</div>
+            <EmailedTo>
+                These scores will be emailed to{' '}
+                <span css={{ fontWeight: 400 }}>{email}</span>:
+            </EmailedTo>
+            <ul>
+                {items.map((item) => (
+                    <LineItem key={item}>{item}</LineItem>
+                ))}
+            </ul>
+            <Questions>
+                Questions? Email{' '}
+                <a
+                    css={{ fontWeight: 400 }}
+                    href="mailto:seanchen@seanchenpiano.com"
+                >
+                    seanchen@seanchenpiano.com
+                </a>
+            </Questions>
+        </Container>
+    );
 };
 
 export default CheckoutSuccess;

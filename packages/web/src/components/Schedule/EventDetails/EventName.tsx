@@ -9,29 +9,27 @@ interface EventNameProps {
     name: string;
     eventType: EventType;
     isMobile?: boolean;
-    permaLink: string
+    permaLink: string;
 }
 
-const eventNameStyle = css(
-    latoFont(300),
-    {
-        fontSize: '1.55rem',
-        transition: 'color 0.2s',
-        color: logoBlue,
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        marginBottom: '0.4rem',
-        wordBreak: 'break-word',
+const eventNameStyle = css(latoFont(300), {
+    fontSize: '1.55rem',
+    transition: 'color 0.2s',
+    color: logoBlue,
+    display: 'flex',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    marginBottom: '0.4rem',
+    wordBreak: 'break-word',
 
-        '&:hover': {
-            cursor: 'pointer',
-        },
+    '&:hover': {
+        cursor: 'pointer',
+    },
 
-        [toMedia(screenXS)]: {
-            fontSize: '1.25rem',
-        },
-    });
+    [toMedia(screenXS)]: {
+        fontSize: '1.25rem',
+    },
+});
 
 export const EventName: React.FC<EventNameProps> = ({ name, eventType }) => {
     return (

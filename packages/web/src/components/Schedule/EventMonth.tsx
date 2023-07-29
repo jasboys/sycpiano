@@ -10,7 +10,10 @@ import { formatInTimeZone } from 'date-fns-tz';
 import { useNavigate } from 'react-router-dom';
 import { BackIconInstance } from 'src/components/Schedule/BackIconSVG.jsx';
 import EventItem from 'src/components/Schedule/EventItem.jsx';
-import { EventListName, MonthGroup as MonthGroupType, } from 'src/components/Schedule/types.js';
+import {
+    EventListName,
+    MonthGroup as MonthGroupType,
+} from 'src/components/Schedule/types.js';
 
 const Events = styled.div({
     overflowY: 'auto',
@@ -39,16 +42,13 @@ const MonthBar = styled.div<{ isMobile: boolean }>(
             width: '92vw',
             padding: '0.2rem 0',
             fontSize: '1.6rem',
-        }
+        },
     },
-    ({ isMobile }) => (
-        {
-            maxWidth: isMobile ? 'unset' : 850,
-            margin: isMobile ? 'auto' : '0 auto',
-        }
-    )
+    ({ isMobile }) => ({
+        maxWidth: isMobile ? 'unset' : 850,
+        margin: isMobile ? 'auto' : '0 auto',
+    }),
 );
-
 
 const BackButton = styled.div({
     width: 'min(10vw, 2.0rem)',
@@ -63,8 +63,8 @@ const BackButton = styled.div({
     '&:hover': {
         cursor: 'pointer',
         stroke: 'var(--light-blue)',
-        borderColor: 'var(--light-blue)'
-    }
+        borderColor: 'var(--light-blue)',
+    },
 });
 
 interface MonthEventsProps {
@@ -88,30 +88,36 @@ export const MonthEvents: React.FC<MonthEventsProps> = ({
     }, []);
 
     return (
-        <MonthGroup key={`${type}-${lastQuery!}-${idx}-month`}>
+        <MonthGroup key={`${type}-${lastQuery ?? '_'}-${idx}-month`}>
             <MonthBar isMobile={isHamburger}>
-                {(type === 'event') &&
+                {type === 'event' && (
                     <BackButton>
                         <BackIconInstance onClick={backOnClick} />
                     </BackButton>
-                }
-                <div css={{}}>{format(parseISO(monthGroup.dateTime), 'MMMM yyyy')}</div>
+                )}
+                <div css={{}}>
+                    {format(parseISO(monthGroup.dateTime), 'MMMM yyyy')}
+                </div>
             </MonthBar>
             <Events>
-                {
-                    monthGroup.events.map((event, idx) => {
-                        const permaLink = `/schedule/event/${encodeURIComponent(formatInTimeZone(parseISO(event.dateTime), 'Zulu', `yyyyMMdd'T'HHmmssX`))}`;
-                        return (
-                            <EventItem
-                                key={`${type}-${lastQuery!}-${idx}-event`}
-                                listType={type}
-                                isMobile={isHamburger}
-                                permaLink={permaLink}
-                                {...event}
-                            />
-                        );
-                    })
-                }
+                {monthGroup.events.map((event, idx) => {
+                    const permaLink = `/schedule/event/${encodeURIComponent(
+                        formatInTimeZone(
+                            parseISO(event.dateTime),
+                            'Zulu',
+                            `yyyyMMdd'T'HHmmssX`,
+                        ),
+                    )}`;
+                    return (
+                        <EventItem
+                            key={`${type}-${lastQuery ?? '_'}-${idx}-event`}
+                            listType={type}
+                            isMobile={isHamburger}
+                            permaLink={permaLink}
+                            {...event}
+                        />
+                    );
+                })}
             </Events>
         </MonthGroup>
     );

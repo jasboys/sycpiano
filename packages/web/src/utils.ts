@@ -1,4 +1,4 @@
-import { gsap } from 'gsap'
+import { gsap } from 'gsap';
 // import { gsap } from 'gsap'
 import { baseString, getAge as _getAge, descriptions } from 'common';
 
@@ -17,12 +17,16 @@ export const formatLocation = (location: string): FormattedLocationShape => {
     return { venue, street, stateZipCountry };
 };
 
-export const getViewportSize = (): { width: number; height: number } => (
-    {
-        width: Math.max(document.documentElement.clientWidth, window.innerWidth || 0),
-        height: Math.max(document.documentElement.clientHeight, window.innerHeight || 0),
-    }
-);
+export const getViewportSize = (): { width: number; height: number } => ({
+    width: Math.max(
+        document.documentElement.clientWidth,
+        window.innerWidth || 0,
+    ),
+    height: Math.max(
+        document.documentElement.clientHeight,
+        window.innerHeight || 0,
+    ),
+});
 
 export const titleStringBase = baseString;
 
@@ -31,41 +35,72 @@ export const getAge = _getAge;
 // map of page name to meta title strings
 export const metaDescriptions = descriptions;
 
-export const formatPrice = (price: number): string => (
-    '$' + (price / 100).toFixed(2)
-);
+export const formatPrice = (price: number): string =>
+    `$${(price / 100).toFixed(2)}`;
 
 export const validateEmail = (email: string): boolean => {
-    return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$/.test(email);
+    return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$/.test(
+        email,
+    );
 };
 
-export const fadeOnEnter = (delay = 0, duration = 0.25) => (element: HTMLElement, isEntering?: boolean): void => {
-    if (element) {
-        // console.log('enter', element);
-        // console.log(isEntering);
-        gsap.fromTo(element, { autoAlpha: 0 }, { autoAlpha: 1, delay: isEntering ? delay + 1 : delay, duration, ease: 'power1.inOut' });
-    }
-};
+export const fadeOnEnter =
+    (delay = 0, duration = 0.25) =>
+    (element: HTMLElement, isEntering?: boolean): void => {
+        if (element) {
+            // console.log('enter', element);
+            // console.log(isEntering);
+            gsap.fromTo(
+                element,
+                { autoAlpha: 0 },
+                {
+                    autoAlpha: 1,
+                    delay: isEntering ? delay + 1 : delay,
+                    duration,
+                    ease: 'power1.inOut',
+                },
+            );
+        }
+    };
 
-export const fadeOnExit = (delay = 0, duration = 0.25) => (element: HTMLElement): void => {
-    if (element) {
-        // console.log('exit', element);
-        gsap.fromTo(element, { autoAlpha: 1 }, { autoAlpha: 0, delay, duration, ease: 'power1.inOut' });
-    }
-};
+export const fadeOnExit =
+    (delay = 0, duration = 0.25) => (element: HTMLElement): void => {
+        if (element) {
+            // console.log('exit', element);
+            gsap.fromTo(
+                element,
+                { autoAlpha: 1 },
+                { autoAlpha: 0, delay, duration, ease: 'power1.inOut' },
+            );
+        }
+    };
 
-export const slideOnEnter = (delay = 0, duration = 0.25) => (element: HTMLElement): void => {
-    if (element) {
-        gsap.fromTo(element, { autoAlpha: 1}, { y: '0%', delay, duration, clearProps: 'transform', force3D: true, });
-    }
-};
+export const slideOnEnter =
+    (delay = 0, duration = 0.25) => (element: HTMLElement): void => {
+        if (element) {
+            gsap.fromTo(
+                element,
+                { autoAlpha: 1 },
+                {
+                    y: '0%',
+                    delay,
+                    duration,
+                    clearProps: 'transform',
+                    force3D: true,
+                },
+            );
+        }
+    };
 
-export const slideOnExit = (delay = 0, duration = 0.25) => (element: HTMLElement): void => {
-    if (element) {
-        gsap.to(element, { y: '-100%', delay, duration, force3D: true });
-    }
-};
+export const slideOnExit =
+    (delay = 0, duration = 0.25) => (element: HTMLElement): void => {
+        if (element) {
+            gsap.to(element, { y: '-100%', delay, duration, force3D: true });
+        }
+    };
 
-export const isImageElement = (el: HTMLImageElement | HTMLElement | Element): el is HTMLImageElement => {
+export const isImageElement = (
+    el: HTMLImageElement | HTMLElement | Element,
+): el is HTMLImageElement => {
     return (el as HTMLImageElement).currentSrc !== undefined;
 };

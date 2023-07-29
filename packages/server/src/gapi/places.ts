@@ -15,19 +15,21 @@ export const getPhotos = async (search: string) => {
             input: search,
             inputtype: PlaceInputType.textQuery,
             key: gapiKey,
-        }
+        },
     });
     for (const can of place.data.candidates) {
-        const placeId = can.place_id!;
+        const placeId = can.place_id;
         let photos = can.photos;
-        if (!photos) {
-            photos = (await mapsClient.placeDetails({
-                params: {
-                    place_id: placeId,
-                    key: gapiKey,
-                    fields: ['photos'],
-                }
-            })).data.result.photos;
+        if (!photos && placeId) {
+            photos = (
+                await mapsClient.placeDetails({
+                    params: {
+                        place_id: placeId,
+                        key: gapiKey,
+                        fields: ['photos'],
+                    },
+                })
+            ).data.result.photos;
         }
         if (!photos || photos.length === 0) {
             console.log('testing next place');

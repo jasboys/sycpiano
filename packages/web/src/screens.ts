@@ -1,4 +1,4 @@
-import { toMedia } from "./mediaQuery";
+import { toMedia } from './mediaQuery';
 
 // Screen widths for media queries
 const xs = 640;
@@ -26,19 +26,23 @@ export const isHamburger = {
     or: [
         minRes,
         webkitMinDPR,
-        { and: [ screenShort, screenPortrait ]},
+        { and: [screenShort, screenPortrait] },
         screenPortrait,
-        { and: [ screenL, screenLandscape ]},
-    ]
+        { and: [screenL, screenLandscape] },
+    ],
 };
 
 //(hiDpx || screenPortrait || (screenL && screenLandscape))
 
 export const screenXL = { minWidth: xl };
-export const screenLandLandscape = { ...screenLandscape, ...screenL }
+export const screenLandLandscape = { ...screenLandscape, ...screenL };
 export const screenXSandPortrait = { ...screenPortrait, ...screenXS };
 export const screenMandPortrait = { ...screenPortrait, ...screenM };
-export const hiDpx = [ minRes, webkitMinDPR, { and: [ screenShort, screenPortrait ] } ];
+export const hiDpx = [
+    minRes,
+    webkitMinDPR,
+    { and: [screenShort, screenPortrait] },
+];
 export const GLOBAL_QUERIES = {
     screenTouch,
     screenXS,

@@ -17,9 +17,7 @@ if (!process.env.GAPI_KEY_APP) {
 
 const staticPrefix = '/static';
 
-const sourcePaths = [
-    path.resolve(__dirname, 'src'),
-];
+const sourcePaths = [path.resolve(__dirname, 'src')];
 
 const tsxUse = [
     {
@@ -28,7 +26,7 @@ const tsxUse = [
             presets: [
                 [
                     '@babel/preset-react',
-                    { runtime: 'automatic', importSource: '@emotion/react' }
+                    { runtime: 'automatic', importSource: '@emotion/react' },
                 ],
                 [
                     '@babel/preset-env',
@@ -43,9 +41,7 @@ const tsxUse = [
                 ],
                 '@babel/preset-typescript',
             ],
-            plugins: [
-                '@emotion/babel-plugin',
-            ]
+            plugins: ['@emotion/babel-plugin'],
         },
     },
 ];
@@ -125,12 +121,14 @@ const config = () => {
         },
         plugins: [
             new webpack.DefinePlugin({
-                BINARY_PATH: JSON.stringify(staticPrefix + '/binary'),
-                IMAGES_PATH: JSON.stringify(staticPrefix + '/images'),
-                MUSIC_PATH: JSON.stringify(staticPrefix + '/music'),
-                VIDEOS_PATH: JSON.stringify(staticPrefix + '/videos'),
+                BINARY_PATH: JSON.stringify(`${staticPrefix}/binary`),
+                IMAGES_PATH: JSON.stringify(`${staticPrefix}/images`),
+                MUSIC_PATH: JSON.stringify(`${staticPrefix}/music`),
+                VIDEOS_PATH: JSON.stringify(`${staticPrefix}/videos`),
                 GAPI_KEY: JSON.stringify(process.env.GAPI_KEY_APP),
-                STRIPE_PUBLIC_KEY: JSON.stringify(process.env.STRIPE_PUBLIC_KEY),
+                STRIPE_PUBLIC_KEY: JSON.stringify(
+                    process.env.STRIPE_PUBLIC_KEY,
+                ),
             }),
             new CleanWebpackPlugin(),
             new HtmlWebpackPlugin({
@@ -142,14 +140,14 @@ const config = () => {
         resolve: {
             extensions: ['.js', '.jsx', '.ts', '.tsx', '...'],
             alias: {
-                'src': path.resolve(__dirname, 'src'),
+                src: path.resolve(__dirname, 'src'),
             },
             fallback: {
                 process: require.resolve('process/browser'),
             },
             symlinks: false,
-        }
-    }
+        },
+    };
 };
 
 module.exports = {

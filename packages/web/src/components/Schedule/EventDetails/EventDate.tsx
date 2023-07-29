@@ -8,12 +8,10 @@ import { screenXS } from 'src/screens.js';
 import { interFont } from 'src/styles/fonts.js';
 import { EventDateTimeProps } from '../types.js';
 
-
 const Connector = styled.div({
     flex: '1 1 1rem',
     width: '100%',
-    background:
-        `linear-gradient(
+    background: `linear-gradient(
             to right,
             transparent 0%,
             transparent calc(50% - 0.82px),
@@ -24,8 +22,7 @@ const Connector = styled.div({
         )`,
     marginTop: '0.2rem',
     [toMedia(screenXS)]: {
-        background:
-            `linear-gradient(
+        background: `linear-gradient(
                 to right,
                 transparent 0%,
                 transparent calc(50% - 0.8px),
@@ -37,29 +34,26 @@ const Connector = styled.div({
     },
 });
 
-const eventDateStyle = css(
-    interFont(300),
-    {
-        textAlign: 'center',
-        background: 'none',
-        color: 'white',
-        height: '100%',
-        width: 80,
-        padding: '1.0rem 1.0rem',
-        flex: '0 0 auto',
-        zIndex: 5,
-        position: 'relative',
-        top: 0,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        [toMedia(screenXS)]: {
-            padding: '1.0rem',
-            width: 60,
-        },
-    }
-);
+const eventDateStyle = css(interFont(300), {
+    textAlign: 'center',
+    background: 'none',
+    color: 'white',
+    height: '100%',
+    width: 80,
+    padding: '1.0rem 1.0rem',
+    flex: '0 0 auto',
+    zIndex: 5,
+    position: 'relative',
+    top: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    [toMedia(screenXS)]: {
+        padding: '1.0rem',
+        width: 60,
+    },
+});
 
 const MonthDay = styled.div({
     flex: '0 0 auto',
@@ -67,7 +61,7 @@ const MonthDay = styled.div({
     lineHeight: '2.2rem',
     [toMedia(screenXS)]: {
         fontSize: '1.6rem',
-    }
+    },
 });
 
 const DayOfWeek = styled.div({
@@ -83,7 +77,7 @@ const Overlay = styled.div({
     width: '100%',
     height: '100%',
     zIndex: -1,
-    backgroundColor: `#00000020`,
+    backgroundColor: '#00000020',
     backdropFilter: 'blur(1px)',
 });
 
@@ -93,12 +87,8 @@ export const EventDate: React.FC<EventDateTimeProps> = (props) => {
     return (
         <div css={eventDateStyle}>
             <Overlay />
-            <MonthDay>
-                {`${format(date, 'dd')}`}
-            </MonthDay>
-            <DayOfWeek>
-                {format(date, 'EE')}
-            </DayOfWeek>
+            <MonthDay>{`${format(date, 'dd')}`}</MonthDay>
+            <DayOfWeek>{format(date, 'EE')}</DayOfWeek>
             {!!end && (
                 <>
                     <Connector />
@@ -110,7 +100,6 @@ export const EventDate: React.FC<EventDateTimeProps> = (props) => {
                     </DayOfWeek>
                 </>
             )}
-
         </div>
     );
 };

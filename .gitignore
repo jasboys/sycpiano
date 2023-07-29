@@ -11,6 +11,7 @@ packages/common/dist/
 packages/admin/build/
 
 **/gapi-key.json
+**/stats.html
 
 yarn-error.log
 

@@ -58,7 +58,7 @@ const Schedule: React.FC<ScheduleProps> = ({ type }) => {
                         timeout={800}
                         onEntering={fadeOnEnter(0.2)}
                         onExiting={fadeOnExit(0.5)}
-                        key={type + ' ' + location.search}
+                        key={`${type} ${location.search}`}
                         appear={true}
                     >
                         <Fading>

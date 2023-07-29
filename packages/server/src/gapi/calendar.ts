@@ -12,12 +12,16 @@ import { Calendar } from '../models/Calendar.js';
 // Make sure it's set in .env
 const gapiKey = process.env.GAPI_KEY_SERVER;
 
-const calendarId = (process.env.NODE_ENV === 'production' && process.env.SERVER_ENV !== 'test')
-    ? 'qdoiu1uovuc05c4egu65vs9uck@group.calendar.google.com'
-    : 'c7dolt217rdb9atggl25h4fspg@group.calendar.google.com';
+const calendarId =
+    process.env.NODE_ENV === 'production' && process.env.SERVER_ENV !== 'test'
+        ? 'qdoiu1uovuc05c4egu65vs9uck@group.calendar.google.com'
+        : 'c7dolt217rdb9atggl25h4fspg@group.calendar.google.com';
 const uriEncCalId = encodeURIComponent(calendarId);
 
-export const getCalendarSingleEvent = async (em: EntityManager, id: string): Promise<AxiosResponse<GCalEvent>> => {
+export const getCalendarSingleEvent = async (
+    em: EntityManager,
+    id: string,
+): Promise<AxiosResponse<GCalEvent>> => {
     const token = await getToken(em);
     const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events/${id}`;
     return axios.get(url, {
@@ -33,7 +37,11 @@ interface EventsListResponse {
     nextSyncToken: string;
 }
 
-export const getCalendarEvents = async (em: EntityManager, nextPageToken?: string, syncToken?: string): Promise<AxiosResponse<EventsListResponse>> => {
+export const getCalendarEvents = async (
+    em: EntityManager,
+    nextPageToken?: string,
+    syncToken?: string,
+): Promise<AxiosResponse<EventsListResponse>> => {
     const token = await getToken(em);
     const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events`;
     return axios.get(url, {
@@ -48,7 +56,10 @@ export const getCalendarEvents = async (em: EntityManager, nextPageToken?: strin
     });
 };
 
-export const deleteCalendarEvent = async (em: EntityManager, id: string): Promise<AxiosResponse<any>> => {
+export const deleteCalendarEvent = async (
+    em: EntityManager,
+    id: string,
+): Promise<AxiosResponse<unknown>> => {
     const token = await getToken(em);
     const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events/${id}`;
     return axios.delete(url, {
@@ -79,24 +90,25 @@ export const createCalendarEvent = async (
         timeZone,
         allDay,
         endDate,
-    }: GoogleCalendarParams
-): Promise<AxiosResponse<any>> => {
+    }: GoogleCalendarParams,
+): Promise<AxiosResponse<{ id: string }>> => {
     const token = await getToken(em);
     const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events`;
     const eventResource = {
         summary,
         description,
         location,
-        start: (allDay ?
-            { date: format(startDatetime, 'yyyy-MM-dd') } :
-            { dateTime: startDatetime.toISOString(), timeZone }),
-        end: (endDate ?
-            { date: endDate } :
-            (allDay ?
-                { date: format(add(startDatetime, { days: 1 }), 'yyyy-MM-dd') } :
-                { dateTime: add(startDatetime, { hours: 2 }).toISOString(), timeZone }
-            )
-        ),
+        start: allDay
+            ? { date: format(startDatetime, 'yyyy-MM-dd') }
+            : { dateTime: startDatetime.toISOString(), timeZone },
+        end: endDate
+            ? { date: endDate }
+            : allDay
+            ? { date: format(add(startDatetime, { days: 1 }), 'yyyy-MM-dd') }
+            : {
+                  dateTime: add(startDatetime, { hours: 2 }).toISOString(),
+                  timeZone,
+              },
     };
     return axios.post(url, eventResource, {
         headers: {
@@ -116,24 +128,25 @@ export const updateCalendar = async (
         timeZone,
         allDay,
         endDate,
-    }: GoogleCalendarParams
-): Promise<AxiosResponse<any>> => {
+    }: GoogleCalendarParams,
+): Promise<AxiosResponse<unknown>> => {
     const token = await getToken(em);
     const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events/${id}`;
     const eventResource = {
         summary,
         description,
         location,
-        start: (allDay ?
-            { date: format(startDatetime, 'yyyy-MM-dd') } :
-            { dateTime: startDatetime.toISOString(), timeZone }),
-        end: (endDate ?
-            { date: endDate } :
-            (allDay ?
-                { date: format(add(startDatetime, { days: 1 }), 'yyyy-MM-dd') } :
-                { dateTime: add(startDatetime, { hours: 2 }).toISOString(), timeZone }
-            )
-        ),
+        start: allDay
+            ? { date: format(startDatetime, 'yyyy-MM-dd') }
+            : { dateTime: startDatetime.toISOString(), timeZone },
+        end: endDate
+            ? { date: endDate }
+            : allDay
+            ? { date: format(add(startDatetime, { days: 1 }), 'yyyy-MM-dd') }
+            : {
+                  dateTime: add(startDatetime, { hours: 2 }).toISOString(),
+                  timeZone,
+              },
     };
     return axios.put(url, eventResource, {
         headers: {
@@ -142,7 +155,9 @@ export const updateCalendar = async (
     });
 };
 
-export const extractEventDescription = (event: GCalEvent): Record<string, unknown> => {
+export const extractEventDescription = (
+    event: GCalEvent,
+): Record<string, unknown> => {
     try {
         return JSON.parse(event.description);
     } catch (e) {
@@ -165,7 +180,12 @@ interface GeocodeResponse {
     }[];
 }
 
-export const getLatLng = async (address: string): Promise<{ latlng: { lat: number; lng: number }; formattedAddress: string }> => {
+export const getLatLng = async (
+    address: string,
+): Promise<{
+    latlng: { lat: number; lng: number };
+    formattedAddress: string;
+}> => {
     const geocodeUrl = 'https://maps.googleapis.com/maps/api/geocode/json';
     try {
         const response = await axios.get<GeocodeResponse>(geocodeUrl, {
@@ -188,9 +208,13 @@ interface TimezoneResponse {
     timeZoneId: string;
 }
 
-export const getTimeZone = async (lat: number, lng: number, timestamp?: Date): Promise<string> => {
+export const getTimeZone = async (
+    lat: number,
+    lng: number,
+    timestamp?: Date,
+): Promise<string> => {
     const loc = `${lat.toString()},${lng.toString()}`;
-    const url = `https://maps.googleapis.com/maps/api/timezone/json`;
+    const url = 'https://maps.googleapis.com/maps/api/timezone/json';
     try {
         const response = await axios.get<TimezoneResponse>(url, {
             params: {
@@ -232,7 +256,7 @@ export const transformModelToGoogle = (c: Calendar) => {
             photoReference: c.photoReference,
         }),
     };
-    if (!!c.id) {
+    if (c.id) {
         data.id = c.id;
     }
     return data;
@@ -242,9 +266,15 @@ export const getImageFromMetaTag = async (website: string) => {
     try {
         const page = await axios.get<string>(website);
         const { document } = new JSDOM(page.data).window;
-        return document.querySelector('meta[name="twitter:image"]')?.getAttribute('content')
-            ?? document.querySelector('meta[property="og:image"]')?.getAttribute('content')
-            ?? '';
+        return (
+            document
+                .querySelector('meta[name="twitter:image"]')
+                ?.getAttribute('content') ??
+            document
+                .querySelector('meta[property="og:image"]')
+                ?.getAttribute('content') ??
+            ''
+        );
     } catch (e) {
         // console.log(e);
         try {
@@ -253,9 +283,15 @@ export const getImageFromMetaTag = async (website: string) => {
             const err = e as AxiosError<string>;
             const page = err.response?.data;
             const { document } = new JSDOM(page).window;
-            return document.querySelector('meta[name="twitter:image"]')?.getAttribute('content')
-                ?? document.querySelector('meta[property="og:image"]')?.getAttribute('content')
-                ?? '';
+            return (
+                document
+                    .querySelector('meta[name="twitter:image"]')
+                    ?.getAttribute('content') ??
+                document
+                    .querySelector('meta[property="og:image"]')
+                    ?.getAttribute('content') ??
+                ''
+            );
         } catch (ee) {
             // Really can't use it.
             console.log(ee);

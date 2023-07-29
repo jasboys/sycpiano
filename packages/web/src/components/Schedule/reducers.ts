@@ -12,7 +12,12 @@ import {
     minOfMonthGroups,
     maxOfMonthGroups,
 } from 'src/components/Schedule/types';
-import { createSlice, createAsyncThunk, createAction, isAnyOf } from '@reduxjs/toolkit';
+import {
+    createSlice,
+    createAsyncThunk,
+    createAction,
+    isAnyOf,
+} from '@reduxjs/toolkit';
 import { ThunkAPIType } from 'src/types';
 import axios from 'axios';
 
@@ -44,19 +49,17 @@ interface FetchEventsReturn {
     lastQuery?: string;
 }
 
-export const fetchEvents = createAsyncThunk<FetchEventsReturn, FetchEventsArguments, ThunkAPIType>(
+export const fetchEvents = createAsyncThunk<
+    FetchEventsReturn,
+    FetchEventsArguments,
+    ThunkAPIType
+>(
     'calendar/fetchEvents',
     async (args, _thunkAPI) => {
         const params: FetchEventsAPIParams = {
             limit: FETCH_LIMIT,
         };
-        const {
-            name: name,
-            after,
-            before,
-            date,
-            at,
-        } = args;
+        const { name, after, before, date, at } = args;
 
         if (date) {
             params.date = date.toISOString();
@@ -67,7 +70,10 @@ export const fetchEvents = createAsyncThunk<FetchEventsReturn, FetchEventsArgume
         } else if (at) {
             params.at = at.toISOString();
         }
-        const { data: cachedEvents } = await axios.get<CachedEvent[]>('/api/calendar', { params });
+        const { data: cachedEvents } = await axios.get<CachedEvent[]>(
+            '/api/calendar',
+            { params },
+        );
         const events = transformCachedEventsToListItems(cachedEvents);
         const hasMore = !!events.length && events.length === FETCH_LIMIT;
         return {
@@ -79,19 +85,28 @@ export const fetchEvents = createAsyncThunk<FetchEventsReturn, FetchEventsArgume
     {
         condition: ({ name }, { getState }) => {
             const eventItemsReducer = getState().scheduleEventItems[name];
-            return !eventItemsReducer.isFetchingList && eventItemsReducer.hasMore;
-        }
-    }
+            return (
+                !eventItemsReducer.isFetchingList && eventItemsReducer.hasMore
+            );
+        },
+    },
 );
 
-export const searchEvents = createAsyncThunk<FetchEventsReturn, SearchEventsArguments, ThunkAPIType>(
+export const searchEvents = createAsyncThunk<
+    FetchEventsReturn,
+    SearchEventsArguments,
+    ThunkAPIType
+>(
     'calendar/searchEvents',
     async ({ name, q }, _) => {
         const params = {
-            q
+            q,
         };
 
-        const { data } = await axios.get<void, { data: CachedEvent[] }>('/api/calendar/search', { params });
+        const { data } = await axios.get<void, { data: CachedEvent[] }>(
+            '/api/calendar/search',
+            { params },
+        );
         const events = transformCachedEventsToListItems(data);
 
         return {
@@ -105,12 +120,18 @@ export const searchEvents = createAsyncThunk<FetchEventsReturn, SearchEventsArgu
     {
         condition: ({ q }, { getState }) => {
             const state = getState().scheduleEventItems.search;
-            return (q !== '') && !state.isFetchingList && (state.hasMore || state.lastQuery !== q);
-        }
-    }
-)
+            return (
+                q !== '' &&
+                !state.isFetchingList &&
+                (state.hasMore || state.lastQuery !== q)
+            );
+        },
+    },
+);
 
-const initialState = (order: 'asc' | 'desc' = 'desc'): EventItemsStateShape => ({
+const initialState = (
+    order: 'asc' | 'desc' = 'desc',
+): EventItemsStateShape => ({
     currentLatLng: {
         lat: 39.0997,
         lng: -94.5786,
@@ -135,7 +156,9 @@ const initialScheduleState: ScheduleStateShape = {
 };
 
 export const clearList = createAction<EventListName>('calendar/clearList');
-export const hasMore = createAction<{ name: EventListName; hasMore: boolean }>('calendar/hasMore');
+export const hasMore = createAction<{ name: EventListName; hasMore: boolean }>(
+    'calendar/hasMore',
+);
 
 const scheduleSlice = createSlice({
     name: 'scheduleEventItems',
@@ -149,7 +172,11 @@ const scheduleSlice = createSlice({
                     ...state[name],
                     hasMore: true,
                     isFetchingList: false,
-                    items: { order: state[name].items.order, length: 0, monthGroups: [] },
+                    items: {
+                        order: state[name].items.order,
+                        length: 0,
+                        monthGroups: [],
+                    },
                     minDate: undefined,
                     maxDate: undefined,
                     lastQuery: '',
@@ -161,7 +188,11 @@ const scheduleSlice = createSlice({
             })
             .addCase(searchEvents.pending, (state, _action) => {
                 state.search.isFetchingList = true;
-                state.search.items = { order: state.search.items.order, length: 0, monthGroups: [] }
+                state.search.items = {
+                    order: state.search.items.order,
+                    length: 0,
+                    monthGroups: [],
+                };
                 state.search.maxDate = undefined;
                 state.search.minDate = undefined;
             })
@@ -169,30 +200,43 @@ const scheduleSlice = createSlice({
                 const { name } = action.meta.arg;
                 state[name].isFetchingList = true;
             })
-            .addMatcher(isAnyOf(fetchEvents.rejected, searchEvents.rejected), (state, action) => {
-                const { name } = action.meta.arg;
-                state[name].isFetchingList = false;
-            })
-            .addMatcher(isAnyOf(fetchEvents.fulfilled, searchEvents.fulfilled), (state, action) => {
-                const {
-                    name,
-                    hasMore,
-                    lastQuery,
-                    events
-                } = action.payload;
-                const newMonthGroup = createMonthGroups(events, state[name].items.order);
-                const mergedItems = mergeMonthGroups(state[name].items, newMonthGroup);
-                state[name] = {
-                    ...state[name],
-                    isFetchingList: false,
-                    items: mergedItems,
-                    minDate: mergedItems.monthGroups.length === 0 ? new Date().toISOString() : minOfMonthGroups(mergedItems).dateTime,
-                    maxDate: mergedItems.monthGroups.length === 0 ? new Date().toISOString() : maxOfMonthGroups(mergedItems).dateTime,
-                    hasMore: hasMore,
-                    lastQuery: lastQuery,
-                };
-            })
-            .addDefaultCase(state => state);
+            .addMatcher(
+                isAnyOf(fetchEvents.rejected, searchEvents.rejected),
+                (state, action) => {
+                    const { name } = action.meta.arg;
+                    state[name].isFetchingList = false;
+                },
+            )
+            .addMatcher(
+                isAnyOf(fetchEvents.fulfilled, searchEvents.fulfilled),
+                (state, action) => {
+                    const { name, hasMore, lastQuery, events } = action.payload;
+                    const newMonthGroup = createMonthGroups(
+                        events,
+                        state[name].items.order,
+                    );
+                    const mergedItems = mergeMonthGroups(
+                        state[name].items,
+                        newMonthGroup,
+                    );
+                    state[name] = {
+                        ...state[name],
+                        isFetchingList: false,
+                        items: mergedItems,
+                        minDate:
+                            mergedItems.monthGroups.length === 0
+                                ? new Date().toISOString()
+                                : minOfMonthGroups(mergedItems).dateTime,
+                        maxDate:
+                            mergedItems.monthGroups.length === 0
+                                ? new Date().toISOString()
+                                : maxOfMonthGroups(mergedItems).dateTime,
+                        hasMore: hasMore,
+                        lastQuery: lastQuery,
+                    };
+                },
+            )
+            .addDefaultCase((state) => state);
     },
 });
 

@@ -22,27 +22,30 @@ const negatable = [
     'pointer',
     'scripting',
     'update',
-]
+];
 
 type MediaQueryValue = string | number | boolean;
 interface MediaQueryEntries {
     [key: string]: MediaQueryValue;
 }
-type MediaQueryObject = MediaQueryGroup | MediaQueryEntries | (MediaQueryEntries | MediaQueryGroup)[];
+type MediaQueryObject =
+    | MediaQueryGroup
+    | MediaQueryEntries
+    | (MediaQueryEntries | MediaQueryGroup)[];
 type MediaQueryGroup = {
     or?: MediaQueryObject;
     and?: MediaQueryObject;
     not?: MediaQueryObject;
-}
+};
 
 const processFeature = (feature: string, value: MediaQueryValue) => {
     const hyphenized = decamalize(feature, { separator: '-' });
     const suffixed =
-        (isDimension(hyphenized) && typeof value === 'number') ?
-            value + 'px'
-            : (isResolution(hyphenized) && typeof value === 'number') ?
-                value + 'dppx'
-                : value;
+        isDimension(hyphenized) && typeof value === 'number'
+            ? `${value}px`
+            : isResolution(hyphenized) && typeof value === 'number'
+            ? `${value}dppx`
+            : value;
     if (value === true) {
         return hyphenized;
     } else if (value === false || negatable.includes(feature)) {
@@ -57,31 +60,37 @@ const obj2mq = (obj: MediaQueryObject, logic?: 'or' | 'and') => {
         const strings: string[] = obj.map((val) => obj2mq(val));
         return strings.length === 1
             ? strings[0]
-            : '(' + strings.join(` ${logic ?? 'or'} `) + ')';
+            : `(${strings.join(` ${logic ?? 'or'} `)})`;
     } else {
-        const strings: string[] = Object.entries(obj).map(([feature, value]) => {
-            if (feature === 'or' || feature === 'and') {
-                if (typeof value === 'object') {
-                    return obj2mq(value, feature);
+        const strings: string[] = Object.entries(obj).map(
+            ([feature, value]) => {
+                if (feature === 'or' || feature === 'and') {
+                    if (typeof value === 'object') {
+                        return obj2mq(value, feature);
+                    } else {
+                        throw Error(
+                            'logic entries must have either objects or array of objects',
+                        );
+                    }
+                } else if (feature === 'not') {
+                    if (typeof value === 'object') {
+                        return `not ${obj2mq(value)}`;
+                    } else {
+                        throw Error(
+                            'logic entries must have either objects or array of objects',
+                        );
+                    }
                 } else {
-                    throw Error('logic entries must have either objects or array of objects')
+                    return processFeature(feature, value as MediaQueryValue);
                 }
-            } else if (feature === 'not') {
-                if (typeof value === 'object') {
-                    return 'not ' + obj2mq(value);
-                } else {
-                    throw Error('logic entries must have either objects or array of objects')
-                }
-            } else {
-                return processFeature(feature, value as MediaQueryValue);
-            }
-        });
+            },
+        );
         return strings.length === 1
             ? strings[0]
-            : '(' + strings.join(` ${logic ?? 'and'} `) + ')';
+            : `(${strings.join(` ${logic ?? 'and'} `)})`;
     }
 };
 
 export const toMedia = (obj: MediaQueryObject) => {
-    return '@media only screen and ' + obj2mq(obj) + '';
+    return `@media only screen and ${obj2mq(obj)}`;
 };

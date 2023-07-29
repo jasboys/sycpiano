@@ -5,11 +5,19 @@ import { User } from './User.js';
 
 @Entity()
 export class UserProduct {
+    @ManyToOne({
+        entity: () => User,
+        onDelete: 'cascade',
+        primary: true,
+        index: 'user_product_user_idx',
+    })
+    user!: Rel<User>;
 
-  @ManyToOne({ entity: () => User, onDelete: 'cascade', primary: true, index: 'user_product_user_idx' })
-  user!: Rel<User>;
-
-  @ManyToOne({ entity: () => Product, onDelete: 'cascade', primary: true, index: 'user_product_product_idx' })
-  product!: Rel<Product>;
-
+    @ManyToOne({
+        entity: () => Product,
+        onDelete: 'cascade',
+        primary: true,
+        index: 'user_product_product_idx',
+    })
+    product!: Rel<Product>;
 }

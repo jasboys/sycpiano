@@ -13,16 +13,15 @@ export default defineConfig({
         alias: {
             src: path.resolve(__dirname, 'src'),
             path: 'path-browserify',
-            gsap: 'gsap/dist/gsap'
+            gsap: 'gsap/dist/gsap',
         },
-        dedupe: ['polished']
-
+        dedupe: ['polished'],
     },
     define: {
-        BINARY_PATH: JSON.stringify(staticPrefix + '/binary'),
-        IMAGES_PATH: JSON.stringify(staticPrefix + '/images'),
-        MUSIC_PATH: JSON.stringify(staticPrefix + '/music'),
-        VIDEOS_PATH: JSON.stringify(staticPrefix + '/videos'),
+        BINARY_PATH: JSON.stringify(`${staticPrefix}/binary`),
+        IMAGES_PATH: JSON.stringify(`${staticPrefix}/images`),
+        MUSIC_PATH: JSON.stringify(`${staticPrefix}/music`),
+        VIDEOS_PATH: JSON.stringify(`${staticPrefix}/videos`),
         GAPI_KEY: JSON.stringify(process.env.GAPI_KEY_APP),
         STRIPE_PUBLIC_KEY: JSON.stringify(process.env.STRIPE_PUBLIC_KEY),
         preventAssignment: true,
@@ -47,4 +46,4 @@ export default defineConfig({
         assetsDir: 'static/scripts',
         emptyOutDir: true,
     },
-})
+});

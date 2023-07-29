@@ -1,26 +1,30 @@
 {
-	"$schema": "https://docs.rome.tools/schemas/12.1.3/schema.json",
-	"organizeImports": {
-		"enabled": false
-	},
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"recommended": true,
-			"suspicious": {
-				"noAssignInExpressions": "off"
-			}
-		}
-	},
-	"formatter": {
-		"enabled": true,
-		"indentStyle": "space",
-		"indentSize": 4,
-		"lineWidth": 80
-	},
-	"javascript": {
-		"formatter": {
-			"quoteStyle": "single"
-		}
-	}
+    "$schema": "https://docs.rome.tools/schemas/12.1.3/schema.json",
+    "organizeImports": {
+        "enabled": false
+    },
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "recommended": true,
+            "suspicious": {
+                "noAssignInExpressions": "off"
+            },
+            "style": {
+                "noInferrableTypes": "off"
+            }
+        }
+    },
+    "formatter": {
+        "enabled": true,
+        "indentStyle": "space",
+        "indentSize": 4,
+        "lineWidth": 80
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single",
+            "jsxQuoteStyle": "double"
+        }
+    }
 }

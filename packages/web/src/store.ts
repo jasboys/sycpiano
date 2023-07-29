@@ -26,12 +26,10 @@ const staticReducers = {
 };
 
 const createReducer = (reducers: Partial<Reducers>) => {
-    return combineReducers(
-        {
-            ...staticReducers,
-            ...reducers
-        }
-    );
+    return combineReducers({
+        ...staticReducers,
+        ...reducers,
+    });
 };
 
 const store = (() => {
@@ -44,13 +42,16 @@ const store = (() => {
     return store;
 })();
 
-export const registerReducer = (store: AsyncStore, reducers: Partial<Reducers>): void => {
+export const registerReducer = (
+    store: AsyncStore,
+    reducers: Partial<Reducers>,
+): void => {
     store.async = { ...store.async, ...reducers };
     if (store.async !== undefined) {
         store.replaceReducer(createReducer(store.async));
     }
 };
 
-export type AppDispatch = typeof store.dispatch
-export type GlobalStateShape = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch;
+export type GlobalStateShape = ReturnType<typeof store.getState>;
 export default store;

@@ -47,7 +47,7 @@ const LoadingDiv = styled.div({
     flexDirection: 'column',
     alignItems: 'center',
     pointerEvents: 'none',
-    zIndex: 20
+    zIndex: 20,
 });
 
 const SpinnerContainer = styled.div({
@@ -58,36 +58,35 @@ const SpinnerContainer = styled.div({
     backgroundColor: 'rgba(255 255 255 / 0.6)',
     backdropFilter: 'blur(3px)',
     boxShadow: '0px 3px 5px -2px rgba(0 0 0 / 0.5)',
-    'svg': {
+    svg: {
         fill: 'none',
         stroke: lightBlue,
-    }
+    },
 });
 
 const loadingStyle = css({
     margin: '0.5rem',
 });
 
-const EndOfList = styled.div(
-    latoFont(200),
-    {
-        margin: '2.4rem auto',
-        width: '80vw',
-        maxWidth: 720,
-        overflow: 'hidden',
-        display: 'flex',
-        flexWrap: 'wrap',
-        padding: '1.5rem',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: '1.8rem',
-        color: logoBlue,
-        [toMedia([screenXS, screenPortrait])]: {
-            flexDirection: 'column',
-        }
-    });
+const EndOfList = styled.div(latoFont(200), {
+    margin: '2.4rem auto',
+    width: '80vw',
+    maxWidth: 720,
+    overflow: 'hidden',
+    display: 'flex',
+    flexWrap: 'wrap',
+    padding: '1.5rem',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '1.8rem',
+    color: logoBlue,
+    [toMedia([screenXS, screenPortrait])]: {
+        flexDirection: 'column',
+    },
+});
 
-const fetchDateParam = (type: string) => type === 'upcoming' ? 'after' : 'before';
+const fetchDateParam = (type: string) =>
+    type === 'upcoming' ? 'after' : 'before';
 
 const scheduleListSelector = createCachedSelector(
     (state: GlobalStateShape) => state.scheduleEventItems,
@@ -101,11 +100,9 @@ const scheduleListSelector = createCachedSelector(
         isFetchingList: state[type].isFetchingList,
         lastQuery: state[type].lastQuery,
     }),
-)(
-    (_, type) => type
-);
+)((_, type) => type);
 
-const ScrollingContainer = styled.div<{ isSearch: boolean; }>((props) => ({
+const ScrollingContainer = styled.div<{ isSearch: boolean }>((props) => ({
     width: '100%',
     height: '100%',
     overflowY: 'scroll',
@@ -114,16 +111,31 @@ const ScrollingContainer = styled.div<{ isSearch: boolean; }>((props) => ({
     [toMedia(screenXSandPortrait)]: {
         paddingTop: 0,
         marginTop: props.isSearch ? 'calc(80px + 1.2rem)' : 'calc(50px + 2rem)',
-        height: props.isSearch ? 'calc(100% ,- (80px + 1.2rem))' : 'calc(100% - (50px + 1.2rem))'
-    }
+        height: props.isSearch
+            ? 'calc(100% ,- (80px + 1.2rem))'
+            : 'calc(100% - (50px + 1.2rem))',
+    },
 }));
 
 const loadingOnEnter = (el: HTMLElement) => {
-    gsap.fromTo(el, { y: 200 }, { duration: 0.5, y: 0, ease: Back.easeOut.config(1)});
+    gsap.fromTo(
+        el,
+        { y: 200 },
+        { duration: 0.5, y: 0, ease: Back.easeOut.config(1) },
+    );
 };
 
 const loadingOnExit = (el: HTMLElement) => {
-    gsap.fromTo(el, { y: 0 }, { duration: 0.5, y: 200, ease: Back.easeIn.config(1), clearProps: 'translate,rotate,scale,transform' });
+    gsap.fromTo(
+        el,
+        { y: 0 },
+        {
+            duration: 0.5,
+            y: 200,
+            ease: Back.easeIn.config(1),
+            clearProps: 'translate,rotate,scale,transform',
+        },
+    );
 };
 
 export const EventList: React.FC<EventListProps> = (props) => {
@@ -154,10 +166,12 @@ export const EventList: React.FC<EventListProps> = (props) => {
                 return;
             }
             // run search fetch
-            dispatch(searchEvents({
-                name: 'search',
-                q: searchQ
-            }));
+            dispatch(
+                searchEvents({
+                    name: 'search',
+                    q: searchQ,
+                }),
+            );
         } else if (props.type === 'event') {
             console.log(date);
             if (!date) {
@@ -199,29 +213,30 @@ export const EventList: React.FC<EventListProps> = (props) => {
         }),
     };
 
-    const onScroll = React.useCallback(({ clientHeight, scrollTop, scrollHeight }: OnScrollProps) => {
-        if (scrollTop + clientHeight > scrollHeight - 600 &&
-            hasMore &&
-            !isFetchingList &&
-            !!maxDate &&
-            !!minDate
-        ) {
-            if (props.type !== 'search' && props.type !== 'event') {
-                dispatch(fetchEvents(getScrollFetchParams[props.type]()));
+    const onScroll = React.useCallback(
+        ({ clientHeight, scrollTop, scrollHeight }: OnScrollProps) => {
+            if (
+                scrollTop + clientHeight > scrollHeight - 600 &&
+                hasMore &&
+                !isFetchingList &&
+                !!maxDate &&
+                !!minDate
+            ) {
+                if (props.type !== 'search' && props.type !== 'event') {
+                    dispatch(fetchEvents(getScrollFetchParams[props.type]()));
+                }
             }
-        }
-    }, [hasMore, isFetchingList, maxDate, minDate, props.type]);
+        },
+        [hasMore, isFetchingList, maxDate, minDate, props.type],
+    );
 
     const debouncedFetch = React.useMemo(
-        () => debounce(onScroll, 100, { leading: true })
-        , [props.type, hasMore, isFetchingList, maxDate, minDate]);
+        () => debounce(onScroll, 100, { leading: true }),
+        [props.type, hasMore, isFetchingList, maxDate, minDate],
+    );
 
     const title =
-        titleStringBase +
-        'Schedule | ' +
-        (props.type === 'archive' ? 'Archived' : startCase(props.type)) +
-        'Events' +
-        (searchQ ? ': ' + searchQ : '');
+        `${titleStringBase}Schedule | ${(props.type === 'archive' ? 'Archived' : startCase(props.type))}Events${(searchQ ?? `: ${searchQ}`)}`;
 
     const description = metaDescriptions[props.type];
 
@@ -242,34 +257,34 @@ export const EventList: React.FC<EventListProps> = (props) => {
                 isSearch={props.type === 'search'}
                 onScroll={(ev) => {
                     ev.persist();
-                    const {
-                        scrollTop,
-                        scrollHeight,
-                        clientHeight
-                    } = ev.currentTarget;
+                    const { scrollTop, scrollHeight, clientHeight } =
+                        ev.currentTarget;
                     debouncedFetch({ scrollTop, scrollHeight, clientHeight });
                 }}
             >
-                {eventItemsLength
-                    ? eventItems.monthGroups.map((monthGroup, idx) =>
+                {eventItemsLength ? (
+                    eventItems.monthGroups.map((monthGroup, idx) => (
                         <MonthEvents
-                            key={idx}
+                            key={monthGroup.dateTime}
                             type={props.type}
                             idx={idx}
                             monthGroup={monthGroup}
                             isHamburger={isHamburger}
                             lastQuery={lastQuery}
-                        />)
-                    : <div />
-                }
-                {(props.type !== 'event') && <EndOfList>
-                    {eventItemsLength === 0 ?
-                        'No events fetched'
-                        : (hasMore ?
-                            ''
-                            : 'No more events')}
-                </EndOfList>
-                }
+                        />
+                    ))
+                ) : (
+                    <div />
+                )}
+                {props.type !== 'event' && (
+                    <EndOfList>
+                        {eventItemsLength === 0
+                            ? 'No events fetched'
+                            : hasMore
+                            ? ''
+                            : 'No more events'}
+                    </EndOfList>
+                )}
             </ScrollingContainer>
             <Transition<undefined>
                 in={isFetchingList}
@@ -279,7 +294,11 @@ export const EventList: React.FC<EventListProps> = (props) => {
             >
                 <LoadingDiv>
                     <SpinnerContainer>
-                        <LoadingInstance css={loadingStyle} width={loadingDimension} height={loadingDimension} />
+                        <LoadingInstance
+                            css={loadingStyle}
+                            width={loadingDimension}
+                            height={loadingDimension}
+                        />
                     </SpinnerContainer>
                 </LoadingDiv>
             </Transition>

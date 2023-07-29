@@ -23,7 +23,10 @@ export const getToken = async (_em: EntityManager): Promise<string> => {
     const em = _em.fork();
     const tokenInstance = await em.findOne(Token, { id: 'access_token' });
     if (tokenInstance) {
-        const expired = (tokenInstance.expires === undefined) ? undefined : Date.now() > tokenInstance.expires.valueOf();
+        const expired =
+            tokenInstance.expires === undefined
+                ? undefined
+                : Date.now() > tokenInstance.expires.valueOf();
         if (expired !== undefined && !expired) {
             return tokenInstance.token;
         }
@@ -39,14 +42,11 @@ export const getToken = async (_em: EntityManager): Promise<string> => {
     ) {
         throw new Error('Not authorized, or no expiry date');
     }
-    await em.upsert(
-        Token,
-        {
-            id: 'access_token',
-            token: credentials.access_token,
-            expires: new Date(credentials.expiry_date),
-        }
-    );
+    await em.upsert(Token, {
+        id: 'access_token',
+        token: credentials.access_token,
+        expires: new Date(credentials.expiry_date),
+    });
     await em.flush();
 
     return credentials.access_token;

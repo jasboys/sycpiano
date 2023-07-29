@@ -11,19 +11,15 @@ import TextField from '@mui/material/TextField';
 import { ThemeProvider } from '@mui/system';
 import { useAppSelector } from 'src/hooks.js';
 
-const Container = styled.div(
-    latoFont(300),
-    pushed,
-    {
-        display: 'flex',
-        flexDirection: 'column',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        alignItems: 'center',
-        padding: '2rem 2rem',
-        maxWidth: 600,
-    },
-);
+const Container = styled.div(latoFont(300), pushed, {
+    display: 'flex',
+    flexDirection: 'column',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    alignItems: 'center',
+    padding: '2rem 2rem',
+    maxWidth: 600,
+});
 
 const StyledForm = styled.form({
     display: 'flex',
@@ -44,11 +40,19 @@ const getHoverStyle = (isMouseDown: boolean) => ({
     color: 'white',
     cursor: 'pointer',
     border: `1px solid ${mix(0.75, logoBlue, '#FFF')}`,
-    transform: isMouseDown ? 'translateY(-1.2px) scale(1.01)' : 'translateY(-2px) scale(1.04)',
-    boxShadow: isMouseDown ? '0 1px 2px rgba(0, 0, 0, 0.8)' : '0 4px 6px rgba(0, 0, 0, 0.4)',
+    transform: isMouseDown
+        ? 'translateY(-1.2px) scale(1.01)'
+        : 'translateY(-2px) scale(1.04)',
+    boxShadow: isMouseDown
+        ? '0 1px 2px rgba(0, 0, 0, 0.8)'
+        : '0 4px 6px rgba(0, 0, 0, 0.4)',
 });
 
-const StyledSubmitButton = styled.button<{ disabled: boolean; isMouseDown: boolean; isSuccess: boolean }>(
+const StyledSubmitButton = styled.button<{
+    disabled: boolean;
+    isMouseDown: boolean;
+    isSuccess: boolean;
+}>(
     latoFont(300),
     {
         position: 'relative',
@@ -66,33 +70,32 @@ const StyledSubmitButton = styled.button<{ disabled: boolean; isMouseDown: boole
         userSelect: 'none',
     },
     noHighlight,
-    ({ disabled, isMouseDown }) => disabled
-        ? {
-            color: logoBlue,
-            backgroundColor: 'white',
-            border: `1px solid ${logoBlue}`,
-        }
-        : {
-            '&:hover': getHoverStyle(isMouseDown),
+    ({ disabled, isMouseDown }) =>
+        disabled
+            ? {
+                  color: logoBlue,
+                  backgroundColor: 'white',
+                  border: `1px solid ${logoBlue}`,
+              }
+            : {
+                  '&:hover': getHoverStyle(isMouseDown),
+              },
+    ({ isSuccess }) =>
+        isSuccess && {
+            backgroundColor: '#4BB543',
+            color: 'white',
+            border: `1px solid ${mix(0.8, '#4BB543', '#000')}`,
         },
-    ({ isSuccess }) => isSuccess && {
-        backgroundColor: '#4BB543',
-        color: 'white',
-        border: `1px solid ${mix(0.8, '#4BB543', '#000')}`,
-    },
 );
 
-const Title = styled.div(
-    latoFont(400),
-    {
-        textAlign: 'center',
-        fontSize: '1.5rem',
-        color: logoBlue,
-        width: '100%',
-        maxWidth: 600,
-        marginBottom: '2rem',
-    }
-);
+const Title = styled.div(latoFont(400), {
+    textAlign: 'center',
+    fontSize: '1.5rem',
+    color: logoBlue,
+    width: '100%',
+    maxWidth: 600,
+    marginBottom: '2rem',
+});
 
 enum SubmitState {
     initial = 0,
@@ -120,7 +123,7 @@ const RetrievalForm: React.FC<Record<never, unknown>> = () => {
                         headers: {
                             'X-CSRF-TOKEN': 'sycpiano',
                         },
-                    }
+                    },
                 );
                 setState(SubmitState.success);
             } catch (e) {
@@ -140,7 +143,8 @@ const RetrievalForm: React.FC<Record<never, unknown>> = () => {
                 Enter your email to request previously purchased scores.
             </div>
             <div css={{ fontSize: '1.2rem', width: '100%', marginTop: '1rem' }}>
-                If the email exists in the database, you will receive an email with the scores attached.
+                If the email exists in the database, you will receive an email
+                with the scores attached.
             </div>
             <ThemeProvider theme={theme}>
                 <StyledForm
@@ -148,8 +152,7 @@ const RetrievalForm: React.FC<Record<never, unknown>> = () => {
                         e.preventDefault();
                         if (error) {
                             return;
-                        }
-                        else if (email === '') {
+                        } else if (email === '') {
                             setError(true);
                             return;
                         }
@@ -161,9 +164,16 @@ const RetrievalForm: React.FC<Record<never, unknown>> = () => {
                         error={error}
                         id="email-text"
                         value={email}
-                        onChange={(event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+                        onChange={(
+                            event: React.ChangeEvent<
+                                HTMLTextAreaElement | HTMLInputElement
+                            >,
+                        ) => {
                             setEmail(event.target.value);
-                            setError(event.target.value !== '' && !validateEmail(event.target.value));
+                            setError(
+                                event.target.value !== '' &&
+                                    !validateEmail(event.target.value),
+                            );
                         }}
                         variant="outlined"
                         margin="dense"
@@ -171,7 +181,7 @@ const RetrievalForm: React.FC<Record<never, unknown>> = () => {
                     />
                     <StyledSubmitButton
                         type="submit"
-                        disabled={email === '' || (state !== SubmitState.initial)}
+                        disabled={email === '' || state !== SubmitState.initial}
                         isMouseDown={isMouseDown}
                         isSuccess={state === SubmitState.success}
                         onTouchStart={() => {
@@ -187,13 +197,19 @@ const RetrievalForm: React.FC<Record<never, unknown>> = () => {
                             setIsMouseDown(false);
                         }}
                     >
-                        {(state === SubmitState.submitting) ? 'Submitting...' :
-                            (state === SubmitState.success) ? 'Submitted' : 'Submit'}
+                        {state === SubmitState.submitting
+                            ? 'Submitting...'
+                            : state === SubmitState.success
+                            ? 'Submitted'
+                            : 'Submit'}
                     </StyledSubmitButton>
                 </StyledForm>
             </ThemeProvider>
-            {(state === SubmitState.success) &&
-                <div css={{ fontWeight: 'bold' }}><Link to="/shop/scores">🠔 Go back to the shop</Link></div>}
+            {state === SubmitState.success && (
+                <div css={{ fontWeight: 'bold' }}>
+                    <Link to="/shop/scores">🠔 Go back to the shop</Link>
+                </div>
+            )}
         </Container>
     );
 };

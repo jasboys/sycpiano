@@ -13,7 +13,7 @@ export interface Product {
     readonly permalink: string;
 }
 
-export type ProductMap = Record<typeof ProductTypes[number], Product[]>
+export type ProductMap = Record<typeof ProductTypes[number], Product[]>;
 
 export interface ShopStateShape {
     isFetching: boolean;

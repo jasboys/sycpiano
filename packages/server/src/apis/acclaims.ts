@@ -10,9 +10,17 @@ interface RequestWithCount extends Request {
     };
 }
 
-const getAcclaims = async (req: RequestWithCount, res: Response, _: NextFunction): Promise<void> => {
+const getAcclaims = async (
+    req: RequestWithCount,
+    res: Response,
+    _: NextFunction,
+): Promise<void> => {
     const limit = req.params.count ? parseInt(req.params.count) : undefined;
-    const acclaims = await orm.em.find(Acclaim, {}, { limit, orderBy: [{ date: QueryOrder.DESC }] });
+    const acclaims = await orm.em.find(
+        Acclaim,
+        {},
+        { limit, orderBy: [{ date: QueryOrder.DESC }] },
+    );
     res.json(acclaims);
 };
 

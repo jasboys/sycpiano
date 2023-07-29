@@ -19,7 +19,7 @@ export const theme = createTheme({
         },
         secondary: {
             main: magenta,
-        }
+        },
     },
 });
 

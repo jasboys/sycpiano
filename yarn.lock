@@ -2393,44 +2393,44 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rometools/cli-darwin-arm64@npm:12.1.3":
-  version: 12.1.3
-  resolution: "@rometools/cli-darwin-arm64@npm:12.1.3"
+"@rometools/cli-darwin-arm64@npm:12.1.3-nightly.4c8cf32":
+  version: 12.1.3-nightly.4c8cf32
+  resolution: "@rometools/cli-darwin-arm64@npm:12.1.3-nightly.4c8cf32"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rometools/cli-darwin-x64@npm:12.1.3":
-  version: 12.1.3
-  resolution: "@rometools/cli-darwin-x64@npm:12.1.3"
+"@rometools/cli-darwin-x64@npm:12.1.3-nightly.4c8cf32":
+  version: 12.1.3-nightly.4c8cf32
+  resolution: "@rometools/cli-darwin-x64@npm:12.1.3-nightly.4c8cf32"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@rometools/cli-linux-arm64@npm:12.1.3":
-  version: 12.1.3
-  resolution: "@rometools/cli-linux-arm64@npm:12.1.3"
+"@rometools/cli-linux-arm64@npm:12.1.3-nightly.4c8cf32":
+  version: 12.1.3-nightly.4c8cf32
+  resolution: "@rometools/cli-linux-arm64@npm:12.1.3-nightly.4c8cf32"
   conditions: os=linux & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rometools/cli-linux-x64@npm:12.1.3":
-  version: 12.1.3
-  resolution: "@rometools/cli-linux-x64@npm:12.1.3"
+"@rometools/cli-linux-x64@npm:12.1.3-nightly.4c8cf32":
+  version: 12.1.3-nightly.4c8cf32
+  resolution: "@rometools/cli-linux-x64@npm:12.1.3-nightly.4c8cf32"
   conditions: os=linux & cpu=x64
   languageName: node
   linkType: hard
 
-"@rometools/cli-win32-arm64@npm:12.1.3":
-  version: 12.1.3
-  resolution: "@rometools/cli-win32-arm64@npm:12.1.3"
+"@rometools/cli-win32-arm64@npm:12.1.3-nightly.4c8cf32":
+  version: 12.1.3-nightly.4c8cf32
+  resolution: "@rometools/cli-win32-arm64@npm:12.1.3-nightly.4c8cf32"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@rometools/cli-win32-x64@npm:12.1.3":
-  version: 12.1.3
-  resolution: "@rometools/cli-win32-x64@npm:12.1.3"
+"@rometools/cli-win32-x64@npm:12.1.3-nightly.4c8cf32":
+  version: 12.1.3-nightly.4c8cf32
+  resolution: "@rometools/cli-win32-x64@npm:12.1.3-nightly.4c8cf32"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -3403,7 +3403,6 @@ __metadata:
     react-query: ^3.39.3
     react-router: ^6.14.2
     react-router-dom: ^6.14.2
-    rome: ^12.1.3
     terser: ^5.19.2
     typescript: ^5.1.6
     vite: ^4.4.6
@@ -4347,8 +4346,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "common@workspace:packages/common"
   dependencies:
+    cross-env: ^7.0.3
     date-fns: ^2.30.0
-    rome: ^12.1.3
     typescript: ^5.1.6
   languageName: unknown
   linkType: soft
@@ -9448,16 +9447,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rome@npm:12.1.3, rome@npm:^12.1.3":
-  version: 12.1.3
-  resolution: "rome@npm:12.1.3"
+"rome@npm:nightly":
+  version: 12.1.3-nightly.4c8cf32
+  resolution: "rome@npm:12.1.3-nightly.4c8cf32"
   dependencies:
-    "@rometools/cli-darwin-arm64": 12.1.3
-    "@rometools/cli-darwin-x64": 12.1.3
-    "@rometools/cli-linux-arm64": 12.1.3
-    "@rometools/cli-linux-x64": 12.1.3
-    "@rometools/cli-win32-arm64": 12.1.3
-    "@rometools/cli-win32-x64": 12.1.3
+    "@rometools/cli-darwin-arm64": 12.1.3-nightly.4c8cf32
+    "@rometools/cli-darwin-x64": 12.1.3-nightly.4c8cf32
+    "@rometools/cli-linux-arm64": 12.1.3-nightly.4c8cf32
+    "@rometools/cli-linux-x64": 12.1.3-nightly.4c8cf32
+    "@rometools/cli-win32-arm64": 12.1.3-nightly.4c8cf32
+    "@rometools/cli-win32-x64": 12.1.3-nightly.4c8cf32
   dependenciesMeta:
     "@rometools/cli-darwin-arm64":
       optional: true
@@ -9473,7 +9472,7 @@ __metadata:
       optional: true
   bin:
     rome: bin/rome
-  checksum: 341e5520a23277bdc2571db279e72fe9427a95f4e3025cd215a989d381fe6690f6aa1c0fb9abbd318a8bfd85ff1cec2304e92b732329c8a46c69e259eeb080cc
+  checksum: eb3d2364c5fe397b1e93532fbc351423de37666acaf763bacab0fa1e7d6de0abe49aaf6688b2a8ee7255729d9595d43e90c07a36347eda90dcbd34f81219eea6
   languageName: node
   linkType: hard
 
@@ -9586,7 +9585,7 @@ __metadata:
   dependencies:
     cross-env: ^7.0.3
     nodemon: ^3.0.1
-    rome: 12.1.3
+    rome: nightly
     turbo: ^1.10.12
     typescript: ^5.1.6
   languageName: unknown
@@ -9743,7 +9742,6 @@ __metadata:
     pino-http: ^8.3.3
     qs: ^6.11.2
     reflect-metadata: ^0.1.13
-    rome: ^12.1.3
     serve-favicon: ^2.5.0
     sharp: ^0.32.3
     stripe: ^12.13.0
@@ -10991,7 +10989,6 @@ __metadata:
     redux-thunk: ^2.4.2
     reselect: ^4.1.8
     rollup-plugin-visualizer: ^5.9.2
-    rome: ^12.1.3
     terser: ^5.19.0
     typescript: ^5.1.6
     validator: ^13.9.0

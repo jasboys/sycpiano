@@ -8,18 +8,14 @@ import { latoFont } from 'src/styles/fonts';
 import { logoBlue } from 'src/styles/colors.js';
 import { useAppSelector } from 'src/hooks.js';
 
-const Container = styled.div(
-    latoFont(300),
-    pushed,
-    {
-        display: 'flex',
-        flexDirection: 'column',
-        marginLeft: 'auto',
-        marginRight: 'auto',
-        alignItems: 'center',
-        paddingTop: '2rem',
-    },
-);
+const Container = styled.div(latoFont(300), pushed, {
+    display: 'flex',
+    flexDirection: 'column',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    alignItems: 'center',
+    paddingTop: '2rem',
+});
 
 const Question = styled.div({
     fontWeight: 400,
@@ -29,23 +25,30 @@ const Answer = styled.div({
     padding: '1rem 0 1rem 1rem',
 });
 
-const Anchor: React.FC<{ href: string; children: React.ReactNode}> = (props) =>
-    props.href?.match('mailto') ?
-        <a css={{ textDecoration: 'underline' }} href={props.href} children={props.children} />
-        : <Link css={{ textDecoration: 'underline' }} to={props.href!} children={props.children} />;
+const Anchor: React.FC<{ href: string; children: React.ReactNode }> = (props) =>
+    props.href.match('mailto') ? (
+        <a
+            css={{ textDecoration: 'underline' }}
+            href={props.href}
+            children={props.children}
+        />
+    ) : (
+        <Link
+            css={{ textDecoration: 'underline' }}
+            to={props.href}
+            children={props.children}
+        />
+    );
 
-const Title = styled.div(
-    latoFont(400),
-    {
-        textAlign: 'left',
-        fontSize: '1.5rem',
-        color: logoBlue,
-        width: '100%',
-        maxWidth: 800,
-        paddingLeft: '1rem',
-        marginBottom: '0.5rem',
-    }
-);
+const Title = styled.div(latoFont(400), {
+    textAlign: 'left',
+    fontSize: '1.5rem',
+    color: logoBlue,
+    width: '100%',
+    maxWidth: 800,
+    paddingLeft: '1rem',
+    marginBottom: '0.5rem',
+});
 
 interface FAQ {
     question: string;
@@ -59,13 +62,13 @@ const FAQs: React.FC<Record<never, unknown>> = () => {
     React.useEffect(() => {
         const fetchData = async () => {
             try {
-                const {
-                    data
-                }: { data: FAQ[] } = await axios.get('/api/shop/faqs');
+                const { data }: { data: FAQ[] } = await axios.get(
+                    '/api/shop/faqs',
+                );
 
                 setFaqs(data);
             } catch (e) {
-                console.error(`Could not fetch faqs.`);
+                console.error('Could not fetch faqs.');
             }
         };
 
@@ -77,13 +80,13 @@ const FAQs: React.FC<Record<never, unknown>> = () => {
             <Container>
                 {!isHamburger && <Title>Frequently Asked Questions</Title>}
                 <ul css={{ maxWidth: 800 }}>
-                    {faqs.map((faq, idx) => (
-                        <li key={idx}>
+                    {faqs.map((faq) => (
+                        <li key={faq.question.substring(0, 16)}>
                             <Markdown
                                 options={{
                                     overrides: {
                                         span: Question,
-                                    }
+                                    },
                                 }}
                             >
                                 {faq.question}
@@ -94,7 +97,7 @@ const FAQs: React.FC<Record<never, unknown>> = () => {
                                     overrides: {
                                         p: Answer,
                                         a: Anchor,
-                                    }
+                                    },
                                 }}
                             >
                                 {faq.answer}

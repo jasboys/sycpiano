@@ -1,48 +1,46 @@
 {
-  "$schema": "https://json.schemastore.org/package.json",
-  "name": "seanchenpiano",
-  "version": "2.0.1",
-  "description": "Website Sean Chen Piano",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:jasboys/sycpiano.git"
-  },
-  "type": "module",
-  "license": "MIT",
-  "author": "Sean Chen, Andrew Chen, and Jason Chen",
-  "workspaces": [
-    "packages/*"
-  ],
-  "scripts": {
-    "build": "trash server/build && yarn buildServer && yarn buildApp",
-    "buildApp": "webpack --config webpack.prod.config.js",
-    "buildServer": "cd server && swc src -d build",
-    "dev": "turbo run watch",
-    "lintServer": "cd server && eslint src/**",
-    "start": "node server/build/app.js",
-    "startProd": "scripts/start.sh",
-    "typecheckServer": "cd server && tsc --noEmit --incremental --tsBuildInfoFile ./.tsbuildinfo",
-    "watch": "nodemon --config nodemon.json packages/server/build/app.js",
-    "watchAndLintCheckApp": "nodemon --config nodemon.frontend.json",
-    "watchAndLintCheckServer": "nodemon --config nodemon.backend.json",
-    "watchServer": "cd server && cross-env NODE_ENV=development swc src -d build -w",
-    "windowsDev": "powershell contrib/dev.ps1",
-    "bundle": "run-script-os",
-    "migrate": "npx dbmate -d ./server/migrations",
-    "bundle:win32": "del sycpiano.zip && git archive --format=zip --output ./sycpiano.zip main && 7z a -r sycpiano.zip web/build server/build",
-    "bundle:linux": "rm sycpiano.zip && git archive --format=zip --output ./sycpiano.zip main && zip -r sycpiano.zip web/build server/build"
-  },
-  "packageManager": "yarn@3.6.1",
-  "engines": {
-    "node": ">=16.0.0"
-  },
-  "dependencies": {
-    "cross-env": "^7.0.3",
-    "nodemon": "^3.0.1",
-    "turbo": "^1.10.12",
-    "typescript": "^5.1.6"
-  },
-  "devDependencies": {
-    "rome": "12.1.3"
-  }
+    "$schema": "https://json.schemastore.org/package.json",
+    "name": "seanchenpiano",
+    "version": "2.0.1",
+    "description": "Website Sean Chen Piano",
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:jasboys/sycpiano.git"
+    },
+    "type": "module",
+    "license": "MIT",
+    "author": "Sean Chen, Andrew Chen, and Jason Chen",
+    "workspaces": ["packages/*"],
+    "scripts": {
+        "build": "trash server/build && yarn buildServer && yarn buildApp",
+        "buildApp": "webpack --config webpack.prod.config.js",
+        "buildServer": "cd server && swc src -d build",
+        "dev": "turbo run watch",
+        "lintServer": "cd server && eslint src/**",
+        "start": "node server/build/app.js",
+        "startProd": "scripts/start.sh",
+        "typecheckServer": "cd server && tsc --noEmit --incremental --tsBuildInfoFile ./.tsbuildinfo",
+        "watch": "nodemon --config nodemon.json packages/server/build/app.js",
+        "watchAndLintCheckApp": "nodemon --config nodemon.frontend.json",
+        "watchAndLintCheckServer": "nodemon --config nodemon.backend.json",
+        "watchServer": "cd server && cross-env NODE_ENV=development swc src -d build -w",
+        "windowsDev": "powershell contrib/dev.ps1",
+        "bundle": "run-script-os",
+        "migrate": "npx dbmate -d ./server/migrations",
+        "bundle:win32": "del sycpiano.zip && git archive --format=zip --output ./sycpiano.zip main && 7z a -r sycpiano.zip web/build server/build",
+        "bundle:linux": "rm sycpiano.zip && git archive --format=zip --output ./sycpiano.zip main && zip -r sycpiano.zip web/build server/build"
+    },
+    "packageManager": "yarn@3.6.1",
+    "engines": {
+        "node": ">=16.0.0"
+    },
+    "dependencies": {
+        "cross-env": "^7.0.3",
+        "nodemon": "^3.0.1",
+        "turbo": "^1.10.12",
+        "typescript": "^5.1.6"
+    },
+    "devDependencies": {
+        "rome": "nightly"
+    }
 }

@@ -18,7 +18,7 @@ const eventTimeStyle = css({
     [toMedia(screenXS)]: {
         fontSize: '0.8rem',
         height: 24,
-    }
+    },
 });
 
 const clockStyle = css({
@@ -39,11 +39,20 @@ const timeStyle = css({
     },
 });
 
-export const EventTime: React.FC<Omit<EventDateTimeProps, 'rounded'>> = ({ dateTime, timezone, isMobile }) => (
+export const EventTime: React.FC<Omit<EventDateTimeProps, 'rounded'>> = ({
+    dateTime,
+    timezone,
+    isMobile,
+}) => (
     <div css={eventTimeStyle}>
         <div css={{ margin: '0 3px', display: 'flex' }}>
-            <ClockIconInstance css={clockStyle} date={utcToZonedTime(dateTime, timezone)} />
+            <ClockIconInstance
+                css={clockStyle}
+                date={utcToZonedTime(dateTime, timezone)}
+            />
         </div>
-        <div css={timeStyle}>{formatInTimeZone(parseISO(dateTime), timezone, 'h:mm a z')}</div>
+        <div css={timeStyle}>
+            {formatInTimeZone(parseISO(dateTime), timezone, 'h:mm a z')}
+        </div>
     </div>
 );

@@ -751,7 +751,8 @@ namespace GoogleCalendar {
             dateTime: datetime;
             timeZone?: string;
         };
-        [key: string]: any; /* eslint-disable-line @typescript-eslint/no-explicit-any */
+        // rome-ignore lint/suspicious/noExplicitAny: <explanation>
+        [key: string]: any;
     }
 
     export interface EventsList {
@@ -766,7 +767,7 @@ namespace GoogleCalendar {
             {
                 method: string;
                 minutes: number;
-            }
+            },
         ];
         nextPageToken: string;
         nextSyncToken: string;

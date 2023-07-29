@@ -5,16 +5,18 @@ import { getLastName } from '../hash.js';
 import { Music } from '../models/Music.js';
 
 interface GroupedMusic {
-    [key: string] : Music[];
+    [key: string]: Music[];
 }
 
 const musicCompare = (a: Music, b: Music) => {
-    let nameCompare = (getLastName(a.composer) ?? '').localeCompare(getLastName(b.composer) ?? '');
+    const nameCompare = (getLastName(a.composer) ?? '').localeCompare(
+        getLastName(b.composer) ?? '',
+    );
     if (nameCompare === 0) {
         return a.piece.localeCompare(b.piece);
     }
     return nameCompare;
-}
+};
 
 const groupMusic = (musicList: Loaded<Music, 'musicFiles'>[]): GroupedMusic => {
     const accumulator: GroupedMusic = {};
@@ -29,7 +31,11 @@ const groupMusic = (musicList: Loaded<Music, 'musicFiles'>[]): GroupedMusic => {
     return accumulator;
 };
 
-const musicHandler = async (_: Request, res: Response, __: NextFunction): Promise<void> => {
+const musicHandler = async (
+    _: Request,
+    res: Response,
+    __: NextFunction,
+): Promise<void> => {
     const results = await orm.em.find(Music, {}, { populate: ['musicFiles'] });
 
     // const [solo, concerto, chamber, composition, videogame] = await Promise.all([

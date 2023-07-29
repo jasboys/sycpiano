@@ -1,4 +1,14 @@
-import { AfterDelete, BeforeCreate, BeforeUpdate, Collection, Entity, type EventArgs, ManyToMany, PrimaryKey, Property } from '@mikro-orm/core';
+import {
+    AfterDelete,
+    BeforeCreate,
+    BeforeUpdate,
+    Collection,
+    Entity,
+    type EventArgs,
+    ManyToMany,
+    PrimaryKey,
+    Property,
+} from '@mikro-orm/core';
 import { createProduct, deleteProduct, updateProduct } from '../stripe.js';
 import { User } from './User.js';
 
@@ -6,7 +16,6 @@ export const ProductTypes = ['arrangement', 'cadenza', 'original'] as const;
 
 @Entity()
 export class Product {
-
     @PrimaryKey({ columnType: 'text' })
     id!: string;
 
@@ -46,7 +55,7 @@ export class Product {
     @Property({ columnType: 'text', nullable: true })
     permalink?: string;
 
-    @ManyToMany({ entity: () => User, mappedBy: u => u.products })
+    @ManyToMany({ entity: () => User, mappedBy: (u) => u.products })
     users = new Collection<User>(this);
 
     @BeforeCreate()

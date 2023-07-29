@@ -13,7 +13,9 @@ interface AsyncComponentState<P extends object> {
 // Waits for moduleProvider to return a promise that contains the AsyncModule.
 // Then sets the component of that module in the state to trigger mounting of
 // component in render(). Passes through props the props.
-export default class AsyncComponent<P extends object> extends React.PureComponent<AsyncComponentProps<P>, AsyncComponentState<P>> {
+export default class AsyncComponent<
+    P extends object,
+> extends React.PureComponent<AsyncComponentProps<P>, AsyncComponentState<P>> {
     state: AsyncComponentState<P> = {
         Component: undefined,
     };
@@ -29,8 +31,6 @@ export default class AsyncComponent<P extends object> extends React.PureComponen
     render() {
         const { Component } = this.state;
         const { moduleProvider, ...props } = this.props;
-        return (
-            (Component === undefined) ? null : <Component {...(props as P)} />
-        );
+        return Component === undefined ? null : <Component {...(props as P)} />;
     }
 }

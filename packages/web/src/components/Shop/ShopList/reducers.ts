@@ -10,16 +10,18 @@ interface FetchReturn {
 export const fetchShopItems = createAsyncThunk<FetchReturn, void, ThunkAPIType>(
     'shop/fetchItems',
     async () => {
-        const { data: items } = await axios.get<void, { data: ProductMap }>('/api/shop/items');
+        const { data: items } = await axios.get<void, { data: ProductMap }>(
+            '/api/shop/items',
+        );
         return {
-            items
+            items,
         };
     },
     {
         condition: (_, { getState }) => {
             return !getState().shop.isFetching && !getState().shop.fetchSuccess;
-        }
-    }
+        },
+    },
 );
 
 const initialState: ShopStateShape = {
@@ -45,37 +47,8 @@ const shopSlice = createSlice({
                 state.fetchSuccess = true;
                 state.items = action.payload.items;
             })
-            .addDefaultCase(state => state);
+            .addDefaultCase((state) => state);
     },
 });
 
 export const shopReducer = shopSlice.reducer;
-
-// export const shopReducer: Reducer<ShopStateShape, ActionTypes.Types> = (state: ShopStateShape = {
-//     isFetching: false,
-//     fetchSuccess: false,
-//     items: {},
-// }, action: ActionTypes.Types) => {
-//     switch (action.type) {
-//         case STORE_ACTIONS.FETCH_ITEMS_REQUEST:
-//             return {
-//                 ...state,
-//                 isFetching: true,
-//             };
-//         case STORE_ACTIONS.FETCH_ITEMS_ERROR:
-//             return {
-//                 ...state,
-//                 fetchSuccess: false,
-//                 isFetching: false,
-//             };
-//         case STORE_ACTIONS.FETCH_ITEMS_SUCCESS:
-//             return {
-//                 ...state,
-//                 isFetching: false,
-//                 fetchSuccess: true,
-//                 items: action.items,
-//             };
-//         default:
-//             return state;
-//     }
-// };

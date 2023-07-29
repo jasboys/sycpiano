@@ -12,7 +12,7 @@ const VIDEOS_URL = `${YOUTUBE_BASE_URL}/videos`;
 const MAX_PLAYLIST_ITEMS = 25;
 
 /* NOTE: We might want to consider moving all properties on the YouTube class
-** that don't need to be exposed to other modules into variables local to module. */
+ ** that don't need to be exposed to other modules into variables local to module. */
 
 declare global {
     interface Window {
@@ -40,7 +40,9 @@ class YouTube {
 
     public async executeWhenPlayerReady(func: () => void) {
         if (!this.playerReady) {
-            throw new Error('initializePlayerOnElement must first be called before calling this function');
+            throw new Error(
+                'initializePlayerOnElement must first be called before calling this function',
+            );
         }
 
         await this.playerReady;
@@ -49,30 +51,32 @@ class YouTube {
 
     public async initializePlayerOnElement(el: HTMLElement, id = 'player') {
         // reinitiaize playerReady deferred
-        this.playerReady = this.apiReady?.then(() => new Promise((resolve) => {
+        this.playerReady = this.apiReady?.then(
+            () =>
+                new Promise((resolve) => {
+                    // For now, only allow one player at a time.
+                    this.destroyPlayer();
 
-            // For now, only allow one player at a time.
-            this.destroyPlayer();
+                    // element to be replace by iframe
+                    const div = document.createElement('div');
+                    div.id = id;
+                    el.appendChild(div);
 
-            // element to be replace by iframe
-            const div = document.createElement('div');
-            div.id = id;
-            el.appendChild(div);
-
-            // create youtube player
-            this.player = new YT.Player(id, {
-                host: `${window.location.protocol}//www.youtube.com`,
-                events: {
-                    onReady: () => {
-                        resolve();
-                    },
-                },
-                playerVars: {
-                    rel: 0,
-                    origin: `${window.location.protocol}//${window.location.host}`,
-                },
-            });
-        }));
+                    // create youtube player
+                    this.player = new YT.Player(id, {
+                        host: `${window.location.protocol}//www.youtube.com`,
+                        events: {
+                            onReady: () => {
+                                resolve();
+                            },
+                        },
+                        playerVars: {
+                            rel: 0,
+                            origin: `${window.location.protocol}//${window.location.host}`,
+                        },
+                    });
+                }),
+        );
         return this.playerReady;
     }
 
@@ -94,24 +98,30 @@ class YouTube {
     }
 
     public getPlaylistItems() {
-        return axios.get<void, { data: { items: Youtube.PlaylistItem[] } }>(PLAYLIST_ITEMS_URL, {
-            params: {
-                key: API_KEY,
-                maxResults: MAX_PLAYLIST_ITEMS,
-                part: 'id, snippet',
-                playlistId: PLAYLIST_ID,
+        return axios.get<void, { data: { items: Youtube.PlaylistItem[] } }>(
+            PLAYLIST_ITEMS_URL,
+            {
+                params: {
+                    key: API_KEY,
+                    maxResults: MAX_PLAYLIST_ITEMS,
+                    part: 'id, snippet',
+                    playlistId: PLAYLIST_ID,
+                },
             },
-        });
+        );
     }
 
     public getVideos(listOfIds: string[]) {
-        return axios.get<void, { data: { items: Youtube.Video[] } }>(VIDEOS_URL, {
-            params: {
-                id: listOfIds.join(','),
-                key: API_KEY,
-                part: 'id, contentDetails, statistics',
+        return axios.get<void, { data: { items: Youtube.Video[] } }>(
+            VIDEOS_URL,
+            {
+                params: {
+                    id: listOfIds.join(','),
+                    key: API_KEY,
+                    part: 'id, contentDetails, statistics',
+                },
             },
-        });
+        );
     }
 
     public destroyPlayer() {

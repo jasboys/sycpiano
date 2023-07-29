@@ -53,7 +53,14 @@ const main = async () => {
     await (async () => {
         if (!isProduction) {
             const { default: fav } = await import('serve-favicon');
-            app.use(fav(path.resolve(process.env.IMAGE_ASSETS_DIR || './', 'favicon.png')));
+            app.use(
+                fav(
+                    path.resolve(
+                        process.env.IMAGE_ASSETS_DIR || './',
+                        'favicon.png',
+                    ),
+                ),
+            );
         }
     })();
 
@@ -61,67 +68,69 @@ const main = async () => {
 
     // helmet will add HSTS to force HTTPS connections, remove x-powered-by non-standard header,
     // sets x-frame-options header to disallow our content to be rendered in iframes.
-    app.use(helmet({
-        contentSecurityPolicy: {
-            directives: {
-                'script-src-attr': null,
-                'script-src': [
-                    "'self'",
-                    "'unsafe-inline'",
-                    "'unsafe-eval'",
-                    "http://localhost:5173",
-                    "http://localhost:5174",
-                    "https://js.stripe.com",
-                    "https://checkout.stripe.com",
-                    "https://www.youtube.com/iframe_api",
-                    "https://www.youtube.com/s/player/",
-                ],
-                'default-src': [
-                    "'self'",
-                    "https://js.stripe.com/v3/",
-                    "https://www.googleapis.com/youtube/v3/",
-                    "https://www.youtube.com/embed/",
-                ],
-                'img-src': [
-                    "'self'",
-                    "https:",
-                    "data:",
-                    // "https://i.ytimg.com/vi/",
-                    // "https://*.stripe.com",
-                    // "https://*.googleapis.com",
-                    // "https://*.gstatic.com",
-                    // "*.google.com",
-                    // "*.googleusercontent.com"
-                ],
-                'connect-src': [
-                    "'self'",
-                    "ws://localhost:5173/",
-                    "ws://localhost:5174/",
-                    "https://api.stripe.com",
-                    "https://checkout.stripe.com",
-                    "https://www.googleapis.com/youtube/v3/",
-                    "https://*.googleapis.com",
-                    "*.google.com",
-                    "*.googleusercontent.com",
-                    "https://*.gstatic.com",
-                    "data:",
-                    "blob:",
-                ],
-                'frame-src': [
-                    "'self'",
-                    "https://js.stripe.com",
-                    "https://www.youtube.com",
-                    "https://hooks.stripe.com",
-                    "https://checkout.stripe.com"
-                ]
+    app.use(
+        helmet({
+            contentSecurityPolicy: {
+                directives: {
+                    'script-src-attr': null,
+                    'script-src': [
+                        "'self'",
+                        "'unsafe-inline'",
+                        "'unsafe-eval'",
+                        'http://localhost:5173',
+                        'http://localhost:5174',
+                        'https://js.stripe.com',
+                        'https://checkout.stripe.com',
+                        'https://www.youtube.com/iframe_api',
+                        'https://www.youtube.com/s/player/',
+                    ],
+                    'default-src': [
+                        "'self'",
+                        'https://js.stripe.com/v3/',
+                        'https://www.googleapis.com/youtube/v3/',
+                        'https://www.youtube.com/embed/',
+                    ],
+                    'img-src': [
+                        "'self'",
+                        'https:',
+                        'data:',
+                        // "https://i.ytimg.com/vi/",
+                        // "https://*.stripe.com",
+                        // "https://*.googleapis.com",
+                        // "https://*.gstatic.com",
+                        // "*.google.com",
+                        // "*.googleusercontent.com"
+                    ],
+                    'connect-src': [
+                        "'self'",
+                        'ws://localhost:5173/',
+                        'ws://localhost:5174/',
+                        'https://api.stripe.com',
+                        'https://checkout.stripe.com',
+                        'https://www.googleapis.com/youtube/v3/',
+                        'https://*.googleapis.com',
+                        '*.google.com',
+                        '*.googleusercontent.com',
+                        'https://*.gstatic.com',
+                        'data:',
+                        'blob:',
+                    ],
+                    'frame-src': [
+                        "'self'",
+                        'https://js.stripe.com',
+                        'https://www.youtube.com',
+                        'https://hooks.stripe.com',
+                        'https://checkout.stripe.com',
+                    ],
+                },
             },
-        },
-        crossOriginEmbedderPolicy: false
-    }));
+            crossOriginEmbedderPolicy: false,
+        }),
+    );
 
     const ormHandler: RequestHandler = (_, __, next) => {
         RequestContext.create(orm.em, next);
-    }
+    };
 
     // Non-admin routes.
     // Don't inject bodyParser unless needed
@@ -134,9 +143,22 @@ const main = async () => {
         if (!process.env.MUSIC_ASSETS_DIR || !process.env.IMAGE_ASSETS_DIR) {
             throw Error('Necessary environmental variables not found');
         }
-        app.use('/static/music', express.static(path.resolve(rootPath.toString(), process.env.MUSIC_ASSETS_DIR)));
-        app.use('/static/images', express.static(path.resolve(rootPath.toString(), process.env.IMAGE_ASSETS_DIR)));
-        app.use('/static', express.static(path.resolve(rootPath.toString(), 'assets')));
+        app.use(
+            '/static/music',
+            express.static(
+                path.resolve(rootPath.toString(), process.env.MUSIC_ASSETS_DIR),
+            ),
+        );
+        app.use(
+            '/static/images',
+            express.static(
+                path.resolve(rootPath.toString(), process.env.IMAGE_ASSETS_DIR),
+            ),
+        );
+        app.use(
+            '/static',
+            express.static(path.resolve(rootPath.toString(), 'assets')),
+        );
         // app.use('/static', express.static(path.resolve(rootPath.toString(), 'web/build')));
         // app.use('/static', createProxyMiddleware({
         //     target: 'http://localhost:5173',
@@ -152,14 +174,27 @@ const main = async () => {
         path.resolve(rootPath.toString(), 'partials'),
     ]);
 
-    let allowedOrigins = [/localhost:\d{4}$/, /https:\/\/\w*.googleapis\.com.*/];
+    let allowedOrigins = [
+        /localhost:\d{4}$/,
+        /https:\/\/\w*.googleapis\.com.*/,
+    ];
     if (process.env.CORS_ORIGINS) {
-        allowedOrigins = allowedOrigins.concat(process.env.CORS_ORIGINS.split(',').map(v => new RegExp(v)));
+        allowedOrigins = allowedOrigins.concat(
+            process.env.CORS_ORIGINS.split(',').map((v) => new RegExp(v)),
+        );
     }
 
     const corsOptions = {
         origin: allowedOrigins,
-        allowedHeaders: ['Access-Control-Allow-Headers', 'Authorization', 'X-Requested-With', 'Content-Type', 'X-Total-Count', 'Origin', 'Accept'],
+        allowedHeaders: [
+            'Access-Control-Allow-Headers',
+            'Authorization',
+            'X-Requested-With',
+            'Content-Type',
+            'X-Total-Count',
+            'Origin',
+            'Accept',
+        ],
         optionsSuccessStatus: 204,
         maxAge: 86400,
         credentials: true,
@@ -179,13 +214,7 @@ const main = async () => {
     app.use(/\/auth/, csrfMiddleware, adminMiddlewares, AuthRouter);
 
     // Custom api endpoint
-    app.use(
-        /\/rest/,
-        adminMiddlewares,
-        authAndGetRole,
-        checkAdmin,
-        AdminRest
-    );
+    app.use(/\/rest/, adminMiddlewares, authAndGetRole, checkAdmin, AdminRest);
 
     // Resize images
     app.use(/\/resized/, Resized);
@@ -216,8 +245,8 @@ const main = async () => {
                         <script type="module" src="http://localhost:5174/@vite/client"></script>
                         <script type="module" src="http://localhost:5174/main.tsx"></script>
                     `,
-                }
-            })
+                },
+            });
         },
         // createProxyMiddleware({
         //     target: `http://127.0.0.1:${process.env.ADMIN_PORT}`,
@@ -232,7 +261,9 @@ const main = async () => {
     app.get('/health-check', (_req, res) => res.sendStatus(200));
 
     if (!isProduction) {
-        app.get('/pianonotes', (_req, res) => res.redirect('https://seanchenpiano.com/pianonotes'));
+        app.get('/pianonotes', (_req, res) =>
+            res.redirect('https://seanchenpiano.com/pianonotes'),
+        );
     }
 
     app.get(
@@ -240,13 +271,21 @@ const main = async () => {
         cors(corsOptions),
         cookieParser(process.env.COOKIE_SECRET),
         async (req, res) => {
-            delete req.query.fbclid;    // NO FACEBOOK
-            const { sanitize = '', ...meta } = await getMetaFromPathAndSanitize(req.path, req.query.q as string);
+            const { fbclid, ...queries } = req.query;
+            req.query = queries; // NO FACEBOOK
+            const { sanitize = '', ...meta } = await getMetaFromPathAndSanitize(
+                req.path,
+                req.query.q as string,
+            );
             if (sanitize) {
                 res.redirect(req.url.replace(`/${sanitize}`, ''));
                 res.end();
             } else {
-                meta.image = meta.image ?? `https://${req.get('host')}/static/images/syc_chair_meta.jpg`;
+                meta.image =
+                    meta.image ??
+                    `https://${req.get(
+                        'host',
+                    )}/static/images/syc_chair_meta.jpg`;
                 res.render('index', {
                     ...meta,
                     twitter: meta,
@@ -254,7 +293,7 @@ const main = async () => {
                         ...meta,
                         image: meta.image.replace('https', 'http'),
                         secure_image: meta.image,
-                        url: 'https://' + req.get('host') + req.originalUrl
+                        url: `https://${req.get('host')}${req.originalUrl}`,
                     },
                     vite: {
                         refresh: `
@@ -272,10 +311,11 @@ const main = async () => {
                             <script type="module" src="http://localhost:5173/@vite/client"></script>
                             <script type="module" src="http://localhost:5173/main.tsx"></script>
                         `,
-                    }
+                    },
                 });
             }
-        });
+        },
+    );
 
     const host = process.env.HOST ?? '127.0.0.1';
 
@@ -283,25 +323,26 @@ const main = async () => {
 
     if (!isProduction) {
         if (!process.env.DEV_HTTPS_CERT_PATH || !process.env.DEV_HTTPS_PORT) {
-            console.log('Necessary env paths not found for HTTPS; only using HTTP.');
+            console.log(
+                'Necessary env paths not found for HTTPS; only using HTTP.',
+            );
         } else {
             const devPort = parseInt(process.env.DEV_HTTPS_PORT, 10);
             const https = await import('https');
             const httpsOptions = {
-                key: readFileSync(path.resolve(
-                    process.env.DEV_HTTPS_CERT_PATH,
-                    'cert.key'
-                )),
-                cert: readFileSync(path.resolve(
-                    process.env.DEV_HTTPS_CERT_PATH,
-                    'cert.pem'
-                )),
+                key: readFileSync(
+                    path.resolve(process.env.DEV_HTTPS_CERT_PATH, 'cert.key'),
+                ),
+                cert: readFileSync(
+                    path.resolve(process.env.DEV_HTTPS_CERT_PATH, 'cert.pem'),
+                ),
             };
             const server = https.createServer(httpsOptions, app);
-            server.listen(devPort, host, () => console.log(`App listening for https on port ${devPort}.`));
+            server.listen(devPort, host, () =>
+                console.log(`App listening for https on port ${devPort}.`),
+            );
         }
-
     }
-}
+};
 
 main();

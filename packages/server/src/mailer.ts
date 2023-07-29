@@ -9,7 +9,8 @@ import * as path from 'path';
 import orm from './database.js';
 import { Product } from './models/Product.js';
 
-if (process.env.SMTP_HOST === undefined ||
+if (
+    process.env.SMTP_HOST === undefined ||
     process.env.SMTP_PASSWORD === undefined ||
     process.env.SMTP_PORT === undefined ||
     process.env.SMTP_USERNAME === undefined ||
@@ -32,14 +33,17 @@ const transportOptions = {
     dkim: {
         domainName: 'seanchenpiano.com',
         keySelector: 'email',
-        privateKey: readFileSync(path.resolve(process.env.DKIM_PRIVATE_KEY_FILE), 'utf8'),
+        privateKey: readFileSync(
+            path.resolve(process.env.DKIM_PRIVATE_KEY_FILE),
+            'utf8',
+        ),
     },
 };
 
-export const duplicateEmailNotification = async (username: string): Promise<void> => {
-    if (
-        process.env.IMAGE_ASSETS_DIR === undefined
-    ) {
+export const duplicateEmailNotification = async (
+    username: string,
+): Promise<void> => {
+    if (process.env.IMAGE_ASSETS_DIR === undefined) {
         throw new Error('Missing env vars');
     }
     const transport = nodemailer.createTransport(transportOptions);
@@ -48,14 +52,17 @@ export const duplicateEmailNotification = async (username: string): Promise<void
         path: string;
         cid?: string;
     }[] = [
-            {
-                filename: 'logo.png',
-                path: path.resolve(process.env.IMAGE_ASSETS_DIR, 'email_logo.png'),
-                cid: 'logo@seanchenpiano.com',
-            },
-        ];
+        {
+            filename: 'logo.png',
+            path: path.resolve(process.env.IMAGE_ASSETS_DIR, 'email_logo.png'),
+            cid: 'logo@seanchenpiano.com',
+        },
+    ];
 
-    const template = await fsAsync.readFile(path.resolve(root.toString(), 'web/partials', 'notificationEmail.html'), 'utf8');
+    const template = await fsAsync.readFile(
+        path.resolve(root.toString(), 'web/partials', 'notificationEmail.html'),
+        'utf8',
+    );
 
     const html = mustache.render(template, {
         username,
@@ -63,12 +70,11 @@ export const duplicateEmailNotification = async (username: string): Promise<void
         year: getYear(new Date()),
     });
 
-
     const message: nodemailer.SendMailOptions = {
         from: 'Sean Chen Piano <seanchen@seanchenpiano.com>',
         replyTo: 'seanchen@seanchenpiano.com',
         to: username,
-        subject: `[Sean Chen Piano] Duplicate Account Registration`,
+        subject: '[Sean Chen Piano] Duplicate Account Registration',
         html,
         attachments,
     };
@@ -79,12 +85,12 @@ export const duplicateEmailNotification = async (username: string): Promise<void
         console.log(attachments);
         console.log(result);
     }
-}
+};
 
-export const emailRegisterNotification = async (username: string): Promise<void> => {
-    if (
-        process.env.IMAGE_ASSETS_DIR === undefined
-    ) {
+export const emailRegisterNotification = async (
+    username: string,
+): Promise<void> => {
+    if (process.env.IMAGE_ASSETS_DIR === undefined) {
         throw new Error('Missing env vars');
     }
     const transport = nodemailer.createTransport(transportOptions);
@@ -93,27 +99,30 @@ export const emailRegisterNotification = async (username: string): Promise<void>
         path: string;
         cid?: string;
     }[] = [
-            {
-                filename: 'logo.png',
-                path: path.resolve(process.env.IMAGE_ASSETS_DIR, 'email_logo.png'),
-                cid: 'logo@seanchenpiano.com',
-            },
-        ];
+        {
+            filename: 'logo.png',
+            path: path.resolve(process.env.IMAGE_ASSETS_DIR, 'email_logo.png'),
+            cid: 'logo@seanchenpiano.com',
+        },
+    ];
 
-    const template = await fsAsync.readFile(path.resolve(root.toString(), 'web/partials', 'notificationEmail.html'), 'utf8');
+    const template = await fsAsync.readFile(
+        path.resolve(root.toString(), 'web/partials', 'notificationEmail.html'),
+        'utf8',
+    );
 
     const html = mustache.render(template, {
         username,
-        notification: `Thank you for registering an account with Sean Chen Piano. Once you purchase scores, they will be downloadable from the website when logged in. You will also receive an email with the scores upon purchase.`,
+        notification:
+            'Thank you for registering an account with Sean Chen Piano. Once you purchase scores, they will be downloadable from the website when logged in. You will also receive an email with the scores upon purchase.',
         year: getYear(new Date()),
     });
-
 
     const message: nodemailer.SendMailOptions = {
         from: 'Sean Chen Piano <seanchen@seanchenpiano.com>',
         replyTo: 'seanchen@seanchenpiano.com',
         to: username,
-        subject: `[Sean Chen Piano] Account Registration`,
+        subject: '[Sean Chen Piano] Account Registration',
         html,
         attachments,
     };
@@ -127,28 +136,33 @@ export const emailRegisterNotification = async (username: string): Promise<void>
 };
 
 // To email a manual request, omit clientRef (or pass falsey value)
-export const emailPDFs = async (productIDs: string[], email: string, clientRef?: string): Promise<void> => {
+export const emailPDFs = async (
+    productIDs: string[],
+    email: string,
+    clientRef?: string,
+): Promise<void> => {
     try {
-        if (process.env.PRODUCTS_DIR === undefined ||
+        if (
+            process.env.PRODUCTS_DIR === undefined ||
             process.env.IMAGE_ASSETS_DIR === undefined
         ) {
             throw new Error('Missing env vars');
         }
         const transport = nodemailer.createTransport(transportOptions);
 
-        const products = await orm.em.find(
-            Product,
-            {
-                id: {
-                    $in: productIDs,
-                },
+        const products = await orm.em.find(Product, {
+            id: {
+                $in: productIDs,
             },
-        );
+        });
 
         let attachments: Attachment[] = [
             {
                 filename: 'logo.png',
-                path: path.resolve(process.env.IMAGE_ASSETS_DIR, 'email_logo.png'),
+                path: path.resolve(
+                    process.env.IMAGE_ASSETS_DIR,
+                    'email_logo.png',
+                ),
                 cid: 'logo@seanchenpiano.com',
             },
         ];
@@ -157,12 +171,15 @@ export const emailPDFs = async (productIDs: string[], email: string, clientRef?:
                 ...attachments,
                 {
                     filename: products[0].file,
-                    path: path.resolve(process.env.PRODUCTS_DIR, products[0].file),
+                    path: path.resolve(
+                        process.env.PRODUCTS_DIR,
+                        products[0].file,
+                    ),
                 },
             ];
         } else {
             const zip = archiver('zip', {
-                zlib: { level: 9 }
+                zlib: { level: 9 },
             });
 
             zip.on('warning', function (err) {
@@ -181,7 +198,9 @@ export const emailPDFs = async (productIDs: string[], email: string, clientRef?:
             });
 
             products.forEach((prod) => {
-                zip.file(path.resolve(process.env.PRODUCTS_DIR!, prod.file), { name: prod.file });
+                zip.file(path.resolve(process.env.PRODUCTS_DIR, prod.file), {
+                    name: prod.file,
+                });
             });
             await zip.finalize();
             attachments = [
@@ -193,7 +212,10 @@ export const emailPDFs = async (productIDs: string[], email: string, clientRef?:
             ];
         }
 
-        const template = await fsAsync.readFile(path.resolve(root.toString(), 'web/partials', 'purchaseEmail.html'), 'utf8');
+        const template = await fsAsync.readFile(
+            path.resolve(root.toString(), 'web/partials', 'purchaseEmail.html'),
+            'utf8',
+        );
 
         const html = mustache.render(template, {
             products: products.map((prod) => prod.name),
@@ -201,12 +223,13 @@ export const emailPDFs = async (productIDs: string[], email: string, clientRef?:
             year: getYear(new Date()),
         });
 
-
         const message: nodemailer.SendMailOptions = {
             from: 'Sean Chen Piano <seanchen@seanchenpiano.com>',
             replyTo: 'seanchen@seanchenpiano.com',
             to: email,
-            subject: `[Sean Chen Piano] ${clientRef ? 'Your recent' : 'Your request for previously'} purchased PDFs from seanchenpiano.com.`,
+            subject: `[Sean Chen Piano] ${
+                clientRef ? 'Your recent' : 'Your request for previously'
+            } purchased PDFs from seanchenpiano.com.`,
             html,
             attachments,
         };

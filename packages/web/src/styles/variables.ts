@@ -4,15 +4,15 @@ import decamelize from 'decamelize';
 import { CSSVariableKeys } from 'src/types';
 
 export const camel2prop = (property: CSSVariableKeys) => {
-    return `--` + decamelize(property, { separator: '-' });
-}
+    return `--${decamelize(property, { separator: '-' })}`;
+};
 
 export const camel2var = (property: CSSVariableKeys) => {
     return `var(${camel2prop(property)})`;
 };
 
 export const toPx = (value: string | number) => {
-    return (typeof value === 'number') ? value + 'px' : value;
+    return typeof value === 'number' ? `${value}px` : value;
 };
 
 // true and false allow indexing using hiDpx boolean
@@ -51,7 +51,7 @@ export const CSSVariables = {
     playlistContainerWidth: desktopPlaylistWidth,
     // playlistContainerWidthMedium: '45vw',
     playlistTogglerWidth: 24,
-    playlistWidth: `calc(var(--playlist-container-width) - var(--playlist-toggler-width))`,
+    playlistWidth: 'calc(var(--playlist-container-width) - var(--playlist-toggler-width))',
     // playlistWidthMedium: `calc(${camel2var('playlistContainerWidthMedium')} - ${camel2var('playlistTogglerWidth')})`,
     playlistPadding,
     cartWidth,

@@ -1,8 +1,27 @@
-import { AfterDelete, BeforeCreate, BeforeUpdate, Collection, Entity, Index, ManyToMany, OneToOne, PrimaryKey, Property } from '@mikro-orm/core';
-import type { EventArgs, Rel } from '@mikro-orm/core';
+import {
+    AfterDelete,
+    BeforeCreate,
+    BeforeUpdate,
+    Collection,
+    Entity,
+    Index,
+    ManyToMany,
+    OneToOne,
+    PrimaryKey,
+    Property,
+} from '@mikro-orm/core';
+import type { EventArgs } from '@mikro-orm/core';
 import { isEmpty } from 'lodash-es';
 
-import { createCalendarEvent, deleteCalendarEvent, getImageFromMetaTag, getLatLng, getTimeZone, transformModelToGoogle, updateCalendar } from '../gapi/calendar.js';
+import {
+    createCalendarEvent,
+    deleteCalendarEvent,
+    getImageFromMetaTag,
+    getLatLng,
+    getTimeZone,
+    transformModelToGoogle,
+    updateCalendar,
+} from '../gapi/calendar.js';
 import { getPhotos } from '../gapi/places.js';
 import { CalendarCollaborator } from './CalendarCollaborator.js';
 import { CalendarPiece } from './CalendarPiece.js';
@@ -10,17 +29,13 @@ import { CalendarSearchMatview } from './CalendarSearchMatview.js';
 import { Collaborator } from './Collaborator.js';
 import { Piece } from './Piece.js';
 
-
 async function beforeCreateHook(args: EventArgs<Calendar>) {
     console.log('[Hook: BeforeCreate] Start');
-    const {
-        dateTime,
-        website,
-        imageUrl,
-        location
-    } = args.entity;
+    const { dateTime, website, imageUrl, location } = args.entity;
 
-    console.log(`[Hook: BeforeCreate] Fetching coord and tz for location: ${location}`);
+    console.log(
+        `[Hook: BeforeCreate] Fetching coord and tz for location: ${location}`,
+    );
     let timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     if (location) {
         const { latlng } = await getLatLng(location);
@@ -28,33 +43,27 @@ async function beforeCreateHook(args: EventArgs<Calendar>) {
     }
     console.log(`[Hook: BeforeCreate] timezone: ${timezone}`);
 
-    console.log(`[Hook: BeforeCreate] Fetching image url from tags`);
+    console.log('[Hook: BeforeCreate] Fetching image url from tags');
     if (!imageUrl && website) {
-        const fetchedImageUrl = await getImageFromMetaTag(website)
+        const fetchedImageUrl = await getImageFromMetaTag(website);
         args.entity.imageUrl = fetchedImageUrl;
-        args.entity.usePlacePhoto = (fetchedImageUrl === '');
+        args.entity.usePlacePhoto = fetchedImageUrl === '';
     }
-    console.log(`[Hook: BeforeCreate] Finished image url from tags.`);
+    console.log('[Hook: BeforeCreate] Finished image url from tags.');
 
-    console.log(`[Hook: BeforeCreate] Fetching photos from Places API`);
+    console.log('[Hook: BeforeCreate] Fetching photos from Places API');
     if (location) {
         try {
-            const otherCal = await args.em.findOne(
-                Calendar,
-                {
-                    $and: [
-                        { location },
-                        { photoReference: { $ne: null } },
-                    ],
-                },
-            );
-            if (!!otherCal) {
-                console.log(`[Hook: BeforeCreate] Found existing photo.`);
+            const otherCal = await args.em.findOne(Calendar, {
+                $and: [{ location }, { photoReference: { $ne: null } }],
+            });
+            if (otherCal) {
+                console.log('[Hook: BeforeCreate] Found existing photo.');
                 args.entity.photoReference = otherCal.photoReference;
                 args.entity.placeId = otherCal.placeId;
             } else {
                 const { photoReference, placeId } = await getPhotos(location);
-                console.log(`[Hook: BeforeCreate]: Parsed photo from API.`);
+                console.log('[Hook: BeforeCreate]: Parsed photo from API.');
                 args.entity.photoReference = photoReference;
                 args.entity.placeId = placeId;
             }
@@ -64,12 +73,16 @@ async function beforeCreateHook(args: EventArgs<Calendar>) {
             args.entity.placeId = '';
         }
     }
-    console.log(`[Hook: BeforeCreate] Done with Places API`);
+    console.log('[Hook: BeforeCreate] Done with Places API');
 
     /* eslint-disable require-atomic-updates */
     args.entity.timezone = timezone;
     /* eslint-enable require-atomic-updates */
-    console.log(`[Hook: BeforeCreate] Creating google calendar event '${args.entity.name}' on ${args.entity.dateTime.toISOString()}`);
+    console.log(
+        `[Hook: BeforeCreate] Creating google calendar event '${
+            args.entity.name
+        }' on ${args.entity.dateTime.toISOString()}`,
+    );
     const googleParams = transformModelToGoogle(args.entity);
     const createResponse = await createCalendarEvent(args.em, googleParams);
 
@@ -78,21 +91,27 @@ async function beforeCreateHook(args: EventArgs<Calendar>) {
     /* eslint-disable require-atomic-updates */
     args.entity.id = id;
     /* eslint-enable require-atomic-updates */
-    console.log(`[Hook: BeforeCreate] End`);
+    console.log('[Hook: BeforeCreate] End');
 }
 
 async function beforeUpdateHook(args: EventArgs<Calendar>) {
+    if (!args.changeSet) {
+        return Promise.resolve();
+    }
     console.log('[Hook: BeforeUpdate] Start');
 
     let timezone = args.entity.timezone;
 
-    const locationChanged = !!args.changeSet?.payload?.location || timezone === null;
+    const locationChanged =
+        !!args.changeSet?.payload?.location || timezone === null;
     const websiteChanged = !!args.changeSet?.payload?.website;
     const dateTime = args.entity.dateTime;
     const location = args.entity.location;
 
     if (locationChanged || timezone === undefined) {
-        console.log('[Hook: BeforeUpdate] Location changed or timezone was undefined, fetching timezone');
+        console.log(
+            '[Hook: BeforeUpdate] Location changed or timezone was undefined, fetching timezone',
+        );
 
         const location = args.entity.location;
         const { latlng } = await getLatLng(location);
@@ -101,57 +120,52 @@ async function beforeUpdateHook(args: EventArgs<Calendar>) {
     }
 
     if (timezone !== args.entity.timezone) {
-        args.changeSet!.payload.timezone = timezone;
+        args.changeSet.payload.timezone = timezone;
     }
 
     if (locationChanged) {
-        console.log(`[Hook: BeforeUpdate] Fetching photos from Places API`);
+        console.log('[Hook: BeforeUpdate] Fetching photos from Places API');
         try {
-            const otherCal = await args.em.findOne(
-                Calendar,
-                {
-                    $and: [
-                        { location },
-                        { photoReference: { $ne: null } },
-                    ],
-                },
-            );
-            if (!!otherCal) {
-                console.log(`[Hook: BeforeUpdate] Found existing photo.`);
-                args.changeSet!.payload.photoReference = otherCal.photoReference;
-                args.changeSet!.payload.placeId = otherCal.placeId;
+            const otherCal = await args.em.findOne(Calendar, {
+                $and: [{ location }, { photoReference: { $ne: null } }],
+            });
+            if (otherCal) {
+                console.log('[Hook: BeforeUpdate] Found existing photo.');
+                args.changeSet.payload.photoReference = otherCal.photoReference;
+                args.changeSet.payload.placeId = otherCal.placeId;
             } else {
                 const { photoReference, placeId } = await getPhotos(location);
-                console.log(`[Hook: BeforeUpdate]: Parsed photo from API.`);
-                args.changeSet!.payload.photoReference = photoReference;
-                args.changeSet!.payload.placeId = placeId;
+                console.log('[Hook: BeforeUpdate]: Parsed photo from API.');
+                args.changeSet.payload.photoReference = photoReference;
+                args.changeSet.payload.placeId = placeId;
             }
         } catch (e) {
             console.log(`[Hook: BeforeUpdate] ${e}`);
-            args.changeSet!.payload.photoReference = '';
-            args.changeSet!.payload.placeId = '';
+            args.changeSet.payload.photoReference = '';
+            args.changeSet.payload.placeId = '';
         }
-        console.log(`[Hook: BeforeUpdate] Done with Places API`);
+        console.log('[Hook: BeforeUpdate] Done with Places API');
     }
 
     if (websiteChanged && !args.entity.imageUrl && args.entity.website) {
-        console.log(`[Hook: BeforeUpdate] Fetching image url from tags`);
-        const fetchedImageUrl = await getImageFromMetaTag(args.entity.website)
-        args.changeSet!.payload.imageUrl = fetchedImageUrl;
-        args.changeSet!.payload.usePlacePhoto = (fetchedImageUrl === '');
+        console.log('[Hook: BeforeUpdate] Fetching image url from tags');
+        const fetchedImageUrl = await getImageFromMetaTag(args.entity.website);
+        args.changeSet.payload.imageUrl = fetchedImageUrl;
+        args.changeSet.payload.usePlacePhoto = fetchedImageUrl === '';
     }
 
     if (!isEmpty(args.changeSet?.payload)) {
         const data = transformModelToGoogle(args.entity);
-        console.log(`[Hook: BeforeUpdate] Updating google calendar event: ${args.entity.id}`);
+        console.log(
+            `[Hook: BeforeUpdate] Updating google calendar event: ${args.entity.id}`,
+        );
         await updateCalendar(args.em, data);
     }
-    console.log(`[Hook: BeforeUpdate] End\n`);
+    console.log('[Hook: BeforeUpdate] End\n');
 }
 
 @Entity()
 export class Calendar {
-
     @PrimaryKey({ columnType: 'text' })
     id!: string;
 
@@ -192,10 +206,18 @@ export class Calendar {
     @Property({ nullable: true, default: true })
     usePlacePhoto?: boolean = true;
 
-    @ManyToMany({ entity: () => Piece, pivotEntity: () => CalendarPiece, fixedOrderColumn: 'order' })
+    @ManyToMany({
+        entity: () => Piece,
+        pivotEntity: () => CalendarPiece,
+        fixedOrderColumn: 'order',
+    })
     pieces = new Collection<Piece>(this);
 
-    @ManyToMany({ entity: () => Collaborator, pivotEntity: () => CalendarCollaborator, fixedOrderColumn: 'order' })
+    @ManyToMany({
+        entity: () => Collaborator,
+        pivotEntity: () => CalendarCollaborator,
+        fixedOrderColumn: 'order',
+    })
     collaborators = new Collection<Collaborator>(this);
 
     @OneToOne({ entity: () => CalendarSearchMatview, joinColumn: 'id' })
@@ -213,9 +235,11 @@ export class Calendar {
 
     @AfterDelete()
     async AfterDelete(args: EventArgs<Calendar>) {
-        console.log(`[Hook: AfterDelete] Start`);
+        console.log('[Hook: AfterDelete] Start');
         await deleteCalendarEvent(args.em, args.entity.id);
-        console.log(`[Hook: AfterDelete] Deleted calendar id: ${args.entity.id}`);
+        console.log(
+            `[Hook: AfterDelete] Deleted calendar id: ${args.entity.id}`,
+        );
     }
 }
 

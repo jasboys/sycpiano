@@ -1,4 +1,9 @@
-import { EntityProperty, LoadStrategy, MikroORM, ReflectMetadataProvider } from '@mikro-orm/core';
+import {
+    EntityProperty,
+    LoadStrategy,
+    MikroORM,
+    ReflectMetadataProvider,
+} from '@mikro-orm/core';
 import { PostgreSqlDriver, PostgreSqlPlatform } from '@mikro-orm/postgresql';
 
 import * as dotenv from 'dotenv';
@@ -6,9 +11,7 @@ dotenv.config({ override: true });
 
 import config from './config/config.js';
 
-const {
-    databaseUrl
-} = config;
+const { databaseUrl } = config;
 
 class FixedPlatform extends PostgreSqlPlatform {
     override getFullTextWhereClause(prop: EntityProperty): string {
@@ -21,7 +24,7 @@ class FixedPlatform extends PostgreSqlPlatform {
 }
 
 export class FixedPostgresql extends PostgreSqlDriver {
-    protected readonly platform = new FixedPlatform;
+    protected readonly platform = new FixedPlatform();
 }
 
 const orm = await MikroORM.init<FixedPostgresql>({
@@ -31,7 +34,7 @@ const orm = await MikroORM.init<FixedPostgresql>({
     clientUrl: databaseUrl,
     debug: process.env.NODE_ENV === 'development',
     driver: FixedPostgresql,
-    loadStrategy: LoadStrategy.JOINED
+    loadStrategy: LoadStrategy.JOINED,
 });
 
 export default orm;

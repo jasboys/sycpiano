@@ -10,10 +10,10 @@
     "watch": "cross-env NODE_ENV=development tsc --watch"
   },
   "devDependencies": {
-    "rome": "^12.1.3",
     "typescript": "^5.1.6"
   },
   "dependencies": {
+    "cross-env": "^7.0.3",
     "date-fns": "^2.30.0"
   }
 }

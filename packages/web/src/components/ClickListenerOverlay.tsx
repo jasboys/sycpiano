@@ -13,8 +13,9 @@ const ClickDiv = styled.div({
     top: 0,
 });
 
-export const ClickListenerOverlay: React.FC<ClickListenerProps> = ({ onClick, className }) => {
-    return (
-        <ClickDiv onClick={onClick} className={className} />
-    );
+export const ClickListenerOverlay: React.FC<ClickListenerProps> = ({
+    onClick,
+    className,
+}) => {
+    return <ClickDiv onClick={onClick} className={className} />;
 };

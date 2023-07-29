@@ -1,7 +1,10 @@
 import styled from '@emotion/styled';
 import * as React from 'react';
 
-import { addToCartAction, removeItemFromCart } from 'src/components/Cart/reducers';
+import {
+    addToCartAction,
+    removeItemFromCart,
+} from 'src/components/Cart/reducers';
 import { Product } from 'src/components/Shop/ShopList/types';
 
 import { latoFont } from 'src/styles/fonts';
@@ -36,7 +39,7 @@ const ThumbnailContainer = styled.div<{ isHamburger: boolean }>(
             maxWidth: '48%',
             background: 'rgba(0,0,0,0.7)',
             boxShadow: '0 1.0rem 0.75rem -2px rgba(0, 0, 0, 0.7)',
-            transform: 'rotate(-3deg)'
+            transform: 'rotate(-3deg)',
         },
         '&:after': {
             transform: 'rotate(3deg)',
@@ -45,9 +48,10 @@ const ThumbnailContainer = styled.div<{ isHamburger: boolean }>(
         },
     },
     ({ isHamburger }) => ({
-        flex: '0 0 ' + (isHamburger ? '80vw' : '210px'),
-        boxShadow: '0 2px 7px -4px rgba(0,0,0,0.8)'
-            + (isHamburger ? ', 0 -2px 7px -4px rgba(0, 0, 0, 0.8)' : ''),
+        flex: `0 0 ${isHamburger ? '80vw' : '210px'}`,
+        boxShadow: `0 2px 7px -4px rgba(0,0,0,0.8)${
+            isHamburger ? ', 0 -2px 7px -4px rgba(0, 0, 0, 0.8)' : ''
+        }`,
         width: isHamburger ? '60vw' : '',
         height: isHamburger ? '80vw' : 280,
     }),
@@ -60,13 +64,13 @@ const Thumbnail = styled.div<{ imageUrl: string; isHamburger: boolean }>(
         backgroundSize: 'cover',
         height: '100%',
     },
-    props => {
+    (props) => {
         const spread = props.isHamburger ? '1rem' : '0.5rem';
         return {
             backgroundImage: `url(${props.imageUrl})`,
             boxShadow: `0 0 2px ${spread} rgba(255, 255, 255, 1) inset`,
         };
-    }
+    },
 );
 
 const ContentContainer = styled.div<{ isHamburger: boolean }>(
@@ -81,15 +85,16 @@ const ContentContainer = styled.div<{ isHamburger: boolean }>(
         justifyContent: 'space-evenly',
         alignItems: 'center',
     },
-    ({ isHamburger }) => isHamburger && ({
-        padding: '1rem',
-    }),
+    ({ isHamburger }) =>
+        isHamburger && {
+            padding: '1rem',
+        },
 );
 
 const baseItemInCart = css({
     color: 'white',
-    backgroundColor: mix(0.50, logoBlue, '#FFF'),
-    border: `1px solid ${mix(0.52, logoBlue, '#FFF')}`
+    backgroundColor: mix(0.5, logoBlue, '#FFF'),
+    border: `1px solid ${mix(0.52, logoBlue, '#FFF')}`,
 });
 
 const baseItemNotInCart = css({
@@ -98,7 +103,11 @@ const baseItemNotInCart = css({
     border: `1px solid ${logoBlue}`,
 });
 
-const CartButton = styled.button<{ isItemInCart: boolean; isMouseDown: boolean; isHamburger: boolean }>(
+const CartButton = styled.button<{
+    isItemInCart: boolean;
+    isMouseDown: boolean;
+    isHamburger: boolean;
+}>(
     latoFont(300),
     {
         fontSize: '0.9rem',
@@ -110,11 +119,12 @@ const CartButton = styled.button<{ isItemInCart: boolean; isMouseDown: boolean; 
         userSelect: 'none',
     },
     noHighlight,
-    ({ isHamburger, isMouseDown }) => isHamburger ?
-        getHoverStyle(isMouseDown) :
-        ({
-            '&:hover': getHoverStyle(isMouseDown),
-        }),
+    ({ isHamburger, isMouseDown }) =>
+        isHamburger
+            ? getHoverStyle(isMouseDown)
+            : {
+                  '&:hover': getHoverStyle(isMouseDown),
+              },
     ({ isItemInCart }) => {
         return isItemInCart ? baseItemInCart : baseItemNotInCart;
     },
@@ -130,10 +140,13 @@ const ShopItemContainer = styled.div<{ isHamburger: boolean }>(
         flex: '0 1 auto',
         maxWidth: 650,
         scrollMarginTop: '5rem',
-    }, ({ isHamburger }) => isHamburger && ({
-        flexDirection: 'column',
-        alignItems: 'center',
-    }));
+    },
+    ({ isHamburger }) =>
+        isHamburger && {
+            flexDirection: 'column',
+            alignItems: 'center',
+        },
+);
 
 const ItemName = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => ({
     margin: isHamburger ? '0.8rem 0' : 'unset',
@@ -142,10 +155,12 @@ const ItemName = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => ({
     fontWeight: 400,
 }));
 
-const ItemDescription = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => ({
-    // margin: isHamburger ? '1rem 2rem' : '1rem 0',
-    paddingLeft: isHamburger ? 'unset' : '1rem',
-}));
+const ItemDescription = styled.div<{ isHamburger: boolean }>(
+    ({ isHamburger }) => ({
+        // margin: isHamburger ? '1rem 2rem' : '1rem 0',
+        paddingLeft: isHamburger ? 'unset' : '1rem',
+    }),
+);
 
 const ItemDetails = styled.span({
     margin: '0.2rem 0',
@@ -156,14 +171,18 @@ const ItemPrice = styled.span({
     fontWeight: 500,
 });
 
-const DetailContainer = styled.div<{ isHamburger: boolean }>({
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    maxWidth: 500,
-}, ({ isHamburger }) => isHamburger && ({
-    justifyContent: 'space-evenly',
-}));
+const DetailContainer = styled.div<{ isHamburger: boolean }>(
+    {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        maxWidth: 500,
+    },
+    ({ isHamburger }) =>
+        isHamburger && {
+            justifyContent: 'space-evenly',
+        },
+);
 
 const Separator = styled.span({
     margin: '0.2rem 1rem',
@@ -173,15 +192,15 @@ const Separator = styled.span({
 const SampleLink = styled.div<{ isHamburger: boolean }>(
     latoFont(400),
     {
-        'a': {
-            color: 'var(--light-blue)'
-        }
+        a: {
+            color: 'var(--light-blue)',
+        },
     },
-    ({ isHamburger }) => (
-        {
-            margin: isHamburger ? '1rem 2rem' : '1.5rem 0 0',
-            paddingLeft: isHamburger ? 'unset' : '1rem',
-        }));
+    ({ isHamburger }) => ({
+        margin: isHamburger ? '1rem 2rem' : '1.5rem 0 0',
+        paddingLeft: isHamburger ? 'unset' : '1rem',
+    }),
+);
 
 const leftHighlight = css({
     margin: '1rem 0',
@@ -194,36 +213,59 @@ const formatCentsToDollars = (price: number) => `$${(price / 100).toFixed(2)}`;
 const cartSelector = createSelector(
     (state: GlobalStateShape) => state.cart.items,
     (_: GlobalStateShape, itemId: string) => itemId,
-    (items, itemId) => items.includes(itemId)
+    (items, itemId) => items.includes(itemId),
 );
 
 export const ShopItem: React.FC<ShopItemProps> = ({ item, className }) => {
     const isHamburger = useAppSelector(mqSelectors.isHamburger);
-    const isItemInCart = useAppSelector((state) => cartSelector(state, item.id));
+    const isItemInCart = useAppSelector((state) =>
+        cartSelector(state, item.id),
+    );
     const [isMouseDown, setIsMouseDown] = React.useState(false);
 
     const dispatch = useAppDispatch();
 
     return (
-        <ShopItemContainer id={item.permalink} isHamburger={isHamburger} className={className}>
+        <ShopItemContainer
+            id={item.permalink}
+            isHamburger={isHamburger}
+            className={className}
+        >
             <ThumbnailContainer isHamburger={isHamburger}>
-                <Thumbnail isHamburger={isHamburger} imageUrl={staticImage('/products/thumbnails/' + item.images[0]) || ''} />
+                <Thumbnail
+                    isHamburger={isHamburger}
+                    imageUrl={
+                        staticImage(`/products/thumbnails/${item.images[0]}`) ||
+                        ''
+                    }
+                />
             </ThumbnailContainer>
             <ContentContainer isHamburger={isHamburger}>
                 <div css={{ marginBottom: '24px' }}>
                     <ItemName isHamburger={isHamburger}>{item.name}</ItemName>
                     <div css={leftHighlight}>
-                    <ItemDescription isHamburger={isHamburger}>{item.description}</ItemDescription>
-                    {item.sample && (
-                        <SampleLink isHamburger={isHamburger}><a href={item.sample} target="seanchenpiano_sample">Listen to the work here.</a></SampleLink>
-                    )}
+                        <ItemDescription isHamburger={isHamburger}>
+                            {item.description}
+                        </ItemDescription>
+                        {item.sample && (
+                            <SampleLink isHamburger={isHamburger}>
+                                <a
+                                    href={item.sample}
+                                    target="seanchenpiano_sample"
+                                >
+                                    Listen to the work here.
+                                </a>
+                            </SampleLink>
+                        )}
                     </div>
                     <DetailContainer isHamburger={isHamburger}>
                         <ItemDetails>{toUpper(item.format)} format</ItemDetails>
                         <Separator>|</Separator>
                         <ItemDetails>{item.pages} pages</ItemDetails>
                         <Separator>|</Separator>
-                        <ItemPrice>{formatCentsToDollars(item.price)}</ItemPrice>
+                        <ItemPrice>
+                            {formatCentsToDollars(item.price)}
+                        </ItemPrice>
                     </DetailContainer>
                 </div>
                 <CartButton
@@ -243,7 +285,9 @@ export const ShopItem: React.FC<ShopItemProps> = ({ item, className }) => {
                         setIsMouseDown(false);
                     }}
                     onClick={() =>
-                        isItemInCart ? dispatch(removeItemFromCart(item.id)) : dispatch(addToCartAction(item.id))
+                        isItemInCart
+                            ? dispatch(removeItemFromCart(item.id))
+                            : dispatch(addToCartAction(item.id))
                     }
                 >
                     {isItemInCart ? 'Remove from Cart' : 'Add to Cart'}

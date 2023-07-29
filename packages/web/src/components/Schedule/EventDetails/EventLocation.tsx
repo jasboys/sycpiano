@@ -7,10 +7,13 @@ import { LocationIconInstance } from '../LocationIconSVG.jsx';
 import { getGoogleMapsSearchUrl } from '../utils.js';
 import styled from '@emotion/styled';
 
-
 const locationIconDimension = 24;
 
-interface EventLocationProps { location: string; className?: string; isMobile?: boolean }
+interface EventLocationProps {
+    location: string;
+    className?: string;
+    isMobile?: boolean;
+}
 
 const getVenueName = (location: string): string => {
     if (!location) {
@@ -52,17 +55,20 @@ const eventLocationStyle = css({
     [toMedia(screenXS)]: {
         fontSize: '0.8rem',
         marginTop: 0,
-    }
+    },
 });
 
 const VenueSpan = styled.span({
     marginLeft: 10,
     [toMedia(screenXS)]: {
         marginLeft: 5,
-    }
-})
+    },
+});
 
-export const EventLocation: React.FC<EventLocationProps> = ({ location, isMobile }) => {
+export const EventLocation: React.FC<EventLocationProps> = ({
+    location,
+    isMobile,
+}) => {
     return (
         <a
             href={getGoogleMapsSearchUrl(location)}
@@ -72,9 +78,7 @@ export const EventLocation: React.FC<EventLocationProps> = ({ location, isMobile
         >
             <LocationIconInstance css={locationIconStyle} />
 
-            <VenueSpan>
-                {getVenueName(location)}
-            </VenueSpan>
+            <VenueSpan>{getVenueName(location)}</VenueSpan>
         </a>
     );
 };

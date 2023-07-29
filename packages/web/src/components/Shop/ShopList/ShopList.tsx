@@ -15,22 +15,22 @@ import { screenPortrait, screenXS } from 'src/screens.js';
 
 type ShopListProps = Record<never, unknown>;
 
-const listStyle = css(
-    pushed,
-    {
-        overflowY: 'scroll',
-        flex: '1 0 auto',
-        zIndex: 10,
-    }
+const listStyle = css(pushed, {
+    overflowY: 'scroll',
+    flex: '1 0 auto',
+    zIndex: 10,
+});
+
+const Category = styled.div<{ isHamburger: boolean }>(
+    ({ isHamburger }) =>
+        !isHamburger && {
+            display: 'flex',
+            flexDirection: 'column',
+        },
 );
 
-const Category = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => !isHamburger && ({
-    display: 'flex',
-    flexDirection: 'column',
-}));
-
-const CategoryTitle = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => (
-    {
+const CategoryTitle = styled.div<{ isHamburger: boolean }>(
+    ({ isHamburger }) => ({
         color: logoBlue,
         fontSize: 'min(10vw, 2rem)',
         padding: '0 2rem',
@@ -41,20 +41,18 @@ const CategoryTitle = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => 
         width: '100%',
         maxWidth: isHamburger ? 'unset' : '750px',
         margin: isHamburger ? 'unset' : '0 auto',
-    })
+    }),
 );
 
-const CategoryTitleText = styled.div<{ isHamburger: boolean }>(
-    latoFont(300),
-    {
-        width: '100%',
-        background: `linear-gradient(white 92%, rgba(255, 255, 255, 0) 100%)`,
-        padding: '2rem 0 0.5rem 0',
-        whiteSpace: 'nowrap',
-        [toMedia([screenXS, screenPortrait])]: {
-            paddingTop: '2.5rem'
-        }
-    });
+const CategoryTitleText = styled.div<{ isHamburger: boolean }>(latoFont(300), {
+    width: '100%',
+    background: 'linear-gradient(white 92%, rgba(255, 255, 255, 0) 100%)',
+    padding: '2rem 0 0.5rem 0',
+    whiteSpace: 'nowrap',
+    [toMedia([screenXS, screenPortrait])]: {
+        paddingTop: '2.5rem',
+    },
+});
 
 const CategoryToLabel: Record<typeof ProductTypes[number], string> = {
     arrangement: 'Arrangements',
@@ -68,7 +66,11 @@ const ShopList: React.FC<ShopListProps> = () => {
     const categorizedItems = useAppSelector(({ shop }) => shop.items);
 
     React.useEffect(() => {
-        if (categorizedItems && Object.keys(categorizedItems).length && product) {
+        if (
+            categorizedItems &&
+            Object.keys(categorizedItems).length &&
+            product
+        ) {
             const el = document.getElementById(product);
             if (el) {
                 el.scrollIntoView();
@@ -76,27 +78,26 @@ const ShopList: React.FC<ShopListProps> = () => {
         }
     }, [categorizedItems, product]);
 
-    return (categorizedItems === undefined) ? null : (
+    return categorizedItems === undefined ? null : (
         <div css={listStyle}>
-            {
-                Object.entries(categorizedItems).map(([key, items]) => (
-                    <Category isHamburger={isHamburger} key={key}>
-                        <CategoryTitle isHamburger={isHamburger}>
-                            <CategoryTitleText isHamburger={isHamburger}>{CategoryToLabel[key as typeof ProductTypes[number]]}</CategoryTitleText>
-                        </CategoryTitle>
-                        {
-                            items.map((item: Product, idx: number) => (
-                                <ShopItem
-                                    item={item}
-                                    key={idx}
-                                />
-                            ))
-                        }
-                    </Category>
-                ))
-            }
+            {Object.entries(categorizedItems).map(([key, items]) => (
+                <Category isHamburger={isHamburger} key={key}>
+                    <CategoryTitle isHamburger={isHamburger}>
+                        <CategoryTitleText isHamburger={isHamburger}>
+                            {
+                                CategoryToLabel[
+                                    key as typeof ProductTypes[number]
+                                ]
+                            }
+                        </CategoryTitleText>
+                    </CategoryTitle>
+                    {items.map((item: Product) => (
+                        <ShopItem item={item} key={item.id} />
+                    ))}
+                </Category>
+            ))}
         </div>
-    )
+    );
 };
 
 export default ShopList;

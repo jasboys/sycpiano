@@ -38,6 +38,7 @@ export const precheck = async () => {
         }
     });
 
+    return Promise.resolve();
     // run migrations!
     // await umzug.up();
 };
