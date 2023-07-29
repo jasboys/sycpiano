@@ -1,12 +1,5 @@
-import { Request, Response } from 'express';
-
-export type UpdateMany<R> = (ids: string[], data: R, opts?: {
-    req: Request;
-    res: Response;
-}) => Promise<any>
-
-export interface GCalEvent {
-    readonly description: any;
+export interface GCalEvent extends Record<string, unknown> {
+    readonly description: string;
     readonly id: string;
     readonly location: string;
     readonly start: {
@@ -15,7 +8,6 @@ export interface GCalEvent {
         readonly timeZone?: string;
     };
     readonly summary: string;
-    readonly [key: string]: any; // other params
 }
 
 export interface ShopItem {

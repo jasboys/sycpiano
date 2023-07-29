@@ -1,7 +1,0 @@
-.eslintrc.js
-jest.config.js
-webpack.common.config.js
-webpack.dev.config.js
-webpack.prod.config.js
-ecosystem.config.js
-vite.config.js

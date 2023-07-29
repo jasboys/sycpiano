@@ -16,5 +16,6 @@
       "database": "sycpiano",
       "username": "sycpiano"
     }
-  ]
+  ],
+  "prettier.prettierPath": ".yarn/sdks/prettier/index.js"
 }

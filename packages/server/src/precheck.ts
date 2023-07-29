@@ -17,7 +17,7 @@ const required = [
     'SMTP_USERNAME',
     'SMTP_PASSWORD',
     'GAPI_CLIENT_EMAIL',
-    'GAPI_PRIVATE_KEY'
+    'GAPI_PRIVATE_KEY',
 ];
 
 export const precheck = async () => {

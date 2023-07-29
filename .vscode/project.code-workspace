@@ -1,0 +1,25 @@
+{
+    "folders": [
+        {
+            "name": "root",
+            "path": "../"
+        },
+        {
+            "name": "packages/admin",
+            "path": "../packages/admin"
+        },
+        {
+            "name": "packages/common",
+            "path": "../packages/common"
+        },
+        {
+            "name": "packages/server",
+            "path": "../packages/server"
+        },
+        {
+            "name": "packages/web",
+            "path": "../packages/web"
+        }
+    ],
+    "settings": {}
+}

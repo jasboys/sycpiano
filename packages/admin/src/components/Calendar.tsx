@@ -69,105 +69,9 @@ import { toUTC } from '../utils.js';
 import { useForm, useFormContext, useFormState, useWatch } from 'react-hook-form';
 import { useAppDataProvider } from '../providers/restProvider.js';
 
-const GAPI_KEY = import.meta.env.PUBLIC_GAPI_KEY;
 
 const getGooglePlacePhoto = (photoReference: string, maxHeight: number) =>
     `https://maps.googleapis.com/maps/api/place/photo?maxheight=${maxHeight}&photo_reference=${photoReference}&key=${GAPI_KEY}`;
-
-const filters = [
-    <SearchInput key="search" source="q" alwaysOn />
-];
-
-const PopulateImageFieldsButton = ({ selectedIds }: { selectedIds?: Identifier[] }) => {
-    const notify = useNotify();
-    const refresh = useRefresh();
-    const dataProvider = useAppDataProvider();
-    const { mutate, isLoading } = useMutation(
-        () => dataProvider.populateImageFields('calendars', selectedIds ? { ids: selectedIds } : {}),
-        {
-            onSuccess: () => {
-                refresh();
-                notify('Populating Succeeded');
-            },
-            onError: (error) => notify(`Error: ${error}`, { type: 'warning' }),
-        });
-    return <Button
-        label="Populate Image Fields"
-        onClick={() => mutate()}
-        disabled={isLoading}
-    />;
-};
-
-const ListActions = (_props: any) => (
-    <TopToolbar>
-        <FilterButton />
-        <CreateButton />
-        <PopulateImageFieldsButton />
-    </TopToolbar>
-);
-
-const PostBulkActionButtons = (props: BulkActionProps) => (
-    <>
-        <PopulateImageFieldsButton {...props} />
-    </>
-);
-
-/*    id?: string;
-    name: string;
-    dateTime: Date;
-    allDay: boolean;
-    endDate: Date;
-    timezone: string;
-    location: string;
-    type: string;
-    website: string;
-    */
-
-export const CalendarList = (props: ListProps) => {
-    return (
-        <List
-            {...props}
-            perPage={25}
-            filters={filters}
-            sort={{ field: 'dateTime', order: 'DESC' }}
-            actions={<ListActions />}
-        >
-            <Datagrid
-                sx={{
-                    '& .RaDatagrid-rowCell': {
-                        overflow: 'hidden',
-                    }
-                }}
-                style={{ tableLayout: 'fixed' }}
-                rowClick="edit"
-                bulkActionButtons={<PostBulkActionButtons />}
-            >
-                <TextField source="name" />
-                <FunctionField
-                    label="Date Time"
-                    render={(record: RaRecord | undefined) =>
-                        formatInTimeZone(record?.dateTime, record?.timezone || 'America/Chicago', "yyyy-MM-dd HH:mm zzz")
-                    }
-                />
-                <BooleanField source="allDay" />
-                <TextField source="endDate" />
-                <TextField source="timezone" />
-                <TextField source="location" />
-                <TextField source="type" />
-                <UrlField source="website" target="_blank" rel="noopener noreferrer" />
-                <BooleanField source="usePlacePhoto" />
-                <FunctionField
-                    label="imageUrl"
-                    render={(record: RaRecord | undefined) =>
-                        record?.imageUrl === null ? 'null' : record?.imageUrl
-                    }
-                />
-                <TextField source="photoReference" />
-                <TextField source="placeId" />
-            </Datagrid>
-        </List>
-    )
-};
 
 const Empty = () => (
     <Typography>
@@ -175,15 +79,6 @@ const Empty = () => (
     </Typography>
 );
 
-const PlacePhotoField = (props: UseRecordContextParams) => {
-    const { source } = props;
-    const record = useRecordContext(props);
-    return record[source] && (
-        <div style={{ height: 200, width: 200, position: 'relative' }}>
-            <img src={getGooglePlacePhoto(record[source], 200)} alt="thumbnail" style={{ height: '100%' }} />
-        </div>
-    );
-};
 
 const ImageField = (props: UseRecordContextParams) => {
     const { source } = props;
@@ -194,47 +89,6 @@ const ImageField = (props: UseRecordContextParams) => {
         </div>
     );
 };
-
-export const CalendarShow = (props: ShowProps) => (
-    <Show {...props}>
-        <TabbedShowLayout >
-            <Tab label="Event Info">
-                <TextField source="name" />
-                <TextField source="dateTime" />
-                <BooleanField source="allDay" />
-                <TextField source="endDate" />
-                <TextField source="timezone" />
-                <TextField source="location" />
-                <TextField source="type" />
-                <UrlField source="website" target="_blank" rel="noopener noreferrer" />
-                <BooleanField source="usePlacePhoto" />
-                <UrlField source="imageUrl" target="_blank" rel="noopener noreferrer" />
-                <ImageField source="imageUrl" />
-                <TextField source="placeId" />
-                <TextField source="photoReference" />
-                <PlacePhotoField source="photoReference" />
-            </Tab>
-            <Tab label="Pieces">
-                <ArrayField source="pieces" fieldKey="order" fullWidth>
-                    <Datagrid empty={<Empty />}>
-                        <TextField source="order" />
-                        <TextField source="composer" />
-                        <TextField source="piece" />
-                    </Datagrid>
-                </ArrayField>
-            </Tab>
-            <Tab label="Collaborators">
-                <ArrayField source="collaborators" fieldKey="order" fullWidth>
-                    <Datagrid empty={<Empty />}>
-                        <TextField source="order" />
-                        <TextField source="name" />
-                        <TextField source="instrument" />
-                    </Datagrid>
-                </ArrayField>
-            </Tab>
-        </TabbedShowLayout>
-    </Show>
-);
 
 const EndDate = ({ sx }: { sx?: SxProps }) => {
     const allDay = useWatch({ name: 'allDay' });
@@ -259,14 +113,6 @@ interface ControllerInputProps extends TextInputProps {
 const ControlledInput = ({ source, property, ...rest }: ControllerInputProps) => {
     const { selectedChoices } = useChoicesContext();
 
-    // React.useEffect(() => {
-    //     console.log(formState.values[controller]);
-    //     if (formState.values[controller]) {
-    //         setValue(source, null);
-    //         resetField(source);
-    //     }
-    // }, [formState, form, controller, source]);
-
     return (
         <TextInput
             source={source}
@@ -276,14 +122,6 @@ const ControlledInput = ({ source, property, ...rest }: ControllerInputProps) =>
         />
     )
 };
-
-// const useStyles = makeStyles({
-//     createButton: {
-//         '& span span': {
-//             paddingRight: '0.5em'
-//         }
-//     },
-// });
 
 const DeleteCalendarPiece: React.FC<{ onRefresh: () => void; }> = ({ onRefresh }) => {
     const record = useRecordContext();

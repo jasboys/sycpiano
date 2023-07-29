@@ -50,6 +50,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["cross-env", "npm:7.0.3"],\
             ["nodemon", "npm:3.0.1"],\
+            ["rome", "npm:12.1.3"],\
             ["turbo", "npm:1.10.12"],\
             ["typescript", "patch:typescript@npm%3A5.1.6#~builtin<compat/typescript>::version=5.1.6&hash=5da071"]\
           ],\
@@ -3896,6 +3897,60 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@rometools/cli-darwin-arm64", [\
+        ["npm:12.1.3", {\
+          "packageLocation": "./.yarn/unplugged/@rometools-cli-darwin-arm64-npm-12.1.3-e1f412f8be/node_modules/@rometools/cli-darwin-arm64/",\
+          "packageDependencies": [\
+            ["@rometools/cli-darwin-arm64", "npm:12.1.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@rometools/cli-darwin-x64", [\
+        ["npm:12.1.3", {\
+          "packageLocation": "./.yarn/unplugged/@rometools-cli-darwin-x64-npm-12.1.3-213b94ec09/node_modules/@rometools/cli-darwin-x64/",\
+          "packageDependencies": [\
+            ["@rometools/cli-darwin-x64", "npm:12.1.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@rometools/cli-linux-arm64", [\
+        ["npm:12.1.3", {\
+          "packageLocation": "./.yarn/unplugged/@rometools-cli-linux-arm64-npm-12.1.3-1a684f2047/node_modules/@rometools/cli-linux-arm64/",\
+          "packageDependencies": [\
+            ["@rometools/cli-linux-arm64", "npm:12.1.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@rometools/cli-linux-x64", [\
+        ["npm:12.1.3", {\
+          "packageLocation": "./.yarn/unplugged/@rometools-cli-linux-x64-npm-12.1.3-a343b37dfc/node_modules/@rometools/cli-linux-x64/",\
+          "packageDependencies": [\
+            ["@rometools/cli-linux-x64", "npm:12.1.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@rometools/cli-win32-arm64", [\
+        ["npm:12.1.3", {\
+          "packageLocation": "./.yarn/unplugged/@rometools-cli-win32-arm64-npm-12.1.3-82e0519b43/node_modules/@rometools/cli-win32-arm64/",\
+          "packageDependencies": [\
+            ["@rometools/cli-win32-arm64", "npm:12.1.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@rometools/cli-win32-x64", [\
+        ["npm:12.1.3", {\
+          "packageLocation": "./.yarn/unplugged/@rometools-cli-win32-x64-npm-12.1.3-553c0b4b40/node_modules/@rometools/cli-win32-x64/",\
+          "packageDependencies": [\
+            ["@rometools/cli-win32-x64", "npm:12.1.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@sindresorhus/is", [\
         ["npm:4.6.0", {\
           "packageLocation": "./.yarn/cache/@sindresorhus-is-npm-4.6.0-7cad05c55e-83839f13da.zip/node_modules/@sindresorhus/is/",\
@@ -5140,6 +5195,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["react-query", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:3.39.3"],\
             ["react-router", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:6.14.2"],\
             ["react-router-dom", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:6.14.2"],\
+            ["rome", "npm:12.1.3"],\
             ["terser", "npm:5.19.2"],\
             ["typescript", "patch:typescript@npm%3A5.1.6#~builtin<compat/typescript>::version=5.1.6&hash=5da071"],\
             ["vite", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:4.4.6"]\
@@ -6249,6 +6305,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["common", "workspace:packages/common"],\
             ["date-fns", "npm:2.30.0"],\
+            ["rome", "npm:12.1.3"],\
             ["typescript", "patch:typescript@npm%3A5.1.6#~builtin<compat/typescript>::version=5.1.6&hash=5da071"]\
           ],\
           "linkType": "SOFT"\
@@ -12348,6 +12405,21 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["rome", [\
+        ["npm:12.1.3", {\
+          "packageLocation": "./.yarn/unplugged/rome-npm-12.1.3-5eebcc998d/node_modules/rome/",\
+          "packageDependencies": [\
+            ["rome", "npm:12.1.3"],\
+            ["@rometools/cli-darwin-arm64", "npm:12.1.3"],\
+            ["@rometools/cli-darwin-x64", "npm:12.1.3"],\
+            ["@rometools/cli-linux-arm64", "npm:12.1.3"],\
+            ["@rometools/cli-linux-x64", "npm:12.1.3"],\
+            ["@rometools/cli-win32-arm64", "npm:12.1.3"],\
+            ["@rometools/cli-win32-x64", "npm:12.1.3"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["rrweb-cssom", [\
         ["npm:0.6.0", {\
           "packageLocation": "./.yarn/cache/rrweb-cssom-npm-0.6.0-04bbb1169b-182312f6e4.zip/node_modules/rrweb-cssom/",\
@@ -12472,6 +12544,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["seanchenpiano", "workspace:."],\
             ["cross-env", "npm:7.0.3"],\
             ["nodemon", "npm:3.0.1"],\
+            ["rome", "npm:12.1.3"],\
             ["turbo", "npm:1.10.12"],\
             ["typescript", "patch:typescript@npm%3A5.1.6#~builtin<compat/typescript>::version=5.1.6&hash=5da071"]\
           ],\
@@ -12636,6 +12709,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["pino-http", "npm:8.3.3"],\
             ["qs", "npm:6.11.2"],\
             ["reflect-metadata", "npm:0.1.13"],\
+            ["rome", "npm:12.1.3"],\
             ["serve-favicon", "npm:2.5.0"],\
             ["sharp", "npm:0.32.3"],\
             ["stripe", "npm:12.13.0"],\
@@ -14091,6 +14165,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["redux-thunk", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:2.4.2"],\
             ["reselect", "npm:4.1.8"],\
             ["rollup-plugin-visualizer", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:5.9.2"],\
+            ["rome", "npm:12.1.3"],\
             ["terser", "npm:5.19.2"],\
             ["typescript", "patch:typescript@npm%3A5.1.6#~builtin<compat/typescript>::version=5.1.6&hash=5da071"],\
             ["validator", "npm:13.9.0"],\
