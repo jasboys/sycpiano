@@ -6,24 +6,24 @@ type PolarToCartesianShape = (
     offset?: [number, number],
 ) => [number, number];
 
-export const polarToCartesian: PolarToCartesianShape = (radius, angle, offset = [0, 0]) => (
-    [
-        radius * Math.cos(angle) + offset[0],
-        radius * Math.sin(angle) + offset[1],
-    ]
-);
+export const polarToCartesian: PolarToCartesianShape = (
+    radius,
+    angle,
+    offset = [0, 0],
+) => [
+    radius * Math.cos(angle) + offset[0],
+    radius * Math.sin(angle) + offset[1],
+];
 
 type CartesianToPolarShape = (
     x: number,
     y: number,
 ) => { radius: number; angle: number };
 
-export const cartesianToPolar: CartesianToPolarShape = (x, y) => (
-    {
-        radius: Math.sqrt(x * x + y * y),
-        angle: Math.atan2(y, x),
-    }
-);
+export const cartesianToPolar: CartesianToPolarShape = (x, y) => ({
+    radius: Math.sqrt(x * x + y * y),
+    angle: Math.atan2(y, x),
+});
 
 export const formatTime = (current: number): string => {
     if (current === -1) {
@@ -64,22 +64,44 @@ export const getLastName = (name: string): string | undefined => {
 };
 
 export const normalizeString = (str: string): string => {
-    return str.normalize('NFD').replace(/[\u0300-\u036f":()',.-]/g, '').replace(/\s+/g, '-').replace(/_$/, '');
+    return str
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f":()',.-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/_$/, '');
 };
 
-export const getPermaLink = (base: string, composer: string, piece: string, movement?: string): string => {
-    return path.normalize(`${base}/${getLastName(composer)}/${normalizeString(piece)}${movement ? '/' + normalizeString(movement) : ''}`);
+export const getPermaLink = (
+    base: string,
+    composer: string,
+    piece: string,
+    movement?: string,
+): string => {
+    return path.normalize(
+        `${base}/${getLastName(composer)}/${normalizeString(piece)}${
+            movement ? `/${normalizeString(movement)}` : ''
+        }`,
+    );
 };
 
-export const getRelativePermaLink = (composer: string, piece: string, movement?: string): string => {
-    return path.normalize(`${getLastName(composer)}/${normalizeString(piece)}${movement ? '/' + normalizeString(movement) : ''}`);
+export const getRelativePermaLink = (
+    composer: string,
+    piece: string,
+    movement?: string,
+): string => {
+    return path.normalize(
+        `${getLastName(composer)}/${normalizeString(piece)}${
+            movement ? `/${normalizeString(movement)}` : ''
+        }`,
+    );
 };
 
 export const modulo = (n: number, m: number): number => {
     return ((n % m) + m) % m;
 };
 
-export const nextPow2 = (v: number): number => {
+export const nextPow2 = (vv: number): number => {
+    let v = vv;
     v--;
     v |= v >> 1;
     v |= v >> 2;

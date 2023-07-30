@@ -1,68 +1,65 @@
+import styled from '@emotion/styled';
+import { gsap } from 'gsap';
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useMatch } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
-import youTube from 'src/services/YouTube';
 
-import styled from '@emotion/styled';
-
-import { gsap } from 'gsap';
-
+import { mqSelectors } from 'src/components/App/reducers';
 import { LoadingInstance } from 'src/components/LoadingSVG';
 import PreviewOverlay from 'src/components/Media/Videos/PreviewOverlay';
+import {
+    fetchVideoPlaylist,
+    playerIsReady,
+    playVideo,
+    resetPlayer,
+} from 'src/components/Media/Videos/reducers';
 import VideoPlaylist from 'src/components/Media/Videos/VideoPlaylist';
-
-import { fetchVideoPlaylist, playerIsReady, playVideo, resetPlayer } from 'src/components/Media/Videos/reducers';
-
-import { pushed } from 'src/styles/mixins';
-import { minRes, screenPortrait, screenXS, webkitMinDPR } from 'src/screens';
-import { navBarHeight } from 'src/styles/variables';
-import { titleStringBase } from 'src/utils';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { toMedia } from 'src/MediaQuery';
-import { mqSelectors } from 'src/components/App/reducers';
+import { minRes, screenXS, webkitMinDPR } from 'src/screens';
+import youTube from 'src/services/YouTube';
+import { pushed } from 'src/styles/mixins';
+import { navBarHeight } from 'src/styles/variables';
+import { titleStringBase } from 'src/utils';
 
 type VideosProps = Record<never, unknown>;
 
-const StyledVideos = styled.div`
-    ${pushed}
-    width: 100%;
-    background-color: black;
-    position: relative;
+const StyledVideos = styled.div(pushed, {
+    width: '100%',
+    backgroundColor: 'black',
+    position: 'relative',
+    [toMedia([minRes, webkitMinDPR])]: {
+        marginTop: 0,
+        paddingTop: navBarHeight.hiDpx,
+        height: '100%',
+    },
+    iframe: {
+        width: '100%',
+        height: '100%',
+        [toMedia([minRes, webkitMinDPR])]: {
+            position: 'fixed',
+            top: navBarHeight.hiDpx,
+            height: '56.25vw',
+            zIndex: 5,
+            boxShadow: '0 0 7px 2px rgba(0 0 0 / 0.5)',
+        },
+    },
+});
 
-    ${toMedia([minRes, webkitMinDPR])} {
-        margin-top: 0;
-        padding-top: ${navBarHeight.hiDpx}px;
-        height: 100%;
-    }
-
-    iframe {
-        width: 100%;
-        height: 100%;
-
-        ${toMedia([minRes, webkitMinDPR])} {
-            position: fixed;
-            top: ${navBarHeight.hiDpx}px;
-            height: 56.25vw;
-            z-index: 5;
-            box-shadow: 0 0 7px 2px rgba(0 0 0 / 0.5);
-        }
-    }
-`;
-
-const LoadingOverlayDiv = styled.div`
-    width: 100%;
-    height: 100%;
-    z-index: 11;
-    position: absolute;
-    top: 0;
-    left: 0;
-    background-color: rgba(255 255 255 / 0.5);
-    backdrop-filter: blur(2px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-`;
+const LoadingOverlayDiv = styled.div({
+    width: '100%',
+    height: '100%',
+    zIndex: 11,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    backgroundColor: 'rgba(255 255 255 / 0.5)',
+    backdropFilter: 'blur(2px)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+});
 
 const LoadingInstanceContainer = styled.div({
     padding: '0.5rem',
@@ -71,7 +68,7 @@ const LoadingInstanceContainer = styled.div({
     backgroundColor: 'rgba(255 255 255 / 0.8)',
     display: 'flex',
     boxShadow: '0px 3px 5px -2px rgba(0 0 0 / 0.5)',
-    'svg': {
+    svg: {
         fill: 'none',
         stroke: 'var(--light-blue)',
         width: 120,
@@ -79,11 +76,11 @@ const LoadingInstanceContainer = styled.div({
     },
     [toMedia(screenXS)]: {
         padding: '0.75rem',
-        'svg': {
+        svg: {
             width: 100,
             height: 100,
-        }
-    }
+        },
+    },
 });
 
 const Videos: React.FC<VideosProps> = () => {
@@ -93,14 +90,16 @@ const Videos: React.FC<VideosProps> = () => {
     // const initialized = React.useRef<boolean>(false);
     const dispatch = useAppDispatch();
     const videos = useAppSelector(({ videoPlaylist }) => videoPlaylist.items);
-    const isPlayerReady = useAppSelector(({ videoPlayer }) => videoPlayer.isPlayerReady);
+    const isPlayerReady = useAppSelector(
+        ({ videoPlayer }) => videoPlayer.isPlayerReady,
+    );
 
     React.useEffect(() => {
         async function callDispatch() {
             if (domElement.current) {
                 await Promise.all([
                     dispatch(fetchVideoPlaylist()),
-                    youTube.initializePlayerOnElement(domElement.current)
+                    youTube.initializePlayerOnElement(domElement.current),
                 ]);
                 dispatch(playerIsReady());
                 if (match?.params.videoId !== undefined) {
@@ -112,15 +111,18 @@ const Videos: React.FC<VideosProps> = () => {
         callDispatch();
         return function cleanup() {
             dispatch(resetPlayer());
-        }
+        };
     }, []);
 
     const videoId = match?.params.videoId;
-    const video = videoId !== undefined ? videos.find((item) => item.id === videoId) : undefined;
+    const video =
+        videoId !== undefined
+            ? videos.find((item) => item.id === videoId)
+            : undefined;
     const description = video?.snippet?.description;
     return (
         <>
-            {(video !== undefined) && (
+            {video !== undefined && (
                 <Helmet
                     title={`${titleStringBase} | Videos | ${video.snippet?.title}`}
                     meta={[
@@ -131,13 +133,13 @@ const Videos: React.FC<VideosProps> = () => {
                     ]}
                 />
             )}
-            <StyledVideos
-                ref={domElement}
-            >
+            <StyledVideos ref={domElement}>
                 <PreviewOverlay isMobile={isHamburger} />
                 <Transition<undefined>
                     in={!isPlayerReady}
-                    onExit={(el) => gsap.to(el, { duration: 0.3, autoAlpha: 0 })}
+                    onExit={(el) =>
+                        gsap.to(el, { duration: 0.3, autoAlpha: 0 })
+                    }
                     timeout={300}
                     mountOnEnter={true}
                     unmountOnExit={true}

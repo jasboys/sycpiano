@@ -1,9 +1,7 @@
+import { css } from '@emotion/react';
+import { gsap } from 'gsap';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
-
-import { css } from '@emotion/react';
-
-import { gsap } from 'gsap';
 
 import { toMedia } from 'src/MediaQuery';
 import PlaylistToggler from 'src/components/Media/PlaylistToggler';

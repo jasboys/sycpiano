@@ -1,19 +1,16 @@
-import * as React from 'react';
-
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
+import * as React from 'react';
 
+import { toMedia } from 'src/MediaQuery';
 import MusicPlaylistItem from 'src/components/Media/Music/MusicPlaylistItem';
 import ShuffleButton from 'src/components/Media/Music/ShuffleButton';
 import SpotifyButton from 'src/components/Media/Music/SpotifyButton';
-import Playlist from 'src/components/Media/Playlist';
-
 import { MusicFileItem } from 'src/components/Media/Music/types';
-
-import { playlistBackground } from 'src/styles/colors';
-import { screenXS, screenPortrait } from 'src/screens';
-import { toMedia } from 'src/MediaQuery';
+import Playlist from 'src/components/Media/Playlist';
 import { useAppSelector } from 'src/hooks';
+import { screenPortrait, screenXS } from 'src/screens';
+import { playlistBackground } from 'src/styles/colors';
 
 interface MusicPlaylistOwnProps {
     readonly currentTrackId: string;
@@ -26,38 +23,35 @@ interface MusicPlaylistOwnProps {
 
 type MusicPlaylistProps = MusicPlaylistOwnProps;
 
-const musicPlaylistStyle = css`
-    position: initial;
+const musicPlaylistStyle = css({
+    position: 'initial',
+    [toMedia([screenXS, screenPortrait])]: {
+        top: 360,
+        position: 'relative',
+        overflow: 'visible',
+    },
+});
 
-    ${toMedia([screenXS, screenPortrait])} {
-        top: 360px;
-        position: relative;
-        overflow: visible;
-    }
-`;
+const musicULStyle = css({
+    backgroundColor: playlistBackground,
+    paddingBottom: 80,
+    [toMedia([screenXS, screenPortrait])]: {
+        paddingBottom: 60,
+    },
+});
 
-const musicULStyle = css`
-    background-color: ${playlistBackground};
-    padding-bottom: 80px;
-
-    ${toMedia([screenXS, screenPortrait])} {
-        padding-bottom: 60px;
-    }
-`;
-
-const PlaylistContainer = styled.div`
-    width: fit-content;
-    height: 100%;
-    right: 0;
-    position: absolute;
-
-    ${toMedia([screenXS, screenPortrait])} {
-        width: 100%;
-        height: auto;
-        position: unset;
-        right: unset;
-    }
-`;
+const PlaylistContainer = styled.div({
+    width: 'fit-content',
+    height: '100%',
+    right: 0,
+    position: 'absolute',
+    [toMedia([screenXS, screenPortrait])]: {
+        width: '100%',
+        height: 'auto',
+        position: 'unset',
+        right: 'unset',
+    },
+});
 
 const MusicPlaylist: React.FC<MusicPlaylistProps> = ({
     onClick,

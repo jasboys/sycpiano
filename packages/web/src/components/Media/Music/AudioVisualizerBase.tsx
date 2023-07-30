@@ -1,39 +1,36 @@
-import * as React from 'react';
 import styled from '@emotion/styled';
 import { gsap } from 'gsap';
+import * as React from 'react';
 
-import { navBarHeight, playlistContainerWidth } from '../../../styles/variables';
-import { toMedia } from '../../../mediaQuery.js';
-import { screenM, screenPortrait } from '../../../screens.js';
-
+import { toMedia } from 'src/mediaQuery.js';
+import { screenM, screenPortrait } from 'src/screens.js';
+import { navBarHeight, playlistContainerWidth } from 'src/styles/variables.js';
 import { ConstantQNode } from './ConstantQNode.js';
 import { CIRCLE_SAMPLES, constantQ, firLoader } from './VisualizationUtils.js';
-
 import { nextPow2 } from './utils.js';
 
-const VisualizerContainer = styled.div`
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: calc(100% - ${playlistContainerWidth.desktop});
-    height: 100%;
+const VisualizerContainer = styled.div({
+    position: 'absolute',
+    width: `calc(100% - ${playlistContainerWidth.desktop})`,
+    height: '100%',
+    left: 0,
+    top: 0,
 
-    ${toMedia(screenM)} {
-        width: calc(100% - ${playlistContainerWidth.tablet});
-    }
+    [toMedia(screenM)]: {
+        width: `calc(100% - ${playlistContainerWidth.tablet})`,
+    },
+    [toMedia(screenPortrait)]: {
+        width: '100%',
+        height: 360,
+        top: navBarHeight.hiDpx,
+    },
+});
 
-    ${toMedia(screenPortrait)} {
-        width: 100%;
-        height: 360px;
-        top: ${navBarHeight.hiDpx}px;
-    }
-`;
-
-const VisualizerCanvas = styled.canvas`
-    position: absolute;
-    width: 100%;
-    height: 100%;
-`;
+const VisualizerCanvas = styled.canvas({
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+});
 
 export const TWO_PI = 2 * Math.PI;
 export const HALF_PI = Math.PI / 2;
@@ -61,9 +58,13 @@ export interface AudioVisualizerProps {
     readonly setRadii: (inner: number, outer: number, base: number) => void;
 }
 
-type ColorType<C> = C extends WebGL2RenderingContext | WebGLRenderingContext ? Float32Array : string;
+type ColorType<C> = C extends WebGL2RenderingContext | WebGLRenderingContext
+    ? Float32Array
+    : string;
 
-export abstract class AudioVisualizerBase<C extends RenderingContext> extends React.Component<AudioVisualizerProps> {
+export abstract class AudioVisualizerBase<
+    C extends RenderingContext,
+> extends React.Component<AudioVisualizerProps> {
     renderingContext!: C | null;
     isRendering!: boolean;
     lastPlayheadPosition = 0;
@@ -110,17 +111,32 @@ export abstract class AudioVisualizerBase<C extends RenderingContext> extends Re
 
     abstract drawConstantQBins: (radius: number, color: ColorType<C>) => void;
     abstract drawWaveForm: (centerAxis: number, color: ColorType<C>) => void;
-    abstract drawPlaybackHead: (angle: number, minRad: number, maxRad: number, color: ColorType<C>) => void;
-    abstract drawSeekArea: (radius: number, color: ColorType<C>, timestamp: number) => void;
+    abstract drawPlaybackHead: (
+        angle: number,
+        minRad: number,
+        maxRad: number,
+        color: ColorType<C>,
+    ) => void;
+    abstract drawSeekArea: (
+        radius: number,
+        color: ColorType<C>,
+        timestamp: number,
+    ) => void;
     abstract drawPhase: (radius: number, color: ColorType<C>) => void;
-    abstract drawVisualization: (lowFreq: number, lightness: number, timestamp: number) => void;
+    abstract drawVisualization: (
+        lowFreq: number,
+        lightness: number,
+        timestamp: number,
+    ) => void;
     abstract onResize: () => void;
     abstract initializeVisualizer: () => Promise<void>;
 
     adjustHeight = (): void => {
-        this.HEIGHT_ADJUST = this.props.isMobile ? HEIGHT_ADJUST_MOBILE : HEIGHT_ADJUST_DESKTOP;
+        this.HEIGHT_ADJUST = this.props.isMobile
+            ? HEIGHT_ADJUST_MOBILE
+            : HEIGHT_ADJUST_DESKTOP;
         this.SCALE = this.props.isMobile ? SCALE_MOBILE : SCALE_DESKTOP;
-    }
+    };
 
     initialize = async () => {
         try {
@@ -134,9 +150,13 @@ export abstract class AudioVisualizerBase<C extends RenderingContext> extends Re
             // Therefore the bin of MaxDesiredFreq must be 22050/(sr/2) percent of total bin_size.
             // bin number of MaxFreq = numBins * MaxDesiredFreq / AbsMaxFreq
             const sr2 = constantQ.sampleRate / 2;
-            this.MAX_BIN = Math.round(this.FFT_HALF_SIZE * 22050 / sr2);
-            this.HIGH_PASS_BIN = Math.round(constantQ.maxF * this.FFT_HALF_SIZE / sr2);
-            this.LOW_PASS_BIN = Math.round(constantQ.minF * this.FFT_HALF_SIZE / sr2); // not used right now
+            this.MAX_BIN = Math.round((this.FFT_HALF_SIZE * 22050) / sr2);
+            this.HIGH_PASS_BIN = Math.round(
+                (constantQ.maxF * this.FFT_HALF_SIZE) / sr2,
+            );
+            this.LOW_PASS_BIN = Math.round(
+                (constantQ.minF * this.FFT_HALF_SIZE) / sr2,
+            ); // not used right now
 
             this.NUM_CROSSINGS = firLoader.numCrossings;
             this.SAMPLES_PER_CROSSING = firLoader.samplesPerCrossing;
@@ -151,7 +171,7 @@ export abstract class AudioVisualizerBase<C extends RenderingContext> extends Re
 
             const phaseSamples =
                 constantQ.sampleRate *
-                ((this.props.isMobile ? MOBILE_MSPF : (1000.0 / 60.0)) / 1000);
+                ((this.props.isMobile ? MOBILE_MSPF : 1000.0 / 60.0) / 1000);
 
             this.leftData = new Float32Array(nextPow2(phaseSamples));
             this.rightData = new Float32Array(nextPow2(phaseSamples));
@@ -162,7 +182,7 @@ export abstract class AudioVisualizerBase<C extends RenderingContext> extends Re
         } catch (err) {
             console.error('visualizer init failed.', err);
         }
-    }
+    };
 
     onAnalyze = (): void => {
         // this.requestId = requestAnimationFrame(this.onAnalyze);
@@ -176,13 +196,16 @@ export abstract class AudioVisualizerBase<C extends RenderingContext> extends Re
             !this.props.rightAnalyzer ||
             !this.props.leftPhase ||
             !this.props.rightPhase ||
-            this.props.isMobile && this.lastCallback && (timestamp - this.lastCallback) < MOBILE_MSPF
+            (this.props.isMobile &&
+                this.lastCallback &&
+                timestamp - this.lastCallback < MOBILE_MSPF)
         ) {
             return;
         } else {
             if (this.props.isMobile) {
                 if (this.lastCallback) {
-                    const timeAdjusted = (timestamp - this.lastCallback) % MOBILE_MSPF;
+                    const timeAdjusted =
+                        (timestamp - this.lastCallback) % MOBILE_MSPF;
                     this.lastCallback = timestamp - timeAdjusted;
                 } else {
                     this.lastCallback = timestamp;
@@ -191,7 +214,8 @@ export abstract class AudioVisualizerBase<C extends RenderingContext> extends Re
 
             if (!this.props.isPlaying) {
                 // reset idleStart time if either hover, hoverangle, or currPos changes
-                if (this.lastIsHover !== this.props.isHoverSeekring ||
+                if (
+                    this.lastIsHover !== this.props.isHoverSeekring ||
                     this.lastCurrentPosition !== this.props.currentPosition ||
                     this.lastHover !== this.props.hoverAngle
                 ) {
@@ -202,24 +226,27 @@ export abstract class AudioVisualizerBase<C extends RenderingContext> extends Re
                 this.lastHover = this.props.hoverAngle;
                 this.lastCurrentPosition = this.props.currentPosition;
                 // if has been idle for over 3.5 seconds, cancel animation
-                if (this.idleStart !== 0 && (timestamp - this.idleStart > 3500)) {
+                if (this.idleStart !== 0 && timestamp - this.idleStart > 3500) {
                     gsap.ticker.remove(this.onAnalyze);
                     this.isRendering = false;
                     return;
                 }
             }
 
-
             // FFT -> CQ
-            const { lowFreq: leftLow, highFreq: leftHigh } = this.props.leftAnalyzer.getConstantQ(this.leftCQResult);
-            const { lowFreq: rightLow, highFreq: rightHigh } = this.props.rightAnalyzer.getConstantQ(this.rightCQResult);
-            this.props.leftPhase!.getFloatTimeDomainData(this.leftData);
-            this.props.rightPhase!.getFloatTimeDomainData(this.rightData);
-
+            const { lowFreq: leftLow, highFreq: leftHigh } =
+                this.props.leftAnalyzer.getConstantQ(this.leftCQResult);
+            const { lowFreq: rightLow, highFreq: rightHigh } =
+                this.props.rightAnalyzer.getConstantQ(this.rightCQResult);
+            this.props.leftPhase?.getFloatTimeDomainData(this.leftData);
+            this.props.rightPhase?.getFloatTimeDomainData(this.rightData);
 
             // concat the results, store in vizBins
             this.vizBins.set(this.leftCQResult);
-            this.vizBins.set(this.rightCQResult.reverse(), this.leftCQResult.length);
+            this.vizBins.set(
+                this.rightCQResult.reverse(),
+                this.leftCQResult.length,
+            );
 
             // Average left and right for each high and low accumulator, and divide by number of bins
             let highFreq = (leftHigh + rightHigh) / 2;
@@ -243,25 +270,33 @@ export abstract class AudioVisualizerBase<C extends RenderingContext> extends Re
                 this.isRendering = false;
             }
         }
-    }
+    };
 
     componentDidMount(): void {
         window.addEventListener('resize', this.onResize);
-        document.addEventListener('visibilitychange', this.onVisibilityChange, false);
+        document.addEventListener(
+            'visibilitychange',
+            this.onVisibilityChange,
+            false,
+        );
         this.initializeVisualizer();
     }
 
     componentWillUnmount(): void {
         window.removeEventListener('resize', this.onResize);
-        document.removeEventListener('visibilitychange', this.onVisibilityChange);
+        document.removeEventListener(
+            'visibilitychange',
+            this.onVisibilityChange,
+        );
         gsap.ticker.remove(this.onAnalyze);
         this.isRendering = false;
     }
 
     shouldComponentUpdate(nextProps: AudioVisualizerProps): boolean {
-        if (nextProps.isMobile !== this.props.isMobile ||
+        if (
+            nextProps.isMobile !== this.props.isMobile ||
             nextProps.currentPosition !== this.props.currentPosition ||
-            nextProps.isPlaying && !this.props.isPlaying ||
+            (nextProps.isPlaying && !this.props.isPlaying) ||
             nextProps.isHoverSeekring !== this.props.isHoverSeekring ||
             nextProps.hoverAngle !== this.props.hoverAngle
         ) {
@@ -282,7 +317,5 @@ export abstract class AudioVisualizerBase<C extends RenderingContext> extends Re
         );
     }
 }
-
-
 
 export type AudioVisualizerType = React.ComponentType<AudioVisualizerProps>;

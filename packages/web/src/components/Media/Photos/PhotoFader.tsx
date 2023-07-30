@@ -1,13 +1,15 @@
-import * as React from 'react';
-
 import { css } from '@emotion/react';
-import { Transition } from 'react-transition-group';
-
 import { gsap } from 'gsap';
+import * as React from 'react';
+import { Transition } from 'react-transition-group';
 
 import { LazyImage } from 'src/components/LazyImage';
 import { PhotoItem } from 'src/components/Media/Photos/types';
-import { idFromItem, resizedPathFromItem, staticPathFromItem } from 'src/components/Media/Photos/utils';
+import {
+    idFromItem,
+    resizedPathFromItem,
+    staticPathFromItem,
+} from 'src/components/Media/Photos/utils';
 import { generateSrcsetWidths } from 'src/imageUrls';
 import { screenWidths } from 'src/screens';
 import { fadeOnEnter, fadeOnExit, isImageElement } from 'src/utils';
@@ -19,15 +21,23 @@ interface PhotoFaderProps {
     isMobile: boolean;
 }
 
-const PhotoFader: React.FC<PhotoFaderProps> = ({ item, isCurrent, idx, isMobile }) => {
+const PhotoFader: React.FC<PhotoFaderProps> = ({
+    item,
+    isCurrent,
+    idx,
+    isMobile,
+}) => {
     const urlWebP = resizedPathFromItem(item, { gallery: true, webp: true });
     const urlJpg = resizedPathFromItem(item, { gallery: true });
 
-    const successCb = React.useCallback((el: HTMLImageElement | HTMLElement | Element | undefined) => {
-        if (el && isImageElement(el)) {
-            gsap.to(el, { autoAlpha: 1, duration: 0.2 });
-        }
-    }, []);
+    const successCb = React.useCallback(
+        (el: HTMLImageElement | HTMLElement | Element | undefined) => {
+            if (el && isImageElement(el)) {
+                gsap.to(el, { autoAlpha: 1, duration: 0.2 });
+            }
+        },
+        [],
+    );
 
     return (
         <Transition<undefined>
@@ -60,7 +70,7 @@ const PhotoFader: React.FC<PhotoFaderProps> = ({ item, isCurrent, idx, isMobile 
                     loading: css`
                         background-color: rgb(208 208 208);
                         fill: rgb(208 208 208);
-                    `
+                    `,
                 }}
                 desktopAttributes={{
                     webp: {

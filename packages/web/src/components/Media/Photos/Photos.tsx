@@ -1,21 +1,18 @@
-import * as React from 'react';
-
 import styled from '@emotion/styled';
+import * as React from 'react';
+import { TransitionGroup } from 'react-transition-group';
 
+import { toMedia } from 'src/MediaQuery';
+import { mqSelectors } from 'src/components/App/reducers';
 import PhotoFader from 'src/components/Media/Photos/PhotoFader';
 import PhotoList from 'src/components/Media/Photos/PhotoList';
-
 import { fetchPhotos, selectFirstPhoto, selectPhoto } from 'src/components/Media/Photos/reducers';
 import { PhotoItem } from 'src/components/Media/Photos/types';
 import { idFromItem } from 'src/components/Media/Photos/utils';
-
+import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { screenPortrait, screenXS } from 'src/screens';
 import { latoFont } from 'src/styles/fonts';
 import { pushed } from 'src/styles/mixins';
-import { screenXS, screenPortrait } from 'src/screens';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { TransitionGroup } from 'react-transition-group';
-import { toMedia } from 'src/MediaQuery';
-import { mqSelectors } from 'src/components/App/reducers';
 
 const StyledPhotos = styled.div(
     pushed,
@@ -34,7 +31,7 @@ const StyledPhotos = styled.div(
 const StyledPhotoViewer = styled.div({
     position: 'absolute',
     left: 0,
-    width: `calc(100vw - 300px)`,
+    width: 'calc(100vw - 300px)',
     height: '100%',
     justifyContent: 'center',
     display: 'flex',
@@ -44,7 +41,7 @@ const StyledPhotoViewer = styled.div({
     img: {
         maxWidth: '100%',
         maxHeight: '100%',
-    }
+    },
 });
 
 const StyledCredit = styled.div(
@@ -99,7 +96,7 @@ const Photos: React.FC<Record<never, unknown>> = () => {
                         {items.map((item, idx) => {
                             const isCurrent = isCurrentItem(item);
                             return (
-                                <PhotoFader key={idx} idx={idx} item={item} isCurrent={isCurrent} isMobile={isHamburger} />
+                                <PhotoFader key={item.file} idx={idx} item={item} isCurrent={isCurrent} isMobile={isHamburger} />
                             );
 
                         })}

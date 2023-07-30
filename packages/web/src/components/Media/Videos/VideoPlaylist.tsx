@@ -1,16 +1,17 @@
-import * as React from 'react';
-
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
+import * as React from 'react';
 
-import Playlist from 'src/components/Media/Playlist';
-import { playVideo, togglePlaylist } from 'src/components/Media/Videos/reducers';
-import VideoPlaylistItem from 'src/components/Media/Videos/VideoPlaylistItem';
-
-import { screenXS, screenPortrait } from 'src/screens';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { toMedia } from 'src/MediaQuery';
 import { mqSelectors } from 'src/components/App/reducers';
+import Playlist from 'src/components/Media/Playlist';
+import VideoPlaylistItem from 'src/components/Media/Videos/VideoPlaylistItem';
+import {
+    playVideo,
+    togglePlaylist,
+} from 'src/components/Media/Videos/reducers';
+import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { screenPortrait, screenXS } from 'src/screens';
 import { latoFont } from 'src/styles/fonts.js';
 
 const StyledPlaylistContainer = styled.div`
@@ -29,15 +30,12 @@ const StyledPlaylistContainer = styled.div`
     }
 `;
 
-const videoPlaylistStyle = css(
-    latoFont(300),
-    {
-        [toMedia([screenXS, screenPortrait])]: {
-            position: 'relative',
-            overflow: 'visible',
-        }
-    }
-);
+const videoPlaylistStyle = css(latoFont(300), {
+    [toMedia([screenXS, screenPortrait])]: {
+        position: 'relative',
+        overflow: 'visible',
+    },
+});
 
 const videoULStyle = css({
     backgroundColor: 'rgba(255 255 255 / 0.9)',
@@ -45,8 +43,8 @@ const videoULStyle = css({
     [toMedia([screenXS, screenPortrait])]: {
         backgroundColor: 'rgba(255 255 255 / 0.95)',
         backdropFilter: 'none',
-    }
-})
+    },
+});
 
 const VideoPlaylist: React.FC<Record<never, unknown>> = () => {
     const isHamburger = useAppSelector(mqSelectors.isHamburger);
@@ -59,14 +57,21 @@ const VideoPlaylist: React.FC<Record<never, unknown>> = () => {
         dispatch(togglePlaylist(show));
     }, []);
 
-    const playDispatch = React.useCallback((isMobile: boolean, videoId: string) => {
-        dispatch(playVideo(isMobile, videoId));
-    }, []);
+    const playDispatch = React.useCallback(
+        (isMobile: boolean, videoId: string) => {
+            dispatch(playVideo(isMobile, videoId));
+        },
+        [],
+    );
 
     return (
         <StyledPlaylistContainer>
             <Playlist
-                extraStyles={{ div: videoPlaylistStyle, ul: videoULStyle, toggler: videoULStyle }}
+                extraStyles={{
+                    div: videoPlaylistStyle,
+                    ul: videoULStyle,
+                    toggler: videoULStyle,
+                }}
                 isShow={isShow}
                 hasToggler={!isHamburger}
                 togglePlaylist={toggleDispatch}

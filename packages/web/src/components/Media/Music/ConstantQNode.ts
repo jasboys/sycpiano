@@ -12,13 +12,15 @@ export class ConstantQNode extends AnalyserNode {
         this.initialize();
     }
 
-    initialize = async(): Promise<void> => {
+    initialize = async (): Promise<void> => {
         await constantQ.loaded;
         this.fftSize = constantQ.numRows * 2;
         this.endIdx = this.fftSize / 2 - 1;
         const halfSR = constantQ.sampleRate / 2;
-        this.maxBin = Math.round(constantQ.numRows * 22050 / halfSR);
-        this.highPassBin = Math.round(constantQ.maxF * constantQ.numRows / halfSR);
+        this.maxBin = Math.round((constantQ.numRows * 22050) / halfSR);
+        this.highPassBin = Math.round(
+            (constantQ.maxF * constantQ.numRows) / halfSR,
+        );
         this.floatArray = new Float32Array(constantQ.numRows);
         this.intArray = new Uint8Array(constantQ.numRows);
     };
@@ -41,7 +43,7 @@ export class ConstantQNode extends AnalyserNode {
             const temp = d / 255;
             this.floatArray[i] = temp;
             if (i < this.maxBin) {
-                if (!!i) {
+                if (i) {
                     lowFreq += temp;
                 }
                 if (i >= this.highPassBin) {
@@ -55,7 +57,7 @@ export class ConstantQNode extends AnalyserNode {
         constantQ.apply(this.floatArray, data);
         return {
             lowFreq: lowFreq / this.highPassBin,
-            highFreq: highFreq / (this.maxBin - this.highPassBin)
+            highFreq: highFreq / (this.maxBin - this.highPassBin),
         };
-    }
+    };
 }

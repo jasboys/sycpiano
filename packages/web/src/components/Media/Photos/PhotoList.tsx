@@ -1,63 +1,59 @@
-import * as React from 'react';
-
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
+import * as React from 'react';
 
+import { toMedia } from 'src/MediaQuery';
 import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
-
+import { mqSelectors } from 'src/components/App/reducers';
 import DropboxButton from 'src/components/Media/Photos/DropboxButton';
 import PhotoListItem from 'src/components/Media/Photos/PhotoListItem';
 import { PhotoItem } from 'src/components/Media/Photos/types';
 import { idFromItem } from 'src/components/Media/Photos/utils';
 import Playlist from 'src/components/Media/Playlist';
-import { screenXS, screenPortrait, webkitMinDPR, minRes } from 'src/screens';
-import { navBarHeight } from 'src/styles/variables';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { toMedia } from 'src/MediaQuery';
-import { mqSelectors } from 'src/components/App/reducers';
+import { minRes, screenPortrait, screenXS, webkitMinDPR } from 'src/screens';
+import { navBarHeight } from 'src/styles/variables';
 
-const photoListStyle = css`
-    padding-left: 5px;
-    background-color: rgb(248 248 248);
-    top: 0;
-    width: 300px;
+const photoListStyle = css({
+    paddingLeft: 5,
+    backgroundColor: 'rgb(248 248 248)',
+    top: 0,
+    width: 300,
 
-    ${toMedia([screenXS, screenPortrait])} {
-        padding-left: 0;
+    [toMedia([screenXS, screenPortrait])]: {
+        paddingLeft: 0,
     }
-`;
-
-const photoULStyle = css`
-    padding-bottom: 80px;
-    background-color: rgb(248 248 248);
-
-    ${toMedia([minRes, webkitMinDPR])} {
-        padding-top: ${navBarHeight.hiDpx}px;
-        background-color: unset;
-        padding-bottom: 60px;
-    }
-`;
-
-const playlistExtraStyles = ({
-    div: photoListStyle,
-    ul: photoULStyle,
 });
 
-const StyledPhotoListContainer = styled.div`
-    width: fit-content;
-    height: 100%;
-    right: 0;
-    top: 0;
-    position: absolute;
+const photoULStyle = css({
+    paddingBottom: 80,
+    backgroundColor: 'rgb(248 248 248)',
+    [toMedia([minRes, webkitMinDPR])]: {
+        paddingTop: navBarHeight.hiDpx,
+        backgroundColor: 'unset',
+        paddingBottom: 60,
+    },
+});
 
-    ${toMedia([screenXS, screenPortrait])} {
-        width: 100%;
-        height: auto;
-        right: unset;
-        top: unset;
-        position: unset;
-    }
-`;
+const playlistExtraStyles = {
+    div: photoListStyle,
+    ul: photoULStyle,
+};
+
+const StyledPhotoListContainer = styled.div({
+    width: 'fit-content',
+    height: '100%',
+    right: 0,
+    top: 0,
+    position: 'absolute',
+    [toMedia([screenXS, screenPortrait])]: {
+        width: '100%',
+        height: 'auto',
+        right: 'unset',
+        top: 'unset',
+        position: 'unset',
+    },
+});
 
 interface PhotoListProps {
     items: PhotoItem[];
@@ -71,15 +67,14 @@ const PhotoList: React.FC<PhotoListProps> = (props) => {
     const hiDpx = useAppSelector(mqSelectors.hiDpx);
     const dispatch = useAppDispatch();
 
-    const onScrollDispatch = React.useCallback((triggerHeight: number, scrollTop: number) => {
-        dispatch(onScroll({ triggerHeight, scrollTop }));
-    }, []);
+    const onScrollDispatch = React.useCallback(
+        (triggerHeight: number, scrollTop: number) => {
+            dispatch(onScroll({ triggerHeight, scrollTop }));
+        },
+        [],
+    );
 
-    const {
-        items,
-        currentItem,
-        selectPhoto,
-    } = props;
+    const { items, currentItem, selectPhoto } = props;
     return (
         <StyledPhotoListContainer>
             <Playlist
@@ -89,14 +84,20 @@ const PhotoList: React.FC<PhotoListProps> = (props) => {
                 hasToggler={false}
                 isShow={true}
                 shouldAppear={false}
-                onScroll={isHamburger ? scrollFn(navBarHeight.get(hiDpx), onScrollDispatch) : undefined}
+                onScroll={
+                    isHamburger
+                        ? scrollFn(navBarHeight.get(hiDpx), onScrollDispatch)
+                        : undefined
+                }
             >
                 {items.map((item) => (
                     <PhotoListItem
                         key={item.file}
                         item={item}
                         isMobile={isHamburger}
-                        currentItemId={isHamburger ? undefined : idFromItem(currentItem)}
+                        currentItemId={
+                            isHamburger ? undefined : idFromItem(currentItem)
+                        }
                         onClick={isHamburger ? undefined : selectPhoto}
                     />
                 ))}

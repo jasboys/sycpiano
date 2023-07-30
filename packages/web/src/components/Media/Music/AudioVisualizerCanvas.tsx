@@ -6,9 +6,14 @@ import {
     HALF_PI,
     TWO_PI,
 } from 'src/components/Media/Music/AudioVisualizerBase';
-
 import { polarToCartesian } from 'src/components/Media/Music/utils';
-import { CIRCLE_SAMPLES, constantQ, drawCircleMask, firLoader, waveformLoader } from 'src/components/Media/Music/VisualizationUtils';
+import {
+    CIRCLE_SAMPLES,
+    constantQ,
+    drawCircleMask,
+    firLoader,
+    waveformLoader,
+} from 'src/components/Media/Music/VisualizationUtils';
 
 declare global {
     interface CanvasRenderingContext2D {
@@ -48,7 +53,11 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
             const integralPart = Math.floor(index);
             const fractionalPart = index - integralPart;
             let sum = 0;
-            for (let i = integralPart, j = this.HALF_CROSSINGS; i < this.FILTER_SIZE; i += this.SAMPLES_PER_CROSSING, j = j - 1) {
+            for (
+                let i = integralPart, j = this.HALF_CROSSINGS;
+                i < this.FILTER_SIZE;
+                i += this.SAMPLES_PER_CROSSING, j = j - 1
+            ) {
                 let input = currentInput + j;
                 // treat like ring buffer
                 if (input < 0) {
@@ -57,7 +66,10 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
                     input -= this.CQ_BINS;
                 }
                 const scale = this.vizBins[input];
-                sum += scale * (firLoader.coeffs[i] + fractionalPart * firLoader.deltas[i]);
+                sum +=
+                    scale *
+                    (firLoader.coeffs[i] +
+                        fractionalPart * firLoader.deltas[i]);
             }
             const result = radius + this.props.volume * sum * this.SCALE;
             let { x, y } = constantQ.angles[currentSample];
@@ -123,7 +135,12 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         this.renderingContext.restore();
     };
 
-    drawPlaybackHead = (angle: number, minRad: number, maxRad: number, color: string): void => {
+    drawPlaybackHead = (
+        angle: number,
+        minRad: number,
+        maxRad: number,
+        color: string,
+    ): void => {
         if (!this.renderingContext) return;
         const [xStart, yStart] = polarToCartesian(minRad, angle);
         const [xEnd, yEnd] = polarToCartesian(maxRad, angle);
@@ -147,22 +164,31 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
             this.props.currentPosition === this.lastPlayheadPosition &&
             this.props.isPlaying
         ) {
-            playbackHead = this.props.currentPosition + (timestamp - this.props.prevTimestamp) / 1000;
+            playbackHead =
+                this.props.currentPosition +
+                (timestamp - this.props.prevTimestamp) / 1000;
         } else {
             this.lastPlayheadPosition = this.props.currentPosition;
         }
-        const angle = (this.props.currentPosition && this.props.duration) ? TWO_PI * playbackHead / this.props.duration : 0;
+        const angle =
+            this.props.currentPosition && this.props.duration
+                ? (TWO_PI * playbackHead) / this.props.duration
+                : 0;
         this.drawPlaybackHead(
             angle,
-            WAVEFORM_CENTER_AXIS - this.props.volume * this.WAVEFORM_HALF_HEIGHT,
-            WAVEFORM_CENTER_AXIS + this.props.volume * this.WAVEFORM_HALF_HEIGHT,
+            WAVEFORM_CENTER_AXIS -
+                this.props.volume * this.WAVEFORM_HALF_HEIGHT,
+            WAVEFORM_CENTER_AXIS +
+                this.props.volume * this.WAVEFORM_HALF_HEIGHT,
             '#FFF',
         );
         if (this.props.isHoverSeekring && this.props.hoverAngle !== undefined) {
             this.drawPlaybackHead(
                 this.props.hoverAngle,
-                WAVEFORM_CENTER_AXIS - this.props.volume * this.WAVEFORM_HALF_HEIGHT,
-                WAVEFORM_CENTER_AXIS + this.props.volume * this.WAVEFORM_HALF_HEIGHT,
+                WAVEFORM_CENTER_AXIS -
+                    this.props.volume * this.WAVEFORM_HALF_HEIGHT,
+                WAVEFORM_CENTER_AXIS +
+                    this.props.volume * this.WAVEFORM_HALF_HEIGHT,
                 '#888',
             );
         }
@@ -177,16 +203,16 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         this.renderingContext.moveTo(verts[0], verts[1]);
 
         for (let i = 2; i < verts.length; i += 2) {
-            this.renderingContext.lineTo(verts[i], verts[i+1]);
+            this.renderingContext.lineTo(verts[i], verts[i + 1]);
         }
 
         this.renderingContext.stroke();
-    }
+    };
 
     drawPhase = (radius: number, color: string): void => {
         if (!this.renderingContext) return;
 
-        let verts: number[] = [];
+        const verts: number[] = [];
 
         for (let i = 1; i < this.leftData.length; i++) {
             verts.push(this.rightData[i] * radius, this.leftData[i] * radius);
@@ -196,7 +222,6 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         this.renderingContext.rotate(-Math.PI / 4.0);
 
         if (this.props.isMobile) {
-
         } else {
             this.history.push(new Float32Array(verts));
             if (this.history.length > this.maxHistoryLength) {
@@ -206,31 +231,48 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
             let i = 1;
             for (const phase of this.history) {
                 // color[3] = Math.pow(0.8, maxLength - i);
-                const opacified = opacify(Math.pow(i / this.maxHistoryLength, 4))(color);
+                const opacified = opacify(
+                    Math.pow(i / this.maxHistoryLength, 4),
+                )(color);
                 this.drawPhaseVerts(phase, opacified);
                 i++;
             }
-
         }
         this.renderingContext.restore();
-    }
+    };
 
     drawVisualization = (
         lowFreq: number,
         lightness: number,
-        timestamp: number
+        timestamp: number,
     ): void => {
         if (!this.renderingContext) return;
         // beware! we are rotating the whole thing by -half_pi so, we need to swap width and height values
-        this.renderingContext.clearRect(-this.height / 2 + this.HEIGHT_ADJUST, -this.width / 2, this.height, this.width);
+        this.renderingContext.clearRect(
+            -this.height / 2 + this.HEIGHT_ADJUST,
+            -this.width / 2,
+            this.height,
+            this.width,
+        );
         // hsl derived from @light-blue: #4E86A4;
-        const color = hsl(201, (36 + lightness * 64) / 100, (47 + lightness * 53) / 100);
+        const color = hsl(
+            201,
+            (36 + lightness * 64) / 100,
+            (47 + lightness * 53) / 100,
+        );
         // adjust large radius to change with the average of all values
         const radius = this.RADIUS_BASE + lowFreq * this.RADIUS_SCALE;
-        this.props.setRadii(radius - 2 * this.WAVEFORM_HALF_HEIGHT, radius, this.RADIUS_BASE);
+        this.props.setRadii(
+            radius - 2 * this.WAVEFORM_HALF_HEIGHT,
+            radius,
+            this.RADIUS_BASE,
+        );
 
         this.drawConstantQBins(radius, color);
-        drawCircleMask(this.renderingContext, radius + 0.25, [this.width, this.height]);
+        drawCircleMask(this.renderingContext, radius + 0.25, [
+            this.width,
+            this.height,
+        ]);
         this.drawSeekArea(radius, color, timestamp);
         this.drawPhase(this.RADIUS_BASE, opacify(0.5)(color));
     };
@@ -254,11 +296,13 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         ) {
             return;
         }
-        const backingStoreRatio = anyCtx.webkitBackingStorePixelRatio ||
+        const backingStoreRatio =
+            anyCtx.webkitBackingStorePixelRatio ||
             anyCtx.mozBackingStorePixelRatio ||
             anyCtx.msBackingStorePixelRatio ||
             anyCtx.oBackingStorePixelRatio ||
-            anyCtx.backingStorePixelRatio || 1;
+            anyCtx.backingStorePixelRatio ||
+            1;
 
         const ratio = devicePixelRatio / backingStoreRatio;
 
@@ -288,7 +332,8 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         this.renderingContext.translate(-centerY, centerX);
 
         this.RADIUS_SCALE = Math.min(this.width, this.height) / 12;
-        this.RADIUS_BASE = Math.min(centerX, centerY) - this.RADIUS_SCALE * 3 / 4;
+        this.RADIUS_BASE =
+            Math.min(centerX, centerY) - (this.RADIUS_SCALE * 3) / 4;
         this.WAVEFORM_HALF_HEIGHT = Math.min(50, this.RADIUS_BASE / 4);
 
         if (!this.isRendering) {

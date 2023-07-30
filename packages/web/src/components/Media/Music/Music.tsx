@@ -1,33 +1,51 @@
 /* global MUSIC_PATH */
 
+import styled from '@emotion/styled';
+import { gsap } from 'gsap';
 import isEmpty from 'lodash-es/isEmpty';
 import shuffle from 'lodash-es/shuffle';
 import * as React from 'react';
 import { connect } from 'react-redux';
+import {
+    NavigateFunction,
+    PathMatch,
+    useMatch,
+    useNavigate,
+} from 'react-router-dom';
 
-import styled from '@emotion/styled';
-
-import { gsap } from 'gsap';
-
+import { toMedia } from 'src/MediaQuery';
 import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
 import AudioInfo from 'src/components/Media/Music/AudioInfo';
 import AudioUI from 'src/components/Media/Music/AudioUI';
+import {
+    AudioVisualizerType,
+    MOBILE_MSPF,
+} from 'src/components/Media/Music/AudioVisualizerBase.jsx';
 import MusicPlaylist from 'src/components/Media/Music/MusicPlaylist';
+import {
+    firLoader,
+    waveformLoader,
+} from 'src/components/Media/Music/VisualizationUtils';
 import { fetchPlaylist } from 'src/components/Media/Music/reducers';
-import { getAudioContext, getLastName, getPermaLink, getRelativePermaLink, modulo, nextPow2, normalizeString } from 'src/components/Media/Music/utils';
-import { firLoader, waveformLoader } from 'src/components/Media/Music/VisualizationUtils';
-
-import { AudioVisualizerType, MOBILE_MSPF } from 'src/components/Media/Music/AudioVisualizerBase.jsx';
-import { isMusicItem, MusicFileItem, MusicListItem } from 'src/components/Media/Music/types';
-
-import { pushed } from 'src/styles/mixins';
-import { minRes, webkitMinDPR } from 'src/screens';
-import { navBarHeight } from 'src/styles/variables';
-import { toMedia } from 'src/MediaQuery';
-
-import { NavigateFunction, PathMatch, useMatch, useNavigate } from 'react-router-dom';
+import {
+    MusicFileItem,
+    MusicListItem,
+    isMusicItem,
+} from 'src/components/Media/Music/types';
+import {
+    getAudioContext,
+    getLastName,
+    getPermaLink,
+    getRelativePermaLink,
+    modulo,
+    nextPow2,
+    normalizeString,
+} from 'src/components/Media/Music/utils';
 import module from 'src/module';
+import { minRes, webkitMinDPR } from 'src/screens';
 import store, { AppDispatch, GlobalStateShape } from 'src/store';
+import { pushed } from 'src/styles/mixins';
+import { navBarHeight } from 'src/styles/variables';
 import { ConstantQNode } from './ConstantQNode.js';
 
 const register = module(store);
@@ -68,26 +86,25 @@ interface MusicDispatchToProps {
     dispatch: AppDispatch;
 }
 
-type MusicProps = MusicStateToProps & MusicDispatchToProps & {
-    matches: PathMatchResult;
-    navigate: NavigateFunction;
-};
+type MusicProps = MusicStateToProps &
+    MusicDispatchToProps & {
+        matches: PathMatchResult;
+        navigate: NavigateFunction;
+    };
 
-const MusicDiv = styled.div`
-    ${pushed}
-    position: relative;
-    width: 100%;
-    background-color: black;
-
-    ${toMedia([minRes, webkitMinDPR])} {
-        margin-top: 0;
-        padding-top: ${navBarHeight.hiDpx}px;
-        height: 100%;
-        overflow-y: scroll;
-        -webkit-overflow-scrolling: touch;
-        background-color: white;
-    }
-`;
+const MusicDiv = styled.div(pushed, {
+    position: 'relative',
+    width: '100%',
+    backgroundColor: 'black',
+    [toMedia([minRes, webkitMinDPR])]: {
+        marginTop: 0,
+        paddingTop: navBarHeight.hiDpx,
+        height: '100%',
+        overflowY: 'scroll',
+        WebkitOverflowScrolling: 'touch',
+        backgroundColor: 'white',
+    },
+});
 
 class Music extends React.Component<MusicProps, MusicState> {
     wasPlaying = false;
@@ -125,32 +142,38 @@ class Music extends React.Component<MusicProps, MusicState> {
     musicFileOrder!: number[];
 
     getNextTrack = (which: 'next' | 'prev', force = false) => {
-        const trackNo = this.state.localFlat.findIndex((item) => item.id === this.state.currentTrack?.id);
-        const nextTrackNo = (which === 'next') ? trackNo + 1 : trackNo - 1;
+        const trackNo = this.state.localFlat.findIndex(
+            (item) => item.id === this.state.currentTrack?.id,
+        );
+        const nextTrackNo = which === 'next' ? trackNo + 1 : trackNo - 1;
         if (force) {
-            return this.state.localFlat[modulo(nextTrackNo, this.state.localFlat.length)];
+            return this.state.localFlat[
+                modulo(nextTrackNo, this.state.localFlat.length)
+            ];
         }
-        if (nextTrackNo >= 0 && nextTrackNo < this.state.localFlat.length
-        ) {
+        if (nextTrackNo >= 0 && nextTrackNo < this.state.localFlat.length) {
             return this.state.localFlat[nextTrackNo];
         }
-    }
+    };
 
     toggleShuffle = () => {
-        this.setState({
-            isShuffle: !this.state.isShuffle,
-        }, () => {
-            if (this.state.isShuffle) {
-                this.setState({
-                    localFlat: shuffle(this.state.localFlat),
-                });
-            } else {
-                this.setState({
-                    localFlat: this.props.flatItems,
-                });
-            }
-        });
-    }
+        this.setState(
+            {
+                isShuffle: !this.state.isShuffle,
+            },
+            () => {
+                if (this.state.isShuffle) {
+                    this.setState({
+                        localFlat: shuffle(this.state.localFlat),
+                    });
+                } else {
+                    this.setState({
+                        localFlat: this.props.flatItems,
+                    });
+                }
+            },
+        );
+    };
 
     play = () => {
         if (!this.state.userInteracted) {
@@ -162,33 +185,43 @@ class Music extends React.Component<MusicProps, MusicState> {
             this.audioCtx.resume();
         }
         this.audio.current?.play();
-    }
+    };
 
     pause = () => {
         this.audio.current?.pause();
-    }
+    };
 
     initializeAudioPlayer = async () => {
         if (!this.audio.current) {
             throw new Error('audio element ref not created');
         }
         this.audioCtx = getAudioContext();
-        const audioSrc = this.audioCtx.createMediaElementSource(this.audio.current);
+        const audioSrc = this.audioCtx.createMediaElementSource(
+            this.audio.current,
+        );
 
         const sampleRate = this.audioCtx.sampleRate;
         // smooth more when sampleRate is higher
         const smoothing = 0.9 * Math.pow(sampleRate / 192000, 2);
 
         // source -> split(L, R) => analyzer(L, R) => merge -> dest
-        this.analyzerL = new ConstantQNode(this.audioCtx, { smoothingTimeConstant: smoothing });
-        this.analyzerR = new ConstantQNode(this.audioCtx, { smoothingTimeConstant: smoothing });
+        this.analyzerL = new ConstantQNode(this.audioCtx, {
+            smoothingTimeConstant: smoothing,
+        });
+        this.analyzerR = new ConstantQNode(this.audioCtx, {
+            smoothingTimeConstant: smoothing,
+        });
 
         const phaseSamples =
             sampleRate *
-            ((this.props.isHamburger ? MOBILE_MSPF : (1000.0 / 60.0)) / 1000);
+            ((this.props.isHamburger ? MOBILE_MSPF : 1000.0 / 60.0) / 1000);
 
-        this.phaseAnalyzerL = new AnalyserNode(this.audioCtx, { fftSize: nextPow2(phaseSamples) });
-        this.phaseAnalyzerR = new AnalyserNode(this.audioCtx, { fftSize: nextPow2(phaseSamples) });
+        this.phaseAnalyzerL = new AnalyserNode(this.audioCtx, {
+            fftSize: nextPow2(phaseSamples),
+        });
+        this.phaseAnalyzerR = new AnalyserNode(this.audioCtx, {
+            fftSize: nextPow2(phaseSamples),
+        });
 
         const splitter = this.audioCtx.createChannelSplitter(2);
         const merger = this.audioCtx.createChannelMerger(2);
@@ -205,16 +238,21 @@ class Music extends React.Component<MusicProps, MusicState> {
 
         this.setState({ isLoading: true });
         this.waitForFilterAndPlaylist();
-    }
+    };
 
-    getFirstTrack = (composer: string | undefined, piece: string | undefined, movement = '') => {
+    getFirstTrack = (
+        composer: string | undefined,
+        piece: string | undefined,
+        movement = '',
+    ) => {
         if (composer && piece) {
             return this.props.flatItems.find((item) => {
                 // early return before looking through props.items
                 // if composer or piece don't match, return false
                 if (
-                    composer !== getLastName(item.composer!) ||
-                    piece !== normalizeString(item.piece!)
+                    (item.composer &&
+                        composer !== getLastName(item.composer)) ||
+                    (item.piece && piece !== normalizeString(item.piece))
                 ) {
                     return false;
                 }
@@ -228,29 +266,25 @@ class Music extends React.Component<MusicProps, MusicState> {
                 // If not, then the only last possible way this returns true
                 // is if musicFiles.length === 1, since that would mean there isn't
                 // a movement name associated with this track.
-                const music = this.props.items.find((mi) => item.music === mi.id);
+                const music = this.props.items.find(
+                    (mi) => item.music === mi.id,
+                );
                 return (
-                    music &&
-                    isMusicItem(music) &&
-                    music.musicFiles.length === 1
+                    music && isMusicItem(music) && music.musicFiles.length === 1
                 );
             });
         } else {
             return this.props.flatItems[0];
         }
-    }
+    };
 
     waitForFilterAndPlaylist = async () => {
         try {
-            const {
-                composer,
-                piece,
-                movement
-            } = {
+            const { composer, piece, movement } = {
                 composer: undefined,
                 piece: undefined,
                 movement: undefined,
-                ...this.props.matches?.params
+                ...this.props.matches?.params,
             };
 
             await this.props.dispatch(fetchPlaylist());
@@ -266,7 +300,7 @@ class Music extends React.Component<MusicProps, MusicState> {
         } catch (err) {
             console.error('Playlist init failed.', err);
         }
-    }
+    };
 
     loadTrack = async (track: MusicFileItem) => {
         if (
@@ -277,20 +311,23 @@ class Music extends React.Component<MusicProps, MusicState> {
         }
         await new Promise((resolve: (arg: void) => void) => {
             if (this.audio.current) {
-                gsap.fromTo(this.audio.current,
+                gsap.fromTo(
+                    this.audio.current,
                     { volume: this.audio.current.volume, duration: 0.3 },
                     {
                         volume: 0,
                         onUpdate: () => {
                             if (this.audio.current) {
-                                this.setState({ volume: this.audio.current.volume });
+                                this.setState({
+                                    volume: this.audio.current.volume,
+                                });
                             }
                         },
                         onComplete: () => {
                             setTimeout(resolve, 100);
                         },
-                    }
-                )
+                    },
+                );
             } else {
                 resolve();
             }
@@ -301,22 +338,30 @@ class Music extends React.Component<MusicProps, MusicState> {
             duration: -1,
             isLoading: this.audioCtx.state === 'suspended' ? false : true,
         });
-        waveformLoader.loadWaveformFile(`${MUSIC_PATH}/waveforms/${track.waveformFile}`);
+        waveformLoader.loadWaveformFile(
+            `${MUSIC_PATH}/waveforms/${track.waveformFile}`,
+        );
         if (this.audio.current) {
             this.audio.current.src = `${MUSIC_PATH}/${track.audioFile}`;
         }
         await waveformLoader.loaded;
         if (this.audio.current) {
-            gsap.fromTo(this.audio.current, { duration: 0.3, volume: 0 }, {
-                volume: 1,
-                onUpdate: () => {
-                    if (this.audio.current) {
-                        this.setState({ volume: this.audio.current.volume });
-                    }
+            gsap.fromTo(
+                this.audio.current,
+                { duration: 0.3, volume: 0 },
+                {
+                    volume: 1,
+                    onUpdate: () => {
+                        if (this.audio.current) {
+                            this.setState({
+                                volume: this.audio.current.volume,
+                            });
+                        }
+                    },
                 },
-            });
+            );
         }
-    }
+    };
 
     loadTrackNoFade = async (track: MusicFileItem) => {
         this.setState({
@@ -324,12 +369,14 @@ class Music extends React.Component<MusicProps, MusicState> {
             duration: -1,
             isLoading: true,
         });
-        waveformLoader.loadWaveformFile(`${MUSIC_PATH}/waveforms/${track.waveformFile}`);
+        waveformLoader.loadWaveformFile(
+            `${MUSIC_PATH}/waveforms/${track.waveformFile}`,
+        );
         if (this.audio.current) {
             this.audio.current.src = `${MUSIC_PATH}/${track.audioFile}`;
         }
         await waveformLoader.loaded;
-    }
+    };
 
     onTimeUpdate = () => {
         if (this.audio.current) {
@@ -338,24 +385,33 @@ class Music extends React.Component<MusicProps, MusicState> {
                 lastUpdateTimestamp: performance.now(),
             });
         }
-    }
+    };
 
     playPrev = async () => {
         if (!this.state.userInteracted) {
             this.play();
         }
         // Prev Button should scroll to beginning of track unless it's at the beginning
-        if (this.audio.current?.currentTime && this.audio.current.currentTime >= 3) {
+        if (
+            this.audio.current?.currentTime &&
+            this.audio.current.currentTime >= 3
+        ) {
             this.audio.current.currentTime = 0;
             return;
         }
         const next = this.getNextTrack('prev', true);
         if (next) {
-            this.props.navigate(getRelativePermaLink(next.composer!, next.piece!, next.name));
+            this.props.navigate(
+                getRelativePermaLink(
+                    next.composer ?? '',
+                    next.piece ?? '',
+                    next.name,
+                ),
+            );
             await this.loadTrack(next);
             this.play();
         }
-    }
+    };
 
     playNext = async () => {
         if (!this.state.userInteracted) {
@@ -363,20 +419,28 @@ class Music extends React.Component<MusicProps, MusicState> {
         }
         const next = this.getNextTrack('next', true);
         if (next) {
-            this.props.navigate(getRelativePermaLink(next.composer!, next.piece!, next.name));
+            this.props.navigate(
+                getRelativePermaLink(
+                    next.composer ?? '',
+                    next.piece ?? '',
+                    next.name,
+                ),
+            );
             await this.loadTrack(next);
             this.play();
         }
-    }
+    };
 
     playNextNoFade = async () => {
         const next = this.getNextTrack('next', true);
         if (next) {
-            this.props.navigate(getPermaLink(next.composer!, next.piece!, next.name));
+            this.props.navigate(
+                getPermaLink(next.composer ?? '', next.piece ?? '', next.name),
+            );
             await this.loadTrackNoFade(next);
             this.play();
         }
-    }
+    };
 
     onEnded = () => {
         this.setState({
@@ -385,7 +449,7 @@ class Music extends React.Component<MusicProps, MusicState> {
             lastUpdateTimestamp: performance.now(),
         });
         this.playNextNoFade();
-    }
+    };
 
     onDrag = (percent: number) => {
         if (this.audio.current) {
@@ -395,7 +459,7 @@ class Music extends React.Component<MusicProps, MusicState> {
                 lastUpdateTimestamp: performance.now(),
             });
         }
-    }
+    };
 
     onStartDrag = (percent: number) => {
         this.wasPlaying = this.state.isPlaying;
@@ -407,7 +471,7 @@ class Music extends React.Component<MusicProps, MusicState> {
             const position = percent * this.audio.current.duration;
             this.audio.current.currentTime = position;
         }
-    }
+    };
 
     seekAudio = (percent: number) => {
         this.onDrag(percent);
@@ -418,7 +482,7 @@ class Music extends React.Component<MusicProps, MusicState> {
                 this.audio.current.play();
             }
         }
-    }
+    };
 
     audioOnLoad = async () => {
         if (this.audio.current) {
@@ -432,7 +496,7 @@ class Music extends React.Component<MusicProps, MusicState> {
         } catch (err) {
             console.error('music component init failed.', err);
         }
-    }
+    };
 
     onPause = () => {
         if (this.audio.current) {
@@ -442,7 +506,7 @@ class Music extends React.Component<MusicProps, MusicState> {
                 lastUpdateTimestamp: performance.now(),
             });
         }
-    }
+    };
 
     onPlaying = () => {
         if (this.audio.current) {
@@ -452,13 +516,16 @@ class Music extends React.Component<MusicProps, MusicState> {
                 lastUpdateTimestamp: performance.now(),
             });
         }
-    }
+    };
 
     detectWebGL = () => {
         const canvas = document.createElement('canvas');
-        const gl = canvas.getContext('webgl2') || canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        const gl =
+            canvas.getContext('webgl2') ||
+            canvas.getContext('webgl') ||
+            canvas.getContext('experimental-webgl');
         return gl;
-    }
+    };
 
     setHoverSeekring = (isHoverSeekring: boolean, angle?: number) => {
         if (this.state.isHoverSeekring !== isHoverSeekring) {
@@ -467,13 +534,13 @@ class Music extends React.Component<MusicProps, MusicState> {
         if (this.state.angle !== angle) {
             this.setState({ angle });
         }
-    }
+    };
 
     setMouseMove = (isMouseMove: boolean) => {
         if (isMouseMove !== this.state.isMouseMove) {
             this.setState({ isMouseMove });
         }
-    }
+    };
 
     setRadii = (inner: number, outer: number, base: number) => {
         if (
@@ -489,29 +556,44 @@ class Music extends React.Component<MusicProps, MusicState> {
                 },
             });
         }
-    }
+    };
 
     async componentDidMount() {
         this.initializeAudioPlayer();
         const gl = this.detectWebGL();
-        if (!!gl) {
+        if (gl) {
             if (gl instanceof WebGL2RenderingContext) {
-                const component = await register('visualizer', import(/* webpackChunkName: 'visualizerWebGL2' */ 'src/components/Media/Music/AudioVisualizerWebGL2.js'));
+                const component = await register(
+                    'visualizer',
+                    import(
+                        /* webpackChunkName: 'visualizerWebGL2' */ 'src/components/Media/Music/AudioVisualizerWebGL2.js'
+                    ),
+                );
                 console.log('Using WebGL2');
                 this.setState({
                     Visualizer: component,
                 });
             } else {
-                const component = await register('visualizer', import(/* webpackChunkName: 'visualizerWebGL' */ 'src/components/Media/Music/AudioVisualizerWebGL.js'));
+                const component = await register(
+                    'visualizer',
+                    import(
+                        /* webpackChunkName: 'visualizerWebGL' */ 'src/components/Media/Music/AudioVisualizerWebGL.js'
+                    ),
+                );
                 console.log('Using WebGL');
                 this.setState({
                     Visualizer: component,
                 });
             }
         } else {
-            const component = await register('visualizer', import(/* webpackChunkName: 'visualizerCanvas' */ 'src/components/Media/Music/AudioVisualizerCanvas'));
-                console.log('Using Canvas');
-                this.setState({
+            const component = await register(
+                'visualizer',
+                import(
+                    /* webpackChunkName: 'visualizerCanvas' */ 'src/components/Media/Music/AudioVisualizerCanvas'
+                ),
+            );
+            console.log('Using Canvas');
+            this.setState({
                 Visualizer: component,
             });
         }
@@ -531,7 +613,16 @@ class Music extends React.Component<MusicProps, MusicState> {
         const isHamburger = this.props.isHamburger;
         const hiDpx = this.props.hiDpx;
         return (
-            <MusicDiv onScroll={isHamburger ? scrollFn(navBarHeight.get(hiDpx), this.onScrollDispatch) : undefined}>
+            <MusicDiv
+                onScroll={
+                    isHamburger
+                        ? scrollFn(
+                              navBarHeight.get(hiDpx),
+                              this.onScrollDispatch,
+                          )
+                        : undefined
+                }
+            >
                 <audio
                     id="audio"
                     crossOrigin="anonymous"
@@ -546,7 +637,11 @@ class Music extends React.Component<MusicProps, MusicState> {
                 <MusicPlaylist
                     play={this.play}
                     onClick={this.loadTrack}
-                    currentTrackId={(this.state.currentTrack) ? this.state.currentTrack.id : ''}
+                    currentTrackId={
+                        this.state.currentTrack
+                            ? this.state.currentTrack.id
+                            : ''
+                    }
                     userInteracted={this.state.userInteracted}
                     toggleShuffle={this.toggleShuffle}
                     isShuffle={this.state.isShuffle}
@@ -599,31 +694,36 @@ class Music extends React.Component<MusicProps, MusicState> {
     }
 }
 
-type PathMatchResult = PathMatch<'composer' | 'piece'> | PathMatch<'composer' | 'piece' | 'movement'> | null;
+type PathMatchResult =
+    | PathMatch<'composer' | 'piece'>
+    | PathMatch<'composer' | 'piece' | 'movement'>
+    | null;
 
-const mapStateToProps = ({ audioPlaylist, mediaQuery }: GlobalStateShape): MusicStateToProps => ({
+const mapStateToProps = ({
+    audioPlaylist,
+    mediaQuery,
+}: GlobalStateShape): MusicStateToProps => ({
     items: audioPlaylist.items,
     flatItems: audioPlaylist.flatItems,
     isHamburger: mediaQuery.isHamburger,
     hiDpx: mediaQuery.hiDpx,
 });
 
-const ConnectedMusic = connect<MusicStateToProps, void, Record<never, unknown>, GlobalStateShape>(
-    mapStateToProps,
-)(Music);
+const ConnectedMusic = connect<
+    MusicStateToProps,
+    void,
+    Record<never, unknown>,
+    GlobalStateShape
+>(mapStateToProps)(Music);
 
-const routerHOC = (Component: typeof ConnectedMusic) =>
-    () => {
-        const matches: PathMatchResult = [
-            useMatch('media/music/:composer/:piece'),
-            useMatch('media/music/:composer/:piece/:movement')
-        ].reduce((prev, curr) => prev ?? curr, null);
+const routerHOC = (Component: typeof ConnectedMusic) => () => {
+    const matches: PathMatchResult = [
+        useMatch('media/music/:composer/:piece'),
+        useMatch('media/music/:composer/:piece/:movement'),
+    ].reduce((prev, curr) => prev ?? curr, null);
 
-        return <Component
-            matches={matches}
-            navigate={useNavigate()}
-        />;
-    };
+    return <Component matches={matches} navigate={useNavigate()} />;
+};
 
 export type MusicType = React.Component<MusicProps>;
 export type RequiredProps = Record<never, unknown>;

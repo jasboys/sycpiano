@@ -160,7 +160,7 @@ namespace Youtube {
         /* Etag of this resource. */
         etag?: string;
         /* The ID that YouTube uses to uniquely identify the playlist item. */
-        id?: string;
+        id: string;
         /* Identifies what kind of resource this is. Value: the fixed string "youtube#playlistItem". */
         kind?: string;
         /* The snippet object contains basic details about the playlist item, such as its title and position in the playlist. */
@@ -325,7 +325,7 @@ namespace Youtube {
          */
         fileDetails?: VideoFileDetails;
         /* The ID that YouTube uses to uniquely identify the video. */
-        id?: string;
+        id: string;
         /* Identifies what kind of resource this is. Value: the fixed string "youtube#video". */
         kind?: string;
         /*

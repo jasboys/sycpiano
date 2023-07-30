@@ -1,12 +1,15 @@
+import { createAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { AnyAction } from 'redux';
+import { ThunkAction } from 'redux-thunk';
 import youTube from 'src/services/YouTube';
 
-import { VideoItemShape, VideoPlayerStateShape, VideoPlaylistStateShape } from 'src/components/Media/Videos/types';
-
-import { createSlice, createAsyncThunk, createAction } from '@reduxjs/toolkit';
-import { ThunkAPIType } from 'src/types';
-import { ThunkAction } from 'redux-thunk';
+import {
+    VideoItemShape,
+    VideoPlayerStateShape,
+    VideoPlaylistStateShape,
+} from 'src/components/Media/Videos/types';
 import { GlobalStateShape } from 'src/store';
+import { ThunkAPIType } from 'src/types';
 
 const videoPlayerInitialState: VideoPlayerStateShape = {
     isPlayerReady: false,
@@ -26,7 +29,7 @@ const videoPlayerSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(fetchVideoPlaylist.fulfilled, (state, action) => {
-                state.videoId = action.payload[0].id!;
+                state.videoId = action.payload[0].id;
             })
             .addCase(playerIsReady, (state) => {
                 state.isPlayerReady = true;
@@ -43,8 +46,8 @@ const videoPlayerSlice = createSlice({
                 state.isPlaying = false;
                 state.isPreviewOverlay = false;
             })
-            .addDefaultCase(state => state);
-    }
+            .addDefaultCase((state) => state);
+    },
 });
 
 export const videoPlayerReducer = videoPlayerSlice.reducer;
@@ -85,32 +88,52 @@ export const videoPlayerReducer = videoPlayerSlice.reducer;
 //         default: return state;
 //     }
 // };
-export const togglePlaylist = createAction<boolean | undefined>('videoPlaylist/togglePlaylist');
+export const togglePlaylist = createAction<boolean | undefined>(
+    'videoPlaylist/togglePlaylist',
+);
 
-const videoIdExists = (id: string | undefined): id is string => id !== undefined;
-
-export const fetchVideoPlaylist = createAsyncThunk<VideoItemShape[], void, ThunkAPIType>(
+export const fetchVideoPlaylist = createAsyncThunk<
+    VideoItemShape[],
+    void,
+    ThunkAPIType
+>(
     'videoPlayer/fetchPlaylist',
     async () => {
         const playlistResponse = await youTube.getPlaylistItems();
-        const videoItems: Partial<Youtube.PlaylistItem & Youtube.Video>[] =
+        const videoItems: (Youtube.PlaylistItem & Youtube.Video)[] =
             playlistResponse.data.items.filter((item: Youtube.PlaylistItem) => {
-                return item?.snippet?.thumbnails && Object.keys(item.snippet.thumbnails).length != 0;
+                return (
+                    item?.snippet?.thumbnails &&
+                    Object.keys(item.snippet.thumbnails).length !== 0
+                );
             });
-        const videoIds = videoItems.map((item: Youtube.PlaylistItem) => {
-            return item?.snippet?.resourceId && item.snippet.resourceId.videoId;
-        });
-        const videosResponse = await youTube.getVideos(videoIds.filter(videoIdExists));
-        videosResponse.data.items.forEach((item: Youtube.Video, i: number) => {
-            videoItems[i] = { ...videoItems[i], ...item };
+        const videoIds = videoItems.reduce(
+            (prev: string[], item: Youtube.PlaylistItem) => {
+                if (item?.snippet?.resourceId?.videoId !== undefined) {
+                    return [...prev, item.snippet.resourceId.videoId];
+                } else {
+                    return prev;
+                }
+            },
+            [],
+        );
+        const videosResponse = await youTube.getVideos(videoIds);
+        videosResponse.data.items.forEach((item: Youtube.Video) => {
+            const idx = videoItems.findIndex((vi) => vi.id === item.id);
+            if (idx >= 0) {
+                videoItems[idx] = { ...videoItems[idx], ...item };
+            }
         });
         return videoItems;
     },
     {
         condition: (_, { getState }) => {
-            return !getState().videoPlaylist.isFetching && !getState().videoPlaylist.items.length;
-        }
-    }
+            return (
+                !getState().videoPlaylist.isFetching &&
+                !getState().videoPlaylist.items.length
+            );
+        },
+    },
 );
 
 const videoPlaylistInitialState: VideoPlaylistStateShape = {
@@ -137,11 +160,14 @@ const videoPlaylistSlice = createSlice({
                 state.items = action.payload;
             })
             .addCase(togglePlaylist, (state, action) => {
-                const isShow = (action.payload === undefined) ? !state.isShow : action.payload;
+                const isShow =
+                    action.payload === undefined
+                        ? !state.isShow
+                        : action.payload;
                 state.isShow = isShow;
             })
-            .addDefaultCase(state => state);
-    }
+            .addDefaultCase((state) => state);
+    },
 });
 
 export const videoPlaylistReducer = videoPlaylistSlice.reducer;
@@ -187,16 +213,28 @@ export const videoPlaylistReducer = videoPlaylistSlice.reducer;
 //     });
 // };
 
-export const playVideo = (isMobile = false, videoId?: string): ThunkAction<void, GlobalStateShape, void, AnyAction> =>
+export const playVideo =
+    (
+        isMobile = false,
+        videoId?: string,
+    ): ThunkAction<void, GlobalStateShape, void, AnyAction> =>
     (dispatch, getState) => {
         const videoPlayerReducer = getState().videoPlayer;
-        if (videoId !== undefined && !getState().videoPlaylist.items.find((item: VideoItemShape) => item.id === videoId)) {
+        if (
+            videoId !== undefined &&
+            !getState().videoPlaylist.items.find(
+                (item: VideoItemShape) => item.id === videoId,
+            )
+        ) {
             return;
         }
         if (!isMobile) {
             setTimeout(() => dispatch(togglePlaylist(false)), 500);
         }
-        if (videoPlayerReducer.isPlaying && videoId === videoPlayerReducer.videoId) {
+        if (
+            videoPlayerReducer.isPlaying &&
+            videoId === videoPlayerReducer.videoId
+        ) {
             return;
         }
         const vid = videoId ? videoId : videoPlayerReducer.videoId;

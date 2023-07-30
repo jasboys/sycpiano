@@ -12,7 +12,7 @@ const modules: {
 // otherwise, registers the reducer of the (new) module, and caches it.
 const extractModule =
     (store: AsyncStore) =>
-    async <P extends Record<string, unknown>>(
+    async <P extends object>(
         name: string,
         moduleProvider: Promise<AsyncModule<P>>,
     ): Promise<ComponentType<P>> => {

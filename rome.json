@@ -12,6 +12,9 @@
             },
             "style": {
                 "noInferrableTypes": "off"
+            },
+            "a11y": {
+                "useMediaCaption": "off"
             }
         }
     },
