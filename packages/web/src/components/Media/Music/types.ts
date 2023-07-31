@@ -22,7 +22,15 @@ export interface MusicFileItem {
     readonly hash: string;
 }
 
-export type MusicCategories = 'concerto' | 'solo' | 'chamber' | 'composition' | 'videogame';
+export const musicCategories = [
+    'concerto',
+    'solo',
+    'chamber',
+    'composition',
+    'videogame',
+] as const;
+
+export type MusicCategories = typeof musicCategories[number];
 
 export const categoryMap = {
     concerto: 'Concerti',
@@ -37,15 +45,20 @@ export interface MusicCategoryItem {
     readonly type: MusicCategories;
 }
 
-export type MusicResponse = {
-    [k in MusicCategories]?: MusicItem[];
-};
+export interface MusicResponse {
+    [k: string]: MusicItem[];
+}
 
 export type MusicListItem = MusicItem | MusicCategoryItem;
 
 export const isMusicItem = (item: MusicListItem): item is MusicItem => {
     const test = item as MusicItem;
-    return !!(test.piece || test.composer || test.contributors || test.musicFiles);
+    return !!(
+        test.piece ||
+        test.composer ||
+        test.contributors ||
+        test.musicFiles
+    );
 };
 
 export interface AudioPlaylistStateShape {

@@ -1,19 +1,22 @@
 /* global BINARY_PATH */
+import axios from 'axios';
 import {
-    create,
     DenseMatrixDependencies,
-    multiplyDependencies,
-    SparseMatrixDependencies,
     Matrix,
-} from 'mathjs';
-const { multiply, SparseMatrix, matrix } = create({
-    multiplyDependencies,
-    DenseMatrixDependencies,
     SparseMatrixDependencies,
-}, {});
+    create,
+    multiplyDependencies,
+} from 'mathjs';
+const { multiply, SparseMatrix, matrix } = create(
+    {
+        multiplyDependencies,
+        DenseMatrixDependencies,
+        SparseMatrixDependencies,
+    },
+    {},
+);
 
 import { getAudioContext } from 'src/components/Media/Music/utils';
-import axios from 'axios';
 
 export const CIRCLE_SAMPLES = 512;
 
@@ -24,13 +27,23 @@ type DrawCircleMaskShape = (
     center?: [number, number],
 ) => void;
 
-export const drawCircleMask: DrawCircleMaskShape = (context, radius, dimensions, center = [0, 0]) => {
+export const drawCircleMask: DrawCircleMaskShape = (
+    context,
+    radius,
+    dimensions,
+    center = [0, 0],
+) => {
     context.save();
     context.beginPath();
     context.arc(center[0], center[1], radius, 0, 2 * Math.PI);
     context.closePath();
     context.clip();
-    context.clearRect(center[0] - dimensions[0] / 2, center[1] - dimensions[1] / 2, dimensions[0], dimensions[1]);
+    context.clearRect(
+        center[0] - dimensions[0] / 2,
+        center[1] - dimensions[1] / 2,
+        dimensions[0],
+        dimensions[1],
+    );
     context.restore();
 };
 
@@ -40,7 +53,7 @@ const getCirclePoints = (points: number, offset = 0) => {
         y: number;
     }> = [];
 
-    const twoPiPerPoints = 2 * Math.PI / points;
+    const twoPiPerPoints = (2 * Math.PI) / points;
     for (let i = 0; i < points; i++) {
         const angle = i * twoPiPerPoints + offset;
         pointArray.push({
@@ -59,10 +72,14 @@ interface WaveformHeader {
     length: number;
 }
 
-type DataViewDataType = 'int32' | 'uint32' | 'float32'
+type DataViewDataType = 'int32' | 'uint32' | 'float32';
 
-const getDatatypeAndReturnOffset = (dataView: DataView, dataType: DataViewDataType, offset = 0) => {
-    switch(dataType) {
+const getDatatypeAndReturnOffset = (
+    dataView: DataView,
+    dataType: DataViewDataType,
+    offset = 0,
+) => {
+    switch (dataType) {
         case 'int32': {
             return [dataView.getInt32(offset, true), offset + 4];
         }
@@ -76,7 +93,7 @@ const getDatatypeAndReturnOffset = (dataView: DataView, dataType: DataViewDataTy
             throw new Error('dataType extraction not implemented');
         }
     }
-}
+};
 
 export class WaveformLoader {
     headerStructure: [keyof WaveformHeader, DataViewDataType][] = [
@@ -87,53 +104,63 @@ export class WaveformLoader {
         ['length', 'uint32'],
     ];
     header?: WaveformHeader;
-    waveform?: Float32Array ;
+    waveform?: Float32Array;
     angles?: Array<{ x: number; y: number }>;
     loaded?: Promise<void>;
+    resolver?: () => void;
 
     reset = (): void => {
         this.header = undefined;
         this.waveform = undefined;
         this.angles = undefined;
-    }
+        this.resolver = undefined;
+        this.loaded = undefined;
+    };
+
+    private loadFile = async (filename: string): Promise<void> => {
+        const { data: buffer } = await axios.get<ArrayBuffer>(filename, {
+            responseType: 'arraybuffer',
+            headers: {
+                'Content-Type': 'application/octet-stream',
+            },
+        });
+
+        const dataView = new DataView(buffer);
+        const header: Partial<WaveformHeader> = {};
+        let offset = 0;
+
+        // Get Header
+        for (const [key, dataType] of this.headerStructure) {
+            const [data, next] = getDatatypeAndReturnOffset(
+                dataView,
+                dataType,
+                offset,
+            );
+            header[key] = data;
+            offset = next;
+        }
+
+        const dataValues = header.flags
+            ? new Int8Array(buffer, offset)
+            : new Int16Array(buffer, offset);
+        this.waveform = Float32Array.from(dataValues);
+        const maxAbs = this.waveform?.reduce((acc: number, value: number) => {
+            if (Math.abs(value) > acc) {
+                return Math.abs(value);
+            }
+            return acc;
+        }, 0);
+        this.waveform = this.waveform?.map((val) => val / maxAbs);
+        this.header = header as WaveformHeader;
+        const length = this.waveform.length / 2;
+        this.angles = getCirclePoints(length, Math.PI / length);
+    };
 
     loadWaveformFile = (filename: string): void => {
         this.header = undefined;
         this.waveform = undefined;
-        this.loaded = new Promise(async (resolve) => {
-            const { data: buffer } = await axios.get<ArrayBuffer>(filename, {
-                responseType: 'arraybuffer',
-                headers: {
-                    'Content-Type': 'application/octet-stream',
-                }
-            });
-
-            const dataView = new DataView(buffer);
-            const header: Partial<WaveformHeader> = {};
-            let offset = 0;
-
-            // Get Header
-            for (const [key, dataType] of this.headerStructure) {
-                const [data, next] = getDatatypeAndReturnOffset(dataView, dataType, offset);
-                header[key] = data;
-                offset = next;
-            }
-
-            const dataValues = !!header.flags ? new Int8Array(buffer, offset) : new Int16Array(buffer, offset);
-            this.waveform = Float32Array.from(dataValues);
-            const maxAbs = this.waveform?.reduce((acc: number, value: number) => {
-                if (Math.abs(value) > acc) {
-                    acc = Math.abs(value);
-                }
-                return acc;
-            }, 0);
-            this.waveform = this.waveform?.map((val) => val / maxAbs)
-            this.header = header as WaveformHeader;
-            const length = this.waveform.length / 2;
-            this.angles = getCirclePoints(length, Math.PI / length);
-            return resolve();
-        });
-    }
+        this.loaded = this.loadFile(filename);
+    };
 }
 
 export const waveformLoader = new WaveformLoader();
@@ -164,38 +191,45 @@ class FIRLoader {
         this.loaded = this.loadFIRFile();
     }
 
-    loadFIRFile = () =>
-        new Promise<void>(async (resolve) => {
-            const { data: buffer } = await axios.get<ArrayBuffer>(`${BINARY_PATH}/fir.dat`, {
+    loadFIRFile = async () => {
+        const { data: buffer } = await axios.get<ArrayBuffer>(
+            `${BINARY_PATH}/fir.dat`,
+            {
                 responseType: 'arraybuffer',
                 headers: {
                     'Content-Type': 'application/octet-stream',
-                }
-            });
-            console.log('bufferSize', buffer.byteLength);
+                },
+            },
+        );
+        console.log('bufferSize', buffer.byteLength);
 
-            const dataView = new DataView(buffer);
-            const header: Partial<FIRHeader> = {};
-            let offset = 0;
+        const dataView = new DataView(buffer);
+        const header: Partial<FIRHeader> = {};
+        let offset = 0;
 
-            // Get Header
-            for (const [key, dataType] of this.headerStructure) {
-                const [data, next] = getDatatypeAndReturnOffset(dataView, dataType, offset);
-                header[key] = data;
-                offset = next;
-            }
-            console.log('headerSize', offset);
-            this.numCrossings = header.numCrossings!;
-            this.samplesPerCrossing = header.samplesPerCrossing!;
-            this.halfCrossings = (this.numCrossings - 1) / 2;
-            this.filterSize = this.samplesPerCrossing * (this.numCrossings - 1) - 1;
-            console.log(header);
-            console.log(this.filterSize);
-            this.coeffs = new Float32Array(buffer, offset, this.filterSize);
-            offset += Float32Array.BYTES_PER_ELEMENT * this.filterSize;
-            this.deltas = new Float32Array(buffer, offset, this.filterSize);
-            resolve();
-        })
+        // Get Header
+        for (const [key, dataType] of this.headerStructure) {
+            const [data, next] = getDatatypeAndReturnOffset(
+                dataView,
+                dataType,
+                offset,
+            );
+            header[key] = data;
+            offset = next;
+        }
+        if (!header.numCrossings || !header.samplesPerCrossing) {
+            throw Error('Missing headers for FIR');
+        }
+        this.numCrossings = header.numCrossings;
+        this.samplesPerCrossing = header.samplesPerCrossing;
+        this.halfCrossings = (this.numCrossings - 1) / 2;
+        this.filterSize = this.samplesPerCrossing * (this.numCrossings - 1) - 1;
+        console.log(header);
+        console.log(this.filterSize);
+        this.coeffs = new Float32Array(buffer, offset, this.filterSize);
+        offset += Float32Array.BYTES_PER_ELEMENT * this.filterSize;
+        this.deltas = new Float32Array(buffer, offset, this.filterSize);
+    };
 }
 
 export const firLoader = new FIRLoader();
@@ -239,53 +273,67 @@ class ConstantQ {
         this.sampleRate = sampleRate;
     }
 
-    loadMatrix = (filename: string) => (
-        new Promise<void>(async (resolve) => {
-            const { data: buffer } = await axios.get<ArrayBuffer>(filename, {
-                responseType: 'arraybuffer',
-                headers: {
-                    'Content-Type': 'application/octet-stream',
-                }
-            });
+    loadMatrix = async (filename: string): Promise<void> => {
+        const { data: buffer } = await axios.get<ArrayBuffer>(filename, {
+            responseType: 'arraybuffer',
+            headers: {
+                'Content-Type': 'application/octet-stream',
+            },
+        });
 
-            const dataView = new DataView(buffer);
-            const header: Partial<ConstantQHeader> = {};
-            let offset = 0;
+        const dataView = new DataView(buffer);
+        const header: Partial<ConstantQHeader> = {};
+        let offset = 0;
 
-            // Get Header
-            for (const [key, dataType] of this.headerStructure) {
-                const [data, next] = getDatatypeAndReturnOffset(dataView, dataType, offset);
-                header[key] = data;
-                offset = next;
-            }
+        // Get Header
+        for (const [key, dataType] of this.headerStructure) {
+            const [data, next] = getDatatypeAndReturnOffset(
+                dataView,
+                dataType,
+                offset,
+            );
+            header[key] = data;
+            offset = next;
+        }
 
-            const values = new Float32Array(buffer, offset, header.innerPtrSize!);
-            offset += Float32Array.BYTES_PER_ELEMENT * header.innerPtrSize!;
-            const innerPtr = new Int32Array(buffer, offset, header.innerPtrSize!);
-            offset += Int32Array.BYTES_PER_ELEMENT * header.innerPtrSize!
-            const outerPtr = new Int32Array(buffer, offset, header.outerPtrSize!);
-            const o = {
-                mathjs: 'SparseMatrix',
-                values: [...values],
-                index: [...innerPtr],
-                ptr: [...outerPtr],
-                size: [header.numRows, header.numCols],
-                datatype: 'number',
-            };
-            this.numRows = header.numRows!;
-            this.numCols = header.numCols!;
-            this.minF = header.minFreq!;
-            this.maxF = header.maxFreq!;
-            this.matrix = SparseMatrix.fromJSON(o);
-            this.input.resize([1, this.numRows]);
+        if (
+            !header.innerPtrSize ||
+            !header.outerPtrSize ||
+            !header.numCols ||
+            !header.numRows ||
+            !header.minFreq ||
+            !header.maxFreq
+        ) {
+            throw Error('Missing ConstantQ headers');
+        }
+        const values = new Float32Array(buffer, offset, header.innerPtrSize);
+        offset += Float32Array.BYTES_PER_ELEMENT * header.innerPtrSize;
+        const innerPtr = new Int32Array(buffer, offset, header.innerPtrSize);
+        offset += Int32Array.BYTES_PER_ELEMENT * header.innerPtrSize;
+        const outerPtr = new Int32Array(buffer, offset, header.outerPtrSize);
+        const o = {
+            mathjs: 'SparseMatrix',
+            values: [...values],
+            index: [...innerPtr],
+            ptr: [...outerPtr],
+            size: [header.numRows, header.numCols],
+            datatype: 'number',
+        };
+        this.numRows = header.numRows;
+        this.numCols = header.numCols;
+        this.minF = header.minFreq;
+        this.maxF = header.maxFreq;
+        this.matrix = SparseMatrix.fromJSON(o);
+        this.input.resize([1, this.numRows]);
 
-            const cqBins = 2 * this.numCols;
-            const invCqBins = 1 / cqBins;
-            this.angles = getCirclePoints(CIRCLE_SAMPLES, Math.PI * (invCqBins + 1));
-            console.log(header);
-            resolve();
-        })
-    )
+        const cqBins = 2 * this.numCols;
+        const invCqBins = 1 / cqBins;
+        this.angles = getCirclePoints(
+            CIRCLE_SAMPLES,
+            Math.PI * (invCqBins + 1),
+        );
+        console.log(header);
+    };
 
     apply(input: Float32Array, output: Float32Array): void {
         if (this.matrix) {

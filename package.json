@@ -10,7 +10,9 @@
     "type": "module",
     "license": "MIT",
     "author": "Sean Chen, Andrew Chen, and Jason Chen",
-    "workspaces": ["packages/*"],
+    "workspaces": [
+        "packages/*"
+    ],
     "scripts": {
         "build": "trash server/build && yarn buildServer && yarn buildApp",
         "buildApp": "webpack --config webpack.prod.config.js",
