@@ -26,7 +26,6 @@ export const isHamburger = {
     or: [
         minRes,
         webkitMinDPR,
-        { and: [screenShort, screenPortrait] },
         screenPortrait,
         { and: [screenL, screenLandscape] },
     ],

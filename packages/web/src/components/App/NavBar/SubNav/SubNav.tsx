@@ -1,4 +1,4 @@
-import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 import * as React from 'react';
 
 import { toMedia } from 'src/MediaQuery';
@@ -13,11 +13,10 @@ interface SubNavProps {
     readonly currentSpecificPath: string;
     readonly links: LinkShape[];
     readonly onClick: () => void;
-    readonly isHamburger: boolean;
 }
 
-const SubNavContainer = styled.ul<{ isHome: boolean }>(
-    {
+const styles = {
+    ul: css({
         zIndex: 10,
         position: 'absolute',
         listStyle: 'none',
@@ -27,14 +26,6 @@ const SubNavContainer = styled.ul<{ isHome: boolean }>(
         transformOrigin: 'top',
         transform: 'translateX(-50%)',
         overflow: 'visible',
-    },
-    ({ isHome }) =>
-        isHome && {
-            backgroundColor: 'rgba(0 0 0 / 0.1)',
-            backdropFilter: 'blur(2px)',
-            boxShadow: '0 5px 11px -5px rgba(0 0 0 / 0.5)',
-        },
-    {
         [toMedia(isHamburger)]: {
             width: '100%',
             position: 'relative',
@@ -44,20 +35,20 @@ const SubNavContainer = styled.ul<{ isHome: boolean }>(
             backdropFilter: 'unset',
             boxShadow: 'unset',
         },
-    },
-);
+    }),
+    isHome: css({
+        backgroundColor: 'rgba(0 0 0 / 0.1)',
+        backdropFilter: 'blur(2px)',
+        boxShadow: '0 5px 11px -5px rgba(0 0 0 / 0.5)',
+    }),
+};
 
-const SubNav: React.FC<SubNavProps> = ({ links, isHamburger, ...props }) => (
-    <SubNavContainer isHome={props.isHome}>
+const SubNav: React.FC<SubNavProps> = ({ links, ...props }) => (
+    <ul css={[styles.ul, props.isHome && styles.isHome]}>
         {links.map((link) => (
-            <SubNavLink
-                key={link.path}
-                link={link}
-                isHamburger={isHamburger}
-                {...props}
-            />
+            <SubNavLink key={link.path} link={link} {...props} />
         ))}
-    </SubNavContainer>
+    </ul>
 );
 
 export default React.memo(SubNav);

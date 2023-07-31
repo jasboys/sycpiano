@@ -1,5 +1,4 @@
 import { css } from '@emotion/react';
-import styled from '@emotion/styled';
 import { gsap } from 'gsap';
 import { mix } from 'polished';
 import * as React from 'react';
@@ -10,72 +9,68 @@ import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
-import { mqSelectors } from '../reducers';
+import { isHamburger } from 'src/screens';
+import { toMedia } from 'src/mediaQuery';
 
-const cartStyle = ({ isHamburger }: { isHamburger: boolean }) =>
-    css(latoFont(400), {
+const cartStyles = {
+    base: css(latoFont(400), {
         noHighlight,
-        fill: isHamburger ? logoBlue : '#4d4d4d',
+        fill: '#4d4d4d',
         textDecoration: 'none',
         cursor: 'pointer',
         transition: 'all 0.5s',
         webkitTapHighlightColor: 'transparent',
-        paddingBottom: isHamburger ? '' : 12,
-        marginRight: isHamburger ? '1rem' : 'unset',
+        paddingBottom: 12,
         '&:hover': {
             cursor: 'pointer',
             fill: mix(0.5, logoBlue, '#444'),
         },
-    });
-
-const cartHomeStyle = ({
-    isHamburger,
-    cartOpened,
-}: { isHamburger: boolean; cartOpened: boolean }) =>
-    css({
-        fill: isHamburger && cartOpened ? lightBlue : 'white',
-        filter:
-            isHamburger && cartOpened
-                ? 'drop-shadow(0 0 1px white)'
-                : 'drop-shadow(0 0 1px rgba(0 0 0 / 0.8))',
+        [toMedia(isHamburger)]: {
+            fill: logoBlue,
+            paddingBottom: 0,
+            marginRight: '1rem',
+        },
+    }),
+    isHome: css({
+        fill: 'white',
+        filter: 'drop-shadow(0 0 1px rgba(0 0 0 / 0.8))',
         '&:hover': {
             fill: 'white',
             filter: 'drop-shadow(0 0 1px rgba(255 255 255 / 1))',
         },
-    });
+    }),
+    isOpen: css({
+        [toMedia(isHamburger)]: {
+            fill: lightBlue,
+            filter: 'drop-shadow(0 0 1px white)',
+        },
+    }),
+};
 
-const circleStyle = ({ isHamburger }: { isHamburger: boolean }) =>
-    css({
-        stroke: isHamburger ? logoBlue : '#4d4d4d',
+const circleStyles = {
+    base: css({
+        stroke: '#4d4d4d',
         transition: 'all 0.5s',
         fill: 'white',
         '&:hover': {
             stroke: mix(0.5, logoBlue, '#444'),
         },
-    });
-
-const circleHomeStyle = css({
-    stroke: 'white',
-    fill: 'none',
-    '&:hover': {
+        [toMedia(isHamburger)]: {
+            stroke: logoBlue,
+        },
+    }),
+    isHome: css({
         stroke: 'white',
-    },
-});
+        fill: 'none',
+        '&:hover': {
+            stroke: 'white',
+        },
+    }),
+};
 
-const StyledCart = styled.div<{
-    isHome: boolean;
-    isHamburger: boolean;
-    cartOpened: boolean;
-}>(cartStyle, ({ isHome, ...props }) => isHome && cartHomeStyle(props));
+const svgStyle = css({ verticalAlign: 'middle' });
 
-const StyledCircle = styled.circle<{ isHome: boolean; isHamburger: boolean }>(
-    circleStyle,
-    ({ isHome }) => isHome && circleHomeStyle,
-);
-
-const StyledIcon = styled.svg({ verticalAlign: 'middle' });
-
-const StyledText = styled.text(noHighlight);
+const textStyle = css(noHighlight);
 
 const scaleDown = (tl: gsap.core.Tween) => {
     tl.reverse();
@@ -103,7 +98,6 @@ interface CartButtonProps {
 
 const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(
     ({ isHome }, ref) => {
-        const isHamburger = useAppSelector(mqSelectors.isHamburger);
         const cartCount = useAppSelector(({ cart }) => cart.items.length);
         const cartIsInit = useAppSelector(({ cart }) => cart.isInit);
         const cartOpened = useAppSelector(({ cart }) => cart.visible);
@@ -127,18 +121,24 @@ const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(
             }
         }, []);
 
+        const onClick = React.useCallback(() => {
+            dispatch(toggleCartList());
+            menuOpened && dispatch(toggleExpanded(false));
+        }, [menuOpened]);
+
         return (
-            <StyledCart
-                cartOpened={cartOpened}
-                isHamburger={isHamburger}
-                onClick={() => {
-                    dispatch(toggleCartList());
-                    menuOpened && dispatch(toggleExpanded(false));
-                }}
-                isHome={isHome}
+            <div
+                css={[
+                    cartStyles.base,
+                    isHome && cartStyles.isHome,
+                    cartOpened && cartStyles.isOpen,
+                ]}
+                onClick={onClick}
+                onKeyUp={onClick}
                 ref={makeRef}
             >
-                <StyledIcon
+                <svg
+                    css={svgStyle}
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="-4 -5 36 32"
                     height="36"
@@ -151,15 +151,18 @@ const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(
                     />
                     {cartCount !== 0 && (
                         <>
-                            <StyledCircle
-                                isHamburger={isHamburger}
+                            <circle
+                                css={[
+                                    circleStyles.base,
+                                    isHome && circleStyles.isHome,
+                                ]}
                                 cx="23"
                                 cy="2"
                                 r="6"
                                 strokeWidth="1"
-                                isHome={isHome}
                             />
-                            <StyledText
+                            <text
+                                css={textStyle}
                                 x="23.5"
                                 y="3"
                                 textAnchor="middle"
@@ -167,11 +170,11 @@ const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(
                                 fontSize="0.6rem"
                             >
                                 {cartCount}
-                            </StyledText>
+                            </text>
                         </>
                     )}
-                </StyledIcon>
-            </StyledCart>
+                </svg>
+            </div>
         );
     },
 );

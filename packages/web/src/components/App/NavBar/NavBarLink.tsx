@@ -300,7 +300,6 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
                                 isHamburger && dispatch(toggleExpanded(false));
                             }}
                             isHome={isHome}
-                            isHamburger={isHamburger}
                         />
                         {isHamburger && <SubNavLine isHome={isHome} />}
                     </SubNavContainer>

@@ -1,4 +1,4 @@
-import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 import * as React from 'react';
 
 import { toMedia } from 'src/MediaQuery';
@@ -15,15 +15,15 @@ interface PressProps {
     className?: string;
 }
 
-const PressContainer = styled.div(pushed, {
+const containerStyle = css(pushed, {
     width: '100%',
     overflowY: 'scroll',
     WebkitOverflowScrolling: 'touch',
+    backgroundColor: 'rgb(244 244 244)',
     [toMedia([screenXS, screenPortrait])]: {
         marginTop: 0,
         height: '100%',
     },
-    backgroundColor: 'rgb(244 244 244)',
 });
 
 const Press: React.FC<PressProps> = () => {
@@ -43,7 +43,8 @@ const Press: React.FC<PressProps> = () => {
     );
 
     return (
-        <PressContainer
+        <div
+            css={containerStyle}
             onScroll={
                 isHamburger
                     ? scrollFn(navBarHeight.get(hiDpx), onScrollDispatch)
@@ -51,7 +52,7 @@ const Press: React.FC<PressProps> = () => {
             }
         >
             <AcclaimsList />
-        </PressContainer>
+        </div>
     );
 };
 
