@@ -1,4 +1,4 @@
-import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 import * as React from 'react';
 
 import { toMedia } from 'src/MediaQuery';
@@ -11,7 +11,7 @@ import { isHamburger } from 'src/screens';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 
-const StyledDiscs = styled.div(pushed, {
+const containerStyle = css(pushed, {
     width: '100%',
     backgroundColor: 'rgb(238 238 238)',
     overflowY: 'scroll',
@@ -40,7 +40,8 @@ const Discs: React.FC<DiscsProps> = () => {
     );
 
     return (
-        <StyledDiscs
+        <div
+            css={containerStyle}
             onScroll={
                 isHamburger
                     ? scrollFn(navBarHeight.get(hiDpx), onScrollDispatch)
@@ -48,7 +49,7 @@ const Discs: React.FC<DiscsProps> = () => {
             }
         >
             <DiscList />
-        </StyledDiscs>
+        </div>
     );
 };
 

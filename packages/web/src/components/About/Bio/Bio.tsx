@@ -1,15 +1,12 @@
 import { css } from '@emotion/react';
-import styled from '@emotion/styled';
 import { easeQuadOut } from 'd3-ease';
 import { gsap } from 'gsap';
-import Markdown from 'markdown-to-jsx';
 import * as React from 'react';
 import { createStructuredSelector } from 'reselect';
 
 import { toMedia } from 'src/MediaQuery';
 import PortfolioButton from 'src/components/About/Bio/PortfolioButton';
 import { fetchBio } from 'src/components/About/Bio/reducers';
-import { Blurb } from 'src/components/About/Bio/types';
 import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
 import { mqSelectors } from 'src/components/App/reducers';
 import { LazyImage } from 'src/components/LazyImage';
@@ -20,142 +17,20 @@ import {
     sycWithPianoBW,
 } from 'src/imageUrls';
 import {
-    isHamburger,
     screenLengths,
     screenM,
     screenPortrait,
     screenWidths,
     screenXS,
 } from 'src/screens';
-import { logoBlue, offWhite } from 'src/styles/colors';
-import { latoFont } from 'src/styles/fonts';
 import { pushed } from 'src/styles/mixins';
 import { camel2var, navBarHeight } from 'src/styles/variables';
 import { isImageElement } from 'src/utils';
+import { MemoizedBioText } from './BioText';
+import { pictureHeight } from './common';
 
-const pictureHeight = 250;
-
-const Paragraph = styled.p({
-    fontSize: '1.0rem',
-    lineHeight: '2rem',
-    margin: '1.6rem 0',
-
-    [toMedia(isHamburger)]: {
-        '&:first-of-type': {
-            marginTop: 0,
-        },
-    },
-
-    [toMedia(screenM)]: {
-        fontSize: '1rem',
-    },
-
-    [toMedia([screenXS, screenPortrait])]: {
-        fontSize: '1rem',
-        lineHeight: '1.6rem',
-        margin: '1.3rem 0',
-        '&:last-of-type': {
-            marginBottom: '3rem',
-        },
-    },
-});
-
-const SpaceFiller = styled.div({
-    display: 'none',
-
-    [toMedia([screenXS, screenPortrait])]: {
-        display: 'block',
-        minHeight: pictureHeight,
-        height: 'min(50vw, 33vh)',
-        width: '100%',
-        backgroundColor: 'transparent',
-    },
-});
-
-const TextGroup = styled.div(latoFont(300), {
-    [toMedia([screenXS, screenPortrait])]: {
-        backgroundColor: 'white',
-        padding: '20px 20px',
-    },
-});
-
-const TextContainer = styled.div({
-    boxSizing: 'border-box',
-    flex: '1 0 45%',
-    height: 'auto',
-    padding: '3rem 40px 80px 60px',
-    backgroundColor: offWhite,
-    color: 'black',
-    overflowY: 'scroll',
-
-    [toMedia(screenM)]: {
-        padding: '2rem 2rem 5rem 3rem',
-    },
-
-    [toMedia([screenXS, screenPortrait])]: {
-        position: 'relative',
-        zIndex: 1,
-        marginTop: 0,
-        height: '100%',
-        left: 0,
-        backgroundColor: 'transparent',
-        padding: 0,
-        overflowY: 'visible',
-    },
-});
-
-const NameSpan = styled.span(latoFont(400));
-
-const Title = styled.div(latoFont(400), {
-    fontSize: '1.5rem',
-    color: logoBlue,
-});
-
-interface BioTextProps {
-    bio: Blurb[];
-    needsTitle: boolean;
-}
-
-const BioText: React.FunctionComponent<BioTextProps> = (props) => {
-    return (
-        <TextContainer>
-            <SpaceFiller />
-            {props.needsTitle && <Title>Biography</Title>}
-            <TextGroup>
-                {props.bio.map(({ text }) => {
-                    return (
-                        <Markdown
-                            key={text.substring(16)}
-                            options={{
-                                forceBlock: true,
-                                overrides: {
-                                    p: Paragraph,
-                                    strong: NameSpan,
-                                },
-                            }}
-                        >
-                            {text}
-                        </Markdown>
-                    );
-                })}
-            </TextGroup>
-        </TextContainer>
-    );
-};
-
-const MemoizedBioText = React.memo(BioText, (prev, next) => {
-    return (
-        prev.bio.length === next.bio.length &&
-        prev.needsTitle === next.needsTitle
-    );
-});
-
-interface ImageContainerProps {
-    bgImage?: string;
-}
-
-const ImageContainer = styled.div<ImageContainerProps>(
-    {
+const bioStyles = {
+    imageContainer: css({
         flex: '0 1 50vw',
         backgroundSize: 'cover',
         backgroundPosition: 'center 25%',
@@ -180,35 +55,34 @@ const ImageContainer = styled.div<ImageContainerProps>(
             maxWidth: 'unset',
             paddingTop: camel2var('navBarHeight'),
         },
-    },
-    ({ bgImage }) => ({
-        backgroundImage: bgImage ? `url(${bgImage})` : 'unset',
     }),
-);
-
-const BioContainer = styled.div(pushed, {
-    width: '100%',
-    backgroundColor: 'black',
-    position: 'absolute',
-    display: 'flex',
-    [toMedia([screenXS, screenPortrait])]: {
-        marginTop: 0,
-        display: 'block',
-        height: '100%',
-        overflowY: 'scroll',
-        backgroundColor: 'white',
-        paddingTop: camel2var('navBarHeight'),
-    },
-});
+    hasBgImage: (bgImage: string) =>
+        css({
+            backgroundImage: `url(${bgImage})`,
+        }),
+    container: css(pushed, {
+        width: '100%',
+        backgroundColor: 'black',
+        position: 'absolute',
+        display: 'flex',
+        [toMedia([screenXS, screenPortrait])]: {
+            marginTop: 0,
+            display: 'block',
+            height: '100%',
+            overflowY: 'scroll',
+            backgroundColor: 'white',
+            paddingTop: camel2var('navBarHeight'),
+        },
+    }),
+    loader: css({
+        visibility: 'hidden',
+        position: 'absolute',
+    }),
+};
 
 const IMAGE_RATIO = 1736 / 2560;
 
 const srcWidths = screenLengths.map((value) => Math.round(value * IMAGE_RATIO));
-
-const imageLoaderStyle = css({
-    visibility: 'hidden',
-    position: 'absolute',
-});
 
 const selector = createStructuredSelector({
     hiDpx: mqSelectors.hiDpx,
@@ -280,7 +154,8 @@ const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
     );
 
     return (
-        <BioContainer
+        <div
+            css={bioStyles.container}
             onScroll={
                 isHamburger
                     ? (ev) => {
@@ -297,13 +172,19 @@ const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
                     : undefined
             }
         >
-            <ImageContainer bgImage={bgImage} ref={bgRef}>
+            <div
+                css={[
+                    bioStyles.imageContainer,
+                    bgImage && bioStyles.hasBgImage(bgImage),
+                ]}
+                ref={bgRef}
+            >
                 <LazyImage
                     isMobile={isHamburger}
                     id="about_lazy_image"
                     csss={{
-                        mobile: imageLoaderStyle,
-                        desktop: imageLoaderStyle,
+                        mobile: bioStyles.loader,
+                        desktop: bioStyles.loader,
                     }}
                     mobileAttributes={{
                         webp: {
@@ -343,10 +224,10 @@ const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
                     successCb={onImageLoad}
                     destroyCb={onImageDestroy}
                 />
-            </ImageContainer>
+            </div>
             <MemoizedBioText bio={bio} needsTitle={!isHamburger} />
             <PortfolioButton />
-        </BioContainer>
+        </div>
     );
 };
 

@@ -48,10 +48,7 @@ import Cart from 'src/components/Cart/Cart';
 import { toggleCartList } from 'src/components/Cart/reducers';
 import { ClickListenerOverlay } from 'src/components/ClickListenerOverlay';
 import { LogoSVG } from 'src/components/LogoSVG';
-import {
-    EventListName,
-    eventListNamesArr,
-} from 'src/components/Schedule/types';
+import { eventListNamesArr } from 'src/components/Schedule/types';
 import { fetchShopItems } from 'src/components/Shop/ShopList/reducers';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import extractModule from 'src/module';
