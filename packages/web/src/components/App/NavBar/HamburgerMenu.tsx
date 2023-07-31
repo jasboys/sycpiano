@@ -3,14 +3,12 @@ import styled from '@emotion/styled';
 import * as React from 'react';
 
 const hamburgerLayerHeight = 2;
-const hamburgerLayerBorderRadius = '0px';
+const hamburgerLayerBorderRadius = 0;
 const hamburgerLayerExpandRotation = 135;
 const hamburgerLayerOffsetMultiple = 10;
 
-const hamburgerMenuWidth = '32px';
-const hamburgerMenuHeight = `${
-    hamburgerLayerOffsetMultiple * 2 + hamburgerLayerHeight
-}px`;
+const hamburgerMenuWidth = 32;
+const hamburgerMenuHeight = hamburgerLayerOffsetMultiple * 2 + hamburgerLayerHeight;
 
 const hamburgerLayerStyles = (backgroundColor: string) =>
     css({
@@ -24,11 +22,11 @@ const hamburgerLayerStyles = (backgroundColor: string) =>
         left: 0,
         transform: 'rotate(0deg)',
         transition: `
-        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-            left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-            top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-            opacity 0.3s ease-in-out,
-            background-color 0.3s;`,
+            transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity 0.3s ease-in-out,
+                background-color 0.3s;`,
     });
 
 interface HamburgerLayerProps {
