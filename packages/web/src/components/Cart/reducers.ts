@@ -1,19 +1,29 @@
-import axios, { AxiosError, AxiosResponse } from 'axios';
-import { CartStateShape, CheckoutErrorObject } from 'src/components/Cart/types';
-import { createSlice, createAction, createAsyncThunk, AnyAction } from '@reduxjs/toolkit';
-import { ThunkAPIType } from 'src/types';
-import { storageAvailable } from 'src/localStorage';
-import { ThunkAction } from 'redux-thunk';
-import { GlobalStateShape } from 'src/store';
+import {
+    AnyAction,
+    createAction,
+    createAsyncThunk,
+    createSlice,
+} from '@reduxjs/toolkit';
 import { loadStripe } from '@stripe/stripe-js';
+import axios, { AxiosError, AxiosResponse } from 'axios';
+import { ThunkAction } from 'redux-thunk';
+
+import { CartStateShape, CheckoutErrorObject } from 'src/components/Cart/types';
+import { storageAvailable } from 'src/localStorage';
+import { GlobalStateShape } from 'src/store';
+import { ThunkAPIType } from 'src/types';
 
 const LOCAL_STORAGE_KEY = 'seanchenpiano_cart';
 const apiKey = STRIPE_PUBLIC_KEY;
 const stripe = loadStripe(apiKey);
 
-export const toggleCartList = createAction<boolean | undefined>('cart/toggleCartList');
+export const toggleCartList = createAction<boolean | undefined>(
+    'cart/toggleCartList',
+);
 const addItemToCart = createAction<string>('cart/addItemToCart');
-export const removeItemFromCart = createAction<string>('cart/removeItemFromCart');
+export const removeItemFromCart = createAction<string>(
+    'cart/removeItemFromCart',
+);
 export const clearCart = createAction<void>('cart/clearCart');
 export const clearErrors = createAction<void>('cart/clearErrors');
 
@@ -29,12 +39,20 @@ export const addToCartAction = createAsyncThunk<void, string, ThunkAPIType>(
     },
 );
 
-export const initCartAction = createAsyncThunk<{ items: string[]; email: string }, void, ThunkAPIType>(
+export const initCartAction = createAsyncThunk<
+    { items: string[]; email: string },
+    void,
+    ThunkAPIType
+>(
     'cart/initCart',
     async (_, _thunkAPI) => {
         if (storageAvailable()) {
-            const cart: string[] = JSON.parse(window.localStorage.getItem(LOCAL_STORAGE_KEY) ?? '[]');
-            const email: string = JSON.parse(window.localStorage.getItem('customer_email') ?? '[]');
+            const cart: string[] = JSON.parse(
+                window.localStorage.getItem(LOCAL_STORAGE_KEY) ?? '[]',
+            );
+            const email: string = JSON.parse(
+                window.localStorage.getItem('customer_email') ?? '[]',
+            );
             if (cart.length !== 0) {
                 // await dispatch(fetchItemsAction());
             }
@@ -56,17 +74,22 @@ export const initCartAction = createAsyncThunk<{ items: string[]; email: string 
     },
 );
 
-export const syncLocalStorage = (): ThunkAction<void, GlobalStateShape, void, AnyAction> =>
+export const syncLocalStorage =
+    (): ThunkAction<void, GlobalStateShape, void, AnyAction> =>
     (_, getState) => {
         if (storageAvailable()) {
             window.localStorage.setItem(
                 LOCAL_STORAGE_KEY,
-                JSON.stringify(getState().cart.items)
+                JSON.stringify(getState().cart.items),
             );
         }
     };
 
-export const checkoutAction = createAsyncThunk<void, string, ThunkAPIType & { rejectValue: CheckoutErrorObject }>(
+export const checkoutAction = createAsyncThunk<
+    void,
+    string,
+    ThunkAPIType & { rejectValue: CheckoutErrorObject }
+>(
     'cart/checkout',
     async (email, thunkAPI) => {
         try {
@@ -77,26 +100,31 @@ export const checkoutAction = createAsyncThunk<void, string, ThunkAPIType & { re
                 );
             }
             const response = await axios.post<
-                { email: string; productIDs: string[]; },
+                { email: string; productIDs: string[] },
                 AxiosResponse<{ sessionId: string }>
-            >('/api/shop/checkout', {
-                email,
-                productIDs: thunkAPI.getState().cart.items,
-            }, {
-                headers: {
-                    'X-CSRF-TOKEN': 'sycpiano',
+            >(
+                '/api/shop/checkout',
+                {
+                    email,
+                    productIDs: thunkAPI.getState().cart.items,
                 },
-            });
+                {
+                    headers: {
+                        'X-CSRF-TOKEN': 'sycpiano',
+                    },
+                },
+            );
             const loadedStripe = await stripe;
             if (loadedStripe === null) {
                 throw new Error('Stripe JS failed to load');
             }
             const { error } = await loadedStripe.redirectToCheckout({
-                sessionId: response.data.sessionId
+                sessionId: response.data.sessionId,
             });
             if (error) {
                 return thunkAPI.rejectWithValue({
-                    message: 'Stripe redirect failed. Did your internet connection reset?',
+                    message:
+                        'Stripe redirect failed. Did your internet connection reset?',
                 });
             }
         } catch (e) {
@@ -104,20 +132,21 @@ export const checkoutAction = createAsyncThunk<void, string, ThunkAPIType & { re
             if (axiosError.response?.status === 422) {
                 const prevPurchasedData = axiosError.response.data.skus;
                 return thunkAPI.rejectWithValue({
-                    message: `The items marked in red below have been previously purchased. Please remove them to continue with checkout.`,
+                    message:
+                        'The items marked in red below have been previously purchased. Please remove them to continue with checkout.',
                     data: prevPurchasedData,
                 });
             } else {
-                console.error("Checkout Error.", e);
+                console.error('Checkout Error.', e);
             }
         }
     },
     {
         condition: (_, { getState }) => {
             return !getState().cart.isCheckingOut;
-        }
-    }
-)
+        },
+    },
+);
 
 const initialState: CartStateShape = {
     items: [],
@@ -127,7 +156,7 @@ const initialState: CartStateShape = {
     checkoutError: {
         message: '',
     },
-    email: ''
+    email: '',
 };
 
 const cartSlice = createSlice({
@@ -148,13 +177,18 @@ const cartSlice = createSlice({
                 state.items.push(action.payload);
             })
             .addCase(removeItemFromCart, (state, action) => {
-                const idx = state.items.findIndex(item => item === action.payload);
+                const idx = state.items.findIndex(
+                    (item) => item === action.payload,
+                );
                 if (idx !== -1) {
                     state.items.splice(idx, 1);
                 }
             })
             .addCase(toggleCartList, (state, action) => {
-                state.visible = (action.payload === undefined) ? !state.visible : action.payload;
+                state.visible =
+                    action.payload === undefined
+                        ? !state.visible
+                        : action.payload;
             })
             .addCase(checkoutAction.pending, (state, _) => {
                 state.isCheckingOut = true;
@@ -163,7 +197,7 @@ const cartSlice = createSlice({
                 state.isCheckingOut = false;
                 state.checkoutError = action.payload || {
                     message: '',
-                    data: []
+                    data: [],
                 };
             })
             .addCase(checkoutAction.fulfilled, (state, _) => {
@@ -182,7 +216,7 @@ const cartSlice = createSlice({
                     data: [],
                 };
             })
-            .addDefaultCase(state => state);
+            .addDefaultCase((state) => state);
     },
 });
 

@@ -1,11 +1,10 @@
+import styled from '@emotion/styled';
 import * as React from 'react';
 
-import styled from '@emotion/styled';
-
+import { toMedia } from 'src/MediaQuery';
 import SubNavLink from 'src/components/App/NavBar/SubNav/SubNavLink';
 import { LinkShape } from 'src/components/App/NavBar/types';
 import { isHamburger } from 'src/screens';
-import { toMedia } from 'src/MediaQuery';
 
 interface SubNavProps {
     readonly className?: string;
@@ -29,11 +28,12 @@ const SubNavContainer = styled.ul<{ isHome: boolean }>(
         transform: 'translateX(-50%)',
         overflow: 'visible',
     },
-    ({ isHome }) => isHome && {
-        backgroundColor: 'rgba(0 0 0 / 0.1)',
-        backdropFilter: 'blur(2px)',
-        boxShadow: '0 5px 11px -5px rgba(0 0 0 / 0.5)',
-    },
+    ({ isHome }) =>
+        isHome && {
+            backgroundColor: 'rgba(0 0 0 / 0.1)',
+            backdropFilter: 'blur(2px)',
+            boxShadow: '0 5px 11px -5px rgba(0 0 0 / 0.5)',
+        },
     {
         [toMedia(isHamburger)]: {
             width: '100%',
@@ -43,14 +43,19 @@ const SubNavContainer = styled.ul<{ isHome: boolean }>(
             backgroundColor: 'unset',
             backdropFilter: 'unset',
             boxShadow: 'unset',
-        }
-    }
+        },
+    },
 );
 
 const SubNav: React.FC<SubNavProps> = ({ links, isHamburger, ...props }) => (
     <SubNavContainer isHome={props.isHome}>
-        {links.map((link, i) => (
-            <SubNavLink key={i} link={link} isHamburger={isHamburger} {...props} />
+        {links.map((link) => (
+            <SubNavLink
+                key={link.path}
+                link={link}
+                isHamburger={isHamburger}
+                {...props}
+            />
         ))}
     </SubNavContainer>
 );

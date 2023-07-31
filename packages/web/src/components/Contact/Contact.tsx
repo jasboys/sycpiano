@@ -1,39 +1,35 @@
+import styled from '@emotion/styled';
 import * as React from 'react';
 
-import styled from '@emotion/styled';
-
 import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
+import { mqSelectors } from 'src/components/App/reducers';
 import ContactItem from 'src/components/Contact/ContactItem';
 import contacts from 'src/components/Contact/contacts';
-
-import { minRes, webkitMinDPR } from 'src/screens';
-import { navBarHeight } from 'src/styles/variables';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { toMedia } from 'src/mediaQuery';
+import { minRes, webkitMinDPR } from 'src/screens';
 import { pushed } from 'src/styles/mixins';
-import { toMedia } from 'src/MediaQuery';
-import { mqSelectors } from 'src/components/App/reducers';
+import { navBarHeight } from 'src/styles/variables';
 
 type ContactProps = Record<never, unknown>;
 
-const ContactContainer = styled.div(
-    pushed,
-    {
-        display: 'flex',
-        flexFlow: 'row wrap',
-        justifyContent: 'space-evenly',
+const ContactContainer = styled.div(pushed, {
+    display: 'flex',
+    flexFlow: 'row wrap',
+    justifyContent: 'space-evenly',
+    height: '100%',
+    width: '100%',
+    position: 'absolute',
+    top: 0,
+    overflowX: 'hidden',
+    overflowY: 'unset',
+    [toMedia([minRes, webkitMinDPR])]: {
         height: '100%',
-        width: '100%',
-        position: 'absolute',
-        top: 0,
-        overflowX: 'hidden',
-        overflowY: 'unset',
-        [toMedia([minRes, webkitMinDPR])]: {
-            height: '100%',
-            marginTop: 0,
-            overflowY: 'scroll',
-            justifyContent: 'unset',
-        },
-    });
+        marginTop: 0,
+        overflowY: 'scroll',
+        justifyContent: 'unset',
+    },
+});
 
 const Contact: React.FC<ContactProps> = () => {
     const isHamburger = useAppSelector(mqSelectors.isHamburger);
@@ -46,10 +42,14 @@ const Contact: React.FC<ContactProps> = () => {
 
     return (
         <ContactContainer
-            onScroll={isHamburger ? scrollFn(navBarHeight.get(hiDpx), onScrollDispatch) : undefined}
+            onScroll={
+                isHamburger
+                    ? scrollFn(navBarHeight.get(hiDpx), onScrollDispatch)
+                    : undefined
+            }
         >
-            {contacts.map((contact, i) => (
-                <ContactItem {...contact} key={i} />
+            {contacts.map((contact) => (
+                <ContactItem {...contact} key={contact.name} />
             ))}
         </ContactContainer>
     );

@@ -1,30 +1,26 @@
-import * as React from 'react';
-
 import styled from '@emotion/styled';
+import * as React from 'react';
 
 import {
     PersonalContactShape,
     PersonalInfoShape,
 } from 'src/components/Contact/types';
-
+import { toMedia } from 'src/mediaQuery';
+import { screenXL } from 'src/screens';
 import { contactPageLinkColor } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { link } from 'src/styles/mixins';
-import { screenXL } from 'src/screens';
-import { toMedia } from 'src/MediaQuery';
 
 const dividerColor = '#888';
 
-const NameContainer = styled.div(
-    latoFont(400),
-    {
-        flex: '0 0 auto',
-        fontSize: '2em',
-        marginBottom: '0.5rem',
-        [toMedia(screenXL)]: {
-            fontSize: '2.4rem',
-        }
-    });
+const NameContainer = styled.div(latoFont(400), {
+    flex: '0 0 auto',
+    fontSize: '2em',
+    marginBottom: '0.5rem',
+    [toMedia(screenXL)]: {
+        fontSize: '2.4rem',
+    },
+});
 
 const SubInfo = styled.div`
     flex: 1 0 auto;
@@ -50,14 +46,9 @@ const PersonalInfo: React.FC<PersonalInfoShape> = ({
         {position.map((pos) => (
             <SubInfo key={pos.title}>
                 <SubInfoTitle>{pos.title}</SubInfoTitle>
-                {pos.organization && (
-                    <div>
-                        {pos.organization}
-                    </div>
-                )}
+                {pos.organization && <div>{pos.organization}</div>}
             </SubInfo>
         ))}
-
     </div>
 );
 
@@ -104,7 +95,7 @@ const PersonalContact: React.FC<PersonalContactShape> = ({
                 </div>
             </ContactMethod>
         ))}
-        {(website) && (
+        {website && (
             <ContactMethod>
                 <a href={website} css={link(contactPageLinkColor)}>
                     {website}
@@ -114,33 +105,26 @@ const PersonalContact: React.FC<PersonalContactShape> = ({
     </div>
 );
 
-const StyledPersonalContact = styled(PersonalContact)(
-    latoFont(400),
-    {
-        flex: '1 0 auto',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start'
-    });
+const StyledPersonalContact = styled(PersonalContact)(latoFont(400), {
+    flex: '1 0 auto',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+});
 
-const InfoContainer = styled.div(
-    latoFont(300),
-    {
-        display: 'flex',
-        flexDirection: 'column',
-        textAlign: 'center',
-        padding: '30px 0 10px',
-        boxSizing: 'border-box',
-    });
+const InfoContainer = styled.div(latoFont(300), {
+    display: 'flex',
+    flexDirection: 'column',
+    textAlign: 'center',
+    padding: '30px 0 10px',
+    boxSizing: 'border-box',
+});
 
 type ContactInfoProps = PersonalContactShape & PersonalInfoShape;
 
 const ContactInfo: React.FC<ContactInfoProps> = (props) => (
     <InfoContainer>
-        <StyledPersonalInfo
-            name={props.name}
-            position={props.position}
-        />
+        <StyledPersonalInfo name={props.name} position={props.position} />
 
         <Divider />
 
@@ -153,3 +137,4 @@ const ContactInfo: React.FC<ContactInfoProps> = (props) => (
 );
 
 export { ContactInfo };
+

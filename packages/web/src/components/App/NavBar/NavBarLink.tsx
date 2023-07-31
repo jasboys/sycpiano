@@ -1,25 +1,21 @@
-import * as React from 'react';
-
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-
+import { gsap } from 'gsap';
 import { mix } from 'polished';
+import * as React from 'react';
 import { Link, LinkProps } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
 
-import { gsap } from 'gsap';
-
-import { toggleExpanded, showSubNav } from 'src/components/App/NavBar/reducers';
+import { toMedia } from 'src/MediaQuery';
 import SubNav from 'src/components/App/NavBar/SubNav/SubNav';
+import { showSubNav, toggleExpanded } from 'src/components/App/NavBar/reducers';
 import { LinkShape } from 'src/components/App/NavBar/types';
-
+import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { minRes, webkitMinDPR } from 'src/screens';
 import { lightBlue, logoBlue, navFontColor } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
-import { minRes, webkitMinDPR } from 'src/screens';
 import { navBarHeight, navBarMarginTop } from 'src/styles/variables';
-import { useAppSelector, useAppDispatch } from 'src/hooks';
-import { toMedia } from 'src/MediaQuery';
 
 interface HighlightProps {
     readonly active: boolean;
@@ -29,26 +25,32 @@ interface HighlightProps {
     readonly link: LinkShape;
 }
 
-const HighlightDiv = styled.div<{ active: boolean; isHome: boolean }>({
-    width: '100%',
-    position: 'absolute',
-    bottom: 0,
-    padding: 0,
-    marginTop: navBarMarginTop,
-    height: 5,
-    zIndex: -1,
-    transition: 'opacity 0.2s',
-}, ({ active, isHome }) => ({
-    opacity: active ? 1 : 0,
-    backgroundColor: isHome ? 'white' : lightBlue,
-}));
+const HighlightDiv = styled.div<{ active: boolean; isHome: boolean }>(
+    {
+        width: '100%',
+        position: 'absolute',
+        bottom: 0,
+        padding: 0,
+        marginTop: navBarMarginTop,
+        height: 5,
+        zIndex: -1,
+        transition: 'opacity 0.2s',
+    },
+    ({ active, isHome }) => ({
+        opacity: active ? 1 : 0,
+        backgroundColor: isHome ? 'white' : lightBlue,
+    }),
+);
 
-const MobileHighlight = styled.div<{ active: boolean; isHome: boolean }>({
-    flex: '0 0 5px',
-}, ({ active, isHome }) => ({
-    opacity: active ? 1 : 0,
-    backgroundColor: isHome ? 'white' : lightBlue,
-}));
+const MobileHighlight = styled.div<{ active: boolean; isHome: boolean }>(
+    {
+        flex: '0 0 5px',
+    },
+    ({ active, isHome }) => ({
+        opacity: active ? 1 : 0,
+        backgroundColor: isHome ? 'white' : lightBlue,
+    }),
+);
 
 const HyperlinkText = styled.div<{ isHamburger: boolean }>(
     {
@@ -56,22 +58,28 @@ const HyperlinkText = styled.div<{ isHamburger: boolean }>(
         padding: '20px 10px 0 10px',
         marginTop: navBarMarginTop,
     },
-    ({ isHamburger }) => isHamburger ?
-        ({
-            marginTop: 'unset',
-            height: 'unset',
-            lineHeight: '1.5rem',
-            padding: '1rem 0.8rem',
-            flex: '0 0 auto',
-        }) :
-        ({
-            [toMedia([minRes, webkitMinDPR])]: {
-                height: navBarHeight.hiDpx - navBarMarginTop,
-            }
-        }),
+    ({ isHamburger }) =>
+        isHamburger
+            ? {
+                  marginTop: 'unset',
+                  height: 'unset',
+                  lineHeight: '1.5rem',
+                  padding: '1rem 0.8rem',
+                  flex: '0 0 auto',
+              }
+            : {
+                  [toMedia([minRes, webkitMinDPR])]: {
+                      height: navBarHeight.hiDpx - navBarMarginTop,
+                  },
+              },
 );
 
-const Highlight: React.FC<HighlightProps> = ({ active, isHome, link, isHamburger }) => (
+const Highlight: React.FC<HighlightProps> = ({
+    active,
+    isHome,
+    link,
+    isHamburger,
+}) => (
     <React.Fragment>
         {!isHamburger && <HighlightDiv active={active} isHome={isHome} />}
         <HyperlinkText isHamburger={isHamburger}>{link.name}</HyperlinkText>
@@ -89,23 +97,20 @@ interface NavBarLinkProps {
     readonly currentSpecificPath: string;
 }
 
-const linkStyle = css(
-    noHighlight,
-    {
-        color: navFontColor,
-        textDecoration: 'none',
-        cursor: 'pointer',
-        transition: 'all 0.5s',
-        WebkitTapHighlightColor: 'transparent',
+const linkStyle = css(noHighlight, {
+    color: navFontColor,
+    textDecoration: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.5s',
+    WebkitTapHighlightColor: 'transparent',
 
-        '&:hover': {
-            color: mix(0.5, logoBlue, '#444'),
-            [`${HighlightDiv}`]: {
-                opacity: 0.5,
-            },
+    '&:hover': {
+        color: mix(0.5, logoBlue, '#444'),
+        [`${HighlightDiv}`]: {
+            opacity: 0.5,
         },
     },
-);
+});
 
 const linkActiveStyle = css({
     color: lightBlue,
@@ -121,7 +126,7 @@ const linkHomeStyle = css({
 });
 
 const linkHomeActiveStyle = css({
-    textShadow: '0 0 1px rgba(255, 255, 255, 1)'
+    textShadow: '0 0 1px rgba(255, 255, 255, 1)',
 });
 
 const mobileLinkStyle = css({
@@ -132,30 +137,43 @@ const mobileLinkStyle = css({
 const SubNavContainer = styled.div<{ isHamburger: boolean }>(
     {
         visibility: 'hidden',
-    }, ({ isHamburger }) => isHamburger && ({
-        visibility: 'unset',
-        height: 0,
-        overflow: 'hidden',
-        display: 'flex',
-        marginRight: '1rem',
-    })
+    },
+    ({ isHamburger }) =>
+        isHamburger && {
+            visibility: 'unset',
+            height: 0,
+            overflow: 'hidden',
+            display: 'flex',
+            marginRight: '1rem',
+        },
 );
 
-const SubNavLine = styled.div<{ isHome: boolean }>({
-    flex: '0 0 1px',
-}, ({ isHome }) => ({
-    backgroundColor: isHome ? 'white' : navFontColor,
-}));
+const SubNavLine = styled.div<{ isHome: boolean }>(
+    {
+        flex: '0 0 1px',
+    },
+    ({ isHome }) => ({
+        backgroundColor: isHome ? 'white' : navFontColor,
+    }),
+);
 
-const enterAnimation = (el: HTMLElement, isAppearing: boolean, isHamburger: boolean, path: string) => {
+const enterAnimation = (
+    el: HTMLElement,
+    isAppearing: boolean,
+    isHamburger: boolean,
+    path: string,
+) => {
     if (isHamburger) {
         if (isAppearing) {
             el.style.height = 'auto';
         } else {
             gsap.set(el, { height: 'auto' });
             gsap.from(el, { height: 0, duration: 0.25 });
-            gsap.fromTo(`.${path}`, { autoAlpha: 0, x: 80 }, { autoAlpha: 1, x: 0, stagger: 0.08, duration: 0.3 });
-
+            gsap.fromTo(
+                `.${path}`,
+                { autoAlpha: 0, x: 80 },
+                { autoAlpha: 1, x: 0, stagger: 0.08, duration: 0.3 },
+            );
         }
     } else {
         gsap.to(el, { autoAlpha: 1, duration: 0.25 });
@@ -164,8 +182,13 @@ const enterAnimation = (el: HTMLElement, isAppearing: boolean, isHamburger: bool
 
 const exitAnimation = (el: HTMLElement, isHamburger: boolean, path: string) => {
     if (isHamburger) {
-        gsap.to(el, { height: 0, duration: 0.25 })
-        gsap.to(`.${path}`, { autoAlpha: 0, x: 80, stagger: 0.05, duration: 0.25 });
+        gsap.to(el, { height: 0, duration: 0.25 });
+        gsap.to(`.${path}`, {
+            autoAlpha: 0,
+            x: 80,
+            stagger: 0.05,
+            duration: 0.25,
+        });
     } else {
         gsap.to(el, { autoAlpha: 0, duration: 0.25 });
     }
@@ -185,11 +208,13 @@ const StyledLi = styled.li<{ isHamburger: boolean }>(
         '&:last-child': {
             marginRight: 0,
         },
-    }, ({ isHamburger }) => isHamburger && ({
-        textAlign: 'right',
-        visibility: 'hidden',
-        opacity: 0,
-    })
+    },
+    ({ isHamburger }) =>
+        isHamburger && {
+            textAlign: 'right',
+            visibility: 'hidden',
+            opacity: 0,
+        },
 );
 
 interface AorLink {
@@ -234,30 +259,33 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
         };
     }
 
-    const HighlightComponent =
+    const HighlightComponent = (
         <Highlight
             active={active}
             isHome={isHome}
             link={link}
             isHamburger={isHamburger}
             expanded={showSubs.includes(link.name)}
-        />;
+        />
+    );
 
     return (
         <StyledLi className="navlink-entry" isHamburger={isHamburger}>
-            {(subNavLinks || link.name === 'blog') ? (
+            {subNavLinks || link.name === 'blog' ? (
                 <a css={style} {...attr}>
                     {HighlightComponent}
                 </a>
             ) : (
-                    <Link css={style} {...(attr as LinkProps)}>
-                        {HighlightComponent}
-                    </Link>
-                )}
+                <Link css={style} {...(attr as LinkProps)}>
+                    {HighlightComponent}
+                </Link>
+            )}
             {subNavLinks && (
                 <Transition<undefined>
                     in={showSubs.includes(link.name)}
-                    onEnter={(el, isAppearing) => enterAnimation(el, isAppearing, isHamburger, link.name)}
+                    onEnter={(el, isAppearing) =>
+                        enterAnimation(el, isAppearing, isHamburger, link.name)
+                    }
                     onExit={(el) => exitAnimation(el, isHamburger, link.name)}
                     timeout={250}
                     appear={true}

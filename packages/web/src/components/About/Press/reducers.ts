@@ -1,24 +1,35 @@
-import { AcclaimItemShape, AcclaimsListStateShape } from 'src/components/About/Press/types';
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { ThunkAPIType } from 'src/types';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
+import {
+    AcclaimItemShape,
+    AcclaimsListStateShape,
+} from 'src/components/About/Press/types';
+import { ThunkAPIType } from 'src/types';
 
 const initialState: AcclaimsListStateShape = {
     isFetching: false,
     items: [],
 };
 
-export const fetchAcclaims = createAsyncThunk<AcclaimItemShape[], void, ThunkAPIType>(
+export const fetchAcclaims = createAsyncThunk<
+    AcclaimItemShape[],
+    void,
+    ThunkAPIType
+>(
     'acclaims/fetch',
     async () => {
-        const { data: acclaims }: { data: AcclaimItemShape[] } = await axios.get('/api/acclaims');
+        const { data: acclaims }: { data: AcclaimItemShape[] } =
+            await axios.get('/api/acclaims');
         return acclaims;
     },
     {
         condition: (_, { getState }) => {
-            return !getState().pressAcclaimsList.isFetching && !getState().pressAcclaimsList.items.length;
-        }
-    }
+            return (
+                !getState().pressAcclaimsList.isFetching &&
+                !getState().pressAcclaimsList.items.length
+            );
+        },
+    },
 );
 
 const acclaimsSlice = createSlice({
@@ -37,8 +48,8 @@ const acclaimsSlice = createSlice({
                 state.isFetching = false;
                 state.items = action.payload;
             })
-            .addDefaultCase(state => state);
-    }
+            .addDefaultCase((state) => state);
+    },
 });
 
 export const acclaimsListReducer = acclaimsSlice.reducer;

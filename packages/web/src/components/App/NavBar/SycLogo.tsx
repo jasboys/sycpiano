@@ -9,7 +9,7 @@ export const sycLogoSize = {
     lowDpx: 150,
     get(hiDpx: boolean) {
         return hiDpx ? this.hiDpx : this.lowDpx;
-    }
+    },
 };
 
 export const SycLogo = styled(LogoInstance)({

@@ -1,18 +1,16 @@
+import styled from '@emotion/styled';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-
-import styled from '@emotion/styled';
+import { createStructuredSelector } from 'reselect';
 
 import { SycLogo, sycLogoSize } from 'src/components/App/NavBar/SycLogo';
-
+import { toggleExpanded } from 'src/components/App/NavBar/reducers';
+import { mqSelectors } from 'src/components/App/reducers';
+import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { toggleExpanded } from 'src/components/App/NavBar/reducers';
-import { createStructuredSelector } from 'reselect';
-import { mqSelectors } from 'src/components/App/reducers';
 
 const navBarFontSizeREM = 2.5;
 const letterSpacing = 0.05;
@@ -35,14 +33,15 @@ const LogoText = styled.div<{ hiDpx: boolean }>(
         flex: '1 1 auto',
         marginLeft: 20,
     },
-    ({ hiDpx }) => hiDpx && {
-        lineHeight: `${navBarHeight.hiDpx}px`,
-        height: navBarHeight.hiDpx,
-    },
+    ({ hiDpx }) =>
+        hiDpx && {
+            lineHeight: `${navBarHeight.hiDpx}px`,
+            height: navBarHeight.hiDpx,
+        },
 );
 
 const StyledLink = styled(Link, {
-    shouldForwardProp: prop => prop !== 'isHome' && prop !== 'isExpanded',
+    shouldForwardProp: (prop) => prop !== 'isHome' && prop !== 'isExpanded',
 })<{ isHome: boolean; isExpanded: boolean }>(
     latoFont(300),
     {
@@ -60,20 +59,21 @@ const StyledLink = styled(Link, {
         '&:hover': {
             color: lightBlue,
         },
-
     },
-    ({ isHome }) => (isHome) ?
-        {
-            fill: 'white',
-            '&:hover': {
-                filter: 'drop-shadow(0px 0px 4px white)',
-            }
-        } : {
-            fill: logoBlue,
-            '&:hover': {
-                fill: lightBlue
-            }
-        },
+    ({ isHome }) =>
+        isHome
+            ? {
+                  fill: 'white',
+                  '&:hover': {
+                      filter: 'drop-shadow(0px 0px 4px white)',
+                  },
+              }
+            : {
+                  fill: logoBlue,
+                  '&:hover': {
+                      fill: lightBlue,
+                  },
+              },
 );
 
 const SeanChenText = styled.span({ verticalAlign: 'middle' });
@@ -102,33 +102,54 @@ const selector = createStructuredSelector({
     isHamburger: mqSelectors.isHamburger,
 });
 
-const NavBarLogo: React.FC<React.HTMLAttributes<HTMLDivElement> & NavBarLogoProps> = ({
-    isHome,
-    isExpanded,
-    specificRouteName,
-}) => {
+const NavBarLogo: React.FC<
+    React.HTMLAttributes<HTMLDivElement> & NavBarLogoProps
+> = ({ isHome, isExpanded, specificRouteName }) => {
     const dispatch = useAppDispatch();
     const { hiDpx, screenS, screenXS, isHamburger } = useAppSelector(selector);
-    const mapped = specificRouteName && (routeNameMapping[specificRouteName] ?? specificRouteName);
-    const displayName = (Array.isArray(mapped)) ? mapped[screenXS ? 1 : 0] : mapped;
+    const mapped =
+        specificRouteName &&
+        (routeNameMapping[specificRouteName] ?? specificRouteName);
+    const displayName = Array.isArray(mapped)
+        ? mapped[screenXS ? 1 : 0]
+        : mapped;
     const letterCount = displayName?.length;
-    const estimatedTextWidth = letterCount && letterCount * capitalRatio * navBarFontSizeREM * 0.8 + letterSpacing * (letterCount - 1);
+    const estimatedTextWidth =
+        letterCount &&
+        letterCount * capitalRatio * navBarFontSizeREM * 0.8 +
+            letterSpacing * (letterCount - 1);
     // 120 or 150 is logo, 20 margin, other stuff is cart + menu + 15 + 5 buffer
-    const otherObjectSizes = ((sycLogoSize.get(hiDpx)) + 20 + 111);
+    const otherObjectSizes = sycLogoSize.get(hiDpx) + 20 + 111;
 
     return (
-        <StyledLink to="/" isHome={isHome} isExpanded={isExpanded} onClick={() => { dispatch(toggleExpanded(false)); }}>
+        <StyledLink
+            to="/"
+            isHome={isHome}
+            isExpanded={isExpanded}
+            onClick={() => {
+                dispatch(toggleExpanded(false));
+            }}
+        >
             <SycLogo />
             <LogoText hiDpx={hiDpx}>
-                {!isHome && !screenS && <SeanChenText>{'SEAN CHEN' + ((isHamburger) ? ' |' : '')}</SeanChenText>}
-                {
-                    displayName && !isHome && isHamburger &&
+                {!isHome && !screenS && (
+                    <SeanChenText>
+                        {`SEAN CHEN${(isHamburger ? ' |' : '')}`}
+                    </SeanChenText>
+                )}
+                {displayName && !isHome && isHamburger && (
                     <RouteText
-                        css={{ fontSize: `min(${navBarFontSizeREM * 0.8}rem, calc(${navBarFontSizeREM * 0.8} * (100vw - ${otherObjectSizes}px) / ${estimatedTextWidth}))` }}
+                        css={{
+                            fontSize: `min(${
+                                navBarFontSizeREM * 0.8
+                            }rem, calc(${
+                                navBarFontSizeREM * 0.8
+                            } * (100vw - ${otherObjectSizes}px) / ${estimatedTextWidth}))`,
+                        }}
                     >
                         {displayName}
                     </RouteText>
-                }
+                )}
             </LogoText>
         </StyledLink>
     );

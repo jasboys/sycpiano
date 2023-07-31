@@ -1,6 +1,6 @@
-import { Disc, DiscsStateShape } from 'src/components/About/Discs/types';
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { Disc, DiscsStateShape } from 'src/components/About/Discs/types';
 import { ThunkAPIType } from 'src/types';
 
 const initialState: DiscsStateShape = {
@@ -17,9 +17,11 @@ export const fetchDiscs = createAsyncThunk<Disc[], void, ThunkAPIType>(
     },
     {
         condition: (_, { getState }) => {
-            return !getState().discs.isFetching && !getState().discs.discs.length;
-        }
-    }
+            return (
+                !getState().discs.isFetching && !getState().discs.discs.length
+            );
+        },
+    },
 );
 
 const discsSlice = createSlice({
@@ -38,8 +40,8 @@ const discsSlice = createSlice({
                 state.isFetching = false;
                 state.discs = action.payload;
             })
-            .addDefaultCase(() => { });
-    }
+            .addDefaultCase(() => {});
+    },
 });
 
 export const discsReducer = discsSlice.reducer;

@@ -39,10 +39,12 @@ const contacts: Omit<ContactItemShape, 'isMobile'>[] = [
     {
         name: 'Martha Woods',
         className: 'marthaWoods',
-        position: [{
-            title: 'President',
-            organization: 'Jonathan Wentworth Associates',
-        }],
+        position: [
+            {
+                title: 'President',
+                organization: 'Jonathan Wentworth Associates',
+            },
+        ],
         phone: ['(301) 277-8205'],
         email: ['martha@jwentworth.com'],
         social: {

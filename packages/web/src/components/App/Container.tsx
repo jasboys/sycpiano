@@ -1,18 +1,14 @@
+import styled from '@emotion/styled';
 import * as React from 'react';
 import { Outlet } from 'react-router-dom';
 
-import styled from '@emotion/styled';
-
 import { container } from 'src/styles/mixins';
 
-const ContainerElement = styled.div(
-    container,
-    {
-        height: '100%',
-        width: '100%',
-        overflow: 'hidden',
-    }
-);
+const ContainerElement = styled.div(container, {
+    height: '100%',
+    width: '100%',
+    overflow: 'hidden',
+});
 
 type ContainerProps = Record<never, unknown>;
 

@@ -1,7 +1,7 @@
-import { BioStateShape, Blurb } from 'src/components/About/Bio/types';
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { ThunkAPIType } from 'src/types';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { BioStateShape, Blurb } from 'src/components/About/Bio/types';
+import { ThunkAPIType } from 'src/types';
 
 const initialState: BioStateShape = {
     isFetching: false,
@@ -11,14 +11,16 @@ const initialState: BioStateShape = {
 export const fetchBio = createAsyncThunk<Blurb[], void, ThunkAPIType>(
     'bio/fetch',
     async () => {
-        const { data: bio } = await axios.get<void, { data: Blurb[] }>('/api/bio');
+        const { data: bio } = await axios.get<void, { data: Blurb[] }>(
+            '/api/bio',
+        );
         return bio;
     },
     {
         condition: (_, { getState }) => {
             return !getState()?.bio?.isFetching && !getState()?.bio?.bio.length;
-        }
-    }
+        },
+    },
 );
 
 const bioSlice = createSlice({
@@ -37,8 +39,8 @@ const bioSlice = createSlice({
                 state.isFetching = false;
                 state.bio = action.payload;
             })
-            .addDefaultCase(state => state ? state : initialState);
-    }
+            .addDefaultCase((state) => (state ? state : initialState));
+    },
 });
 
 export const bioReducer = bioSlice.reducer;

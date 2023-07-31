@@ -1,5 +1,5 @@
 export interface AcclaimItemShape {
-    readonly ID: string;
+    readonly id: string;
     readonly quote: string;
     readonly date: string;
     readonly short: string;

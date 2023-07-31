@@ -1,37 +1,34 @@
 import * as React from 'react';
-
 import styled from '@emotion/styled';
 
 import iconMap from 'src/components/About/Discs/iconMap';
 import { Disc } from 'src/components/About/Discs/types';
-
 import { staticImage } from 'src/imageUrls';
 import { isHamburger, screenXS, hiDpx } from 'src/screens';
 import { cardShadow } from 'src/styles/mixins';
 import { toMedia } from 'src/MediaQuery';
 
-const LinkImage = styled.img`
-    transition: all 0.2s;
-    vertical-align: middle;
-    height: 2em;
-    filter: saturate(0.3);
+const LinkImage = styled.img({
+    transition: 'all 0.2s',
+    verticalAlign: 'middle',
+    height: '2rem',
+    filter: 'saturate(0.3)',
+    '&:hover': {
+        transform: 'scale(1.1)',
+        filter: 'saturate(1)',
+        cursor: 'pointer',
+    },
 
-    ${toMedia(hiDpx)} {
-        height: 1.8em;
-    }
+    [toMedia(hiDpx)]: {
+        height: '1.8rem',
+    },
+});
 
-    &:hover {
-        transform: scale(1.1);
-        filter: saturate(1);
-        cursor: pointer;
-    }
-`;
-
-const StyledLink = styled.a`
-    flex: 1 0 auto;
-    text-align: center;
-    display: block;
-`;
+const StyledLink = styled.a({
+    flex: '1 0 auto',
+    textAlign: 'center',
+    display: 'block',
+});
 
 interface DiscLinkProps {
     imageUrl: string;
@@ -40,9 +37,7 @@ interface DiscLinkProps {
 
 const DiscLink: React.FC<DiscLinkProps> = (props) => (
     <StyledLink href={props.linkUrl} target="_blank" rel="noopener">
-        <LinkImage
-            src={staticImage(`/logos/${props.imageUrl}`)}
-        />
+        <LinkImage src={staticImage(`/logos/${props.imageUrl}`)} />
     </StyledLink>
 );
 
@@ -69,7 +64,7 @@ const DiscImageContainer = styled.div({
     [toMedia(screenXS)]: {
         height: '80vw',
         flex: '0 0 80vw',
-    }
+    },
 });
 
 // const ImageBorder = styled.div({
@@ -119,38 +114,38 @@ const DiscImage = styled.img({
 //     boxShadow: 'inset 0 0 10px rgba(0, 0, 0, 0.2)',
 // });
 
-const DiscDescription = styled.div`
-    flex: 1;
-    padding: 1.5rem;
-    display: flex;
-    flex-direction: column;
-`;
+const DiscDescription = styled.div({
+    flex: '1',
+    padding: '1.5rem',
+    display: 'flex',
+    flexDirection: 'column',
+});
 
-const DiscTitle = styled.span`
-    margin: 0;
-    margin-bottom: 0.5rem;
-    font-size: 1.5rem;
-`;
+const DiscTitle = styled.span({
+    margin: 0,
+    marginBottom: '0.5rem',
+    fontSize: '1.5rem',
+});
 
-const DiscLabel = styled.span`
-    margin: 0.5rem;
-`;
+const DiscLabel = styled.span({
+    margin: '0.5rem',
+});
 
-const DiscYear = styled.span`
-    margin: 0.5rem;
-`;
+const DiscYear = styled.span({
+    margin: '0.5rem',
+});
 
-const Divider = styled.div`
-    border-top: 1px solid #888;
-    height: 1px;
-    margin: 0.8rem 3rem 1.5rem;
-`;
+const Divider = styled.div({
+    borderTop: '1px solid #888',
+    height: 1,
+    margin: '0.8rem 3rem 1.5rem',
+});
 
-const LinksContainer = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-`;
+const LinksContainer = styled.div({
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'flex-end',
+});
 
 interface DiscListProps {
     item: Disc;
@@ -161,7 +156,9 @@ const DiscListItem: React.FC<DiscListProps> = ({ item }) => {
         <li>
             <DiscItem>
                 <DiscImageContainer>
-                    <DiscImage src={`/static/images/cd-thumbnails/${item.thumbnailFile}`} />
+                    <DiscImage
+                        src={`/static/images/cd-thumbnails/${item.thumbnailFile}`}
+                    />
                 </DiscImageContainer>
                 <DiscDescription>
                     <DiscTitle>{item.title}</DiscTitle>
@@ -173,13 +170,17 @@ const DiscListItem: React.FC<DiscListProps> = ({ item }) => {
                         {item.discLinks
                             .filter((value) => value.type !== 'google')
                             .map((value) => (
-                                <DiscLink key={`${item.id}-${value.type}`} linkUrl={value.url} imageUrl={iconMap[value.type]} />
+                                <DiscLink
+                                    key={`${item.id}-${value.type}`}
+                                    linkUrl={value.url}
+                                    imageUrl={iconMap[value.type]}
+                                />
                             ))}
                     </LinksContainer>
                 </DiscDescription>
             </DiscItem>
         </li>
     );
-}
+};
 
 export default DiscListItem;

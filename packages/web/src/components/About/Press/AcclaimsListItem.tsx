@@ -1,14 +1,14 @@
-import * as React from 'react';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-
-import { AcclaimItemShape } from 'src/components/About/Press/types';
-import { logoBlue } from 'src/styles/colors';
-import { latoFont } from 'src/styles/fonts';
-import { screenXS, screenPortrait } from 'src/screens';
 import format from 'date-fns/format';
 import parseISO from 'date-fns/parseISO';
+import * as React from 'react';
+
 import { toMedia } from 'src/MediaQuery';
+import { AcclaimItemShape } from 'src/components/About/Press/types';
+import { screenPortrait, screenXS } from 'src/screens';
+import { logoBlue } from 'src/styles/colors';
+import { latoFont } from 'src/styles/fonts';
 
 const AcclaimContainer = styled.div({
     margin: '2rem auto 3rem',
@@ -17,28 +17,24 @@ const AcclaimContainer = styled.div({
     [toMedia([screenXS, screenPortrait])]: {
         fontSize: '1rem',
         padding: '0 1.2rem',
-    }
+    },
 });
 
 interface QuoteProps {
     quote: string;
 }
 
-const QuoteDiv = styled.div(
-    latoFont(300),
-    {
-        margin: '2rem 0 1.5rem',
-        padding: '2rem',
-        textAlign: 'left',
-        lineHeight: '1.5rem',
-        backgroundColor: 'white',
-        boxShadow: '0 4px 7px -7px rgba(0 0 0 / 0.7)'
-    });
+const QuoteDiv = styled.div(latoFont(300), {
+    margin: '2rem 0 1.5rem',
+    padding: '2rem',
+    textAlign: 'left',
+    lineHeight: '1.5rem',
+    backgroundColor: 'white',
+    boxShadow: '0 4px 7px -7px rgba(0 0 0 / 0.7)',
+});
 
-let Quote: React.FC<QuoteProps> = (props) => (
-    <QuoteDiv>
-        {props.quote}
-    </QuoteDiv>
+const Quote: React.FC<QuoteProps> = (props) => (
+    <QuoteDiv>{props.quote}</QuoteDiv>
 );
 
 interface AuthorProps {
@@ -53,11 +49,8 @@ const getRepeatCSS = (n: number, s: string) => {
     return Array(n).fill(s).join(',');
 };
 
-const Link = styled.a(
-    latoFont(200),
-    {
-        background:
-            `linear-gradient(
+const Link = styled.a(latoFont(200), {
+    background: `linear-gradient(
             to bottom,
             transparent 0%,
             transparent calc(0.95em - 0.51px),
@@ -66,11 +59,10 @@ const Link = styled.a(
             transparent calc(0.95em + 0.51px),
             transparent 100%
         )`,
-        transition: `background 0.5s linear, color 0.5s linear`,
+    transition: 'background 0.5s linear, color 0.5s linear',
 
-        '&:hover': {
-            background:
-                `linear-gradient(
+    '&:hover': {
+        background: `linear-gradient(
                 to bottom,
                 transparent 0%,
                 transparent calc(0.951em - 0.51px),
@@ -79,42 +71,46 @@ const Link = styled.a(
                 transparent calc(0.95em + 0.51px),
                 transparent 100%
             )`,
-        },
+    },
 
-        textShadow: getRepeatCSS(20, '0 0 1px white'),
-    });
+    textShadow: getRepeatCSS(20, '0 0 1px white'),
+});
 
-const AuthorDiv = styled.div(
-    latoFont(400),
-    {
-        fontSize: '0.9rem',
-        textAlign: 'right',
-        color: logoBlue,
-})
+const AuthorDiv = styled.div(latoFont(400), {
+    fontSize: '0.9rem',
+    textAlign: 'right',
+    color: logoBlue,
+});
 
-const Author: React.FC<AuthorProps> = ({ author, date, hasFullDate, website }) => {
+const Author: React.FC<AuthorProps> = ({
+    author,
+    date,
+    hasFullDate,
+    website,
+}) => {
     const Container = website ? Link : 'span';
-    const attributes = website ? { href: website, target: '_blank', css: latoFont(400) } : {};
+    const attributes = website
+        ? { href: website, target: '_blank', css: latoFont(400) }
+        : {};
     return (
         <AuthorDiv>
             <Container {...attributes}>
                 <span>{`— ${author} `}</span>
                 <span css={css` display: inline-block; `}>
-                    {`(${hasFullDate ?
-                        format(date, 'MMMM dd, yyyy') :
-                        format(date, 'MMMM yyyy')})`
-                    }
+                    {`(${
+                        hasFullDate
+                            ? format(date, 'MMMM dd, yyyy')
+                            : format(date, 'MMMM yyyy')
+                    })`}
                 </span>
             </Container>
         </AuthorDiv>
     );
 };
 
-const StyledAuthor = styled(Author)(
-    latoFont(100),
-    {
-        textAlign: 'center',
-    });
+const StyledAuthor = styled(Author)(latoFont(100), {
+    textAlign: 'center',
+});
 
 interface AcclaimsListItemProps {
     acclaim: AcclaimItemShape;

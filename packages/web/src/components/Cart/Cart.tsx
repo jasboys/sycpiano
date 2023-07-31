@@ -1,16 +1,15 @@
 import styled from '@emotion/styled';
-import * as React from 'react';
-import { Transition } from 'react-transition-group';
-import { initCartAction, syncLocalStorage } from 'src/components/Cart/reducers';
-import { CartList } from 'src/components/Cart/CartList';
-import { mqSelectors } from 'src/components/App/reducers';
-import { LoadingInstance } from 'src/components/LoadingSVG';
-import isEqual from 'react-fast-compare';
-
 import { gsap } from 'gsap';
+import * as React from 'react';
+import isEqual from 'react-fast-compare';
+import { Transition } from 'react-transition-group';
 
-import { navBarHeight } from 'src/styles/variables';
+import { mqSelectors } from 'src/components/App/reducers';
+import { CartList } from 'src/components/Cart/CartList';
+import { initCartAction, syncLocalStorage } from 'src/components/Cart/reducers';
+import { LoadingInstance } from 'src/components/LoadingSVG';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { navBarHeight } from 'src/styles/variables';
 
 const Arrow = styled.div({
     position: 'absolute',
@@ -19,7 +18,7 @@ const Arrow = styled.div({
     height: 0,
     borderLeft: '16px solid transparent',
     borderRight: '16px solid transparent',
-    borderBottom: `15.5px solid rgba(255 255 255 / 0.4)`,
+    borderBottom: '15.5px solid rgba(255 255 255 / 0.4)',
 });
 
 const LoadingDiv = styled.div({
@@ -33,33 +32,35 @@ const LoadingDiv = styled.div({
     fill: 'white',
 });
 
-const CartFilterGroup = styled.div<{ isCheckingOut: boolean; }>(
+const CartFilterGroup = styled.div<{ isCheckingOut: boolean }>(
     {
         position: 'relative',
         height: '100%',
     },
-    ({ isCheckingOut }) => isCheckingOut && ({
-        filter: 'brightness(0.75)',
-    }),
+    ({ isCheckingOut }) =>
+        isCheckingOut && {
+            filter: 'brightness(0.75)',
+        },
 );
 const CartContainer = styled.div<{ hiDpx: boolean; top: number }>(
     {
         zIndex: 5001,
-        filter: `drop-shadow(0px 4px 8px rgba(0 0 0 / 0.5))`,
+        filter: 'drop-shadow(0px 4px 8px rgba(0 0 0 / 0.5))',
         overflow: 'hidden',
         visibility: 'hidden',
         opacity: 0,
         maxHeight: '100%',
     },
     ({ top }) => ({
-        height: `calc(100% - ${top}px)`
+        height: `calc(100% - ${top}px)`,
     }),
-    ({ hiDpx }) => hiDpx && ({
-        position: 'absolute',
-        paddingTop: navBarHeight.hiDpx,
-        zIndex: 4999,
-        height: '100%',
-    })
+    ({ hiDpx }) =>
+        hiDpx && {
+            position: 'absolute',
+            paddingTop: navBarHeight.hiDpx,
+            zIndex: 4999,
+            height: '100%',
+        },
 );
 
 interface CartProps {
@@ -71,14 +72,21 @@ interface CartProps {
         x?: number;
         y?: number;
         centerOffset: number;
-    }
+    };
     strategy: 'absolute' | 'fixed';
     floatingRef: React.MutableRefObject<HTMLDivElement | null>;
     arrowRef: React.MutableRefObject<HTMLDivElement | null>;
     update: () => void;
 }
 
-const Cart: React.FC<CartProps> = ({ position, strategy, floatingRef, arrowRef, arrow, update }) => {
+const Cart: React.FC<CartProps> = ({
+    position,
+    strategy,
+    floatingRef,
+    arrowRef,
+    arrow,
+    update,
+}) => {
     const isHamburger = useAppSelector(mqSelectors.isHamburger);
     const hiDpx = useAppSelector(mqSelectors.hiDpx);
     const dispatch = useAppDispatch();
@@ -99,10 +107,13 @@ const Cart: React.FC<CartProps> = ({ position, strategy, floatingRef, arrowRef, 
         }
     }, [cartLength]);
 
-    const arrowCallback = React.useCallback((el: HTMLDivElement) => {
-        arrowRef.current = el;
-        update();
-    }, [update]);
+    const arrowCallback = React.useCallback(
+        (el: HTMLDivElement) => {
+            arrowRef.current = el;
+            update();
+        },
+        [update],
+    );
 
     return (
         <Transition<undefined>
@@ -110,9 +121,14 @@ const Cart: React.FC<CartProps> = ({ position, strategy, floatingRef, arrowRef, 
             timeout={250}
             onEnter={(el: HTMLElement) => {
                 if (!tl.current) {
-                    tl.current = gsap.timeline({ reversed: true, paused: true })
+                    tl.current = gsap
+                        .timeline({ reversed: true, paused: true })
                         // .to(el, { height: 'auto', duration: 0.30, ease: 'quad.inOut' });
-                        .to(el, { autoAlpha: 1, duration: 0.12, ease: 'quad.inOut' });
+                        .to(el, {
+                            autoAlpha: 1,
+                            duration: 0.12,
+                            ease: 'quad.inOut',
+                        });
                 }
                 tl.current.pause().play();
             }}
@@ -121,24 +137,30 @@ const Cart: React.FC<CartProps> = ({ position, strategy, floatingRef, arrowRef, 
             }}
         >
             <CartContainer
-                css={!isHamburger && {
-                    left: position.x !== null ? position.x : '',
-                    top: position.y !== null ? position.y : '',
-                    position: strategy,
-                }}
-                top={(!isHamburger && position.y !== null) ? position.y : 0}
+                css={
+                    !isHamburger && {
+                        left: position.x !== null ? position.x : '',
+                        top: position.y !== null ? position.y : '',
+                        position: strategy,
+                    }
+                }
+                top={!isHamburger && position.y !== null ? position.y : 0}
                 hiDpx={hiDpx}
-                ref={isHamburger ? () => { } : floatingRef}    /* eslint-disable-line @typescript-eslint/no-empty-function */
+                ref={
+                    isHamburger ? () => {} : floatingRef
+                } /* eslint-disable-line @typescript-eslint/no-empty-function */
             >
-                {isCheckingOut &&
+                {isCheckingOut && (
                     <LoadingDiv>
                         <LoadingInstance width={60} height={60} />
                     </LoadingDiv>
-                }
+                )}
                 <CartFilterGroup isCheckingOut={isCheckingOut}>
                     {!isHamburger && (
                         <Arrow
-                            ref={isHamburger ? () => { } : arrowCallback}     /* eslint-disable-line @typescript-eslint/no-empty-function */
+                            ref={
+                                isHamburger ? () => {} : arrowCallback
+                            } /* eslint-disable-line @typescript-eslint/no-empty-function */
                             style={{
                                 left: arrow?.x !== undefined ? arrow?.x : '',
                                 top: arrow?.y !== undefined ? arrow?.y : '',
@@ -152,12 +174,9 @@ const Cart: React.FC<CartProps> = ({ position, strategy, floatingRef, arrowRef, 
     );
 };
 
-const MemoizedCart = React.memo(
-    Cart,
-    (prev, next) => {
-        return isEqual(prev, next);
-    }
-);
+const MemoizedCart = React.memo(Cart, (prev, next) => {
+    return isEqual(prev, next);
+});
 
 export default MemoizedCart;
 export type RequiredProps = CartProps;

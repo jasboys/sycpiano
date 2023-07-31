@@ -1,41 +1,44 @@
-import * as React from 'react';
-
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
+import format from 'date-fns/format';
+import * as React from 'react';
+import { Transition } from 'react-transition-group';
+import { createStructuredSelector } from 'reselect';
 
-import { interFont, latoFont } from 'src/styles/fonts';
+import { toMedia } from 'src/mediaQuery';
+import {
+    DesktopBackgroundPreview,
+    MobileBackgroundPreview,
+} from 'src/components/Home/PreviewSVGs';
+import Social from 'src/components/Home/Social';
+import { LazyImage } from 'src/components/LazyImage';
+import { useAppSelector } from 'src/hooks';
 import {
     generateSrcsetWidths,
     homeBackground,
     resizedImage,
     sycChairVertical,
 } from 'src/imageUrls';
+import {
+    isHamburger,
+    screenLengths,
+    screenPortrait,
+    screenXSandPortrait,
+} from 'src/screens';
+import { interFont, latoFont } from 'src/styles/fonts';
 import { container, noHighlight } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
-
-import { DesktopBackgroundPreview, MobileBackgroundPreview } from 'src/components/Home/PreviewSVGs';
-import Social from 'src/components/Home/Social';
-import { LazyImage } from 'src/components/LazyImage';
-import { isHamburger, screenLengths, screenPortrait, screenXSandPortrait } from 'src/screens';
-import { Transition } from 'react-transition-group';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
-import { useAppSelector } from 'src/hooks';
-import format from 'date-fns/format';
-import { toMedia } from 'src/MediaQuery';
-import { createStructuredSelector } from 'reselect';
 import { mqSelectors } from '../App/reducers';
 
 const textShadowColor = 'rgba(0 0 0 / 0.75)';
 
-const HomeContainer = styled.div(
-    container,
-    {
-        height: '100%',
-        width: '100%',
-    }
-);
+const HomeContainer = styled.div(container, {
+    height: '100%',
+    width: '100%',
+});
 
-const ContentContainer = styled.div<{ menuExpanded: boolean; hiDpx: boolean; }>(
+const ContentContainer = styled.div<{ menuExpanded: boolean; hiDpx: boolean }>(
     noHighlight,
     {
         position: 'absolute',
@@ -51,41 +54,35 @@ const ContentContainer = styled.div<{ menuExpanded: boolean; hiDpx: boolean; }>(
     ({ menuExpanded, hiDpx }) => ({
         filter: menuExpanded ? 'blur(8px)' : 'unset',
         height: `calc(100% - ${navBarHeight.get(hiDpx)}px)`,
-    })
+    }),
 );
 
-const Name = styled.div(
-    interFont(200),
-    {
-        fontSize: 'calc(100vh / 8)',
-        position: 'absolute',
-        textTransform: 'uppercase',
-        width: '100%',
-        top: 'calc(35.9% - 46px)',
-        [toMedia({ and: [isHamburger, screenPortrait] })]: {
-            fontSize: 'calc(100vw / 6.2)',
-            bottom: '63%',
-            top: 'unset',
-        },
-    }
-);
+const Name = styled.div(interFont(200), {
+    fontSize: 'calc(100vh / 8)',
+    position: 'absolute',
+    textTransform: 'uppercase',
+    width: '100%',
+    top: 'calc(35.9% - 46px)',
+    [toMedia({ and: [isHamburger, screenPortrait] })]: {
+        fontSize: 'calc(100vw / 6.2)',
+        bottom: '63%',
+        top: 'unset',
+    },
+});
 
-const Skills = styled.div(
-    latoFont(200),
-    {
-        position: 'absolute',
-        fontSize: 'calc(100vh / 16)',
-        color: '#fff6b0',
-        textShadow: `0 0 6px ${textShadowColor}`,
-        width: '100%',
-        top: 'calc(50.8% - 35.8px)',
-        [toMedia({ and: [isHamburger, screenPortrait] })]: {
-            fontSize: 'calc(100vw / 16)',
-            bottom: '58%',
-            top: 'unset',
-        },
-    }
-);
+const Skills = styled.div(latoFont(200), {
+    position: 'absolute',
+    fontSize: 'calc(100vh / 16)',
+    color: '#fff6b0',
+    textShadow: `0 0 6px ${textShadowColor}`,
+    width: '100%',
+    top: 'calc(50.8% - 35.8px)',
+    [toMedia({ and: [isHamburger, screenPortrait] })]: {
+        fontSize: 'calc(100vw / 16)',
+        bottom: '58%',
+        top: 'unset',
+    },
+});
 
 const BackgroundContainer = styled.div({
     width: '100%',
@@ -105,19 +102,13 @@ const backgroundStyle = css({
     objectFit: 'cover',
 });
 
-const desktopBackgroundStyle = css(
-    backgroundStyle,
-    {
-        objectPosition: '50% 35%',
-    }
-);
+const desktopBackgroundStyle = css(backgroundStyle, {
+    objectPosition: '50% 35%',
+});
 
-const mobileBackgroundStyle = css(
-    backgroundStyle,
-    {
-        objectPosition: '50% 100%',
-    }
-);
+const mobileBackgroundStyle = css(backgroundStyle, {
+    objectPosition: '50% 100%',
+});
 
 const loadingStyle = css({
     width: '100%',
@@ -134,19 +125,20 @@ const BackgroundCover = styled.div<{ isHamburger: boolean }>(
         top: 0,
         left: 0,
         zIndex: 1,
-    }, ({ isHamburger }) => ({
-        backgroundImage: isHamburger ?
-            `linear-gradient(
+    },
+    ({ isHamburger }) => ({
+        backgroundImage: isHamburger
+            ? `linear-gradient(
             66deg,
             rgba(0 0 0 / 0) 30%,
             rgba(0 0 0 / 0.2) 55%
-        )` :
-            `linear-gradient(
+        )`
+            : `linear-gradient(
             66deg,
             rgba(0 0 0 / 0) 70%,
             rgba(0 0 0 / 0.2) 75%
         )`,
-    })
+    }),
 );
 
 const NavBarGradient = styled.div<{ hiDpx: boolean; isHamburger: boolean }>(
@@ -160,39 +152,37 @@ const NavBarGradient = styled.div<{ hiDpx: boolean; isHamburger: boolean }>(
     },
     ({ isHamburger, hiDpx }) => ({
         height: navBarHeight.get(hiDpx),
-        backgroundImage: isHamburger ?
-            `linear-gradient(
+        backgroundImage: isHamburger
+            ? `linear-gradient(
             122deg,
             rgba(3 3 3 / 0.4) 5%,
             rgba(255 255 255 / 0.11) 40%,
             rgba(255 255 255 / 0.21) 52%,
             rgba(255 255 255 / 0.36) 60%,
             rgba(53 53 53 / 0.27) 90%
-        )` :
-            `linear-gradient(
+        )`
+            : `linear-gradient(
             122deg,
             rgba(3 3 3 / 0.4) 5%,
             rgba(255 255 255 / 0.11) 20%,
             rgba(255 255 255 / 0.62) 22%,
             rgba(255 255 255 / 0.6) 40%,
             rgba(53 53 53 / 0.27) 60%
-        )`
-    })
+        )`,
+    }),
 );
 
-const StyledCopyright = styled.div(
-    latoFont(300),
-    {
-        position: 'absolute',
-        bottom: 0,
-        right: 0,
-        color: 'white',
-        padding: '20px 30px',
+const StyledCopyright = styled.div(latoFont(300), {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    color: 'white',
+    padding: '20px 30px',
 
-        [toMedia(screenXSandPortrait)]: {
-            width: '100%',
-        },
-    });
+    [toMedia(screenXSandPortrait)]: {
+        width: '100%',
+    },
+});
 
 const MobileBackground = styled.div({
     visibility: 'hidden',
@@ -203,16 +193,18 @@ const MobileBackground = styled.div({
     width: '100%',
 });
 
-const srcWidths = screenLengths.map((value) => (
-    Math.round(value * 1779 / 2560)
-));
+const srcWidths = screenLengths.map((value) =>
+    Math.round((value * 1779) / 2560),
+);
 
 const Content: React.FC = () => (
     <React.Fragment>
         <Name>Sean Chen</Name>
         <Skills>pianist / composer / arranger</Skills>
         <Social />
-        <StyledCopyright>Copyright © {format(new Date(), 'yyyy')} Sean Chen</StyledCopyright>
+        <StyledCopyright>
+            Copyright © {format(new Date(), 'yyyy')} Sean Chen
+        </StyledCopyright>
     </React.Fragment>
 );
 
@@ -250,25 +242,41 @@ const Home: React.FC<Record<never, unknown>> = () => {
                     }}
                     mobileAttributes={{
                         webp: {
-                            srcset: generateSrcsetWidths(sycChairVertical('webp'), srcWidths),
+                            srcset: generateSrcsetWidths(
+                                sycChairVertical('webp'),
+                                srcWidths,
+                            ),
                             sizes: '100vh',
                         },
                         jpg: {
-                            srcset: generateSrcsetWidths(sycChairVertical(), srcWidths),
+                            srcset: generateSrcsetWidths(
+                                sycChairVertical(),
+                                srcWidths,
+                            ),
                             sizes: '100vh',
                         },
                         src: resizedImage(sycChairVertical(), { height: 1920 }),
                     }}
                     desktopAttributes={{
                         webp: {
-                            srcset: generateSrcsetWidths(homeBackground('webp'), screenLengths),
+                            srcset: generateSrcsetWidths(
+                                homeBackground('webp'),
+                                screenLengths,
+                            ),
                         },
                         jpg: {
-                            srcset: generateSrcsetWidths(homeBackground(), screenLengths),
+                            srcset: generateSrcsetWidths(
+                                homeBackground(),
+                                screenLengths,
+                            ),
                         },
                         src: resizedImage(homeBackground(), { width: 1920 }),
                     }}
-                    loadingComponent={isHamburger ? MobileBackgroundPreview : DesktopBackgroundPreview}
+                    loadingComponent={
+                        isHamburger
+                            ? MobileBackgroundPreview
+                            : DesktopBackgroundPreview
+                    }
                     alt="home background"
                     successCb={undefined}
                 />
@@ -282,12 +290,15 @@ const Home: React.FC<Record<never, unknown>> = () => {
                     <NavBarGradient hiDpx={hiDpx} isHamburger={isHamburger} />
                 </Transition>
             </BackgroundContainer>
-            <ContentContainer menuExpanded={menuExpanded || cartExpanded} hiDpx={hiDpx}>
+            <ContentContainer
+                menuExpanded={menuExpanded || cartExpanded}
+                hiDpx={hiDpx}
+            >
                 <Content />
             </ContentContainer>
         </HomeContainer>
     );
-}
+};
 
 export type HomeType = typeof Home;
 export type RequiredProps = Record<never, unknown>;
