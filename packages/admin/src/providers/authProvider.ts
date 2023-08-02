@@ -10,13 +10,14 @@ const authProvider = (apiUrl: string): AuthProvider => {
     });
     return {
         login: async ({ username, password }) => {
-            await axiosInstance.post<{}, {}, { username: string; password: string; }>(
-                '/login',
-                {
-                    username,
-                    password,
-                }
-            );
+            await axiosInstance.post<
+                {},
+                {},
+                { username: string; password: string }
+            >('/login', {
+                username,
+                password,
+            });
         },
         checkError: (error) => {
             const status = error.status;
@@ -36,11 +37,11 @@ const authProvider = (apiUrl: string): AuthProvider => {
             await axiosInstance.post('/status');
         },
         getPermissions: async () => {
-            return;
+            return Promise.resolve();
         },
         getIdentity: async () => {
-            return ({ id: 'admin', fullName: 'Admin' });
-        }
+            return Promise.resolve({ id: 'admin', fullName: 'Admin' });
+        },
     };
 };
 

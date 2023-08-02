@@ -10,13 +10,13 @@ import helmet from 'helmet';
 import mustacheExpress from 'mustache-express';
 import path from 'path';
 
-import { ApiRouter } from './api-router.js';
+import { ApiRouter } from './publicAPI/index.js';
 import { AuthRouter, authAndGetRole, checkAdmin } from './authorization.js';
 import orm from './database.js';
 import { getMetaFromPathAndSanitize } from './meta.js';
 import { precheck } from './precheck.js';
 import { Resized } from './resized.js';
-import { AdminRest } from './rest.js';
+import { AdminRest } from './adminAPI/index.js';
 import type { Options } from 'pino-http';
 import { csrfMiddleware } from './csrf.js';
 

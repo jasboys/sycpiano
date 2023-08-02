@@ -7,6 +7,11 @@ export default defineConfig({
     server: {
         port: 5174,
     },
+    resolve: {
+        alias: {
+            src: path.resolve(__dirname, 'src'),
+        },
+    },
     root: path.resolve(__dirname, 'src'),
     // define: {
     //     BINARY_PATH: JSON.stringify(staticPrefix + '/binary'),
@@ -19,8 +24,12 @@ export default defineConfig({
     //     preventAssignment: true,
     // },
     define: {
-        'import.meta.env.PUBLIC_GAPI_KEY': JSON.stringify(process.env.GAPI_KEY_APP),
-        'import.meta.env.PUBLIC_HOST': JSON.stringify(process.env.CALLBACK_HOST),
+        'import.meta.env.PUBLIC_GAPI_KEY': JSON.stringify(
+            process.env.GAPI_KEY_APP,
+        ),
+        'import.meta.env.PUBLIC_HOST': JSON.stringify(
+            process.env.CALLBACK_HOST,
+        ),
     },
     envDir: '../../',
     plugins: [
@@ -29,7 +38,7 @@ export default defineConfig({
             babel: {
                 plugins: ['@emotion/babel-plugin'],
             },
-        })
+        }),
     ],
     build: {
         manifest: true,
@@ -38,4 +47,4 @@ export default defineConfig({
         },
         outDir: path.resolve(__dirname, 'build'),
     },
-})
+});

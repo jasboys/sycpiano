@@ -5,9 +5,7 @@ import { AdminPage } from './components/Admin.jsx';
 function main() {
     const container = document.getElementById('root') as HTMLElement;
     const root = createRoot(container);
-    root.render(
-        <AdminPage />
-    );
+    root.render(<AdminPage />);
 }
 
 main();
