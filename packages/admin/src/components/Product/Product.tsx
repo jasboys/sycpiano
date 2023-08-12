@@ -8,9 +8,13 @@ import {
     Datagrid,
     Edit,
     EditProps,
+    FileField,
+    FileInput,
     FilterButton,
     FunctionField,
     GetListResult,
+    ImageField,
+    ImageInput,
     List,
     ListProps,
     NumberField,
@@ -31,6 +35,7 @@ import {
     useRecordContext,
     useRefresh,
 } from 'react-admin';
+import { useWatch } from 'react-hook-form';
 import { useMutation } from 'react-query';
 import { useAppDataProvider } from 'src/providers/restProvider.js';
 import { AdminError } from 'src/types.js';
@@ -63,7 +68,7 @@ const ThumbnailField = ({ path }: { path: string }) => {
             <img
                 src={`${IMAGES_URI}/products/thumbnails/${path}`}
                 alt="thumbnail"
-                css={{ objectFit : 'fill' }}
+                css={{ objectFit: 'fill', height: '100%', width: '100%' }}
             />
         </div>
     );
@@ -186,12 +191,21 @@ export const ProductShow = (props: ShowProps) => (
     </Show>
 );
 
-export const ProductEdit = (props: EditProps) => (
-    <Edit {...props}>
-        <SimpleForm>
-            <TextInput source="id" fullWidth disabled />
+const EditFields = () => {
+    const pdfFile = useWatch({ name: 'pdf' });
+
+    return (
+        <>
             <TextInput source="name" fullWidth />
             <TextInput source="file" fullWidth />
+            <TextInput
+                source="fileName"
+                defaultValue={pdfFile?.title}
+                fullWidth
+            />
+            <FileInput source="pdf" fullWidth>
+                <FileField source="src" title="title" />
+            </FileInput>
             <TextInput source="permalink" fullWidth />
             <TextInput source="description" fullWidth multiline />
             <NumberInput source="pages" />
@@ -201,29 +215,56 @@ export const ProductEdit = (props: EditProps) => (
                     <TextInput source="" key={Math.random()} />
                 </SimpleFormIterator>
             </ArrayInput>
+            <TextInput source="imageBaseNameWithExt" fullWidth />
+            <ImageInput source="newImages" multiple>
+                <ImageField source="src" title="title" />
+            </ImageInput>
             <NumberInput source="price" helperText="in cents" />
             <SelectInput source="type" choices={productTypeChoices} />
-            <TextInput source="priceID" label="priceId" fullWidth disabled />
+        </>
+    );
+};
+
+export const ProductEdit = (props: EditProps) => (
+    <Edit {...props}>
+        <SimpleForm>
+            <EditFields />
         </SimpleForm>
     </Edit>
 );
 
-export const ProductCreate = (props: CreateProps) => (
-    <Create {...props}>
-        <SimpleForm>
+const CreateFields = () => {
+    const pdfFile = useWatch({ name: 'pdf ' });
+
+    return (
+        <>
             <TextInput source="name" fullWidth />
-            <TextInput source="file" fullWidth />
+            <TextInput
+                source="fileName"
+                defaultValue={pdfFile?.title}
+                fullWidth
+            />
+            <FileInput source="pdf" fullWidth>
+                <FileField source="src" title="title" />
+            </FileInput>
             <TextInput source="permalink" fullWidth />
             <TextInput source="description" fullWidth multiline />
             <NumberInput source="pages" />
             <TextInput source="sample" fullWidth />
-            <ArrayInput source="images">
-                <SimpleFormIterator>
-                    <TextInput source="" key={Math.random()} />
-                </SimpleFormIterator>
-            </ArrayInput>
+            <TextInput source="imageBaseNameWithExt" fullWidth />
+            <ImageInput source="newImages">
+                <ImageField source="src" title="title" />
+            </ImageInput>
             <NumberInput source="price" helperText="in cents" />
             <SelectInput source="type" choices={productTypeChoices} />
+        </>
+    );
+};
+
+export const ProductCreate = (props: CreateProps) => (
+    <Create {...props}>
+        <SimpleForm>
+            <CreateFields />
         </SimpleForm>
     </Create>
 );

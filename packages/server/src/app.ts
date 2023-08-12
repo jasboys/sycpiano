@@ -20,6 +20,8 @@ import { AdminRest } from './adminAPI/index.js';
 import type { Options } from 'pino-http';
 import { csrfMiddleware } from './csrf.js';
 
+// genWaveform('bartok_etude_1.mp3');
+
 const main = async () => {
     await precheck();
 
@@ -94,6 +96,7 @@ const main = async () => {
                         "'self'",
                         'https:',
                         'data:',
+                        'blob:',
                         // "https://i.ytimg.com/vi/",
                         // "https://*.stripe.com",
                         // "https://*.googleapis.com",
@@ -137,6 +140,27 @@ const main = async () => {
     // and non-admin routes don't need POST
     app.use(/\/api/, ormHandler, ApiRouter);
 
+    let allowedOrigins = [
+        /localhost:\d{4}$/,
+        /https:\/\/\w*.googleapis\.com.*/,
+    ];
+
+    const corsOptions = {
+        origin: allowedOrigins,
+        allowedHeaders: [
+            'Access-Control-Allow-Headers',
+            'Authorization',
+            'X-Requested-With',
+            'Content-Type',
+            'X-Total-Count',
+            'Origin',
+            'Accept',
+        ],
+        optionsSuccessStatus: 204,
+        maxAge: 86400,
+        credentials: true,
+    };
+
     // only for dev
     // prod uses nginx to serve static files
     if (!isProduction) {
@@ -145,18 +169,21 @@ const main = async () => {
         }
         app.use(
             '/static/music',
+            cors(corsOptions),
             express.static(
                 path.resolve(rootPath.toString(), process.env.MUSIC_ASSETS_DIR),
             ),
         );
         app.use(
             '/static/images',
+            cors(corsOptions),
             express.static(
                 path.resolve(rootPath.toString(), process.env.IMAGE_ASSETS_DIR),
             ),
         );
         app.use(
             '/static',
+            cors(corsOptions),
             express.static(path.resolve(rootPath.toString(), 'assets')),
         );
         // app.use('/static', express.static(path.resolve(rootPath.toString(), 'web/build')));
@@ -174,31 +201,11 @@ const main = async () => {
         path.resolve(rootPath.toString(), 'partials'),
     ]);
 
-    let allowedOrigins = [
-        /localhost:\d{4}$/,
-        /https:\/\/\w*.googleapis\.com.*/,
-    ];
     if (process.env.CORS_ORIGINS) {
         allowedOrigins = allowedOrigins.concat(
             process.env.CORS_ORIGINS.split(',').map((v) => new RegExp(v)),
         );
     }
-
-    const corsOptions = {
-        origin: allowedOrigins,
-        allowedHeaders: [
-            'Access-Control-Allow-Headers',
-            'Authorization',
-            'X-Requested-With',
-            'Content-Type',
-            'X-Total-Count',
-            'Origin',
-            'Accept',
-        ],
-        optionsSuccessStatus: 204,
-        maxAge: 86400,
-        credentials: true,
-    };
 
     if (!process.env.COOKIE_SECRET) {
         throw Error('No cookie secret specified in environmental variables.');
@@ -219,9 +226,6 @@ const main = async () => {
     // Resize images
     app.use(/\/resized/, Resized);
 
-    if (!process.env.ADMIN_PORT) {
-        throw Error('No admin port specified in environmental variables.');
-    }
     // Admin
     app.use(
         /\/admin/,

@@ -10,10 +10,4 @@ export class Bio {
 
     @Property({ columnType: 'text' })
     text!: string;
-
-    @Property({ length: 6, nullable: true })
-    createdAt?: Date;
-
-    @Property({ length: 6, nullable: true })
-    updatedAt?: Date;
 }

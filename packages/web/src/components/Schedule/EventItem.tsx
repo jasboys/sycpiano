@@ -6,7 +6,7 @@ import { startCase } from 'lodash-es';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
 
-import { toMedia } from 'src/MediaQuery.js';
+import { toMedia } from 'src/mediaQuery.js';
 import {
     EventCollaborators,
     EventDate,
@@ -233,6 +233,11 @@ const EventItem: React.FC<EventItemProps> = ({
         [permaLink],
     );
 
+    const src =
+        (usePlacePhoto && photoReference
+            ? getGooglePlacePhoto(photoReference, 300)
+            : imageUrl) ?? '';
+
     const DateChildren = (
         <EventDate
             dateTime={dateTime}
@@ -246,13 +251,7 @@ const EventItem: React.FC<EventItemProps> = ({
         <ItemContainer>
             <Left>
                 {DateChildren}
-                <Image
-                    src={
-                        (usePlacePhoto && !!photoReference
-                            ? getGooglePlacePhoto(photoReference, 300)
-                            : imageUrl) ?? ''
-                    }
-                />
+                <Image src={src} />
             </Left>
             <Right>
                 <EventName
@@ -279,7 +278,11 @@ const EventItem: React.FC<EventItemProps> = ({
 
                 <Links>
                     {website && <EventWebsiteButton website={website} />}
-                    <button type="button" onClick={onClick}>
+                    <button
+                        type="button"
+                        onClick={onClick}
+                        css={{ all: 'unset' }}
+                    >
                         <StyledShareIcon
                             width={36}
                             height={36}

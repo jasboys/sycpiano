@@ -1,8 +1,7 @@
-import React from 'react';
 import { Admin, Resource } from 'react-admin';
 
 import authProvider from '../providers/authProvider.js';
-import restProvider from '../providers/restProvider.js';
+import { providerWithLifecycleCallbacks } from '../providers/restProvider.js';
 
 // import { AcclaimList, AcclaimShow, AcclaimEdit, AcclaimCreate }
 import { ADMIN_URI, AUTH_URI } from '../uris.js';
@@ -40,7 +39,7 @@ import { UserList, UserShow } from './User';
 
 export const AdminPage = () => (
     <Admin
-        dataProvider={restProvider(ADMIN_URI)}
+        dataProvider={providerWithLifecycleCallbacks}
         authProvider={authProvider(AUTH_URI)}
     >
         <Resource

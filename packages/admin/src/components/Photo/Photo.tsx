@@ -5,6 +5,8 @@ import {
     Edit,
     EditProps,
     FunctionField,
+    ImageField,
+    ImageInput,
     List,
     ListProps,
     NumberInput,
@@ -18,6 +20,7 @@ import {
     useRecordContext,
     UseRecordContextParams,
 } from 'react-admin';
+import { useWatch } from 'react-hook-form';
 import { IMAGES_URI } from 'src/uris.js';
 
 const ThumbnailField = (props: UseRecordContextParams) => {
@@ -106,15 +109,26 @@ export const PhotoEdit = (props: EditProps) => (
     </Edit>
 );
 
-export const PhotoCreate = (props: CreateProps) => (
-    <Create {...props}>
-        <SimpleForm>
-            <TextInput source="file" fullWidth />
+const PhotoFields = () => {
+    const upload = useWatch({ name: 'photoBlob' });
+
+    return (
+        <>
+            <TextInput source="file" defaultValue={upload?.title} fullWidth />
+            <ImageInput accept="image/*" source="photoBlob">
+                <ImageField source="src" title="title" />
+            </ImageInput>
             <TextInput source="credit" />
-            <NumberInput source="width" />
-            <NumberInput source="height" />
-            <NumberInput source="thumbnailWidth" />
-            <NumberInput source="thumbnailHeight" />
-        </SimpleForm>
-    </Create>
-);
+        </>
+    );
+};
+
+export const PhotoCreate = (props: CreateProps) => {
+    return (
+        <Create {...props}>
+            <SimpleForm>
+                <PhotoFields />
+            </SimpleForm>
+        </Create>
+    );
+};

@@ -97,6 +97,7 @@ export const CalendarList = (props: ListProps) => {
                 rowClick="edit"
                 bulkActionButtons={<PostBulkActionButtons />}
             >
+				<TextField source="id" />
                 <TextField source="name" />
                 <FunctionField
                     label="Date Time"

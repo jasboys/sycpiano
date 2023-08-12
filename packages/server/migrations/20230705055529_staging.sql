@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS product (
     permalink       text
 );
 
-CREATE TABLE IF NOT EXISTS user (
+CREATE TABLE IF NOT EXISTS "user" (
     id              text PRIMARY KEY,
     username        text,
     role            text,
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS faq (
     id              uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     question        text,
     answer          text,
-    order           integer
+    "order"         integer
 );
 
 CREATE INDEX IF NOT EXISTS calendar_piece_calendar_idx ON calendar_piece(calendar_id);

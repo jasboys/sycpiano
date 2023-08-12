@@ -1,5 +1,6 @@
 import * as dotenv from 'dotenv';
 import * as express from 'express';
+import multer from 'multer';
 import * as stripeClient from '../stripe.js';
 
 dotenv.config({ override: true });
@@ -9,8 +10,12 @@ import {
     FilterQuery,
     Loaded,
     ValidationError,
+    expr,
     wrap,
 } from '@mikro-orm/core';
+import { format } from 'date-fns';
+import { statSync } from 'fs';
+import { parse, resolve } from 'path';
 import { csrfMiddleware } from '../csrf.js';
 import orm from '../database.js';
 import { getImageFromMetaTag } from '../gapi/calendar.js';
@@ -31,6 +36,8 @@ import { Piece } from '../models/Piece.js';
 import { Product, ProductTypes } from '../models/Product.js';
 import { User } from '../models/User.js';
 import { crud, setGetListHeaders } from './crud.js';
+import { genThumbnail } from './genThumbnail.js';
+import { genWaveformAndReturnDuration } from './genWaveform.js';
 import { mikroCrud } from './mikroCrud.js';
 import { NotFoundError } from './types.js';
 
@@ -40,7 +47,6 @@ adminRest.use(express.urlencoded({ extended: true }));
 adminRest.post('*', csrfMiddleware);
 
 export const respondWithError = (error: Error, res: express.Response): void => {
-    console.error(error);
     if (error instanceof ValidationError) {
         res.status(400).json({
             error: (error as ValidationError).message,
@@ -132,27 +138,43 @@ adminRest.use(
             };
         },
         search: async ({ q, limit }, _) => {
-            const tokens = q.trim().replaceAll(', ', '|').replaceAll(' ', '&');
-            const calendarResults = await orm.em.findAndCount(
-                Calendar,
-                {
-                    calendarSearchMatview: {
-                        Search: {
-                            $fulltext: tokens,
-                        },
+            const matchArray = q.trim().match(/^id\:(.*)$/i);
+            let where: FilterQuery<Calendar>;
+            if (matchArray?.[1]) {
+                where = {
+                    id: {
+                        $ilike: `%${matchArray[1]}%`,
                     },
-                },
-                {
-                    populate: [
-                        'collaborators',
-                        'collaborators.calendarCollaborators',
-                        'pieces',
-                        'pieces.calendarPieces',
-                    ],
-                    orderBy: [{ dateTime: 'DESC' }],
-                    limit,
-                },
-            );
+                };
+            } else {
+                const ors = q.trim().split(', ');
+                const regexPattern = ors
+                    .map((andGroup) => {
+                        return andGroup
+                            .split(/ +/g)
+                            .map((and) => {
+                                return `(?=.*${and})`;
+                            })
+                            .join('');
+                    })
+                    .join('|');
+                const regExp = new RegExp(regexPattern, 'i');
+                where = {
+                    calendarTrgmMatview: {
+                        doc: regExp,
+                    },
+                };
+            }
+            const calendarResults = await orm.em.findAndCount(Calendar, where, {
+                populate: [
+                    'collaborators',
+                    'collaborators.calendarCollaborators',
+                    'pieces',
+                    'pieces.calendarPieces',
+                ],
+                orderBy: [{ dateTime: 'DESC' }],
+                limit,
+            });
             return {
                 count: calendarResults[1],
                 rows: calendarResults[0].map((cal) => {
@@ -183,15 +205,38 @@ adminRest.use(
     crud('/pieces', {
         ...mikroCrud({ entity: Piece, populate: ['calendars'] }),
         search: async ({ q, limit }) => {
-            const tokens = q.trim().replaceAll(', ', '|').replaceAll(' ', '&');
-            const [rows, count] = await orm.em.findAndCount(
-                Piece,
-                { Search: { $fulltext: tokens } },
-                {
-                    populate: ['calendars'],
-                    limit,
-                },
-            );
+            const matchArray = q.trim().match(/^id\:(.*)$/i);
+            let where: FilterQuery<Piece>;
+            if (matchArray?.[1]) {
+                where = {
+                    id: {
+                        $ilike: `%${matchArray[1]}%`,
+                    },
+                };
+            } else {
+                const ors = q.trim().split(', ');
+                const regexPattern = ors
+                    .map((andGroup) => {
+                        return andGroup
+                            .split(/ +/g)
+                            .map((and) => {
+                                return `(?=.*${and})`;
+                            })
+                            .join('');
+                    })
+                    .join('|');
+
+                where = {
+                    [expr(`immutable_concat_ws(' ', composer, piece)`)]: {
+                        $re: regexPattern,
+                    },
+                };
+            }
+
+            const [rows, count] = await orm.em.findAndCount(Piece, where, {
+                populate: ['calendars'],
+                limit,
+            });
             return {
                 count,
                 rows,
@@ -204,18 +249,45 @@ adminRest.use(
     crud('/collaborators', {
         ...mikroCrud({ entity: Collaborator, populate: ['calendars'] }),
         search: async ({ q, limit }) => {
-            const tokens = q.trim().replaceAll(', ', '|').replaceAll(' ', '&');
-            const results = await orm.em.findAndCount(
+            const matchArray = q.trim().match(/^id\:(.*)$/i);
+            let where: FilterQuery<Collaborator>;
+            if (matchArray?.[1]) {
+                where = {
+                    id: {
+                        $ilike: `%${matchArray[1]}%`,
+                    },
+                };
+            } else {
+                const ors = q.trim().split(', ');
+                const regexPattern = ors
+                    .map((andGroup) => {
+                        return andGroup
+                            .split(/ +/g)
+                            .map((and) => {
+                                return `(?=.*${and})`;
+                            })
+                            .join('');
+                    })
+                    .join('|');
+
+                where = {
+                    [expr(`immutable_concat_ws(' ', "name", instrument)`)]: {
+                        $re: regexPattern,
+                    },
+                };
+            }
+
+            const [rows, count] = await orm.em.findAndCount(
                 Collaborator,
-                { Search: { $fulltext: tokens } },
+                where,
                 {
                     populate: ['calendars'],
                     limit,
                 },
             );
             return {
-                count: results[1],
-                rows: results[0],
+                count,
+                rows,
             };
         },
     }),
@@ -241,7 +313,6 @@ adminRest.use(
     crud('/calendar-collaborators', {
         ...mikroCrud({ entity: CalendarCollaborator }),
         create: async (body) => {
-            console.log(body);
             const createBody = body as CalendarCollaboratorCreate;
             const cal = await orm.em.findOneOrFail(Calendar, {
                 id: createBody.calendarId,
@@ -371,12 +442,77 @@ adminRest.use(
     ),
 );
 
+const musicStorage = multer.diskStorage({
+    destination: resolve(process.env.MUSIC_ASSETS_DIR),
+    filename: (req, file, cb) => {
+        const fileName = req.body.fileName;
+        const exists = statSync(resolve(file.destination, fileName), {
+            throwIfNoEntry: false,
+        });
+        if (exists === undefined) {
+            cb(null, req.body.fileName);
+        } else {
+            cb(Error('File already exists'), '');
+        }
+    },
+});
+
+const photoStorage = multer.diskStorage({
+    destination: resolve(process.env.IMAGE_ASSETS_DIR, 'gallery'),
+    filename: (req, file, cb) => {
+        const fileName = req.body.fileName;
+        const exists = statSync(resolve(file.destination, fileName), {
+            throwIfNoEntry: false,
+        });
+        if (exists === undefined) {
+            cb(null, req.body.fileName);
+        } else {
+            cb(Error('File already exists'), '');
+        }
+    },
+});
+
+const musicFileUpload = multer({ storage: musicStorage });
+
+adminRest.post(
+    '/music-files/upload',
+    musicFileUpload.single('audioFile'),
+    async (req, res) => {
+        try {
+            const duration = await genWaveformAndReturnDuration(
+                req.body.fileName,
+            );
+
+            res.json({ fileName: req.body.fileName, duration });
+        } catch (e) {
+            res.statusMessage = 'Error generating waveform';
+            res.sendStatus(500);
+        }
+    },
+);
+
+const photoUpload = multer({ storage: photoStorage });
+adminRest.post(
+    '/photos/upload',
+    photoUpload.single('photo'),
+    async (req, res) => {
+        try {
+            const imageData = await genThumbnail(req.body.fileName);
+            console.log(imageData);
+            res.json({ fileName: req.body.fileName, ...imageData });
+        } catch (e) {
+            res.statusMessage = 'Error generating thumbnail';
+            res.sendStatus(500);
+        }
+    },
+);
+
 adminRest.use(
     crud(
         '/music-files',
         mikroCrud({
             entity: MusicFile,
-            searchableFields: ['audioFile', 'name', 'waveformFile'],
+            searchableFields: ['audioFile', 'name'],
         }),
     ),
 );
@@ -395,9 +531,98 @@ adminRest.use(
 adminRest.use(crud('/disc-links', mikroCrud({ entity: DiscLink })));
 adminRest.use(crud('/photos', mikroCrud({ entity: Photo })));
 adminRest.use(
-    crud('/users', mikroCrud({ entity: User, populate: ['products'] })),
+    crud(
+        '/users',
+        mikroCrud({
+            entity: User,
+            populate: ['products'],
+            searchableFields: ['username'],
+        }),
+    ),
 );
-adminRest.use(crud('/products', mikroCrud({ entity: Product })));
+
+const productStorage = multer.diskStorage({
+    destination: (_req, file, cb) => {
+        let dest: string;
+        if (file.fieldname === 'pdf') {
+            dest = resolve(process.env.PRODUCTS_DIR);
+        } else {
+            dest = resolve(
+                process.env.IMAGE_ASSETS_DIR,
+                'products',
+                'thumbnails',
+            );
+        }
+        cb(null, dest);
+    },
+    filename: (req, file, cb) => {
+        console.log(req.body);
+        if (file.fieldname === 'pdf') {
+            const { name, ext } = parse(req.body.fileName.replace(/ /g, '_'));
+            const exists = statSync(
+                resolve(process.env.PRODUCTS_DIR, `${name}${ext}`),
+                {
+                    throwIfNoEntry: false,
+                },
+            );
+            if (exists === undefined) {
+                cb(null, `${name}${ext}`);
+            } else {
+                cb(null, `${name}_${format(new Date(), 'yyyyMMdd')}${ext}`);
+            }
+        } else {
+            let fileName = req.body.imageBaseNameWithExt.replace(/ /g, '_');
+            const { name, ext } = parse(fileName);
+            let count = 1;
+            while (
+                statSync(
+                    resolve(
+                        process.env.IMAGE_ASSETS_DIR,
+                        'products',
+                        'thumbnails',
+                        fileName,
+                    ),
+                    {
+                        throwIfNoEntry: false,
+                    },
+                )
+            ) {
+                fileName = `${name}${
+                    count ? `_${count.toString().padStart(2, '0')}` : ''
+                }${ext}`;
+                count++;
+            }
+            cb(null, fileName);
+        }
+    },
+});
+
+const productUpload = multer({ storage: productStorage });
+
+adminRest.post(
+    '/products/upload',
+    productUpload.fields([{ name: 'samples[]' }, { name: 'pdf', maxCount: 1 }]),
+    async (req, res) => {
+        if (Array.isArray(req.files)) {
+            throw Error('unexpected array');
+        } else {
+            res.json({
+                images: req.files?.['samples[]']?.map((f) => f.filename),
+                pdf: req.files?.['pdf']?.[0].filename,
+            });
+        }
+    },
+);
+
+adminRest.use(
+    crud(
+        '/products',
+        mikroCrud({
+            entity: Product,
+            searchableFields: ['name', 'file', 'type'],
+        }),
+    ),
+);
 adminRest.use(crud('/faqs', mikroCrud({ entity: Faq })));
 
 adminRest.post(
@@ -489,9 +714,35 @@ const populateImages = async (entity: Calendar) => {
             }
         }
     } catch (e) {
-        console.log(e);
+        console.log('populate images error');
     }
 };
+
+adminRest.post('/actions/pieces/trim', async (_req, res) => {
+    const [pieces, count] = await orm.em.findAndCount(Piece, {
+        $or: [{ composer: /^ .*/i }, { piece: /^ .*/i }],
+    });
+    for (const p of pieces) {
+        p.composer = p.composer?.trim();
+        p.piece = p.piece?.trim();
+    }
+    await orm.em.flush();
+    setGetListHeaders(res, count, pieces.length);
+    res.json({ count, rows: pieces });
+});
+
+adminRest.post('/actions/collaborators/trim', async (_req, res) => {
+    const [collaborators, count] = await orm.em.findAndCount(Collaborator, {
+        $or: [{ name: /^ .*/i }, { instrument: /^ .*/i }],
+    });
+    for (const p of collaborators) {
+        p.name = p.name?.trim();
+        p.instrument = p.instrument?.trim();
+    }
+    await orm.em.flush();
+    setGetListHeaders(res, count, collaborators.length);
+    res.json({ count, rows: collaborators });
+});
 
 adminRest.post(
     '/actions/calendars/populate-image-fields',

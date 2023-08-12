@@ -91,63 +91,91 @@ ALTER TABLE calendar_collaborator
 
 -- re-create _search columns
 
-ALTER TABLE calendar
-    ADD COLUMN _search TSVECTOR
-        GENERATED ALWAYS AS
-            (to_tsvector('en', COALESCE(name, '') || ' ' || COALESCE(location, '') || ' ' || COALESCE(type, ''))) STORED;
+-- ALTER TABLE calendar
+--     ADD COLUMN _search TSVECTOR
+--         GENERATED ALWAYS AS
+--             (to_tsvector('en', COALESCE(name, '') || ' ' || COALESCE(location, '') || ' ' || COALESCE(type, ''))) STORED;
 
-ALTER TABLE piece
-    ADD COLUMN _search TSVECTOR
-        GENERATED ALWAYS AS
-            (to_tsvector('en', COALESCE(composer, '') || ' ' || COALESCE(piece, ''))) STORED;
+-- ALTER TABLE piece
+--     ADD COLUMN _search TSVECTOR
+--         GENERATED ALWAYS AS
+--             (to_tsvector('en', COALESCE(composer, '') || ' ' || COALESCE(piece, ''))) STORED;
 
-ALTER TABLE collaborator
-    ADD COLUMN _search TSVECTOR
-        GENERATED ALWAYS AS
-            (to_tsvector('en', COALESCE(name, '') || ' ' || COALESCE(instrument, ''))) STORED;
+-- ALTER TABLE collaborator
+--     ADD COLUMN _search TSVECTOR
+--         GENERATED ALWAYS AS
+--             (to_tsvector('en', COALESCE(name, '') || ' ' || COALESCE(instrument, ''))) STORED;
 
 
 -- re-create indexes
 
-CREATE INDEX IF NOT EXISTS calendar_search ON calendar USING GIN (_search);
-CREATE INDEX IF NOT EXISTS collaborator_search ON collaborator USING GIN (_search);
-CREATE INDEX IF NOT EXISTS piece_search ON piece USING GIN (_search);
+-- CREATE INDEX IF NOT EXISTS calendar_search ON calendar USING GIN (_search);
+-- CREATE INDEX IF NOT EXISTS collaborator_search ON collaborator USING GIN (_search);
+-- CREATE INDEX IF NOT EXISTS piece_search ON piece USING GIN (_search);
 
 CREATE INDEX IF NOT EXISTS calendar_time ON calendar (date_time);
 
 -- remake tsvector_agg function
 
-CREATE OR REPLACE AGGREGATE tsvector_agg (tsvector) (
-    SFUNC = tsvector_concat,
-    STYPE = tsvector,
-    INITCOND = ''
-);
+-- CREATE OR REPLACE AGGREGATE tsvector_agg (tsvector) (
+--     SFUNC = tsvector_concat,
+--     STYPE = tsvector,
+--     INITCOND = ''
+-- );
 
 -- Use this to join the tsvectors from related rows for calendar
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS calendar_search_matview AS
-    SELECT cal.id, (coalesce(ccj._search, '') || coalesce(cpj._search, '') || coalesce(cal._search, '')) as _search
+CREATE OR REPLACE FUNCTION immutable_concat_ws(text, VARIADIC text[])
+  RETURNS text
+  LANGUAGE sql IMMUTABLE PARALLEL SAFE AS
+'SELECT array_to_string($2, $1)';
+
+CREATE MATERIALIZED VIEW IF NOT EXISTS calendar_trgm_matview AS
+    SELECT cal.id, (immutable_concat_ws(' ', cal.name, cal.location, cal.type, ccj.doc, cpj.doc)) as doc
         FROM calendar as cal
         LEFT JOIN (
-            SELECT cc.calendar_id as id, tsvector_agg(coll._search) as _search
+            SELECT cc.calendar_id as id, string_agg(immutable_concat_ws(' ', coll.name, coll.instrument), ' ') as doc
             FROM calendar_collaborator as cc
             INNER JOIN collaborator as coll on cc.collaborator_id = coll.id
             GROUP BY 1
         ) ccj USING (id)
         LEFT JOIN (
-            SELECT cp.calendar_id as id, tsvector_agg(p._search) as _search
+            SELECT cp.calendar_id as id, string_agg(immutable_concat_ws(' ', p.composer, p.piece), ' ') as doc
             FROM calendar_piece as cp
             INNER JOIN piece as p on cp.piece_id = p.id
             GROUP BY 1
         ) cpj USING (id)
     WITH DATA;
 
-CREATE UNIQUE INDEX IF NOT EXISTS search_idx ON calendar_search_matview (id);
+CREATE INDEX calendar_trgm_gist_idx ON calendar_trgm_matview USING gist(doc gist_trgm_ops);
+
+CREATE UNIQUE INDEX IF NOT EXISTS on calendar_trgm_matview (id);
+CREATE INDEX IF NOT EXISTS piece_trgm ON piece USING gist(immutable_concat_ws(' ', composer, piece) gist_trgm_ops);
+CREATE INDEX IF NOT EXISTS collaborator_trgm ON collaborator USING gist(immutable_concat_ws(' ', "name", instrument) gist_trgm_ops);
+
+-- CREATE MATERIALIZED VIEW IF NOT EXISTS calendar_search_matview AS
+--     SELECT cal.id, (coalesce(ccj._search, '') || coalesce(cpj._search, '') || coalesce(cal._search, '')) as _search
+--         FROM calendar as cal
+--         LEFT JOIN (
+--             SELECT cc.calendar_id as id, tsvector_agg(coll._search) as _search
+--             FROM calendar_collaborator as cc
+--             INNER JOIN collaborator as coll on cc.collaborator_id = coll.id
+--             GROUP BY 1
+--         ) ccj USING (id)
+--         LEFT JOIN (
+--             SELECT cp.calendar_id as id, tsvector_agg(p._search) as _search
+--             FROM calendar_piece as cp
+--             INNER JOIN piece as p on cp.piece_id = p.id
+--             GROUP BY 1
+--         ) cpj USING (id)
+--     WITH DATA;
+
+-- CREATE UNIQUE INDEX IF NOT EXISTS search_idx ON calendar_search_matview (id);
 
 CREATE OR REPLACE FUNCTION refresh_search_matview() RETURNS trigger
 LANGUAGE plpgsql AS $$
 BEGIN
-    REFRESH MATERIALIZED VIEW CONCURRENTLY calendar_search_matview;
+    REFRESH MATERIALIZED VIEW CONCURRENTLY calendar_trgm_matview;
     RETURN NULL;
 END;
 $$;
@@ -155,17 +183,17 @@ $$;
 -- Triggers for refreshing materialized view
 
 CREATE OR REPLACE TRIGGER cal_refresh AFTER
-    INSERT OR DELETE OR UPDATE OF _search ON calendar
+    INSERT OR DELETE OR UPDATE ON calendar
     FOR EACH STATEMENT
     EXECUTE PROCEDURE refresh_search_matview();
 
 CREATE OR REPLACE TRIGGER piece_refresh AFTER
-    UPDATE OF _search ON piece
+    UPDATE ON piece
     FOR EACH STATEMENT
     EXECUTE PROCEDURE refresh_search_matview();
 
 CREATE OR REPLACE TRIGGER collab_refresh AFTER
-    UPDATE OF _search ON collaborator
+    UPDATE ON collaborator
     FOR EACH STATEMENT
     EXECUTE PROCEDURE refresh_search_matview();
 
@@ -289,8 +317,7 @@ ALTER TABLE music_file
     ALTER COLUMN name TYPE text,
     ALTER COLUMN audio_file TYPE text,
     ALTER COLUMN audio_file SET NOT NULL,
-    ALTER COLUMN waveform_file TYPE text,
-    ALTER COLUMN waveform_file SET NOT NULL,
+    DROP COLUMN IF EXISTS waveform_file
     ALTER COLUMN duration_seconds SET NOT NULL,
     ALTER COLUMN hash TYPE text,
     DROP CONSTRAINT IF EXISTS music_file_music_id_fkey,
@@ -343,6 +370,7 @@ ALTER TABLE product
     ALTER COLUMN file SET NOT NULL,
     ALTER COLUMN sample TYPE text,
     ALTER COLUMN images TYPE text[],
+    ALTER COLUMN images SET DEFAULT '{}',
     ALTER COLUMN "type" TYPE text,
     ALTER COLUMN price_id TYPE text,
     ALTER COLUMN price_id SET NOT NULL,
@@ -412,3 +440,30 @@ DROP EXTENSION IF EXISTS "uuid-ossp";
 -- DROP INDEX IF EXISTS search_idx;
 
 -- DROP MATERIALIZED VIEW IF EXISTS calendar_search_matview;
+
+-- CREATE OR REPLACE FUNCTION immutable_concat_ws(text, VARIADIC text[])
+-- RETURNS text
+-- LANGUAGE internal IMMUTABLE PARALLEL SAFE as
+-- 'text_concat_ws';
+
+-- CREATE MATERIALIZED VIEW IF NOT EXISTS calendar_trgm_matview AS
+--     SELECT cal.id, (immutable_concat_ws(' ', cal.name, cal.location, cal.type, ccj.doc, cpj.doc)) as doc
+--         FROM calendar as cal
+--         LEFT JOIN (
+--             SELECT cc.calendar_id as id, string_agg(immutable_concat_ws(' ', coll.name, coll.instrument), ' ') as doc
+--             FROM calendar_collaborator as cc
+--             INNER JOIN collaborator as coll on cc.collaborator_id = coll.id
+--             GROUP BY 1
+--         ) ccj USING (id)
+--         LEFT JOIN (
+--             SELECT cp.calendar_id as id, string_agg(immutable_concat_ws(' ', p.composer, p.piece), ' ') as doc
+--             FROM calendar_piece as cp
+--             INNER JOIN piece as p on cp.piece_id = p.id
+--             GROUP BY 1
+--         ) cpj USING (id)
+--     WITH DATA;
+
+-- create index calendar_trgm_gist_idx on calendar_trgm_matview using gist(doc gist_trgm_ops);
+
+-- explain analyze with trgms as (select id, term <<-> doc as dist from unnest(Array['lig','moz']) term, calendar_trgm_matview order by dist limit 50)
+-- select trgms.id, exp(sum(ln(trgms.dist))) from trgms group by trgms.id order by exp;

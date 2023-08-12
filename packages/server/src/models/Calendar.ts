@@ -25,9 +25,9 @@ import {
 import { getPhotos } from '../gapi/places.js';
 import { CalendarCollaborator } from './CalendarCollaborator.js';
 import { CalendarPiece } from './CalendarPiece.js';
-import { CalendarSearchMatview } from './CalendarSearchMatview.js';
 import { Collaborator } from './Collaborator.js';
 import { Piece } from './Piece.js';
+import { CalendarTrgmMatview } from './CalendarTrgmMatview.js';
 
 async function beforeCreateHook(args: EventArgs<Calendar>) {
     console.log('[Hook: BeforeCreate] Start');
@@ -220,8 +220,8 @@ export class Calendar {
     })
     collaborators = new Collection<Collaborator>(this);
 
-    @OneToOne({ entity: () => CalendarSearchMatview, joinColumn: 'id' })
-    calendarSearchMatview!: CalendarSearchMatview;
+    @OneToOne({ entity: () => CalendarTrgmMatview, joinColumn: 'id' })
+    calendarTrgmMatview!: CalendarTrgmMatview;
 
     @BeforeCreate()
     async beforeCreate(args: EventArgs<Calendar>) {
@@ -242,4 +242,3 @@ export class Calendar {
         );
     }
 }
-

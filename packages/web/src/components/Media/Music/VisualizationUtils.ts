@@ -70,6 +70,7 @@ interface WaveformHeader {
     sampleRate: number;
     samplesPerPixel: number;
     length: number;
+    channels?: number;
 }
 
 type DataViewDataType = 'int32' | 'uint32' | 'float32';
@@ -95,14 +96,28 @@ const getDatatypeAndReturnOffset = (
     }
 };
 
-export class WaveformLoader {
-    headerStructure: [keyof WaveformHeader, DataViewDataType][] = [
+type HeaderStructure = [keyof WaveformHeader, DataViewDataType][];
+
+const waveformHeaderStructures: HeaderStructure[] = [
+    [
         ['version', 'int32'],
         ['flags', 'uint32'],
         ['sampleRate', 'int32'],
         ['samplesPerPixel', 'int32'],
         ['length', 'uint32'],
-    ];
+    ],
+    [
+        ['version', 'int32'],
+        ['flags', 'uint32'],
+        ['sampleRate', 'int32'],
+        ['samplesPerPixel', 'int32'],
+        ['length', 'uint32'],
+        ['channels', 'int32'],
+    ],
+];
+
+export class WaveformLoader {
+    headerStructure?: HeaderStructure;
     header?: WaveformHeader;
     waveform?: Float32Array;
     angles?: Array<{ x: number; y: number }>;
@@ -124,9 +139,11 @@ export class WaveformLoader {
                 'Content-Type': 'application/octet-stream',
             },
         });
-
         const dataView = new DataView(buffer);
         const header: Partial<WaveformHeader> = {};
+        header.version = dataView.getInt32(0, true);
+        this.headerStructure = waveformHeaderStructures[header.version];
+
         let offset = 0;
 
         // Get Header
@@ -154,6 +171,7 @@ export class WaveformLoader {
         this.header = header as WaveformHeader;
         const length = this.waveform.length / 2;
         this.angles = getCirclePoints(length, Math.PI / length);
+        console.log(length);
     };
 
     loadWaveformFile = (filename: string): void => {

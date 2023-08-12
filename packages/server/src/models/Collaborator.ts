@@ -24,10 +24,6 @@ export class Collaborator {
     @Property({ columnType: 'text', nullable: true })
     instrument?: string;
 
-    @Index({ name: 'collaborator_search' })
-    @Property({ fieldName: '_search', columnType: 'tsvector', nullable: true })
-    Search?: unknown;
-
     @OneToMany({
         entity: () => CalendarCollaborator,
         mappedBy: (cc) => cc.collaborator,

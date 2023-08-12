@@ -1,6 +1,12 @@
 # The official web page of pianist Sean Chen.
 
-This website backend is an [express](http://expressjs.com/) app with a PostgreSQL database. The frontend is built with [react](https://facebook.github.io/react/) and bundled with [webpack](https://webpack.github.io/). Use [yarn](https://yarnpkg.com/en/) or npm for package management. Code is in [typescript](https://www.typescriptlang.org/) and styling is done by [emotion](https://github.com/emotion-js/emotion). Admin of the database is administered by another repo [sycpiano-admin](https://github.com/jasboys/sycpiano-admin).
+This is a monorepo of all the parts that make up sycpiano. Uses [turborepo](https://turbo.build/) for task management.
+This website backend is an [express](http://expressjs.com/) app with a PostgreSQL database. Migration is done by [dbmate](https://github.com/amacneil/dbmate)
+The frontend is built with [react](https://facebook.github.io/react/) and bundled with [webpack](https://webpack.github.io/).
+The admin panel uses [react-admin](https://marmelab.com/react-admin/) and bundled with ... ?
+Development is assisted by [vite](https://vitejs.dev/).
+Use [yarn](https://yarnpkg.com/en/) or npm for package management.
+Code is in [typescript](https://www.typescriptlang.org/) and styling is done in [emotion](https://github.com/emotion-js/emotion).
 
 ## Getting Started
 Make sure at least version 16 of Node.js is installed.
@@ -15,70 +21,48 @@ DB_USER=<username>
 DB_PASS=<password>
 DB_PORT=<database port, needed on prod>
 or
-DB_URL=<database connection url>
+DATABASE_URL=<database connection url> // Make sure to set encoding
 
 PORT=<http port number, needed on prod>
-ADMIN_PORT=<admin port number, needed on prod>
+DEV_HTTPS_PORT=<https port number, optional>
+DEV_HTTPS_CERT_PATH=<Dev to generated cert, optional>
 CORS_ORIGINS=<comma separated list of allowed origins for backend requests>
 COOKIE_SECRET=<for signing session cookies>
+CALLBACK_HOST=<For Stripe callback>
 GAPI_KEY_SERVER=<from google developer console>
 GAPI_KEY_APP=<from google developer console, only for dev to build app>
 STRIPE_SECRET_KEY=<from stripe dashboard>
 STRIPE_PUBLIC_KEY=<from stripe dashboard, only for dev to build app>
 STRIPE_WEBHOOK_KEY=<from stripe dashboard>
 PRODUCTS_DIR=<absolute path to emailable assets>
-SEED_DATA_DIR=<absolute path to seeding data, only for first run of database>
-IMAGE_ASSETS_DIR=<absolute path to image assets folder, only for dev>
-MUSIC_ASSETS_DIR=<absolute path to music assets folder, only for dev>
+IMAGE_ASSETS_DIR=<absolute path to image assets folder>
+MUSIC_ASSETS_DIR=<absolute path to music assets folder>
 SMTP_HOST=<smtp server>
 SMTP_PORT=<465, 587, or 25>
 SMTP_USERNAME=<smtp user>
 SMTP_PASSWORD=<smtp pass>
 DKIM_PRIVATE_KEY=<path to private PEM formatted key, should be at least 1024bit rsa>
+GAPI_PRIVATE_KEY=<private key copied from cloud console>
+GAPI_CLIENT_EMAIL=<email associted with above key>
 ```
 
 ## Development
 
-After you've cloned the repository and have navigated to the project root, run:
+clone, run:
 ```
 $ yarn
 ```
-After installing your node dependencies, you're ready to start dev process.
+Then, run dev.
 ```
 $ yarn dev
-```
-This command will run a node script that starts the server and watches for changes you make to your code, in which case it will trigger a rebuild as well as reload the main app.
-
-If you would like to also lint and check the typescript of the frontend and backend, you can just run on windows:
-```
-$ yarn windowsDev
-```
-or use tmux or any other way to run the following in separate windows/panes:
-```
-$ yarn watchAndCheckApp
-$ yarn watchAndCheckServer
 ```
 
 N.B. on Windows, make sure you add %LocalAppData%\Yarn to your whitelist for antivirus and/or Windows Defender, or else installs take forever!
 
-The app will be served on `localhost:8000` and the webpack-bundle-analyzer (if enabled) will be on `localhost:8888`.
-
 ## Production
-Run the following commands:
+Make sure all deps are up to date. Then:
 ```
-$ yarn
 $ yarn build
-$ yarn bundle
-```
-This bundle can be uploaded to github releases (or scp'd to your server).
-
-Extract.
-
-Move your web/build assets to a publicly served folder.
-
-Run:
-```
-$ yarn run startProd
 ```
 
 Automation on the server can be done by [pm2](http://pm2.keymetrics.io/).

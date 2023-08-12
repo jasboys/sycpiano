@@ -22,12 +22,6 @@ export class Photo {
     @Property({ nullable: true })
     thumbnailHeight?: number;
 
-    @Property({ length: 6, nullable: true })
-    createdAt?: Date;
-
-    @Property({ length: 6, nullable: true })
-    updatedAt?: Date;
-
     @Property({ columnType: 'text', nullable: true })
     credit?: string;
 }

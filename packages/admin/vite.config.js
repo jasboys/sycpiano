@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import * as path from 'path';
-require('dotenv').config({ override: true, path: '../../.env' });
+import dotenv from 'dotenv';
+dotenv.config({ override: true, path: '../../.env' });
 
 export default defineConfig({
     server: {

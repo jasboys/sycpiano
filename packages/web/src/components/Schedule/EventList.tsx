@@ -111,7 +111,7 @@ const ScrollingContainer = styled.div<{ isSearch: boolean }>((props) => ({
         paddingTop: 0,
         marginTop: props.isSearch ? 'calc(80px + 1.2rem)' : 'calc(50px + 2rem)',
         height: props.isSearch
-            ? 'calc(100% ,- (80px + 1.2rem))'
+            ? 'calc(100% - (80px + 1.2rem))'
             : 'calc(100% - (50px + 1.2rem))',
     },
 }));

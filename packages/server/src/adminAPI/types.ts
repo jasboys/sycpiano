@@ -23,12 +23,12 @@ interface GetListParams<R extends object> {
     order: QueryOrderMap<R>[];
 }
 
-interface SearchParams {
+export interface SearchParams {
     limit?: number;
     q: string;
 }
 
-interface RequestResponse {
+export interface RequestResponse {
     req: Request;
     res: Response;
 }

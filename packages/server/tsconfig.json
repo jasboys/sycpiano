@@ -2,19 +2,7 @@
     "compileOnSave": false,
     "compilerOptions": {
         "lib": [
-            "esnext"
-        ],
-        "paths": {
-            "*": [
-                "node_modules/*",
-                "node_modules/@types/*",
-                "@types/*",
-            ],
-            "src/*": ["src/*"],
-        },
-        "typeRoots": [
-            "node_modules/@types",
-            "@types",
+            "esnext",
         ],
         "module": "ESNext",
         "target": "ESNext",
@@ -29,18 +17,16 @@
         "sourceMap": false,
         "skipLibCheck": true,
         "outDir": "build",
-        "baseUrl": ".",
+        "baseUrl": "./src",
+        "rootDir": "./src",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true
     },
     "ts-node": {
         "esm": true
     },
-    "exclude": [
-        "**/node_modules/*",
-        "../@types"
-    ],
     "include": [
         "./src"
     ]

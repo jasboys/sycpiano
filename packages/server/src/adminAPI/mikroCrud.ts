@@ -2,11 +2,12 @@ import {
     EntityClass,
     EntityName,
     FilterQuery,
+    Loaded,
     Populate,
     Primary,
     wrap,
 } from '@mikro-orm/core';
-import orm from 'src/database.js';
+import orm from '../database.js';
 import { CrudActions, NotFoundError, SearchParams } from './types.js';
 
 interface CrudParams<R extends object, K extends keyof R & string> {
@@ -45,26 +46,37 @@ const mapSearchFields =
 
 const mikroSearchFields = <R extends Object, K extends keyof R & string>(
     entity: EntityName<R>,
-    searchableFields: K[],
+    searchableFields?: K[],
     populate?: string[],
 ) => {
-    const mappedFields = mapSearchFields(entity, searchableFields);
+    const mappedFields =
+        searchableFields && mapSearchFields(entity, searchableFields);
     return async ({ q, limit }: SearchParams) => {
-        const tokens = q.trim().replaceAll(', ', '|').replaceAll(' ', '&');
-        const splitTokens = tokens.split('|').map((t) => t.split('&'));
-
-        const where = {
-            $or: splitTokens.map((token) => {
-                return {
-                    $and: token.map((v) => {
-                        return {
-                            $or: mappedFields(v),
-                        };
-                    }),
-                };
-            }),
-        } as FilterQuery<R>;
-
+        const matchArray = q.trim().match(/^id\:(.*)$/i);
+        let where: FilterQuery<R>;
+        if (matchArray?.[1]) {
+            where = {
+                id: {
+                    $ilike: `%${matchArray[1]}%`,
+                },
+            } as unknown as FilterQuery<R>;
+        } else if (!mappedFields) {
+            where = q.trim() as FilterQuery<R>;
+        } else {
+            const tokens = q.trim().replaceAll(', ', '|').replaceAll(' ', '&');
+            const splitTokens = tokens.split('|').map((t) => t.split('&'));
+            where = {
+                $or: splitTokens.map((token) => {
+                    return {
+                        $and: token.map((v) => {
+                            return {
+                                $or: mappedFields(v),
+                            };
+                        }),
+                    };
+                }),
+            } as FilterQuery<R>;
+        }
         const results = await orm.em.findAndCount(entity, where, {
             limit,
             populate: populate as Populate<R>,
@@ -135,8 +147,6 @@ export const mikroCrud = <
             await orm.em.remove(record).flush();
             return { id };
         },
-        search: searchableFields
-            ? mikroSearchFields(entity, searchableFields, populate)
-            : null,
+        search: mikroSearchFields(entity, searchableFields, populate),
     };
 };

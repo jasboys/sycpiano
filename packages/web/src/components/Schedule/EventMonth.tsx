@@ -4,7 +4,7 @@ import { formatInTimeZone } from 'date-fns-tz';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { toMedia } from 'src/MediaQuery.js';
+import { toMedia } from 'src/mediaQuery.js';
 import { BackIconInstance } from 'src/components/Schedule/BackIconSVG.jsx';
 import EventItem from 'src/components/Schedule/EventItem.jsx';
 import {

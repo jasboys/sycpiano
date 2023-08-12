@@ -121,10 +121,9 @@ const config = () => {
         },
         plugins: [
             new webpack.DefinePlugin({
-                BINARY_PATH: JSON.stringify(`${staticPrefix}/binary`),
-                IMAGES_PATH: JSON.stringify(`${staticPrefix}/images`),
-                MUSIC_PATH: JSON.stringify(`${staticPrefix}/music`),
-                VIDEOS_PATH: JSON.stringify(`${staticPrefix}/videos`),
+                BINARY_PATH: JSON.stringify(process.env.DATA_ASSETS_DIR),
+                IMAGES_PATH: JSON.stringify(process.env.IMAGE_ASSETS_DIR),
+                MUSIC_PATH: JSON.stringify(process.env.MUSIC_ASSETS_DIR),
                 GAPI_KEY: JSON.stringify(process.env.GAPI_KEY_APP),
                 STRIPE_PUBLIC_KEY: JSON.stringify(
                     process.env.STRIPE_PUBLIC_KEY,

@@ -4,7 +4,6 @@ dotenv.config({ override: true });
 
 const required = [
     'PORT',
-    'ADMIN_PORT',
     'HOST',
     'GAPI_KEY_SERVER',
     'STRIPE_SECRET_KEY',

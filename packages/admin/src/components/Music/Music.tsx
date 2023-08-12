@@ -14,6 +14,8 @@ import {
     Datagrid,
     Edit,
     EditProps,
+    FileField,
+    FileInput,
     Identifier,
     List,
     ListProps,
@@ -37,7 +39,7 @@ import {
     useRefresh,
     useUpdate,
 } from 'react-admin';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 import { AdminError, MutateForm } from 'src/types.js';
 import { AddReferenceButton, EditReferenceButton, Empty } from '../Shared.jsx';
 
@@ -59,7 +61,11 @@ const MusicPanel: React.FC<{
 }> = () => {
     return (
         <ArrayField source="musicFiles" fieldKey="id" fullWidth>
-            <Datagrid>
+            <Datagrid
+                sx={{ marginBottom: '1rem' }}
+                isRowSelectable={() => false}
+                bulkActionButtons={false}
+            >
                 <TextField source="name" />
                 <TextField source="audioFile" label="audio" />
                 <TextField source="waveformFile" label="waveform" />
@@ -72,7 +78,18 @@ const MusicPanel: React.FC<{
 
 export const MusicList = (props: ListProps) => (
     <List {...props} perPage={25} filters={filters}>
-        <Datagrid rowClick="edit" expand={(props) => <MusicPanel {...props} />}>
+        <Datagrid
+            rowClick="edit"
+            expand={(props) => <MusicPanel {...props} />}
+            sx={{
+                '& .RaDatagrid-expandedPanel': {
+                    'th': {
+                        backgroundColor: '#f8f8f8',
+                    },
+                    backgroundColor: '#f8f8f8',
+                },
+            }}
+        >
             <TextField source="composer" />
             <TextField source="piece" />
             <TextField source="contributors" />
@@ -91,7 +108,7 @@ export const MusicShow = (props: ShowProps) => (
             <TextField source="type" />
             <NumberField source="year" options={{ useGrouping: false }} />
             <ArrayField source="musicFiles" fieldKey="id" fullWidth>
-                <Datagrid>
+                <Datagrid isRowSelectable={() => false} bulkActionButtons={false}>
                     <TextField source="name" />
                     <TextField source="audioFile" label="audio" />
                     <TextField source="waveformFile" label="waveform" />
@@ -204,6 +221,7 @@ export const EditMusicFile: MutateForm = ({ setShowDialog, onRefresh }) => {
                     source="durationSeconds"
                     defaultValue={record.durationSeconds}
                     fullWidth
+                    disabled
                 />
             </DialogContent>
             <DialogActions>
@@ -228,6 +246,7 @@ export const AddMusicFile: React.FC<{
     setShowDialog: (t: boolean) => void;
 }> = ({ setShowDialog }) => {
     const record = useRecordContext();
+    const upload = useWatch({ name: 'audioFileBlob' });
     const [create, { isLoading }] = useCreate<
         RaRecord<Identifier>,
         AdminError
@@ -267,9 +286,13 @@ export const AddMusicFile: React.FC<{
                     disabled
                 />
                 <TextInput source="name" fullWidth />
-                <TextInput source="audioFile" fullWidth />
-                <TextInput source="waveformFile" fullWidth />
-                <NumberInput source="durationSeconds" fullWidth />
+                <TextInput source="audioFile" defaultValue={upload?.title} fullWidth />
+                <FileInput
+                    accept="audio/*"
+                    source="audioFileBlob"
+                >
+                    <FileField source="src" title="title" />
+                </FileInput>
             </DialogContent>
             <DialogActions>
                 <Button

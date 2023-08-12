@@ -28,7 +28,7 @@
         "watchServer": "cd server && cross-env NODE_ENV=development swc src -d build -w",
         "windowsDev": "powershell contrib/dev.ps1",
         "bundle": "run-script-os",
-        "migrate": "npx dbmate -d ./server/migrations",
+        "migrate": "dbmate -d ./packages/server/migrations -s ./schema.sql",
         "bundle:win32": "del sycpiano.zip && git archive --format=zip --output ./sycpiano.zip main && 7z a -r sycpiano.zip web/build server/build",
         "bundle:linux": "rm sycpiano.zip && git archive --format=zip --output ./sycpiano.zip main && zip -r sycpiano.zip web/build server/build"
     },

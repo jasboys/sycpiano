@@ -7,11 +7,13 @@ import {
     Typography,
 } from '@mui/material';
 import React from 'react';
-import { Button, Form } from 'react-admin';
+import { Button, Form, useNotify, useRefresh } from 'react-admin';
+import { useMutation } from 'react-query';
+import { useAppDataProvider } from 'src/providers/restProvider.js';
 import { MutateForm } from 'src/types.js';
 
 export const Empty = ({ assoc }: { assoc: string }) => (
-    <Typography>No associated {assoc} found.</Typography>
+    <Typography sx={{ marginBottom: '1rem' }}>No associated {assoc} found.</Typography>
 );
 
 export const EditReferenceButton: React.FC<{
@@ -75,5 +77,34 @@ export const AddReferenceButton: React.FC<{
                 </Form>
             </Dialog>
         </>
+    );
+};
+
+export const TrimButton = ({
+    resource
+}: { resource: string }) => {
+    const notify = useNotify();
+    const refresh = useRefresh();
+    const dataProvider = useAppDataProvider();
+    const { mutate, isLoading } = useMutation(
+        () =>
+            dataProvider.trim(
+                resource,
+                {},
+            ),
+        {
+            onSuccess: () => {
+                refresh();
+                notify(`Trimming of ${resource} fields succeeded.`);
+            },
+            onError: (error) => notify(`Error: ${error}`, { type: 'warning' }),
+        },
+    );
+    return (
+        <Button
+            label={`Trim ${resource} fields`}
+            onClick={() => mutate()}
+            disabled={isLoading}
+        />
     );
 };

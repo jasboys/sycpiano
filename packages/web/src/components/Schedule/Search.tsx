@@ -32,8 +32,8 @@ type SearchProps = {
 
 const ResultsContainer = styled.div(latoFont(200), {
     width: 'fit-content',
-    maxWidth: '25rem',
-    height: 80,
+    maxWidth: 'calc(min(90%, 25rem) - 100px)',
+    height: 'fit-content',
     right: 48,
     position: 'fixed',
     padding: '0.2rem 1rem',
@@ -47,10 +47,13 @@ const ResultsContainer = styled.div(latoFont(200), {
     border: `1px solid ${lightBlue}`,
     color: logoBlue,
     boxShadow: '0 1px 5px -2px rgba(0 0 0 / 0.4)',
+    flexDirection: 'column',
     [toMedia([screenXS, screenPortrait])]: {
         left: 0,
+        maxWidth: 'calc(min(90%, 25rem) - 50px)',
         margin: '0.8rem auto 0',
         borderRadius: 2,
+        right: 0,
     },
 });
 
@@ -364,7 +367,19 @@ export const Search: React.FC<SearchProps> = () => {
             </Container>
             {!!match && !isFetching && (
                 <ResultsContainer>
-                    {`${itemsLength} results for "${lastQuery}"`}
+                    <div
+                        css={{ height: 50, width: '100%', flex: '0 0 50px' }}
+                    />
+                    <div
+                        css={{
+                            textAlign: 'right',
+                            height: '1.2rem',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            width: '100%',
+                        }}
+                    >{`${itemsLength} results for "${lastQuery}"`}</div>
                 </ResultsContainer>
             )}
         </form>

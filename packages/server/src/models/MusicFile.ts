@@ -7,6 +7,7 @@ import {
     Property,
 } from '@mikro-orm/core';
 import { Music } from './Music.js';
+import { parse } from 'path';
 
 @Entity()
 export class MusicFile {
@@ -21,8 +22,10 @@ export class MusicFile {
     @Property({ columnType: 'text' })
     audioFile!: string;
 
-    @Property({ columnType: 'text' })
-    waveformFile!: string;
+    @Property({ persist: false })
+    get waveformFile() {
+        return `${parse(this.audioFile).name}.dat`;
+    }
 
     @Property()
     durationSeconds!: number;

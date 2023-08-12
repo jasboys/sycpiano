@@ -5,11 +5,13 @@ import {
     Identifier,
     RaRecord,
     useDataProvider,
+    withLifecycleCallbacks,
 } from 'react-admin';
 import axios from 'axios';
 import { formatInTimeZone } from 'date-fns-tz';
 import { omit } from 'lodash-es';
 import { toUTC } from '../utils';
+import { ADMIN_URI } from 'src/uris.js';
 
 const ingestArrayTransformer = <RecordType extends RaRecord = RaRecord>(
     resource: string,
@@ -284,6 +286,30 @@ const provider = (apiUrl: string): AdminProvider => {
                 total: parseInt(headers['x-total-count'], 10),
             };
         },
+
+        trim: async (resource: string) => {
+            if (resource !== 'pieces' && resource !== 'collaborators') {
+                return Promise.reject(
+                    'Trim only applies to pieces or collaborators.',
+                );
+            }
+            const { data, headers } = await axiosInstance.post(
+                `/actions/${resource}/trim`,
+                {},
+                {
+                    headers: {
+                        'X-CSRF-TOKEN': 'admin',
+                    },
+                },
+            );
+            if (!headers?.['x-total-count']) {
+                throw new TotalCountError();
+            }
+            return {
+                data: ingestArrayTransformer(resource, data),
+                total: parseInt(headers['x-total-count'], 10),
+            };
+        },
     };
 };
 
@@ -297,8 +323,187 @@ export interface AdminProvider<ResourceType extends string = string>
         resource: string,
         params: { ids?: Identifier[] },
     ) => Promise<GetListResult<RecordType>>;
+    trim: <RecordType extends RaRecord>(
+        resource: string,
+        params: {},
+    ) => Promise<GetListResult<RecordType>>;
 }
 
-export const useAppDataProvider: () => AdminProvider = useDataProvider;
+export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
+    provider(ADMIN_URI),
+    [
+        {
+            resource: 'collaborators',
+            beforeUpdate: async (params) => {
+                const { calendars, ...restData } = params.data;
+                return {
+                    ...params,
+                    data: restData,
+                };
+            },
+        },
+        {
+            resource: 'pieces',
+            beforeUpdate: async (params) => {
+                const { calendars, ...restData } = params.data;
+                return {
+                    ...params,
+                    data: restData,
+                };
+            },
+        },
+        {
+            resource: 'calendars',
+            beforeUpdate: async (params) => {
+                const { calendarTrgmMatview, ...restData } = params.data;
+                return {
+                    ...params,
+                    data: restData,
+                };
+            },
+        },
+        {
+            resource: 'discs',
+            beforeUpdate: async (params) => {
+                const { discLinks, ...restData } = params.data;
+                return {
+                    ...params,
+                    data: restData,
+                };
+            },
+        },
+        {
+            resource: 'musics',
+            beforeUpdate: async (params) => {
+                const { musicFiles, ...restData } = params.data;
+                return {
+                    ...params,
+                    data: restData,
+                };
+            },
+        },
+        {
+            resource: 'music-files',
+            beforeCreate: async ({ data, ...rest }, _dataProvider) => {
+                console.log(data);
+                const { audioFileBlob } = data;
+                const audioFile: File = audioFileBlob.rawFile;
+                const { data: uploaded } = await axios.postForm<{
+                    fileName: string;
+                    duration: number;
+                }>(
+                    `${ADMIN_URI}/music-files/upload`,
+                    {
+                        fileName: data.audioFile,
+                        audioFile,
+                    },
+                    {
+                        headers: {
+                            'X-CSRF-TOKEN': 'admin',
+                        },
+                    },
+                );
+                return {
+                    ...rest,
+                    data: {
+                        audioFile: uploaded.fileName,
+                        name: data.name,
+                        music: data.music,
+                        durationSeconds: uploaded.duration,
+                    },
+                };
+            },
+        },
+        {
+            resource: 'photos',
+            beforeCreate: async ({ data, ...rest }, _dataProvider) => {
+                console.log(data);
+                const { photoBlob } = data;
+                const photo: File = photoBlob.rawFile;
+                const { data: uploaded } = await axios.postForm<{
+                    fileName: string;
+                    original: { width: number; height: number };
+                    thumbnail: { width: number; height: number };
+                }>(
+                    `${ADMIN_URI}/photos/upload`,
+                    {
+                        fileName: data.file,
+                        photo,
+                    },
+                    {
+                        headers: {
+                            'X-CSRF-TOKEN': 'admin',
+                        },
+                    },
+                );
+                return {
+                    ...rest,
+                    data: {
+                        file: uploaded.fileName,
+                        width: uploaded.original.width,
+                        height: uploaded.original.height,
+                        thumbnailWidth: uploaded.thumbnail.width,
+                        thumbnailHeight: uploaded.thumbnail.height,
+                        credit: data.credit,
+                    },
+                };
+            },
+        },
+        {
+            resource: 'products',
+            beforeUpdate: async ({ data, ...restParams }, dataProvider) => {
+                console.log(data);
+                const {
+                    newImages,
+                    pdf,
+                    fileName,
+                    imageBaseNameWithExt,
+                    images,
+                    ...restData
+                } = data;
+                if (!pdf && !newImages) {
+                    return {
+                        ...restParams,
+                        data: {
+                            ...restData,
+                            images,
+                        },
+                    };
+                }
+                const pdfRaw: File | undefined = pdf?.rawFile;
+                const sampleRaws: File[] | undefined = newImages?.map(
+                    (img: { rawFile: File }) => img.rawFile,
+                );
+                const { data: uploaded } = await axios.postForm<{
+                    images?: string[];
+                    pdf?: string;
+                }>(
+                    `${ADMIN_URI}/products/upload`,
+                    {
+                        fileName,
+                        imageBaseNameWithExt,
+                        pdf: pdfRaw,
+                        samples: sampleRaws,
+                    },
+                    {
+                        headers: {
+                            'X-CSRF-TOKEN': 'admin',
+                        },
+                    },
+                );
+                const mergedImages = [...images, ...(uploaded?.images ?? [])];
+                const file = uploaded?.pdf ?? data.file;
+                return {
+                    ...restParams,
+                    data: {
+                        ...restData,
+                        images: mergedImages,
+                        file,
+                    },
+                };
+            },
+        },
+    ],
+);
 
-export default provider;
+export const useAppDataProvider: () => AdminProvider = useDataProvider;

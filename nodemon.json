@@ -3,8 +3,8 @@
         "js": "yarn node"
     },
     "watch": [
-        "web/build/",
-        "server/build/"
+        "packages/web/build/",
+        "packages/server/build/"
     ],
     "env": {
         "NODE_ENV": "development"

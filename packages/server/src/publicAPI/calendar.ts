@@ -89,18 +89,29 @@ calendarRouter.get(
             return;
         }
 
-        console.log(str);
-        const tokens = str.replaceAll(', ', '|').replaceAll(/ +/g, '&');
-        const splitTokens = tokens.split('|').map((t) => t.split('&'));
-        console.log(tokens);
-        console.log(splitTokens);
+        const ors = str.split(', ');
+        const regexPattern = ors
+            .map((andGroup) => {
+                return andGroup
+                    .split(/ +/g)
+                    .map((and) => {
+                        return `(?=.*${and})`;
+                    })
+                    .join('');
+            })
+            .join('|');
 
         const calendarResults = await orm.em.find(
             Calendar,
             {
-                calendarSearchMatview: {
-                    Search: {
-                        $fulltext: tokens,
+                // calendarSearchMatview: {
+                //     Search: {
+                //         $fulltext: tokens,
+                //     },
+                // },
+                calendarTrgmMatview: {
+                    doc: {
+                        $re: regexPattern,
                     },
                 },
             },

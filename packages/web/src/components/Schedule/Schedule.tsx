@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 import * as React from 'react';
 import { SwitchTransition, Transition } from 'react-transition-group';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import { BackIconSVG } from 'src/components/Schedule/BackIconSVG';
 import EventList from 'src/components/Schedule/EventList';
 import { LocationIconSVG } from 'src/components/Schedule/LocationIconSVG';

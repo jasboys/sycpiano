@@ -15,7 +15,7 @@ const hamburgerLayerStyles = (backgroundColor: string) =>
         display: 'block',
         position: 'absolute',
         height: hamburgerLayerHeight,
-        widht: '100%',
+        width: '100%',
         backgroundColor: backgroundColor,
         borderRadius: hamburgerLayerBorderRadius,
         opacity: 1,

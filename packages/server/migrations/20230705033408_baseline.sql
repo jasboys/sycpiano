@@ -103,10 +103,10 @@ CREATE EXTENSION IF NOT EXISTS unaccent;
 
 DO $$
     BEGIN
-        CREATE TEXT SEARCH CONFIGURATION en ( COPY = english );
+        CREATE TEXT SEARCH CONFIGURATION en ( COPY = simple );
         ALTER TEXT SEARCH CONFIGURATION en
             ALTER MAPPING FOR hword, hword_part, word
-            WITH unaccent, english_stem;
+            WITH unaccent;
     EXCEPTION
         WHEN unique_violation THEN
             NULL;

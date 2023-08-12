@@ -50,11 +50,15 @@ const DiscPanel: React.FC<{
 }> = () => {
     return (
         <ArrayField source="discLinks" fieldKey="id" fullWidth>
-            <Datagrid>
-                <TextField source="type" label="" />
+            <Datagrid
+                isRowSelectable={() => false}
+                bulkActionButtons={false}
+                sx={{ marginBottom: '1rem' }}
+            >
+                <TextField source="type" label="Distributor" />
                 <UrlField
                     source="url"
-                    label=""
+                    label="Url"
                     target="_blank"
                     rel="noopener noreferrer"
                 />
@@ -67,7 +71,18 @@ const filters = [<SearchInput key="search" source="q" alwaysOn />];
 
 export const DiscList = (props: ListProps) => (
     <List {...props} perPage={25} filters={filters}>
-        <Datagrid rowClick="edit" expand={(props) => <DiscPanel {...props} />}>
+        <Datagrid
+            rowClick="edit"
+            expand={(props) => <DiscPanel {...props} />}
+            sx={{
+                '& .RaDatagrid-expandedPanel': {
+                    th: {
+                        backgroundColor: '#f8f8f8',
+                    },
+                    backgroundColor: '#f8f8f8',
+                },
+            }}
+        >
             <TextField source="title" />
             <TextField source="description" />
             <TextField source="label" />
@@ -84,8 +99,12 @@ const ThumbnailField = (props: UseRecordContextParams) => {
     const { source } = props;
     const record = useRecordContext(props);
     return (
-        <div style={{ height: 200, width: 200, position: 'relative' }}>
-            <img src={`${DISC_THUMB_URI}/${record[source]}`} alt="thumbnail" />
+        <div css={{ height: 200, width: 200, position: 'relative' }}>
+            <img
+                css={{ height: '100%', width: '100%', objectFit: 'fill' }}
+                src={`${DISC_THUMB_URI}/${record[source]}`}
+                alt="thumbnail"
+            />
         </div>
     );
 };
@@ -105,10 +124,10 @@ export const DiscShow = (props: ShowProps) => (
             <ThumbnailField source="thumbnailFile" />
             <ArrayField source="discLinks" fieldKey="id" fullWidth>
                 <Datagrid>
-                    <TextField source="type" label="" />
+                    <TextField source="type" label="Distributor" />
                     <UrlField
                         source="url"
-                        label=""
+                        label="Url"
                         target="_blank"
                         rel="noopener noreferrer"
                     />
@@ -321,10 +340,10 @@ export const DiscEdit = (props: EditProps) => {
                                 paddingRight: '1rem',
                             },
                         }}>
-                        <TextField source="type" label="" />
+                        <TextField source="type" label="Distributor" />
                         <UrlField
                             source="url"
-                            label=""
+                            label="Url"
                             target="_blank"
                             rel="noopener noreferrer"
                         />

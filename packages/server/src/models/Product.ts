@@ -46,12 +46,6 @@ export class Product {
     @Property({ columnType: 'text' })
     priceId!: string;
 
-    @Property({ length: 6, nullable: true })
-    createdAt?: Date;
-
-    @Property({ length: 6, nullable: true })
-    updatedAt?: Date;
-
     @Property({ columnType: 'text', nullable: true })
     permalink?: string;
 

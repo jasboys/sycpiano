@@ -24,10 +24,6 @@ export class Piece {
     @Property({ columnType: 'text', nullable: true })
     composer?: string;
 
-    @Index({ name: 'piece_search' })
-    @Property({ fieldName: '_search', columnType: 'tsvector', nullable: true })
-    Search?: unknown;
-
     @OneToMany({ entity: () => CalendarPiece, mappedBy: (cp) => cp.piece })
     calendarPieces = new Collection<CalendarPiece>(this);
 

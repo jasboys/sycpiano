@@ -13,12 +13,6 @@ export class Faq {
     @Property({ columnType: 'text', nullable: true })
     answer?: string;
 
-    @Property({ length: 6, nullable: true })
-    createdAt?: Date;
-
-    @Property({ length: 6, nullable: true })
-    updatedAt?: Date;
-
     @Property({ nullable: true })
     order?: number;
 }

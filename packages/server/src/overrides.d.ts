@@ -1,11 +1,11 @@
 declare namespace Express {
-    export interface Request {
+    interface Request {
         role: typeof UserRoles[number];
     }
 }
 
 declare namespace NodeJS {
-    export interface ProcessEnv {
+    interface ProcessEnv {
         NODE_ENV: string;
         SMTP_PORT: string;
         SMTP_HOST: string;
@@ -13,6 +13,7 @@ declare namespace NodeJS {
         SMTP_PASSWORD: string;
         DKIM_PRIVATE_KEY_FILE: string;
         IMAGE_ASSETS_DIR: string;
+        MUSIC_ASSETS_DIR: string;
         PRODUCTS_DIR: string;
         DATABASE_URL: string;
         DB_USER: string;

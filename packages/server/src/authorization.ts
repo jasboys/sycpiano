@@ -137,7 +137,7 @@ authRouter.post('/login', async (req, res) => {
     try {
         // We will check for email validation on front-end as well
         // But just in case someone sends a POST not from front-end
-        if (!username || !password || !validator.default.isEmail(username)) {
+        if (!username || !password) {
             throw new Error('no user or pass');
         }
 

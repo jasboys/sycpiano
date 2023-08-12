@@ -13,12 +13,6 @@ export class User {
     @PrimaryKey({ columnType: 'text' })
     id!: string;
 
-    @Property({ length: 6, nullable: true })
-    createdAt?: Date;
-
-    @Property({ length: 6, nullable: true })
-    updatedAt?: Date;
-
     @Property({ columnType: 'text', nullable: true })
     username?: string;
 

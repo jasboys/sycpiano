@@ -1,14 +1,15 @@
 import { Box } from '@mui/material';
 import { formatInTimeZone } from 'date-fns-tz';
-import * as React from 'react';
 import {
     ArrayField,
     Create,
+    CreateButton,
     CreateProps,
     Datagrid,
     DateField,
     Edit,
     EditProps,
+    FilterButton,
     FunctionField,
     List,
     ListProps,
@@ -22,9 +23,19 @@ import {
     TabbedShowLayout,
     TextField,
     TextInput,
+    TopToolbar,
 } from 'react-admin';
+import { TrimButton } from '../Shared.jsx';
 
 const filters = [<SearchInput key="search" source="q" alwaysOn />];
+
+const ListActions = () => (
+    <TopToolbar>
+        <FilterButton />
+        <CreateButton />
+        <TrimButton resource="pieces" />
+    </TopToolbar>
+);
 
 export const PieceCreate = (props: CreateProps) => (
     <Create {...props}>
@@ -41,7 +52,7 @@ const ExpandPanel = () => {
             <ArrayField source="calendars">
                 <Datagrid
                     rowClick={(_, __, record) =>
-                        `/calendar-pieces/${record.calendarPiece.id}`
+                        `/calendars/${record.id}/pieces`
                     }
                 >
                     <TextField source="name" />
@@ -69,6 +80,7 @@ export const PieceList = (props: ListProps) => {
             perPage={25}
             filters={filters}
             sort={{ field: 'composer,piece', order: 'ASC,ASC' }}
+            actions={<ListActions />}
         >
             <Datagrid rowClick="edit" expand={<ExpandPanel />}>
                 <TextField source="id" />

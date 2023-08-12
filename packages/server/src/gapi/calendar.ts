@@ -16,7 +16,7 @@ const calendarId =
     process.env.NODE_ENV === 'production' && process.env.SERVER_ENV !== 'test'
         ? 'qdoiu1uovuc05c4egu65vs9uck@group.calendar.google.com'
         : 'c7dolt217rdb9atggl25h4fspg@group.calendar.google.com';
-const uriEncCalId = encodeURIComponent(calendarId);
+const uriEncCalId = calendarId;
 
 export const getCalendarSingleEvent = async (
     em: EntityManager,
@@ -102,7 +102,7 @@ export const createCalendarEvent = async (
             ? { date: format(startDatetime, 'yyyy-MM-dd') }
             : { dateTime: startDatetime.toISOString(), timeZone },
         end: endDate
-            ? { date: endDate }
+            ? { date: format(endDate, 'yyyy-MM-dd') }
             : allDay
             ? { date: format(add(startDatetime, { days: 1 }), 'yyyy-MM-dd') }
             : {
@@ -130,29 +130,40 @@ export const updateCalendar = async (
         endDate,
     }: GoogleCalendarParams,
 ): Promise<AxiosResponse<unknown>> => {
-    const token = await getToken(em);
-    const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events/${id}`;
-    const eventResource = {
-        summary,
-        description,
-        location,
-        start: allDay
-            ? { date: format(startDatetime, 'yyyy-MM-dd') }
-            : { dateTime: startDatetime.toISOString(), timeZone },
-        end: endDate
-            ? { date: endDate }
-            : allDay
-            ? { date: format(add(startDatetime, { days: 1 }), 'yyyy-MM-dd') }
-            : {
-                  dateTime: add(startDatetime, { hours: 2 }).toISOString(),
-                  timeZone,
-              },
-    };
-    return axios.put(url, eventResource, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
+    try {
+        console.log('here we are');
+        const token = await getToken(em);
+        const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events/${id}`;
+        const eventResource = {
+            summary,
+            description,
+            location,
+            start: allDay
+                ? { date: format(startDatetime, 'yyyy-MM-dd') }
+                : { dateTime: startDatetime.toISOString(), timeZone },
+            end: endDate
+                ? { date: format(endDate, 'yyyy-MM-dd') }
+                : allDay
+                ? {
+                      date: format(
+                          add(startDatetime, { days: 1 }),
+                          'yyyy-MM-dd',
+                      ),
+                  }
+                : {
+                      dateTime: add(startDatetime, { hours: 2 }).toISOString(),
+                      timeZone,
+                  },
+        };
+        return axios.put(url, eventResource, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+    } catch (e) {
+        console.log('error writing to google calendar');
+        return Promise.reject();
+    }
 };
 
 export const extractEventDescription = (
