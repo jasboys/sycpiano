@@ -1,7 +1,7 @@
 import { css } from '@emotion/react';
 import * as React from 'react';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import AcclaimsList from 'src/components/About/Press/AcclaimsList';
 import { fetchAcclaims } from 'src/components/About/Press/reducers';
 import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';

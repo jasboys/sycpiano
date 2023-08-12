@@ -2,7 +2,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { startCase } from 'lodash-es';
 
-import { toMedia } from 'src/MediaQuery.js';
+import { toMedia } from 'src/mediaQuery.js';
 import { screenXS } from 'src/screens.js';
 import { latoFont } from 'src/styles/fonts.js';
 import { Collaborator } from '../types.js';

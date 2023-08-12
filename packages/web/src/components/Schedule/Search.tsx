@@ -12,7 +12,7 @@ import {
 import { Transition } from 'react-transition-group';
 import { createSelector } from 'reselect';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import { SearchIconInstance } from 'src/components/Schedule/SearchIconSVG';
 import { screenPortrait, screenXS, screenXSandPortrait } from 'src/screens';
 import { lightBlue, logoBlue } from 'src/styles/colors';

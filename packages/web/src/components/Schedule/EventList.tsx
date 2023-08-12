@@ -20,7 +20,7 @@ import {
     FetchEventsArguments
 } from 'src/components/Schedule/types';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenXS, screenXSandPortrait } from 'src/screens';
 import { GlobalStateShape } from 'src/store';
 import { lightBlue, logoBlue } from 'src/styles/colors';

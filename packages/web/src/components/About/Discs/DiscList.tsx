@@ -1,7 +1,7 @@
 import { css } from '@emotion/react';
 import * as React from 'react';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import DiscListItem from 'src/components/About/Discs/DiscListItem';
 import { mqSelectors } from 'src/components/App/reducers';
 import { useAppSelector } from 'src/hooks';

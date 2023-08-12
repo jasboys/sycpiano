@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import * as React from 'react';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import NavBarLink from 'src/components/App/NavBar/NavBarLink';
 import { links } from 'src/components/App/NavBar/links';
 import { LinkShape, NavBarLinksProps } from 'src/components/App/NavBar/types';

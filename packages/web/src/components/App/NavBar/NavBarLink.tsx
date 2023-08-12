@@ -6,7 +6,7 @@ import * as React from 'react';
 import { Link, LinkProps } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import SubNav from 'src/components/App/NavBar/SubNav/SubNav';
 import { showSubNav, toggleExpanded } from 'src/components/App/NavBar/reducers';
 import { LinkShape } from 'src/components/App/NavBar/types';

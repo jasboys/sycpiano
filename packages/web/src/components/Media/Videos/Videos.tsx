@@ -16,7 +16,7 @@ import {
 } from 'src/components/Media/Videos/reducers';
 import VideoPlaylist from 'src/components/Media/Videos/VideoPlaylist';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import { minRes, screenXS, webkitMinDPR } from 'src/screens';
 import youTube from 'src/services/YouTube';
 import { pushed } from 'src/styles/mixins';

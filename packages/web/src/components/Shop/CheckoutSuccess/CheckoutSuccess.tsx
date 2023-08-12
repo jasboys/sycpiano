@@ -3,7 +3,7 @@ import axios from 'axios';
 import * as React from 'react';
 import { useSearchParams } from 'react-router-dom';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import { clearCart } from 'src/components/Cart/reducers';
 import { useAppDispatch } from 'src/hooks';
 import { screenPortrait, screenXS } from 'src/screens';

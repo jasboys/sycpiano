@@ -4,7 +4,7 @@ import { gsap } from 'gsap';
 import * as React from 'react';
 import { createStructuredSelector } from 'reselect';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import PortfolioButton from 'src/components/About/Bio/PortfolioButton';
 import { fetchBio } from 'src/components/About/Bio/reducers';
 import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';

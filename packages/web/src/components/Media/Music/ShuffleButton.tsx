@@ -2,7 +2,7 @@ import { css, Interpolation, Theme } from '@emotion/react';
 import * as React from 'react';
 
 import { useAppSelector } from 'src/hooks';
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import { screenM, screenPortrait, screenXS } from 'src/screens';
 import { lightBlue } from 'src/styles/colors';
 import { playlistWidth } from 'src/styles/variables';

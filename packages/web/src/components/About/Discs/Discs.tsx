@@ -1,7 +1,7 @@
 import { css } from '@emotion/react';
 import * as React from 'react';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import DiscList from 'src/components/About/Discs/DiscList';
 import { fetchDiscs } from 'src/components/About/Discs/reducers';
 import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
