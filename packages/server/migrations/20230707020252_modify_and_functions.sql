@@ -149,7 +149,7 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS calendar_trgm_matview AS
 
 CREATE INDEX calendar_trgm_gist_idx ON calendar_trgm_matview USING gist(doc gist_trgm_ops);
 
-CREATE UNIQUE INDEX IF NOT EXISTS on calendar_trgm_matview (id);
+CREATE UNIQUE INDEX IF NOT EXISTS calendar_trgm_id on calendar_trgm_matview (id);
 CREATE INDEX IF NOT EXISTS piece_trgm ON piece USING gist(immutable_concat_ws(' ', composer, piece) gist_trgm_ops);
 CREATE INDEX IF NOT EXISTS collaborator_trgm ON collaborator USING gist(immutable_concat_ws(' ', "name", instrument) gist_trgm_ops);
 
@@ -317,7 +317,7 @@ ALTER TABLE music_file
     ALTER COLUMN name TYPE text,
     ALTER COLUMN audio_file TYPE text,
     ALTER COLUMN audio_file SET NOT NULL,
-    DROP COLUMN IF EXISTS waveform_file
+    DROP COLUMN IF EXISTS waveform_file,
     ALTER COLUMN duration_seconds SET NOT NULL,
     ALTER COLUMN hash TYPE text,
     DROP CONSTRAINT IF EXISTS music_file_music_id_fkey,

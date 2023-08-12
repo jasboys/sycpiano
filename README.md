@@ -21,18 +21,18 @@ DB_USER=<username>
 DB_PASS=<password>
 DB_PORT=<database port, needed on prod>
 or
-DATABASE_URL=<database connection url> // Make sure to set encoding
+DATABASE_URL=<database connection url>
 
 PORT=<http port number, needed on prod>
 DEV_HTTPS_PORT=<https port number, optional>
 DEV_HTTPS_CERT_PATH=<Dev to generated cert, optional>
-CORS_ORIGINS=<comma separated list of allowed origins for backend requests>
-COOKIE_SECRET=<for signing session cookies>
-CALLBACK_HOST=<For Stripe callback>
+CORS_ORIGINS=<comma separated list of allowed origins for backend requests, optional>
+COOKIE_SECRET=<for signing session cookies, randomly generated (use openssl or something)>
+CALLBACK_HOST=<For Stripe callback/admin URI>
 GAPI_KEY_SERVER=<from google developer console>
-GAPI_KEY_APP=<from google developer console, only for dev to build app>
+GAPI_KEY_APP=<from google developer console, only needed to build app>
 STRIPE_SECRET_KEY=<from stripe dashboard>
-STRIPE_PUBLIC_KEY=<from stripe dashboard, only for dev to build app>
+STRIPE_PUBLIC_KEY=<from stripe dashboard, only needed to build app>
 STRIPE_WEBHOOK_KEY=<from stripe dashboard>
 PRODUCTS_DIR=<absolute path to emailable assets>
 IMAGE_ASSETS_DIR=<absolute path to image assets folder>
@@ -42,8 +42,8 @@ SMTP_PORT=<465, 587, or 25>
 SMTP_USERNAME=<smtp user>
 SMTP_PASSWORD=<smtp pass>
 DKIM_PRIVATE_KEY=<path to private PEM formatted key, should be at least 1024bit rsa>
-GAPI_PRIVATE_KEY=<private key copied from cloud console>
-GAPI_CLIENT_EMAIL=<email associted with above key>
+GAPI_PRIVATE_KEY=<service account private key generated from google api console, copied from gapi-key.json>
+GAPI_CLIENT_EMAIL=<service account email associted with above key>
 ```
 
 ## Development
@@ -75,53 +75,24 @@ Here are the steps for seeding the database:
 ```bash
 $ psql -U <username>
 ```
-* In the psql shell, create a new database called `sycpiano`
-```psql
-postgres=# create database sycpiano;
-# This should also automatically switch to using the new database, but whatever.
-postgres=# \connect sycpiano;
-```
 * In the postgres shell, create a new user
 ```
 create role <username> with login password '<quoted password>'
 ```
+* In the psql shell, create a new database called `sycpiano` or whatever you wish, just remember it.
+```psql
+postgres=# create database sycpiano with owner <database_username>;
+```
+
 
 ## Admin
 
-There's a separate repo sycpiano_admin for the CRUD interface for the backend. In order for that to work, you need to create an admin user first by (after building server):
+Admin is accessible by http://host.tld/admin. It is located in `packages/admin`.
 
+## Migrations
+
+DBmate for migrations
 ```
-$ yarn node ./server/build/createAdmin.js username password
+$ yarn migrate -- [up|down|status]
 ```
-
-## Migrations and Seeding
-Before seeding the calendar, make sure to obtain a service account key file (json) from google developer console. Save the key under `server/gapi-key.json`. This file is also in our `.gitignore`. The json file should contain two fields, `client_email` and `private_key`.
-
-sycpiano uses umzug and sequelize for migrations.
-```
-$ node server/build/migrate [up|down|prev|next] [(if up or down) migration-file]
-$ node server/build/seed [up|down|prev|next] [(if up or down) seeder-file]
-```
-
-Make sure to build the server files first by running `yarn run buildServer`, and also make sure your Postgresql server is up and running.
-
-## Admin
-sycpiano uses the Forest admin for managing the database.
-
-Going to `/admin` will forward you to the forest admin website.
-
-## Utilities
-
-### Audio Waveforms
-There is a waveform generation utility script included in ./scripts called genWaveform.sh.
-```
-$ genWaveform.sh -i input.mp3 -l desiredWaveformLength
-```
-Must have the [audiowaveform](https://github.com/bbc/audiowaveform) package installed (linux or macosx only, windows via WSL). Only does mp3 files. For now, `desiredWaveformLength = 1024`.
-
-### Picture Thumbnails
-There is a thumbanil generation utility (and creates .json file for seeding the photos table in the database) in ./scripts called generateThumbnails.js
-```
-$ node ./scripts/generateThumbnails
-```
-Must have [graphicsmagick](http://www.graphicsmagick.org/), [imagemagick](https://www.imagemagick.org/script/index.php), and [opencv](https://github.com/opencv) installed, which are not included in the `package.json`.
+Read DBmate README for more info.

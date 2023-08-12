@@ -51,71 +51,6 @@ CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA public;
 COMMENT ON EXTENSION unaccent IS 'text search dictionary that removes accents';
 
 
---
--- Name: en; Type: TEXT SEARCH CONFIGURATION; Schema: public; Owner: -
---
-
-CREATE TEXT SEARCH CONFIGURATION public.en (
-    PARSER = pg_catalog."default" );
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR asciiword WITH english_stem;
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR word WITH public.unaccent, english_stem;
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR numword WITH simple;
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR email WITH simple;
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR url WITH simple;
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR host WITH simple;
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR sfloat WITH simple;
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR version WITH simple;
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR hword_numpart WITH simple;
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR hword_part WITH public.unaccent, english_stem;
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR hword_asciipart WITH english_stem;
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR numhword WITH simple;
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR asciihword WITH english_stem;
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR hword WITH public.unaccent, english_stem;
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR url_path WITH simple;
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR file WITH simple;
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR "float" WITH simple;
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR "int" WITH simple;
-
-ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR uint WITH simple;
-
-
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
@@ -134,11 +69,10 @@ CREATE TABLE public.calendar (
     website text,
     all_day boolean DEFAULT false NOT NULL,
     end_date date,
-    image_url text,
-    photo_reference text,
-    place_id text,
-    use_place_photo boolean DEFAULT true,
-    _search tsvector GENERATED ALWAYS AS (to_tsvector('public.en'::regconfig, ((((COALESCE(name, ''::text) || ' '::text) || COALESCE(location, ''::text)) || ' '::text) || COALESCE(type, ''::text)))) STORED
+    image_url character varying(255),
+    photo_reference character varying(255),
+    place_id character varying(255),
+    use_place_photo boolean DEFAULT true
 );
 
 
@@ -150,43 +84,83 @@ CREATE FUNCTION public.calendar_search(search text) RETURNS SETOF public.calenda
     LANGUAGE sql STABLE
     AS $$
 
+
+
         WITH filtered_ids AS (
+
+
 
             SELECT
 
+
+
                 "calendar".id AS "id"
+
+
 
             FROM "calendar" AS "calendar"
 
+
+
             LEFT OUTER JOIN (
+
+
 
                 "calendar_collaborator" AS "collaborators->calendarCollaborator"
 
+
+
                 INNER JOIN "collaborator" AS "collaborators"
+
+
 
                     ON "collaborators"."id" = "collaborators->calendarCollaborator"."collaborator_id"
 
+
+
             ) ON "calendar"."id" = "collaborators->calendarCollaborator"."calendar_id"
+
+
 
             LEFT OUTER JOIN (
 
+
+
                 "calendar_piece" AS "pieces->calendarPiece"
+
+
 
                 INNER JOIN "piece" AS "pieces"
 
+
+
                     ON "pieces"."id" = "pieces->calendarPiece"."piece_id"
+
+
 
             ) ON "calendar"."id" = "pieces->calendarPiece"."calendar_id"
 
+
+
             GROUP BY "calendar"."id"
+
+
 
             HAVING (tsvector_agg(coalesce("collaborators"."_search", '')) || tsvector_agg(coalesce("pieces"."_search", '')) || ("calendar"."_search")) @@ to_tsquery('en', search)
 
+
+
         )
+
+
 
         SELECT * FROM "calendar" AS "calendar"
 
+
+
         WHERE "calendar".id IN (SELECT "id" FROM filtered_ids);
+
+
 
         $$;
 
@@ -226,6 +200,15 @@ BEGIN
     RETURN encode(digest(temp, 'sha1'), 'base64');
 END;
 $$;
+
+
+--
+-- Name: immutable_concat_ws(text, text[]); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.immutable_concat_ws(text, VARIADIC text[]) RETURNS text
+    LANGUAGE sql IMMUTABLE PARALLEL SAFE
+    AS $_$SELECT array_to_string($2, $1)$_$;
 
 
 --
@@ -298,7 +281,7 @@ CREATE FUNCTION public.refresh_search_matview() RETURNS trigger
     LANGUAGE plpgsql
     AS $$
 BEGIN
-    REFRESH MATERIALIZED VIEW CONCURRENTLY calendar_search_matview;
+    REFRESH MATERIALIZED VIEW CONCURRENTLY calendar_trgm_matview;
     RETURN NULL;
 END;
 $$;
@@ -310,9 +293,73 @@ $$;
 
 CREATE AGGREGATE public.tsvector_agg(tsvector) (
     SFUNC = tsvector_concat,
-    STYPE = tsvector,
-    INITCOND = ''
+    STYPE = tsvector
 );
+
+
+--
+-- Name: en; Type: TEXT SEARCH CONFIGURATION; Schema: public; Owner: -
+--
+
+CREATE TEXT SEARCH CONFIGURATION public.en (
+    PARSER = pg_catalog."default" );
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR asciiword WITH english_stem;
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR word WITH public.unaccent, english_stem;
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR numword WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR email WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR url WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR host WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR sfloat WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR version WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR hword_numpart WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR hword_part WITH public.unaccent, english_stem;
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR hword_asciipart WITH english_stem;
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR numhword WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR asciihword WITH english_stem;
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR hword WITH public.unaccent, english_stem;
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR url_path WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR file WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR "float" WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR "int" WITH simple;
+
+ALTER TEXT SEARCH CONFIGURATION public.en
+    ADD MAPPING FOR uint WITH simple;
 
 
 --
@@ -323,9 +370,10 @@ CREATE TABLE public.acclaim (
     id integer NOT NULL,
     quote text,
     short text,
-    author text,
-    short_author text,
-    website text,
+    author character varying(255),
+    short_author character varying(255),
+    old_date character varying(255),
+    website character varying(255),
     has_full_date boolean DEFAULT true NOT NULL,
     date date
 );
@@ -387,10 +435,10 @@ ALTER SEQUENCE public.bio_id_seq OWNED BY public.bio.id;
 --
 
 CREATE TABLE public.calendar_collaborator (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
     calendar_id text NOT NULL,
     collaborator_id uuid NOT NULL,
-    "order" integer,
-    id uuid DEFAULT gen_random_uuid()
+    "order" integer
 );
 
 
@@ -399,10 +447,10 @@ CREATE TABLE public.calendar_collaborator (
 --
 
 CREATE TABLE public.calendar_piece (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
     calendar_id text NOT NULL,
     piece_id uuid NOT NULL,
-    "order" integer,
-    id uuid DEFAULT gen_random_uuid()
+    "order" integer
 );
 
 
@@ -413,8 +461,7 @@ CREATE TABLE public.calendar_piece (
 CREATE TABLE public.collaborator (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     name text,
-    instrument text,
-    _search tsvector GENERATED ALWAYS AS (to_tsvector('public.en'::regconfig, ((COALESCE(name, ''::text) || ' '::text) || COALESCE(instrument, ''::text)))) STORED
+    instrument text
 );
 
 
@@ -425,26 +472,25 @@ CREATE TABLE public.collaborator (
 CREATE TABLE public.piece (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     piece text,
-    composer text,
-    _search tsvector GENERATED ALWAYS AS (to_tsvector('public.en'::regconfig, ((COALESCE(composer, ''::text) || ' '::text) || COALESCE(piece, ''::text)))) STORED
+    composer text
 );
 
 
 --
--- Name: calendar_search_matview; Type: MATERIALIZED VIEW; Schema: public; Owner: -
+-- Name: calendar_trgm_matview; Type: MATERIALIZED VIEW; Schema: public; Owner: -
 --
 
-CREATE MATERIALIZED VIEW public.calendar_search_matview AS
+CREATE MATERIALIZED VIEW public.calendar_trgm_matview AS
  SELECT cal.id,
-    ((COALESCE(ccj._search, ''::tsvector) || COALESCE(cpj._search, ''::tsvector)) || COALESCE(cal._search, ''::tsvector)) AS _search
+    public.immutable_concat_ws(' '::text, VARIADIC ARRAY[cal.name, cal.location, cal.type, ccj.doc, cpj.doc]) AS doc
    FROM ((public.calendar cal
      LEFT JOIN ( SELECT cc.calendar_id AS id,
-            public.tsvector_agg(coll._search) AS _search
+            string_agg(public.immutable_concat_ws(' '::text, VARIADIC ARRAY[coll.name, coll.instrument]), ' '::text) AS doc
            FROM (public.calendar_collaborator cc
              JOIN public.collaborator coll ON ((cc.collaborator_id = coll.id)))
           GROUP BY cc.calendar_id) ccj USING (id))
      LEFT JOIN ( SELECT cp.calendar_id AS id,
-            public.tsvector_agg(p._search) AS _search
+            string_agg(public.immutable_concat_ws(' '::text, VARIADIC ARRAY[p.composer, p.piece]), ' '::text) AS doc
            FROM (public.calendar_piece cp
              JOIN public.piece p ON ((cp.piece_id = p.id)))
           GROUP BY cp.calendar_id) cpj USING (id))
@@ -520,7 +566,6 @@ CREATE TABLE public.music_file (
     id uuid DEFAULT gen_random_uuid() NOT NULL,
     name text,
     audio_file text NOT NULL,
-    waveform_file text NOT NULL,
     duration_seconds integer NOT NULL,
     music_id uuid,
     hash text
@@ -552,7 +597,7 @@ CREATE TABLE public.product (
     file text NOT NULL,
     description text,
     sample text,
-    images text[],
+    images text[] DEFAULT '{}'::text[],
     pages integer,
     price integer NOT NULL,
     type text,
@@ -639,27 +684,11 @@ ALTER TABLE ONLY public.acclaim
 
 
 --
--- Name: calendar_collaborator calendar_collaborator_id_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.calendar_collaborator
-    ADD CONSTRAINT calendar_collaborator_id_key UNIQUE (id);
-
-
---
 -- Name: calendar_collaborator calendar_collaborator_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.calendar_collaborator
     ADD CONSTRAINT calendar_collaborator_pkey PRIMARY KEY (calendar_id, collaborator_id);
-
-
---
--- Name: calendar_piece calendar_piece_id_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.calendar_piece
-    ADD CONSTRAINT calendar_piece_id_key UNIQUE (id);
 
 
 --
@@ -827,13 +856,6 @@ CREATE INDEX calendar_piece_piece_idx ON public.calendar_piece USING btree (piec
 
 
 --
--- Name: calendar_search; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX calendar_search ON public.calendar USING gin (_search);
-
-
---
 -- Name: calendar_time; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -841,10 +863,24 @@ CREATE INDEX calendar_time ON public.calendar USING btree (date_time);
 
 
 --
--- Name: collaborator_search; Type: INDEX; Schema: public; Owner: -
+-- Name: calendar_trgm_gist_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX collaborator_search ON public.collaborator USING gin (_search);
+CREATE INDEX calendar_trgm_gist_idx ON public.calendar_trgm_matview USING gist (doc public.gist_trgm_ops);
+
+
+--
+-- Name: calendar_trgm_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX calendar_trgm_id ON public.calendar_trgm_matview USING btree (id);
+
+
+--
+-- Name: collaborator_trgm; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX collaborator_trgm ON public.collaborator USING gist (public.immutable_concat_ws(' '::text, VARIADIC ARRAY[name, instrument]) public.gist_trgm_ops);
 
 
 --
@@ -862,17 +898,10 @@ CREATE INDEX music_file_music_idx ON public.music_file USING btree (music_id);
 
 
 --
--- Name: piece_search; Type: INDEX; Schema: public; Owner: -
+-- Name: piece_trgm; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX piece_search ON public.piece USING gin (_search);
-
-
---
--- Name: search_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX search_idx ON public.calendar_search_matview USING btree (id);
+CREATE INDEX piece_trgm ON public.piece USING gist (public.immutable_concat_ws(' '::text, VARIADIC ARRAY[composer, piece]) public.gist_trgm_ops);
 
 
 --
@@ -900,7 +929,7 @@ CREATE INDEX user_username_idx ON public."user" USING btree (username);
 -- Name: calendar cal_refresh; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER cal_refresh AFTER INSERT OR DELETE OR UPDATE OF _search ON public.calendar FOR EACH STATEMENT EXECUTE FUNCTION public.refresh_search_matview();
+CREATE TRIGGER cal_refresh AFTER INSERT OR DELETE OR UPDATE ON public.calendar FOR EACH STATEMENT EXECUTE FUNCTION public.refresh_search_matview();
 
 
 --
@@ -921,7 +950,7 @@ CREATE TRIGGER calpiece_refresh AFTER INSERT OR DELETE ON public.calendar_piece 
 -- Name: collaborator collab_refresh; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER collab_refresh AFTER UPDATE OF _search ON public.collaborator FOR EACH STATEMENT EXECUTE FUNCTION public.refresh_search_matview();
+CREATE TRIGGER collab_refresh AFTER UPDATE ON public.collaborator FOR EACH STATEMENT EXECUTE FUNCTION public.refresh_search_matview();
 
 
 --
@@ -942,7 +971,7 @@ CREATE TRIGGER music_trigger AFTER INSERT OR UPDATE ON public.music FOR EACH ROW
 -- Name: piece piece_refresh; Type: TRIGGER; Schema: public; Owner: -
 --
 
-CREATE TRIGGER piece_refresh AFTER UPDATE OF _search ON public.piece FOR EACH STATEMENT EXECUTE FUNCTION public.refresh_search_matview();
+CREATE TRIGGER piece_refresh AFTER UPDATE ON public.piece FOR EACH STATEMENT EXECUTE FUNCTION public.refresh_search_matview();
 
 
 --
