@@ -2,6 +2,14 @@ import * as dotenv from 'dotenv';
 
 dotenv.config({ override: true });
 
+const smtpEnvVars = [
+    'DKIM_PRIVATE_KEY_FILE',
+    'SMTP_HOST',
+    'SMTP_PORT',
+    'SMTP_USERNAME',
+    'SMTP_PASSWORD',
+];
+
 const required = [
     'PORT',
     'HOST',
@@ -10,13 +18,9 @@ const required = [
     'STRIPE_WEBHOOK_KEY',
     'COOKIE_SECRET',
     'PRODUCTS_DIR',
-    'DKIM_PRIVATE_KEY_FILE',
-    'SMTP_HOST',
-    'SMTP_PORT',
-    'SMTP_USERNAME',
-    'SMTP_PASSWORD',
     'GAPI_CLIENT_EMAIL',
     'GAPI_PRIVATE_KEY',
+    ...(process.env.USE_DUMMY_MAILER !== 'true' ? smtpEnvVars : []),
 ];
 
 export const precheck = async () => {

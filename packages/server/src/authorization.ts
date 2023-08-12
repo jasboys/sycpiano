@@ -1,4 +1,3 @@
-// import * as dotenv from 'dotenv';
 import * as argon2 from 'argon2';
 import * as crypto from 'crypto';
 import * as express from 'express';
@@ -6,15 +5,10 @@ import { upperCase } from 'lodash-es';
 import { V3 as paseto } from 'paseto';
 import validator from 'validator';
 
-// dotenv.config();
-
 import orm from './database.js';
-import {
-    duplicateEmailNotification,
-    emailRegisterNotification,
-} from './mailer.js';
 import { User } from './models/User.js';
 import * as stripeClient from './stripe.js';
+import { mailer } from './emails/index.js';
 
 const authRouter = express.Router();
 
@@ -55,8 +49,8 @@ export const authAndGetRole: HandlerWithRole = async (req, res, next) => {
         return next();
     }
     try {
-        const accessToken = req.cookies['access_token'];
-        const session = req.cookies['id'];
+        const accessToken = req.cookies.access_token;
+        const session = req.cookies.id;
         if (!accessToken || !session) {
             throw new Error('No cookie');
         }
@@ -109,7 +103,7 @@ authRouter.post('/register', async (req, res) => {
         let customer = await orm.em.findOne(User, { username });
         if (customer) {
             // Send notification email
-            await duplicateEmailNotification(username);
+            await mailer.duplicateEmailNotification(username);
             return res.status(200).end();
         }
 
@@ -123,7 +117,7 @@ authRouter.post('/register', async (req, res) => {
             role: 'customer',
         });
         await orm.em.persist(customer).flush();
-        await emailRegisterNotification(username);
+        await mailer.emailRegisterNotification(username);
         return res.status(200).end();
     } catch (e) {
         return res.status(500).send('Account creation failed');
@@ -180,8 +174,8 @@ authRouter.post('/login', async (req, res) => {
 
 authRouter.post('/logout', async (req, res) => {
     try {
-        const pasetoCookie = req.cookies['access_token'];
-        const idCookie = req.cookies['id'];
+        const pasetoCookie = req.cookies.access_token;
+        const idCookie = req.cookies.id;
         const user = await orm.em.findOneOrFail(User, { session: idCookie });
         user.session = undefined;
         user.pasetoSecret = undefined;

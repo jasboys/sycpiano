@@ -1,12 +1,11 @@
-
 import { add, isBefore } from 'date-fns';
 import * as express from 'express';
 import { pick } from 'lodash-es';
 import { Stripe } from 'stripe';
 
 import orm from '../database.js';
-import { emailPDFs } from '../mailer.js';
 import { Faq } from '../models/Faq.js';
+import { mailer } from '../emails/index.js';
 import { Product, ProductTypes } from '../models/Product.js';
 import { User } from '../models/User.js';
 import { UserProduct } from '../models/UserProduct.js';
@@ -65,7 +64,7 @@ shopRouter.post(
                 }
                 orm.em.flush();
 
-                await emailPDFs(
+                await mailer.emailPDFs(
                     productIds,
                     email,
                     session.client_reference_id ?? '',
