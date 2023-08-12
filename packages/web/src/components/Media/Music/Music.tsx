@@ -13,7 +13,7 @@ import {
     useNavigate,
 } from 'react-router-dom';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
 import AudioInfo from 'src/components/Media/Music/AudioInfo';
 import AudioUI from 'src/components/Media/Music/AudioUI';

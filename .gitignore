@@ -28,3 +28,7 @@ stats.json
 .eslintcache
 .stylelintcache
 sycpiano.zip
+
+assets/images
+assets/music
+assets/products

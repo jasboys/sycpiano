@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import * as React from 'react';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import { staticImage } from 'src/imageUrls';
 import { screenM, screenPortrait, screenXS } from 'src/screens';
 import { playlistWidth } from 'src/styles/variables';

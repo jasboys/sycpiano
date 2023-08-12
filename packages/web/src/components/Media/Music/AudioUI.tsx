@@ -4,7 +4,7 @@ import { gsap } from 'gsap';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import { LoadingInstance } from 'src/components/LoadingSVG';
 import {
     HEIGHT_ADJUST_DESKTOP,

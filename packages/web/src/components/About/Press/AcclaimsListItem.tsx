@@ -2,7 +2,7 @@ import { css } from '@emotion/react';
 import parseISO from 'date-fns/parseISO';
 import * as React from 'react';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import { AcclaimItemShape } from 'src/components/About/Press/types';
 import { screenPortrait, screenXS } from 'src/screens';
 import { latoFont } from 'src/styles/fonts';

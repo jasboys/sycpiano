@@ -6,7 +6,7 @@ import { mix } from 'polished';
 import * as React from 'react';
 import isEmail from 'validator/es/lib/isEmail';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import { CartItem } from 'src/components/Cart/CartItem';
 import {
     checkoutAction,

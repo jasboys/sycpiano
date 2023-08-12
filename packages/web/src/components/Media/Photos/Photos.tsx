@@ -2,7 +2,7 @@ import styled from '@emotion/styled';
 import * as React from 'react';
 import { TransitionGroup } from 'react-transition-group';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import { mqSelectors } from 'src/components/App/reducers';
 import PhotoFader from 'src/components/Media/Photos/PhotoFader';
 import PhotoList from 'src/components/Media/Photos/PhotoList';

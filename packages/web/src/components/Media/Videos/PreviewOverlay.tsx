@@ -4,7 +4,7 @@ import { gsap } from 'gsap';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import { LazyImage } from 'src/components/LazyImage';
 import { playVideo } from 'src/components/Media/Videos/reducers';
 import { useAppDispatch, useAppSelector } from 'src/hooks';

@@ -1,7 +1,7 @@
 import { css } from '@emotion/react';
 import * as React from 'react';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import { staticImage } from 'src/imageUrls';
 import { screenPortrait, screenXS } from 'src/screens';
 import { lightBlue } from 'src/styles/colors';

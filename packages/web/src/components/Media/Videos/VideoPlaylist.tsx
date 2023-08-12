@@ -2,7 +2,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import * as React from 'react';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import { mqSelectors } from 'src/components/App/reducers';
 import Playlist from 'src/components/Media/Playlist';
 import VideoPlaylistItem from 'src/components/Media/Videos/VideoPlaylistItem';

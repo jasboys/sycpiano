@@ -3,7 +3,7 @@ import { gsap } from 'gsap';
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import { MusicFileItem } from 'src/components/Media/Music/types';
 import { formatTime } from 'src/components/Media/Music/utils';
 import { minRes, screenM, screenPortrait, webkitMinDPR } from 'src/screens';

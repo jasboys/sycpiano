@@ -1,7 +1,7 @@
 import { css } from '@emotion/react';
 import * as React from 'react';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import iconMap from 'src/components/About/Discs/iconMap';
 import { Disc } from 'src/components/About/Discs/types';
 import { isHamburger, screenXS } from 'src/screens';

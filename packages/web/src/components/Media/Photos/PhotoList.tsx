@@ -2,7 +2,7 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import * as React from 'react';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
 import { mqSelectors } from 'src/components/App/reducers';
 import DropboxButton from 'src/components/Media/Photos/DropboxButton';

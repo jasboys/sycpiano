@@ -3,7 +3,7 @@ import styled from '@emotion/styled';
 import { gsap } from 'gsap';
 import * as React from 'react';
 
-import { toMedia } from 'src/MediaQuery';
+import { toMedia } from 'src/mediaQuery';
 import { LazyImage } from 'src/components/LazyImage';
 import { PhotoItem } from 'src/components/Media/Photos/types';
 import {

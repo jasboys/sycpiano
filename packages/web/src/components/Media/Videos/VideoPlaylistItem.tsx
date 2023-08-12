@@ -10,7 +10,7 @@ import * as React from 'react';
 import ClampLines from 'react-clamp-lines';
 import { useNavigate } from 'react-router-dom';
 
-import { toMedia } from 'src/MediaQuery.js';
+import { toMedia } from 'src/mediaQuery.js';
 import { VideoItemShape } from 'src/components/Media/Videos/types';
 import { screenPortrait, screenXS } from 'src/screens.js';
 import { lightBlue } from 'src/styles/colors';
