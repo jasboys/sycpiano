@@ -9,38 +9,36 @@ import * as path from 'path';
 import orm from './database.js';
 import { Product } from './models/Product.js';
 
-// if (
-//     process.env.SMTP_HOST === undefined ||
-//     process.env.SMTP_PASSWORD === undefined ||
-//     process.env.SMTP_PORT === undefined ||
-//     process.env.SMTP_USERNAME === undefined ||
-//     process.env.SMTP_PASSWORD === undefined ||
-//     process.env.DKIM_PRIVATE_KEY_FILE === undefined ||
-//     process.env.IMAGE_ASSETS_DIR === undefined ||
-//     process.env.PRODUCTS_DIR === undefined
-// ) {
-//     throw new Error('Missing env vars');
-// }
+if (
+    process.env.SMTP_HOST === undefined ||
+    process.env.SMTP_PASSWORD === undefined ||
+    process.env.SMTP_PORT === undefined ||
+    process.env.SMTP_USERNAME === undefined ||
+    process.env.SMTP_PASSWORD === undefined ||
+    process.env.DKIM_PRIVATE_KEY_FILE === undefined ||
+    process.env.IMAGE_ASSETS_DIR === undefined ||
+    process.env.PRODUCTS_DIR === undefined
+) {
+    throw new Error('Missing env vars');
+}
 
-// const transportOptions = {
-//     host: process.env.SMTP_HOST,
-//     secure: parseInt(process.env.SMTP_PORT) === 465 ? true : false,
-//     port: parseInt(process.env.SMTP_PORT),
-//     auth: {
-//         user: process.env.SMTP_USERNAME,
-//         pass: process.env.SMTP_PASSWORD,
-//     },
-//     dkim: {
-//         domainName: 'seanchenpiano.com',
-//         keySelector: 'email',
-//         privateKey: readFileSync(
-//             path.resolve(process.env.DKIM_PRIVATE_KEY_FILE),
-//             'utf8',
-//         ),
-//     },
-// };
-
-const transportOptions = {};
+const transportOptions = {
+    host: process.env.SMTP_HOST,
+    secure: parseInt(process.env.SMTP_PORT) === 465 ? true : false,
+    port: parseInt(process.env.SMTP_PORT),
+    auth: {
+        user: process.env.SMTP_USERNAME,
+        pass: process.env.SMTP_PASSWORD,
+    },
+    dkim: {
+        domainName: 'seanchenpiano.com',
+        keySelector: 'email',
+        privateKey: readFileSync(
+            path.resolve(process.env.DKIM_PRIVATE_KEY_FILE),
+            'utf8',
+        ),
+    },
+};
 
 export const duplicateEmailNotification = async (
     username: string,
