@@ -137,4 +137,3 @@ const ContactInfo: React.FC<ContactInfoProps> = (props) => (
 );
 
 export { ContactInfo };
-
