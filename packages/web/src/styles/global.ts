@@ -9,7 +9,6 @@ import {
     camel2prop,
     camel2var,
     CSSVariables,
-    desktopPlaylistWidth,
     navBarHeight,
     toPx,
 } from 'src/styles/variables';
@@ -102,62 +101,62 @@ export const globalCss = css([
 
         a: link(logoBlue),
     },
-    loadFont('Lato', 'Lato-Hairline', 100, {
+    loadFont('Lato', 'lato-hairline', 100, {
         textRendering: 'optimizeLegibility',
     }),
-    loadFont('Lato', 'Lato-HairlineItalic', 100, {
+    loadFont('Lato', 'lato-hairlineitalic', 100, {
         fontStyle: 'italic',
         textRendering: 'optimizeLegibility',
     }),
-    loadFont('Lato', 'Lato-Thin', 200, { textRendering: 'optimizeLegibility' }),
-    loadFont('Lato', 'Lato-ThinItalic', 200, {
+    loadFont('Lato', 'lato-thin', 200, { textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'lato-thinitalic', 200, {
         fontStyle: 'italic',
         textRendering: 'optimizeLegibility',
     }),
-    loadFont('Lato', 'Lato-Light', 300, {
+    loadFont('Lato', 'lato-light', 300, {
         textRendering: 'optimizeLegibility',
     }),
-    loadFont('Lato', 'Lato-LightItalic', 300, {
+    loadFont('Lato', 'lato-lightitalic', 300, {
         fontStyle: 'italic',
         textRendering: 'optimizeLegibility',
     }),
-    loadFont('Lato', 'Lato-Regular', 400, {
+    loadFont('Lato', 'lato-regular', 400, {
         textRendering: 'optimizeLegibility',
     }),
-    loadFont('Lato', 'Lato-Italic', 400, {
+    loadFont('Lato', 'lato-italic', 400, {
         fontStyle: 'italic',
         textRendering: 'optimizeLegibility',
     }),
-    loadFont('Lato', 'Lato-Medium', 500, {
+    loadFont('Lato', 'lato-medium', 500, {
         textRendering: 'optimizeLegibility',
     }),
-    loadFont('Lato', 'Lato-MediumItalic', 500, {
+    loadFont('Lato', 'lato-mediumitalic', 500, {
         fontStyle: 'italic',
         textRendering: 'optimizeLegibility',
     }),
-    loadFont('Lato', 'Lato-Semibold', 600, {
+    loadFont('Lato', 'lato-semibold', 600, {
         textRendering: 'optimizeLegibility',
     }),
-    loadFont('Lato', 'Lato-SemiboldItalic', 600, {
+    loadFont('Lato', 'lato-semibolditalic', 600, {
         fontStyle: 'italic',
         textRendering: 'optimizeLegibility',
     }),
-    loadFont('Lato', 'Lato-Bold', 700, { textRendering: 'optimizeLegibility' }),
-    loadFont('Lato', 'Lato-BoldItalic', 700, {
+    loadFont('Lato', 'lato-bold', 700, { textRendering: 'optimizeLegibility' }),
+    loadFont('Lato', 'lato-bolditalic', 700, {
         fontStyle: 'italic',
         textRendering: 'optimizeLegibility',
     }),
-    loadFont('Lato', 'Lato-Heavy', 800, {
+    loadFont('Lato', 'lato-heavy', 800, {
         textRendering: 'optimizeLegibility',
     }),
-    loadFont('Lato', 'Lato-HeavyItalic', 800, {
+    loadFont('Lato', 'lato-heavyitalic', 800, {
         fontStyle: 'italic',
         textRendering: 'optimizeLegibility',
     }),
-    loadFont('Lato', 'Lato-Black', 900, {
+    loadFont('Lato', 'lato-black', 900, {
         textRendering: 'optimizeLegibility',
     }),
-    loadFont('Lato', 'Lato-BlackItalic', 900, {
+    loadFont('Lato', 'lato-blackitalic', 900, {
         fontStyle: 'italic',
         textRendering: 'optimizeLegibility',
     }),
