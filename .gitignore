@@ -34,3 +34,4 @@ assets/music
 assets/products
 
 docker-compose*
+!docker-compose.sample.yaml

@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  server:
+    image: sycpiano:alpha
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+    # override env, or edit in env
+      PARTIALS_DIR: /srv/assets/partials
+      SCRIPTS_DIR: /srv/assets/scripts/web
+      ADMIN_DIR: /srv/assets/scripts/admin
+      PRODUCTS_DIR: /srv/products
+      DATA_ASSETS_DIR: /srv/assets/data
+      IMAGE_ASSETS_DIR: /srv/assets/images
+      MUSIC_ASSETS_DIR: /srv/assets/music
+      DKIM_PRIVATE_KEY_FILE: /run/secrets/dkim_file
+      NODE_ENV: production
+      HOST: "0.0.0.0" # Be sure to bind 0.0.0.0, or in linux, use network: host
+      DATABASE_URL: # use docker.host.internal instead of localhost
+    secrets:
+      - dkim_file
+    volumes:
+      - "local_path_to_assets:/srv/assets"
+      - "local_path_to_products:/srv/products"
+
+secrets:
+  dkim_file:
+    file: path_to_dkim_file
