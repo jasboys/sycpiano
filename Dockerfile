@@ -4,7 +4,8 @@ FROM base AS depbase
 WORKDIR /root
 COPY package.json .
 COPY yarn.lock .
-RUN yarn set version canary
+COPY .yarnrc.yml .
+COPY ./.yarn/releases .yarn/releases
 COPY ./packages/server/package.json packages/server/
 COPY ./packages/common/package.json packages/common/
 
