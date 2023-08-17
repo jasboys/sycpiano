@@ -18,6 +18,7 @@ import { ThunkAPIType } from 'src/types';
 const initialListState: PhotoListReducerShape = {
     items: [],
     isFetching: false,
+    background: 'rgb(248 248 248)',
 };
 
 export const fetchPhotos = createAsyncThunk<PhotoItem[], void, ThunkAPIType>(
@@ -39,6 +40,8 @@ export const fetchPhotos = createAsyncThunk<PhotoItem[], void, ThunkAPIType>(
     },
 );
 
+export const setBackground = createAction<string>('photos/setBackground');
+
 const photoListSlice = createSlice({
     name: 'photoList',
     initialState: initialListState,
@@ -54,6 +57,9 @@ const photoListSlice = createSlice({
             .addCase(fetchPhotos.fulfilled, (state, action) => {
                 state.isFetching = false;
                 state.items = action.payload;
+            })
+            .addCase(setBackground, (state, action) => {
+                state.background = action.payload;
             })
             .addDefaultCase((state) => state);
     },

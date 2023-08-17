@@ -17,8 +17,8 @@
         "sourceMap": false,
         "skipLibCheck": true,
         "outDir": "build",
-        "baseUrl": "./src",
-        "rootDir": "./src",
+        "baseUrl": "src",
+        "rootDir": "src",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "esModuleInterop": true,
@@ -28,6 +28,6 @@
         "esm": true
     },
     "include": [
-        "./src"
+        "src"
     ]
 }

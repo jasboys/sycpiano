@@ -14,6 +14,8 @@ declare namespace NodeJS {
         DKIM_PRIVATE_KEY_FILE: string;
         IMAGE_ASSETS_DIR: string;
         MUSIC_ASSETS_DIR: string;
+        PARTIALS_DIR: string;
+        SCRIPTS_DIR: string;
         PRODUCTS_DIR: string;
         DATABASE_URL: string;
         DB_USER: string;
@@ -24,7 +26,7 @@ declare namespace NodeJS {
         SEED_DATA_DIR: string;
         STRIPE_SECRET_KEY: string;
         STRIPE_WEBHOOK_KEY: string;
-        STRIPE_CALLBACK_HOST: string;
+        PUBLIC_HOST: string;
         GAPI_CLIENT_EMAIL: string;
         GAPI_PRIVATE_KEY: string;
         DEV_HTTPS_PORT: string;

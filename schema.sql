@@ -69,9 +69,9 @@ CREATE TABLE public.calendar (
     website text,
     all_day boolean DEFAULT false NOT NULL,
     end_date date,
-    image_url character varying(255),
-    photo_reference character varying(255),
-    place_id character varying(255),
+    image_url text,
+    photo_reference text,
+    place_id text,
     use_place_photo boolean DEFAULT true
 );
 
@@ -84,83 +84,43 @@ CREATE FUNCTION public.calendar_search(search text) RETURNS SETOF public.calenda
     LANGUAGE sql STABLE
     AS $$
 
-
-
         WITH filtered_ids AS (
-
-
 
             SELECT
 
-
-
                 "calendar".id AS "id"
-
-
 
             FROM "calendar" AS "calendar"
 
-
-
             LEFT OUTER JOIN (
-
-
 
                 "calendar_collaborator" AS "collaborators->calendarCollaborator"
 
-
-
                 INNER JOIN "collaborator" AS "collaborators"
-
-
 
                     ON "collaborators"."id" = "collaborators->calendarCollaborator"."collaborator_id"
 
-
-
             ) ON "calendar"."id" = "collaborators->calendarCollaborator"."calendar_id"
-
-
 
             LEFT OUTER JOIN (
 
-
-
                 "calendar_piece" AS "pieces->calendarPiece"
-
-
 
                 INNER JOIN "piece" AS "pieces"
 
-
-
                     ON "pieces"."id" = "pieces->calendarPiece"."piece_id"
-
-
 
             ) ON "calendar"."id" = "pieces->calendarPiece"."calendar_id"
 
-
-
             GROUP BY "calendar"."id"
-
-
 
             HAVING (tsvector_agg(coalesce("collaborators"."_search", '')) || tsvector_agg(coalesce("pieces"."_search", '')) || ("calendar"."_search")) @@ to_tsquery('en', search)
 
-
-
         )
-
-
 
         SELECT * FROM "calendar" AS "calendar"
 
-
-
         WHERE "calendar".id IN (SELECT "id" FROM filtered_ids);
-
-
 
         $$;
 
@@ -288,16 +248,6 @@ $$;
 
 
 --
--- Name: tsvector_agg(tsvector); Type: AGGREGATE; Schema: public; Owner: -
---
-
-CREATE AGGREGATE public.tsvector_agg(tsvector) (
-    SFUNC = tsvector_concat,
-    STYPE = tsvector
-);
-
-
---
 -- Name: en; Type: TEXT SEARCH CONFIGURATION; Schema: public; Owner: -
 --
 
@@ -305,10 +255,10 @@ CREATE TEXT SEARCH CONFIGURATION public.en (
     PARSER = pg_catalog."default" );
 
 ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR asciiword WITH english_stem;
+    ADD MAPPING FOR asciiword WITH simple;
 
 ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR word WITH public.unaccent, english_stem;
+    ADD MAPPING FOR word WITH public.unaccent;
 
 ALTER TEXT SEARCH CONFIGURATION public.en
     ADD MAPPING FOR numword WITH simple;
@@ -332,19 +282,19 @@ ALTER TEXT SEARCH CONFIGURATION public.en
     ADD MAPPING FOR hword_numpart WITH simple;
 
 ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR hword_part WITH public.unaccent, english_stem;
+    ADD MAPPING FOR hword_part WITH public.unaccent;
 
 ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR hword_asciipart WITH english_stem;
+    ADD MAPPING FOR hword_asciipart WITH simple;
 
 ALTER TEXT SEARCH CONFIGURATION public.en
     ADD MAPPING FOR numhword WITH simple;
 
 ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR asciihword WITH english_stem;
+    ADD MAPPING FOR asciihword WITH simple;
 
 ALTER TEXT SEARCH CONFIGURATION public.en
-    ADD MAPPING FOR hword WITH public.unaccent, english_stem;
+    ADD MAPPING FOR hword WITH public.unaccent;
 
 ALTER TEXT SEARCH CONFIGURATION public.en
     ADD MAPPING FOR url_path WITH simple;
@@ -370,10 +320,9 @@ CREATE TABLE public.acclaim (
     id integer NOT NULL,
     quote text,
     short text,
-    author character varying(255),
-    short_author character varying(255),
-    old_date character varying(255),
-    website character varying(255),
+    author text,
+    short_author text,
+    website text,
     has_full_date boolean DEFAULT true NOT NULL,
     date date
 );
@@ -435,10 +384,10 @@ ALTER SEQUENCE public.bio_id_seq OWNED BY public.bio.id;
 --
 
 CREATE TABLE public.calendar_collaborator (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
     calendar_id text NOT NULL,
     collaborator_id uuid NOT NULL,
-    "order" integer
+    "order" integer,
+    id uuid DEFAULT gen_random_uuid()
 );
 
 
@@ -447,10 +396,10 @@ CREATE TABLE public.calendar_collaborator (
 --
 
 CREATE TABLE public.calendar_piece (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
     calendar_id text NOT NULL,
     piece_id uuid NOT NULL,
-    "order" integer
+    "order" integer,
+    id uuid DEFAULT gen_random_uuid()
 );
 
 
@@ -684,11 +633,27 @@ ALTER TABLE ONLY public.acclaim
 
 
 --
+-- Name: calendar_collaborator calendar_collaborator_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.calendar_collaborator
+    ADD CONSTRAINT calendar_collaborator_id_key UNIQUE (id);
+
+
+--
 -- Name: calendar_collaborator calendar_collaborator_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.calendar_collaborator
     ADD CONSTRAINT calendar_collaborator_pkey PRIMARY KEY (calendar_id, collaborator_id);
+
+
+--
+-- Name: calendar_piece calendar_piece_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.calendar_piece
+    ADD CONSTRAINT calendar_piece_id_key UNIQUE (id);
 
 
 --
@@ -870,10 +835,10 @@ CREATE INDEX calendar_trgm_gist_idx ON public.calendar_trgm_matview USING gist (
 
 
 --
--- Name: calendar_trgm_id; Type: INDEX; Schema: public; Owner: -
+-- Name: calendar_trgm_matview_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX calendar_trgm_id ON public.calendar_trgm_matview USING btree (id);
+CREATE UNIQUE INDEX calendar_trgm_matview_id_idx ON public.calendar_trgm_matview USING btree (id);
 
 
 --

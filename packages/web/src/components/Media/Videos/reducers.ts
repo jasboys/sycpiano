@@ -119,7 +119,9 @@ export const fetchVideoPlaylist = createAsyncThunk<
         );
         const videosResponse = await youTube.getVideos(videoIds);
         videosResponse.data.items.forEach((item: Youtube.Video) => {
-            const idx = videoItems.findIndex((vi) => vi.id === item.id);
+            const idx = videoItems.findIndex(
+                (vi) => vi.snippet?.resourceId?.videoId === item.id,
+            );
             if (idx >= 0) {
                 videoItems[idx] = { ...videoItems[idx], ...item };
             }

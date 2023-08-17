@@ -28,9 +28,7 @@ export default defineConfig({
         'import.meta.env.PUBLIC_GAPI_KEY': JSON.stringify(
             process.env.GAPI_KEY_APP,
         ),
-        'import.meta.env.PUBLIC_HOST': JSON.stringify(
-            process.env.CALLBACK_HOST,
-        ),
+        'import.meta.env.PUBLIC_HOST': JSON.stringify(process.env.PUBLIC_HOST),
     },
     envDir: '../../',
     plugins: [
@@ -44,8 +42,10 @@ export default defineConfig({
     build: {
         manifest: true,
         rollupOptions: {
-            input: 'src/main.tsx',
+            input: 'src/admin.html',
         },
         outDir: path.resolve(__dirname, 'build'),
+        assetsDir: 'static/scripts/admin',
+        emptyOutDir: true,
     },
 });

@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import uniqid from 'uniqid';
 import { Product } from './models/Product.js';
 
-dotenv.config({ override: true });
+dotenv.config({ override: true, path: '../../.env' });
 
 type CustomerReturn = Stripe.Customer | Stripe.DeletedCustomer;
 type ProductReturn = string | Stripe.Product | Stripe.DeletedProduct;
@@ -13,7 +13,7 @@ export const THUMBNAIL_STATIC =
     'https://seanchenpiano.com/static/images/products/thumbnails/';
 
 // const isDev = process.env.NODE_ENV === 'development';
-const host = process.env.CALLBACK_HOST;
+const host = process.env.PUBLIC_HOST;
 
 if (process.env.STRIPE_SECRET_KEY === undefined) {
     throw new Error('Stripe Secret Key undefined');

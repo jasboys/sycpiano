@@ -38,12 +38,8 @@ export default defineConfig({
     build: {
         target: ['es2015'],
         manifest: true,
-        rollupOptions: {
-            input: 'src/main.tsx',
-            treeshake: 'smallest',
-        },
         outDir: path.resolve(__dirname, 'build'),
-        assetsDir: 'static/scripts',
+        assetsDir: 'static/scripts/web',
         emptyOutDir: true,
     },
 });

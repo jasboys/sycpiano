@@ -330,6 +330,7 @@ ALTER TABLE photo
     DROP COLUMN IF EXISTS created_at,
     DROP COLUMN IF EXISTS updated_at,
     ALTER COLUMN id SET DEFAULT gen_random_uuid(),
+    ADD COLUMN IF NOT EXISTS date_taken timestamp,
     ALTER COLUMN file TYPE text,
     ALTER COLUMN credit TYPE text;
 

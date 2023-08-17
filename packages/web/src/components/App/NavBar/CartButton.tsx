@@ -38,6 +38,13 @@ const cartStyles = {
             fill: 'white',
             filter: 'drop-shadow(0 0 1px rgba(255 255 255 / 1))',
         },
+        [toMedia(isHamburger)]: {
+            fill: 'white',
+            filter: 'drop-shadow(0 0 1px rgba(0 0 0 / 0.8))',
+            '&:hover': {
+                filter: 'drop-shadow(0 0 1px rgba(255 255 255 / 1))',
+            }
+        }
     }),
     isOpen: css({
         [toMedia(isHamburger)]: {
@@ -63,6 +70,9 @@ const circleStyles = {
         stroke: 'white',
         fill: 'none',
         '&:hover': {
+            stroke: 'white',
+        },
+        [toMedia(isHamburger)]: {
             stroke: 'white',
         },
     }),

@@ -81,7 +81,7 @@ const DiscListItem: React.FC<DiscListProps> = ({ item }) => {
                     />
                 </div>
                 <div css={styles.details}>
-                    <span css={styles.span}>{item.title}</span>
+                    <span css={styles.title}>{item.title}</span>
                     <span css={styles.span}>{item.label}</span>
                     <span css={styles.span}>{item.releaseDate}</span>
                     <p>{item.description}</p>

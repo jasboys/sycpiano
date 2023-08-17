@@ -22,6 +22,7 @@ const PhotoRow = styled.div<{ isLoaded: boolean }>(
         height: 200,
         transition: 'all 0.2s',
         borderRadius: 10,
+        border: '1.2px solid transparent',
         cursor: 'default',
         margin: 10,
         overflow: 'hidden',
@@ -31,16 +32,21 @@ const PhotoRow = styled.div<{ isLoaded: boolean }>(
             height: '100%',
             position: 'absolute',
             objectFit: 'cover',
+            filter: 'saturate(0.8)',
+            transition: 'filter 0.5s',
         },
         '&:hover': {
             cursor: 'pointer',
-            borderColor: 'white',
+            borderColor: 'rgba(255 255 255 / 0.8)',
+            img: {
+                filter: 'unset',
+            },
         },
         [toMedia([screenXS, screenPortrait])]: {
             lineHeight: 0,
-
             img: {
                 position: 'relative',
+                filter: 'unset',
             },
 
             '&:hover': {

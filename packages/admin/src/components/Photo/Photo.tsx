@@ -1,7 +1,10 @@
 import {
+    Button,
     Create,
+    CreateButton,
     CreateProps,
     Datagrid,
+    DateField,
     Edit,
     EditProps,
     FunctionField,
@@ -17,10 +20,15 @@ import {
     SimpleShowLayout,
     TextField,
     TextInput,
+    TopToolbar,
+    useNotify,
     useRecordContext,
     UseRecordContextParams,
+    useRefresh,
 } from 'react-admin';
 import { useWatch } from 'react-hook-form';
+import { useMutation } from 'react-query';
+import { useAppDataProvider } from 'src/providers/restProvider.js';
 import { IMAGES_URI } from 'src/uris.js';
 
 const ThumbnailField = (props: UseRecordContextParams) => {
@@ -49,11 +57,42 @@ const FullImageField = (props: UseRecordContextParams) => {
     );
 };
 
+export const DateTakenButton = () => {
+    const notify = useNotify();
+    const refresh = useRefresh();
+    const dataProvider = useAppDataProvider();
+    const { mutate, isLoading } = useMutation(
+        () => dataProvider.populateDateTaken('photos', {}),
+        {
+            onSuccess: () => {
+                refresh();
+                notify('Populating date_taken from EXIF succeeded');
+            },
+            onError: (error) => notify(`Error: ${error}`, { type: 'warning' }),
+        },
+    );
+    return (
+        <Button
+            label={'Populate Photo Dates'}
+            onClick={() => mutate()}
+            disabled={isLoading}
+        />
+    );
+};
+
+const ListActions = () => (
+    <TopToolbar>
+        <CreateButton />
+        <DateTakenButton />
+    </TopToolbar>
+);
+
 export const PhotoList = (props: ListProps) => (
-    <List {...props} perPage={25}>
+    <List {...props} perPage={25} actions={<ListActions />}>
         <Datagrid rowClick="edit">
             <TextField source="file" />
             <TextField source="credit" />
+            <DateField source="dateTaken" />
             <FunctionField
                 label="dimensions"
                 render={(record?: RaRecord) =>
@@ -77,6 +116,7 @@ export const PhotoShow = (props: ShowProps) => (
             <TextField source="id" />
             <TextField source="file" />
             <TextField source="credit" />
+            <DateField source="dateTaken" />
             <FunctionField
                 label="thumbnail dimensions"
                 render={(record?: RaRecord) =>
@@ -101,6 +141,7 @@ export const PhotoEdit = (props: EditProps) => (
             <TextInput source="id" fullWidth disabled />
             <TextInput source="file" fullWidth />
             <TextInput source="credit" />
+            <DateField source="dateTaken" disabled />
             <NumberInput source="width" />
             <NumberInput source="height" />
             <NumberInput source="thumbnailWidth" />

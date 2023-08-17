@@ -50,6 +50,7 @@
     "date-fns": "^2.30.0",
     "date-fns-tz": "^2.0.0",
     "decamelize": "^6.0.0",
+    "dont-crop": "^0.2.0",
     "dotenv": "^16.3.1",
     "gsap": "^3.12.2",
     "html-webpack-plugin": "^5.5.3",

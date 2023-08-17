@@ -1,7 +1,7 @@
-
 export interface PhotoListReducerShape {
     items: PhotoItem[];
     isFetching: boolean;
+    background: string;
 }
 
 export interface PhotoViewerReducerShape {
@@ -11,6 +11,7 @@ export interface PhotoViewerReducerShape {
 export interface PhotoItem {
     file: string;
     credit: string;
+    dateTaken: string;
     width: number;
     height: number;
     thumbnailWidth: number;

@@ -20,7 +20,7 @@ interface AudioInfoProps {
     matchParams: boolean;
 }
 
-const AudioInfoContainer = styled.div(noHighlight, latoFont(100), {
+const AudioInfoContainer = styled.div(noHighlight, latoFont(200), {
     width: `calc(100% - ${playlistContainerWidth.desktop})`,
     height: '100%',
     zIndex: 10,
@@ -50,7 +50,7 @@ const AudioInfoContainer = styled.div(noHighlight, latoFont(100), {
 
 const ComposerTitle = styled.div({
     padding: '0 1.25rem',
-    fontSize: '2.2rem',
+    fontSize: '2.0rem',
     lineHeight: '3.2rem',
     width: '100%',
     overflowX: 'hidden',
@@ -77,14 +77,14 @@ const Marquee = styled.div({
 
 const Movement = styled.div({
     padding: '0 0.625rem',
-    fontSize: '2.2rem',
+    fontSize: '2.0rem',
     lineHeight: '3.2rem',
 });
 
 const ContributingOrDuration = styled.div({
     padding: '0 0.625rem',
-    fontSize: '2rem',
-    lineHeight: '3.2rem',
+    fontSize: '1.5rem',
+    lineHeight: '2.6rem',
 
     [toMedia([minRes, webkitMinDPR])]: {
         fontSize: '1.1rem',
@@ -174,11 +174,9 @@ class AudioInfo extends React.PureComponent<AudioInfoProps> {
                 : contributors.split(', ');
         const composerTitle = `${composer} ${piece}${year ? ` (${year})` : ''}`;
         const composerTitleWithMovement =
-            composerTitle + (movement ? `: ${movement}` : '');
+            composerTitle + (movement ? ` - ${movement}` : '');
         const metaTitle = ` | Music | ${composerTitleWithMovement}`;
-        const marqueeText = this.props.isMobile
-            ? composerTitleWithMovement
-            : composerTitle;
+        const marqueeText = composerTitleWithMovement
         return (
             <>
                 {this.props.matchParams && (
@@ -202,7 +200,6 @@ class AudioInfo extends React.PureComponent<AudioInfoProps> {
                             <span ref={this.secondSpan}>{marqueeText}</span>
                         </Marquee>
                     </ComposerTitle>
-                    {!isMobile && movement && <Movement>{movement}</Movement>}
                     {contribArray &&
                         (isMobile ? (
                             contribArray.map((contributor) => (

@@ -13,7 +13,7 @@ import {
     expr,
     wrap,
 } from '@mikro-orm/core';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { statSync } from 'fs';
 import { parse, resolve } from 'path';
 import { csrfMiddleware } from '../csrf.js';
@@ -36,7 +36,7 @@ import { Piece } from '../models/Piece.js';
 import { Product, ProductTypes } from '../models/Product.js';
 import { User } from '../models/User.js';
 import { crud, setGetListHeaders } from './crud.js';
-import { genThumbnail } from './genThumbnail.js';
+import { genThumbnail, getDateTaken } from './genThumbnail.js';
 import { genWaveformAndReturnDuration } from './genWaveform.js';
 import { mikroCrud } from './mikroCrud.js';
 import { NotFoundError } from './types.js';
@@ -444,11 +444,14 @@ adminRest.use(
 
 const musicStorage = multer.diskStorage({
     destination: resolve(process.env.MUSIC_ASSETS_DIR),
-    filename: (req, file, cb) => {
+    filename: (req, _file, cb) => {
         const fileName = req.body.fileName;
-        const exists = statSync(resolve(file.destination, fileName), {
-            throwIfNoEntry: false,
-        });
+        const exists = statSync(
+            resolve(process.env.MUSIC_ASSETS_DIR, fileName),
+            {
+                throwIfNoEntry: false,
+            },
+        );
         if (exists === undefined) {
             cb(null, req.body.fileName);
         } else {
@@ -459,11 +462,14 @@ const musicStorage = multer.diskStorage({
 
 const photoStorage = multer.diskStorage({
     destination: resolve(process.env.IMAGE_ASSETS_DIR, 'gallery'),
-    filename: (req, file, cb) => {
+    filename: (req, _file, cb) => {
         const fileName = req.body.fileName;
-        const exists = statSync(resolve(file.destination, fileName), {
-            throwIfNoEntry: false,
-        });
+        const exists = statSync(
+            resolve(process.env.IMAGE_ASSETS_DIR, 'gallery', fileName),
+            {
+                throwIfNoEntry: false,
+            },
+        );
         if (exists === undefined) {
             cb(null, req.body.fileName);
         } else {
@@ -742,6 +748,19 @@ adminRest.post('/actions/collaborators/trim', async (_req, res) => {
     await orm.em.flush();
     setGetListHeaders(res, count, collaborators.length);
     res.json({ count, rows: collaborators });
+});
+
+adminRest.post('/actions/photos/populate-date-taken', async (_req, res) => {
+    const [photos, count] = await orm.em.findAndCount(Photo, {
+        dateTaken: { $eq: null },
+    });
+    for (const p of photos) {
+        const dateTaken = p.file ? await getDateTaken(p.file) : undefined;
+        p.dateTaken = dateTaken;
+    }
+    await orm.em.flush();
+    setGetListHeaders(res, count, photos.length);
+    res.json({ count, rows: photos });
 });
 
 adminRest.post(

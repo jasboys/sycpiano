@@ -2704,6 +2704,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/exif-reader@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "@types/exif-reader@npm:1.0.0"
+  dependencies:
+    "@types/node": "*"
+  checksum: 21b79582ee85cd3689334dffd4df8c08f782e04af02c49cf1ab7813c0a9fd9b01b82847bfbecb5136306c45bf4277c08bc1331367799c16079ad994adc7892b5
+  languageName: node
+  linkType: hard
+
 "@types/express-serve-static-core@npm:*, @types/express-serve-static-core@npm:^4.17.33":
   version: 4.17.35
   resolution: "@types/express-serve-static-core@npm:4.17.35"
@@ -4885,6 +4894,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"dont-crop@npm:^0.2.0":
+  version: 0.2.0
+  resolution: "dont-crop@npm:0.2.0"
+  checksum: b1885d94c6ba36699b877b810822c7a4203be25901b21278b88001032145f41ef3ded1773f83ce51c97c7bf0803e0ad336f15d88d677f65d23f1faf35836e13c
+  languageName: node
+  linkType: hard
+
 "dot-case@npm:^3.0.4":
   version: 3.0.4
   resolution: "dot-case@npm:3.0.4"
@@ -5356,6 +5372,13 @@ __metadata:
   dependencies:
     pify: ^2.2.0
   checksum: f01927ce59bccec804e171bf859a26e362c1f50aa9ebc69f7cafdcce3859d29d4b6267fd47237c18b0a1830614bd3f0ee14b7380d9bad18a4e7af9b5f0b6984f
+  languageName: node
+  linkType: hard
+
+"exif-reader@npm:^1.2.0":
+  version: 1.2.0
+  resolution: "exif-reader@npm:1.2.0"
+  checksum: b46de38912b3195a468393cf514fbe2b116998a7bdfc5195b0c50ba1da237374d015696f427d3aec60f8dedf36871077fcce2bda2b485b1357d02e26d96a8171
   languageName: node
   linkType: hard
 
@@ -9764,6 +9787,7 @@ __metadata:
     "@types/cookie-parser": ^1.4.3
     "@types/cors": ^2.8.13
     "@types/csurf": ^1.11.2
+    "@types/exif-reader": ^1.0.0
     "@types/express": ^4.17.17
     "@types/jsdom": ^21.1.1
     "@types/lodash-es": ^4.17.8
@@ -9789,6 +9813,7 @@ __metadata:
     date-fns: ^2.30.0
     date-fns-tz: ^2.0.0
     dotenv: ^16.3.1
+    exif-reader: ^1.2.0
     express: ^4.18.2
     google-auth-library: ^8.9.0
     helmet: ^7.0.0
@@ -11059,6 +11084,7 @@ __metadata:
     date-fns: ^2.30.0
     date-fns-tz: ^2.0.0
     decamelize: ^6.0.0
+    dont-crop: ^0.2.0
     dotenv: ^16.3.1
     gsap: ^3.12.2
     html-webpack-plugin: ^5.5.3

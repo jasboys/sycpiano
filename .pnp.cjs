@@ -4240,6 +4240,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@types/exif-reader", [\
+        ["npm:1.0.0", {\
+          "packageLocation": "./.yarn/cache/@types-exif-reader-npm-1.0.0-f9124c9cb8-21b79582ee.zip/node_modules/@types/exif-reader/",\
+          "packageDependencies": [\
+            ["@types/exif-reader", "npm:1.0.0"],\
+            ["@types/node", "npm:20.4.10"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@types/express", [\
         ["npm:4.17.17", {\
           "packageLocation": "./.yarn/cache/@types-express-npm-4.17.17-46fe8173db-0196dacc27.zip/node_modules/@types/express/",\
@@ -6950,6 +6960,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["dont-crop", [\
+        ["npm:0.2.0", {\
+          "packageLocation": "./.yarn/cache/dont-crop-npm-0.2.0-fe61289e12-b1885d94c6.zip/node_modules/dont-crop/",\
+          "packageDependencies": [\
+            ["dont-crop", "npm:0.2.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["dot-case", [\
         ["npm:3.0.4", {\
           "packageLocation": "./.yarn/cache/dot-case-npm-3.0.4-09675b5521-a65e351941.zip/node_modules/dot-case/",\
@@ -7434,6 +7453,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["executable", "npm:4.1.1"],\
             ["pify", "npm:2.3.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["exif-reader", [\
+        ["npm:1.2.0", {\
+          "packageLocation": "./.yarn/cache/exif-reader-npm-1.2.0-36dfad7d40-b46de38912.zip/node_modules/exif-reader/",\
+          "packageDependencies": [\
+            ["exif-reader", "npm:1.2.0"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -12711,6 +12739,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/cookie-parser", "npm:1.4.3"],\
             ["@types/cors", "npm:2.8.13"],\
             ["@types/csurf", "npm:1.11.2"],\
+            ["@types/exif-reader", "npm:1.0.0"],\
             ["@types/express", "npm:4.17.17"],\
             ["@types/jsdom", "npm:21.1.1"],\
             ["@types/lodash-es", "npm:4.17.8"],\
@@ -12736,6 +12765,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["date-fns", "npm:2.30.0"],\
             ["date-fns-tz", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:2.0.0"],\
             ["dotenv", "npm:16.3.1"],\
+            ["exif-reader", "npm:1.2.0"],\
             ["express", "npm:4.18.2"],\
             ["google-auth-library", "npm:8.9.0"],\
             ["helmet", "npm:7.0.0"],\
@@ -14232,6 +14262,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["date-fns", "npm:2.30.0"],\
             ["date-fns-tz", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:2.0.0"],\
             ["decamelize", "npm:6.0.0"],\
+            ["dont-crop", "npm:0.2.0"],\
             ["dotenv", "npm:16.3.1"],\
             ["gsap", "npm:3.12.2"],\
             ["html-webpack-plugin", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:5.5.3"],\

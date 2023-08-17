@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 
 import { RequestContext } from '@mikro-orm/core';
-import rootPath from 'app-root-path';
+// import rootPath from 'app-root-path';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { RequestHandler, json, urlencoded } from 'express';
@@ -161,9 +161,11 @@ const main = async () => {
         credentials: true,
     };
 
+    let viewPaths: string[] = [path.resolve(process.env.PARTIALS_DIR)];
     // only for dev
-    // prod uses nginx to serve static files
+    // prod uses caddy to serve static files
     if (!isProduction) {
+        const { default: rootPath } = await import('app-root-path');
         if (!process.env.MUSIC_ASSETS_DIR || !process.env.IMAGE_ASSETS_DIR) {
             throw Error('Necessary environmental variables not found');
         }
@@ -186,20 +188,17 @@ const main = async () => {
             cors(corsOptions),
             express.static(path.resolve(rootPath.toString(), 'assets')),
         );
-        // app.use('/static', express.static(path.resolve(rootPath.toString(), 'web/build')));
-        // app.use('/static', createProxyMiddleware({
-        //     target: 'http://localhost:5173',
-        //     ws: true,
-        // }));
+
+        // overwrite viewPaths if in dev
+        viewPaths = [
+            path.resolve(rootPath.toString(), 'packages', 'web', 'src'),
+            path.resolve(rootPath.toString(), 'packages', 'admin', 'src'),
+        ];
     }
 
     app.engine('html', mustacheExpress());
     app.set('view engine', 'html');
-    app.set('views', [
-        path.resolve(rootPath.toString(), 'packages', 'web', 'build'),
-        path.resolve(rootPath.toString(), 'packages', 'admin', 'build'),
-        path.resolve(rootPath.toString(), 'partials'),
-    ]);
+    app.set('views', viewPaths);
 
     if (process.env.CORS_ORIGINS) {
         allowedOrigins = allowedOrigins.concat(
@@ -233,8 +232,10 @@ const main = async () => {
         cookieParser(process.env.COOKIE_SECRET),
         async (_req, res) => {
             res.render('admin', {
-                vite: {
-                    refresh: `
+                vite: isProduction
+                    ? {}
+                    : {
+                          refresh: `
                         <script type="module">
                             window.global = window;
                             import RefreshRuntime from 'http://localhost:5174/@react-refresh';
@@ -244,12 +245,12 @@ const main = async () => {
                             window.__vite_plugin_react_preamble_installed__ = true;
                         </script>
                     `,
-                    srcs: `
+                          srcs: `
                         <!-- if development -->
                         <script type="module" src="http://localhost:5174/@vite/client"></script>
                         <script type="module" src="http://localhost:5174/main.tsx"></script>
                     `,
-                },
+                      },
             });
         },
         // createProxyMiddleware({
@@ -290,6 +291,7 @@ const main = async () => {
                     `https://${req.get(
                         'host',
                     )}/static/images/syc_chair_meta.jpg`;
+
                 res.render('index', {
                     ...meta,
                     twitter: meta,
@@ -299,8 +301,10 @@ const main = async () => {
                         secure_image: meta.image,
                         url: `https://${req.get('host')}${req.originalUrl}`,
                     },
-                    vite: {
-                        refresh: `
+                    vite: isProduction
+                        ? {}
+                        : {
+                              refresh: `
                             <script type="module">
                                 window.global = window;
                                 import RefreshRuntime from 'http://localhost:5173/@react-refresh';
@@ -310,12 +314,11 @@ const main = async () => {
                                 window.__vite_plugin_react_preamble_installed__ = true;
                             </script>
                         `,
-                        srcs: `
-                            <!-- if development -->
+                              srcs: `
                             <script type="module" src="http://localhost:5173/@vite/client"></script>
                             <script type="module" src="http://localhost:5173/main.tsx"></script>
                         `,
-                    },
+                          },
                 });
             }
         },

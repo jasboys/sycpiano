@@ -9,30 +9,30 @@ import { Blurb } from './types';
 import { pictureHeight } from './common';
 
 const bioTextStyles = {
-    p: css({
-        fontSize: '1.0rem',
-        lineHeight: '2rem',
-        margin: '1.6rem 0',
+    // p: css({
+    //     fontSize: '1.0rem',
+    //     lineHeight: '2rem',
+    //     margin: '1.6rem 0',
 
-        [toMedia(isHamburger)]: {
-            '&:first-of-type': {
-                marginTop: 0,
-            },
-        },
+    //     [toMedia(isHamburger)]: {
+    //         '&:first-of-type': {
+    //             marginTop: 0,
+    //         },
+    //     },
 
-        [toMedia(screenM)]: {
-            fontSize: '1rem',
-        },
+    //     [toMedia(screenM)]: {
+    //         fontSize: '1rem',
+    //     },
 
-        [toMedia([screenXS, screenPortrait])]: {
-            fontSize: '1rem',
-            lineHeight: '1.6rem',
-            margin: '1.3rem 0',
-            '&:last-of-type': {
-                marginBottom: '3rem',
-            },
-        },
-    }),
+    //     [toMedia([screenXS, screenPortrait])]: {
+    //         fontSize: '1rem',
+    //         lineHeight: '1.6rem',
+    //         margin: '1.3rem 0',
+    //         '&:last-of-type': {
+    //             marginBottom: '3rem',
+    //         },
+    //     },
+    // }),
     spacer: css({
         display: 'none',
 
@@ -48,6 +48,33 @@ const bioTextStyles = {
         [toMedia([screenXS, screenPortrait])]: {
             backgroundColor: 'white',
             padding: '20px 20px',
+        },
+        p: {
+            fontSize: '1.0rem',
+            lineHeight: '2rem',
+            margin: '1.6rem 0',
+
+            [toMedia(isHamburger)]: {
+                '&:first-of-type': {
+                    marginTop: 0,
+                },
+            },
+
+            [toMedia(screenM)]: {
+                fontSize: '1rem',
+            },
+
+            [toMedia([screenXS, screenPortrait])]: {
+                fontSize: '1rem',
+                lineHeight: '1.6rem',
+                margin: '1.3rem 0',
+                '&:last-of-type': {
+                    marginBottom: '3rem',
+                },
+            },
+        },
+        span: {
+            fontWeight: 400,
         },
     }),
     textContainer: css({
@@ -74,7 +101,6 @@ const bioTextStyles = {
             overflowY: 'visible',
         },
     }),
-    nameSpan: css(latoFont(400)),
     title: css(latoFont(400), {
         fontSize: '1.5rem',
         color: logoBlue,
@@ -99,10 +125,12 @@ const BioText: React.FunctionComponent<BioTextProps> = (props) => {
                             options={{
                                 forceBlock: true,
                                 overrides: {
-                                    p: <p css={bioTextStyles.p} />,
-                                    strong: (
-                                        <span css={bioTextStyles.nameSpan} />
-                                    ),
+                                    p: {
+                                        component: 'p',
+                                    },
+                                    strong: {
+                                        component: 'span',
+                                    },
                                 },
                             }}
                         >

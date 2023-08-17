@@ -16,7 +16,7 @@ import { navBarHeight } from 'src/styles/variables';
 
 const photoListStyle = css({
     paddingLeft: 5,
-    backgroundColor: 'rgb(248 248 248)',
+    backgroundColor: 'transparent',
     top: 0,
     width: 300,
 
@@ -27,7 +27,7 @@ const photoListStyle = css({
 
 const photoULStyle = css({
     paddingBottom: 80,
-    backgroundColor: 'rgb(248 248 248)',
+    backgroundColor: 'transparent',
     [toMedia([minRes, webkitMinDPR])]: {
         paddingTop: navBarHeight.hiDpx,
         backgroundColor: 'unset',

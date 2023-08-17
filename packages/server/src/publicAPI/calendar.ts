@@ -101,18 +101,12 @@ calendarRouter.get(
             })
             .join('|');
 
+        console.log(regexPattern);
         const calendarResults = await orm.em.find(
             Calendar,
             {
-                // calendarSearchMatview: {
-                //     Search: {
-                //         $fulltext: tokens,
-                //     },
-                // },
                 calendarTrgmMatview: {
-                    doc: {
-                        $re: regexPattern,
-                    },
+                    doc: new RegExp(regexPattern, 'i'),
                 },
             },
             {

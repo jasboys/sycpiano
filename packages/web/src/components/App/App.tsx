@@ -230,8 +230,6 @@ const useCustomMatch = (): [RouterMatchPaths, TransitionMatchPaths] => {
         error,
     ].reduce((prev, curr) => prev ?? curr, null);
 
-    console.log(reducedForRouter);
-
     return [reducedForRouter, reducedForTransition];
 };
 

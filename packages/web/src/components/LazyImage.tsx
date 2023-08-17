@@ -2,22 +2,23 @@ import Blazy from 'blazy';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
 
-import { Interpolation, Theme } from '@emotion/react';
-import styled from '@emotion/styled';
+import { Interpolation, Theme, css } from '@emotion/react';
 
 import { LoadingInstance } from 'src/components/LoadingSVG';
 import { lightBlue } from 'src/styles/colors';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
 
-const StyledLoadingInstance = styled(LoadingInstance)`
-    position: absolute;
-    height: 100px;
-    top: 50%;
-    left: 50%;
-    transform: translateX(-50%) translateY(-50%);
-    padding: 10px;
-    stroke: ${lightBlue};
-`;
+const loadingContainerStyle = css({
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    svg: {
+        stroke: lightBlue,
+    },
+});
 
 interface PictureGroupAttributes {
     readonly webp?: {
@@ -102,9 +103,9 @@ export const LazyImage: React.FC<LazyImageProps> = (props) => {
         alt,
         loadingComponent: LoadingComponent,
     } = props;
-    let Loading: React.ComponentType | typeof StyledLoadingInstance | undefined;
+    let Loading: React.ComponentType | typeof LoadingInstance | undefined;
     if (LoadingComponent === 'default') {
-        Loading = StyledLoadingInstance;
+        Loading = LoadingInstance;
     } else {
         Loading = LoadingComponent;
     }
@@ -147,7 +148,9 @@ export const LazyImage: React.FC<LazyImageProps> = (props) => {
                 onExit={fadeOnExit()}
                 timeout={250}
             >
-                <div css={csss?.loading}>{Loading ? <Loading /> : null}</div>
+                <div css={[loadingContainerStyle, csss?.loading]}>
+                    {Loading ? <Loading /> : null}
+                </div>
             </Transition>
 
             <picture key="mobile" css={csss?.picture}>

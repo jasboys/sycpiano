@@ -22,6 +22,9 @@ export class Photo {
     @Property({ nullable: true })
     thumbnailHeight?: number;
 
+    @Property({ nullable: true })
+    dateTaken?: Date;
+
     @Property({ columnType: 'text', nullable: true })
     credit?: string;
 }

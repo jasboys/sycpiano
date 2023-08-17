@@ -310,6 +310,30 @@ const provider = (apiUrl: string): AdminProvider => {
                 total: parseInt(headers['x-total-count'], 10),
             };
         },
+
+        populateDateTaken: async (resource: string) => {
+            if (resource !== 'photos') {
+                return Promise.reject(
+                    'Called on a resource that is not photos',
+                );
+            }
+            const { data, headers } = await axiosInstance.post(
+                '/actions/photos/populate-date-taken',
+                {},
+                {
+                    headers: {
+                        'X-CSRF-TOKEN': 'admin',
+                    },
+                },
+            );
+            if (!headers?.['x-total-count']) {
+                throw new TotalCountError();
+            }
+            return {
+                data: ingestArrayTransformer(resource, data),
+                total: parseInt(headers['x-total-count'], 10),
+            };
+        },
     };
 };
 
@@ -324,6 +348,10 @@ export interface AdminProvider<ResourceType extends string = string>
         params: { ids?: Identifier[] },
     ) => Promise<GetListResult<RecordType>>;
     trim: <RecordType extends RaRecord>(
+        resource: string,
+        params: {},
+    ) => Promise<GetListResult<RecordType>>;
+    populateDateTaken: <RecordType extends RaRecord>(
         resource: string,
         params: {},
     ) => Promise<GetListResult<RecordType>>;
@@ -424,6 +452,7 @@ export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
                     fileName: string;
                     original: { width: number; height: number };
                     thumbnail: { width: number; height: number };
+                    dateTaken: string;
                 }>(
                     `${ADMIN_URI}/photos/upload`,
                     {
@@ -444,6 +473,7 @@ export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
                         height: uploaded.original.height,
                         thumbnailWidth: uploaded.thumbnail.width,
                         thumbnailHeight: uploaded.thumbnail.height,
+                        dateTaken: uploaded.dateTaken,
                         credit: data.credit,
                     },
                 };
@@ -451,7 +481,7 @@ export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
         },
         {
             resource: 'products',
-            beforeUpdate: async ({ data, ...restParams }, dataProvider) => {
+            beforeUpdate: async ({ data, ...restParams }, _dataProvider) => {
                 console.log(data);
                 const {
                     newImages,

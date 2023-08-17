@@ -18,6 +18,7 @@ const required = [
     'STRIPE_WEBHOOK_KEY',
     'COOKIE_SECRET',
     'PRODUCTS_DIR',
+    'PARTIALS_DIR',
     'GAPI_CLIENT_EMAIL',
     'GAPI_PRIVATE_KEY',
     ...(process.env.USE_DUMMY_MAILER !== 'true' ? smtpEnvVars : []),

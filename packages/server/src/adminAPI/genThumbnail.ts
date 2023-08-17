@@ -1,6 +1,27 @@
+import exifReader from 'exif-reader';
 import { resolve } from 'path';
 import Sharp from 'sharp';
 import smartcrop from 'smartcrop-sharp';
+
+export const getDateTaken = async (fileName: string) => {
+    try {
+        const imageFile = resolve(
+            process.env.IMAGE_ASSETS_DIR,
+            'gallery',
+            fileName,
+        );
+        const sharpImage = Sharp(imageFile);
+        const metadata = await sharpImage.metadata();
+        const exif = metadata.exif;
+        const dateTaken = exif
+            ? (exifReader(exif).exif?.DateTimeOriginal as Date)
+            : undefined;
+        console.log(dateTaken);
+        return dateTaken;
+    } catch (e) {
+        console.log(e);
+    }
+};
 
 export const genThumbnail = async (fileName: string) => {
     try {
@@ -11,6 +32,11 @@ export const genThumbnail = async (fileName: string) => {
         );
         const sharpImage = Sharp(imageFile);
         const metadata = await sharpImage.metadata();
+        const exif = metadata.exif;
+        const dateTaken = exif
+            ? exifReader(exif).exif?.DateTimeOriginal
+            : undefined;
+
         const newWidth = metadata.width;
         if (!newWidth) {
             throw Error('could not get width of image');
@@ -49,6 +75,7 @@ export const genThumbnail = async (fileName: string) => {
                 width: output.width,
                 height: output.height,
             },
+            dateTaken,
         };
     } catch (e) {
         console.log(e);
