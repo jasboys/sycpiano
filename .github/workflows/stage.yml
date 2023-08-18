@@ -29,7 +29,7 @@ jobs:
         echo "$SSH_KEY" > ~/.ssh/id_ed25519
         chmod 600 ~/.ssh/id_ed25519
         ssh-keyscan ssh.seanchenpiano.com > ~/.ssh/known_hosts
-        ssh -L 63333:localhost:5432 deploy@ssh.seanchenpiano.com
+        ssh -fN -v -L 5432:localhost:5432 deploy@ssh.seanchenpiano.com
       env:
         SSH_KEY: ${{ secrets.SSH_ED25519 }}
     - name: Migration
@@ -39,6 +39,6 @@ jobs:
         options: -v ${{ github.workspace }}:/workspace --network=host
         run: |
           cd /workspace
-          echo "DATABASE_URL=postgres://sycpiano:sycpiano@localhost:63333/sycpiano_staging?sslmode=disable" > .env
+          echo "DATABASE_URL=postgres://sycpiano:sycpiano@localhost:5432/sycpiano_staging?sslmode=disable" > .env
           dbmate -d ./packages/server/migrations status
 
