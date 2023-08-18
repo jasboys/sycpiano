@@ -25,7 +25,9 @@ jobs:
     #     tags: kamiyo/sycpiano:latest
     - name: Create Tunnel to DB
       run: |
-        ssh -V
+        mkdir -P ~/.ssh
+        ${{ secrets.SSH_ED25519 }} > id_ed25519
+        ssh deploy@ssh.seanchenpiano.com
     # - name: Migration
     #   uses: addnab/docker-run-action@v3
     #   with:
