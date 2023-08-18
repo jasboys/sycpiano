@@ -8,8 +8,8 @@ jobs:
   backend:
     runs-on: ubuntu-latest
     steps:
-    # - name: Checkout
-    #   uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v3
     # - name: Set up Docker Buildx
     #   uses: docker/setup-buildx-action@v2
     # - name: Login to Docker Hub
@@ -29,11 +29,16 @@ jobs:
         echo "$SSH_KEY" > ~/.ssh/id_ed25519
         chmod 600 ~/.ssh/id_ed25519
         ssh-keyscan ssh.seanchenpiano.com > ~/.ssh/known_hosts
-        ssh deploy@ssh.seanchenpiano.com
+        ssh -L 63333:localhost:5432 deploy@ssh.seanchenpiano.com
       env:
         SSH_KEY: ${{ secrets.SSH_ED25519 }}
-    # - name: Migration
-    #   uses: addnab/docker-run-action@v3
-    #   with:
-    #     image: amacneil/dbmate
-    #     options: -v ${{ github.workspace }}:/workspace
+    - name: Migration
+      uses: addnab/docker-run-action@v3
+      with:
+        image: amacneil/dbmate
+        options: -v ${{ github.workspace }}:/workspace --network=host
+        run: |
+          dbmate -d /workspace/packages/server/migrations status
+        env:
+          DATABASE_URL: postgres://sycpiano:sycpiano@localhost:63333/sycpiano_staging?sslmode=disable
+
