@@ -51,8 +51,7 @@ const orm = await MikroORM.init<FixedPostgresql>({
     entitiesTs: ['packages/server/src/models'],
     metadataProvider: ReflectMetadataProvider,
     clientUrl: databaseUrl,
-    // debug: process.env.NODE_ENV === 'development',
-    debug: true,
+    debug: process.env.NODE_ENV === 'development',
     driver: FixedPostgresql,
     loadStrategy: LoadStrategy.JOINED,
 });
