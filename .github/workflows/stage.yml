@@ -26,8 +26,9 @@ jobs:
     - name: Create Tunnel to DB
       run: |
         mkdir -p ~/.ssh
-        echo "$SSH_KEY" > id_ed25519
-        ssh-keyscan deploy@ssh.seanchenpiano.com
+        echo "$SSH_KEY" > ~/.ssh/id_ed25519
+        ssh-keyscan ssh.seanchenpiano.com > ~/.ssh/known_hosts
+        ssh deploy@ssh.seanchenpiano.com
       env:
         SSH_KEY: ${{ secrets.SSH_ED25519 }}
     # - name: Migration
