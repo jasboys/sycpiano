@@ -75,11 +75,11 @@ const Marquee = styled.div({
     },
 });
 
-const Movement = styled.div({
-    padding: '0 0.625rem',
-    fontSize: '2.0rem',
-    lineHeight: '3.2rem',
-});
+// const Movement = styled.div({
+//     padding: '0 0.625rem',
+//     fontSize: '2.0rem',
+//     lineHeight: '3.2rem',
+// });
 
 const ContributingOrDuration = styled.div({
     padding: '0 0.625rem',

@@ -13,7 +13,7 @@ import {
     expr,
     wrap,
 } from '@mikro-orm/core';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { statSync } from 'fs';
 import { parse, resolve } from 'path';
 import { csrfMiddleware } from '../csrf.js';
