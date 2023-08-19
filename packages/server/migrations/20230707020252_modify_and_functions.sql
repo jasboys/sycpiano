@@ -34,7 +34,7 @@ ALTER TABLE calendar
     ALTER COLUMN timezone TYPE text,
     ALTER COLUMN timezone SET DEFAULT current_setting('TIMEZONE'),
     ALTER COLUMN location TYPE text,
-    ALTER COLUMN location DROP NOT NULL,
+    ALTER COLUMN location SET NOT NULL,
     ALTER COLUMN "type" TYPE text,
     ALTER COLUMN "type" SET NOT NULL,
     ALTER COLUMN website TYPE text;
