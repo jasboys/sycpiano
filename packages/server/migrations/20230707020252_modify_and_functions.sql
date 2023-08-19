@@ -22,6 +22,7 @@ ALTER TABLE collaborator DROP COLUMN _search CASCADE;
 
 -- first make sure no null "type" columns
 UPDATE calendar SET "type" = 'solo' WHERE "type" IS NULL;
+UPDATE calendar SET location = 'Kansas City, MO' WHERE location IS NULL;
 
 ALTER TABLE calendar
     DROP COLUMN IF EXISTS created_at,
@@ -52,6 +53,9 @@ ALTER TABLE collaborator
     ALTER COLUMN id SET DEFAULT gen_random_uuid(),
     ALTER COLUMN name TYPE text,
     ALTER COLUMN instrument TYPE text;
+
+DELETE FROM calendar_piece WHERE calendar_id IS NULL OR piece_id IS NULL;
+DELETE FROM calendar_collaborator WHERE calendar_id IS NULL OR collaborator_id IS NULL;
 
 ALTER TABLE calendar_piece
     DROP COLUMN IF EXISTS created_at,
