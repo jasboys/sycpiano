@@ -40,5 +40,5 @@ jobs:
         run: |
           cd /workspace
           echo "DATABASE_URL=postgres://sycpiano:sycpiano@localhost:5432/sycpiano_staging?sslmode=disable" > .env
-          dbmate -d ./packages/server/migrations status
+          dbmate -d ./packages/server/migrations up
 
