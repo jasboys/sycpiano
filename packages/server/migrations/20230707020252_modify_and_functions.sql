@@ -26,7 +26,7 @@ UPDATE calendar SET "type" = 'solo' WHERE "type" IS NULL;
 ALTER TABLE calendar
     DROP COLUMN IF EXISTS created_at,
     DROP COLUMN IF EXISTS updated_at,
-    ALTER COLUMN id TYPE text,
+    -- ALTER COLUMN id TYPE text,
     ALTER COLUMN all_day SET NOT NULL,
     ALTER COLUMN date_time SET NOT NULL,
     ALTER COLUMN name TYPE text,
@@ -34,7 +34,7 @@ ALTER TABLE calendar
     ALTER COLUMN timezone TYPE text,
     ALTER COLUMN timezone SET DEFAULT current_setting('TIMEZONE'),
     ALTER COLUMN location TYPE text,
-    ALTER COLUMN location SET NOT NULL,
+    ALTER COLUMN location DROP NOT NULL,
     ALTER COLUMN "type" TYPE text,
     ALTER COLUMN "type" SET NOT NULL,
     ALTER COLUMN website TYPE text;
@@ -146,6 +146,8 @@ CREATE MATERIALIZED VIEW IF NOT EXISTS calendar_trgm_matview AS
             GROUP BY 1
         ) cpj USING (id)
     WITH DATA;
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 CREATE INDEX calendar_trgm_gist_idx ON calendar_trgm_matview USING gist(doc gist_trgm_ops);
 
