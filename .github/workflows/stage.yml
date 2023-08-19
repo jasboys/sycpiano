@@ -14,10 +14,14 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 20.x
-      - name: Install web deps
-        run: yarn workspace web install
-      - name: Build web
-        run: yarn workspace web build
+      - name: Common deps and build
+        run: |
+          yarn workspace common install
+          yarn workspace common build
+      - name: Web deps and build
+        run: |
+          yarn workspace web install
+          yarn workspace web build
 
   # backend:
   #   runs-on: ubuntu-latest
