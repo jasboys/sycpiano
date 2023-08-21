@@ -11,7 +11,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Use Node
+      - name: Setup Node and Common
         uses: ./.github/actions/setup-node-and-common
         with:
           node-version: 20.x
@@ -22,6 +22,13 @@ jobs:
         env:
           GAPI_KEY_APP: ${{ secrets.GAPI_KEY_APP }}
           PUBLIC_HOST: ${{ env.PUBLIC_HOST }}
+      - name: RSync to Host
+        run: |
+          rsync --delete-before --mkpath -iz --dry-run ./packages/admin/build/static/scripts/admin $SSH_USER@$SSH_HOST:$ADMIN_DEST
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          ADMIN_DEST: ${{ secrets.ADMIN_DEST }}
 
   # frontend:
   #   runs-on: ubuntu-latest
@@ -29,14 +36,10 @@ jobs:
   #   steps:
   #   - name: Checkout
   #     uses: actions/checkout@v3
-  #   - name: Use Node
-  #     uses: actions/setup-node@v3
+  #   - name: Setup Node and Common
+  #     uses: ./.github/actions/setup-node-and-common
   #     with:
   #       node-version: 20.x
-  #   - name: Common deps and build
-  #     run: |
-  #       yarn workspace common install
-  #       yarn workspace common build
   #   - name: Web deps and build
   #     run: |
   #       yarn workspace web install
