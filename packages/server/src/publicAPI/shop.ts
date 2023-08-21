@@ -259,7 +259,7 @@ shopRouter.post('/resend-purchased', async (req, res) => {
             throw Error('No products purchased');
         }
         const purchasedIDs = purchased.toArray().map((prod) => prod.id);
-        await emailPDFs(purchasedIDs, email);
+        await mailer.emailPDFs(purchasedIDs, email);
         localCustomer.lastRequest = new Date();
         orm.em.flush();
         res.sendStatus(200);
