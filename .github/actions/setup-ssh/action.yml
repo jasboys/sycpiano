@@ -12,6 +12,7 @@ runs:
   using: "composite"
   steps:
     - name: Create Tunnel to DB
+      shell: bash
       run: |
         mkdir -p ~/.ssh
         echo "$SSH_KEY" > ~/.ssh/id_ed25519
