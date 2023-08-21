@@ -5166,7 +5166,6 @@ const RAW_RUNTIME_STATE =
           ["react-admin", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:4.13.0"],\
           ["react-dom", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:18.2.0"],\
           ["react-hook-form", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:7.45.4"],\
-          ["react-is", "npm:18.2.0"],\
           ["react-query", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:3.39.3"],\
           ["react-router", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:6.15.0"],\
           ["react-router-dom", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:6.15.0"],\
@@ -11493,7 +11492,6 @@ const RAW_RUNTIME_STATE =
           ["@types/react", "npm:18.2.20"],\
           ["@types/react-dom", "npm:18.2.7"],\
           ["@types/react-hook-form", null],\
-          ["@types/react-is", null],\
           ["@types/react-router", null],\
           ["@types/react-router-dom", null],\
           ["autosuggest-highlight", "npm:3.3.4"],\
@@ -11512,7 +11510,7 @@ const RAW_RUNTIME_STATE =
           ["react-dropzone", "virtual:fac2693aa112585a38d2f111772fe0866f3bb2f011ba3ebb6d9cc6a4f3ffa0d698b199ebb10afd880666a6d35018d5ddb071cf1b091e25a24f1aeb8f6e5d48ec#npm:12.1.0"],\
           ["react-error-boundary", "virtual:fac2693aa112585a38d2f111772fe0866f3bb2f011ba3ebb6d9cc6a4f3ffa0d698b199ebb10afd880666a6d35018d5ddb071cf1b091e25a24f1aeb8f6e5d48ec#npm:3.1.4"],\
           ["react-hook-form", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:7.45.4"],\
-          ["react-is", null],\
+          ["react-is", "npm:18.2.0"],\
           ["react-query", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:3.39.3"],\
           ["react-router", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:6.15.0"],\
           ["react-router-dom", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:6.15.0"],\
@@ -11526,14 +11524,12 @@ const RAW_RUNTIME_STATE =
           "@types/ra-core",\
           "@types/react-dom",\
           "@types/react-hook-form",\
-          "@types/react-is",\
           "@types/react-router-dom",\
           "@types/react-router",\
           "@types/react",\
           "ra-core",\
           "react-dom",\
           "react-hook-form",\
-          "react-is",\
           "react-router-dom",\
           "react-router",\
           "react"\
