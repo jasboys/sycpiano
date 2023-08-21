@@ -13,6 +13,7 @@ runs:
       with:
         node-version: ${{ inputs.node-version }}
     - name: Common deps and build
+      shell: bash
       run: |
         yarn workspace common install
         yarn workspace common build
