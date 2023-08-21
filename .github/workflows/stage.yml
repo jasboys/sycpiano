@@ -58,7 +58,7 @@ jobs:
         uses: addnab/docker-run-action@v3
         with:
           image: amacneil/dbmate
-          options: -v ${{ github.workspace }}:/workspace --network=host
+          options: -v ${{ github.workspace }}:/workspace --network=host -e DATABASE_URL
           run: |
             cd /workspace
             dbmate -d ./packages/server/migrations up
