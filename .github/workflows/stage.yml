@@ -29,7 +29,7 @@ jobs:
           ssh-host: ${{ secrets.SSH_HOST }}
       - name: RSync to Host
         run: |
-          rsync --delete --dirs -ivz --chown=deploy:www-data --chmod=Dg=rwx,Fg=rwx -p $BUILD_DIR $SSH_USER@$SSH_HOST:$ADMIN_DEST
+          rsync --delete --dirs -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $BUILD_DIR $SSH_USER@$SSH_HOST:$ADMIN_DEST
         env:
           BUILD_DIR: ./packages/admin/build/static/scripts/admin/
           SSH_HOST: ${{ secrets.SSH_HOST }}
