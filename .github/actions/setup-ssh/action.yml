@@ -1,0 +1,22 @@
+name: "Setup SSH"
+description: "Setup SSH Config"
+inputs:
+  ssh-key:
+    required: true
+    description: "Private Key"
+  ssh-host:
+    required: true
+    description: "Host name or IP of the server"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Create Tunnel to DB
+      run: |
+        mkdir -p ~/.ssh
+        echo "$SSH_KEY" > ~/.ssh/id_ed25519
+        chmod 600 ~/.ssh/id_ed25519
+        ssh-keyscan $SSH_HOST > ~/.ssh/known_hosts
+      env:
+        SSH_KEY: ${{ inputs.ssh-key }}
+        SSH_HOST: ${{ inputs.ssh-host }}
