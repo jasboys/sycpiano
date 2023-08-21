@@ -22,6 +22,11 @@ jobs:
         env:
           GAPI_KEY_APP: ${{ secrets.GAPI_KEY_APP }}
           PUBLIC_HOST: ${{ env.PUBLIC_HOST }}
+      - name: Setup SSH
+        uses: ./.github/actions/setup-ssh
+        with:
+          ssh-key: ${{ secrets.SSH_ED25519 }}
+          ssh-host: ${{ secrets.SSH_HOST }}
       - name: RSync to Host
         run: |
           rsync --delete --dirs --mkpath -iz --dry-run ./packages/admin/build/static/scripts/admin $SSH_USER@$SSH_HOST:$ADMIN_DEST
