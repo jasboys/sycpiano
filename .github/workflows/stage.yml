@@ -59,9 +59,9 @@ jobs:
         with:
           image: amacneil/dbmate
           options: -v ${{ github.workspace }}:/workspace --network=host
-          env:
-            DATABASE_URL: ${{ format('postgres://{0}:{1}@localhost:5432/{2}?sslmode=disable', secrets.DB_USER, secrets.DB_PASS, secrets.DB_NAME) }}
           run: |
             cd /workspace
             dbmate -d ./packages/server/migrations up
+        env:
+            DATABASE_URL: ${{ format('postgres://{0}:{1}@localhost:5432/{2}?sslmode=disable', secrets.DB_USER, secrets.DB_PASS, secrets.DB_NAME) }}
 
