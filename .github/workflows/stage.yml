@@ -115,4 +115,4 @@ jobs:
           ssh server $COMMAND
         env:
           # COMMAND: ${{ format('''cd {0} && ls && docker compose pull && docker compose up -d && docker image prune''', vars.COMPOSE_DIR) }}
-          COMMAND: ${{ format('''cd {0} && ls''', vars.COMPOSE_DIR) }}
+          COMMAND: ${{ format('cd {0} && ls', vars.COMPOSE_DIR) }}
