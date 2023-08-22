@@ -112,6 +112,6 @@ jobs:
             DATABASE_URL: ${{ format('postgres://{0}:{1}@localhost:5432/{2}?sslmode=disable', secrets.DB_USER, secrets.DB_PASS, secrets.DB_NAME) }}
       - name: Run docker compose pull and up and prune
         run: |
-          ssh server 'cd /srv/www/$FOLDER && docker compose pull && docker compose up -d && docker image prune'
+          ssh server 'cd /srv/$FOLDER && docker compose pull && docker compose up -d && docker image prune'
         env:
           FOLDER: sycpiano-staging
