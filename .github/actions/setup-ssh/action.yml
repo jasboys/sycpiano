@@ -22,11 +22,11 @@ runs:
         chmod 600 ~/.ssh/id_ed25519
         ssh-keyscan $SSH_HOST > ~/.ssh/known_hosts
         cat >>~/.ssh/config <<END
-          Host server
-            HostName $SSH_HOST
-            User $SSH_USER
-            IdentityFile ~/.ssh/id_ed25519
-          END
+        Host server
+          HostName $SSH_HOST
+          User $SSH_USER
+          IdentityFile ~/.ssh/id_ed25519
+        END
       env:
         SSH_KEY: ${{ inputs.ssh-key }}
         SSH_HOST: ${{ inputs.ssh-host }}
