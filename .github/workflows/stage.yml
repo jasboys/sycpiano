@@ -27,32 +27,51 @@ jobs:
         with:
           ssh-key: ${{ secrets.SSH_ED25519 }}
           ssh-host: ${{ secrets.SSH_HOST }}
-      - name: RSync to Host
+      - name: RSync scripts and html to Host
         run: |
-          rsync --delete --dirs -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $BUILD_DIR $SSH_USER@$SSH_HOST:$ADMIN_DEST
+          rsync --delete --dirs -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $SCRIPT_SRC $SSH_USER@$SSH_HOST:$SCRIPT_DEST
+          rsync -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $HTML_SRC $SSH_USER@$SSH_HOST:$HTML_DEST
         env:
-          BUILD_DIR: ./packages/admin/build/static/scripts/admin/
+          SCRIPT_SRC: ./packages/admin/build/static/scripts/admin/
+          HTML_SRC: ./packages/admin/build/admin.html
+          HTML_DEST: ${{ env.HTML_DEST}}
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
-          ADMIN_DEST: ${{ secrets.ADMIN_DEST }}
+          SCRIPT_DEST: ${{ env.ADMIN_DEST }}
 
   # frontend:
   #   runs-on: ubuntu-latest
   #   environment: staging
   #   steps:
-  #   - name: Checkout
-  #     uses: actions/checkout@v3
-  #   - name: Setup Node and Common
-  #     uses: ./.github/actions/setup-node-and-common
-  #     with:
-  #       node-version: 20.x
-  #   - name: Web deps and build
-  #     run: |
-  #       yarn workspace web install
-  #       yarn workspace web build
-  #     env:
-  #       GAPI_KEY_APP: ${{ secrets.GAPI_KEY_APP }}
-  #       STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #     - name: Setup Node and Common
+  #       uses: ./.github/actions/setup-node-and-common
+  #       with:
+  #         node-version: 20.x
+  #     - name: Web deps and build
+  #       run: |
+  #         yarn workspace web install
+  #         yarn workspace web build
+  #       env:
+  #         GAPI_KEY_APP: ${{ secrets.GAPI_KEY_APP }}
+  #         STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
+  #     - name: Setup SSH
+  #       uses: ./.github/actions/setup-ssh
+  #       with:
+  #         ssh-key: ${{ secrets.SSH_ED25519 }}
+  #         ssh-host: ${{ secrets.SSH_HOST }}
+      # - name: RSync scripts and html to Host
+      #   run: |
+      #     rsync --delete --dirs -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $SCRIPT_SRC $SSH_USER@$SSH_HOST:$SCRIPT_DEST
+      #     rsync -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $HTML_SRC $SSH_USER@$SSH_HOST:$HTML_DEST
+      #   env:
+      #     SCRIPT_SRC: ./packages/web/build/static/scripts/web/
+      #     HTML_SRC: ./packages/web/build/index.html
+      #     HTML_DEST: ${{ env.HTML_DEST}}
+      #     SSH_HOST: ${{ secrets.SSH_HOST }}
+      #     SSH_USER: ${{ secrets.SSH_USER }}
+      #     SCRIPT_DEST: ${{ env.WEB_DEST }}
 
   # backend:
   #   runs-on: ubuntu-latest
