@@ -7,6 +7,9 @@ inputs:
   ssh-host:
     required: true
     description: "Host name or IP of the server"
+  ssh-user:
+    required: true
+    description: "SSH User"
 
 runs:
   using: "composite"
@@ -18,6 +21,13 @@ runs:
         echo "$SSH_KEY" > ~/.ssh/id_ed25519
         chmod 600 ~/.ssh/id_ed25519
         ssh-keyscan $SSH_HOST > ~/.ssh/known_hosts
+        cat >>~/.ssh/config <<END
+          Host server
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/id_ed25519
+          END
       env:
         SSH_KEY: ${{ inputs.ssh-key }}
         SSH_HOST: ${{ inputs.ssh-host }}
+        SSH_USER: ${{ inputs.ssh-user }}
