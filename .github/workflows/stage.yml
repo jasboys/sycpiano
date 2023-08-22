@@ -5,39 +5,39 @@ on:
     branches: [ "staging" ]
 
 jobs:
-  # admin:
-  #   runs-on: ubuntu-latest
-  #   environment: staging
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-  #     - name: Setup Node and Common
-  #       uses: ./.github/actions/setup-node-and-common
-  #       with:
-  #         node-version: 20.x
-  #     - name: Admin deps and build
-  #       run: |
-  #         yarn workspace admin install
-  #         yarn workspace admin build
-  #       env:
-  #         GAPI_KEY_APP: ${{ secrets.GAPI_KEY_APP }}
-  #         PUBLIC_HOST: ${{ env.PUBLIC_HOST }}
-  #     - name: Setup SSH
-  #       uses: ./.github/actions/setup-ssh
-  #       with:
-  #         ssh-key: ${{ secrets.SSH_ED25519 }}
-  #         ssh-host: ${{ secrets.SSH_HOST }}
-  #         ssh-user: ${{ secrets.SSH_USER }}
-  #     - name: RSync scripts and html to Host
-  #       if: ${{ vars.HTML_DEST != '' && vars.ADMIN_DEST != '' }}
-  #       run: |
-  #         rsync --delete --dirs -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $SCRIPT_SRC server:$SCRIPT_DEST
-  #         rsync -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $HTML_SRC server:$HTML_DEST
-  #       env:
-  #         SCRIPT_SRC: ./packages/admin/build/static/scripts/admin/
-  #         SCRIPT_DEST: ${{ vars.ADMIN_DEST }}
-  #         HTML_SRC: ./packages/admin/build/admin.html
-  #         HTML_DEST: ${{ vars.HTML_DEST }}
+  admin:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Node and Common
+        uses: ./.github/actions/setup-node-and-common
+        with:
+          node-version: 20.x
+      - name: Admin deps and build
+        run: |
+          yarn workspaces focus admin
+          yarn workspace admin build
+        env:
+          GAPI_KEY_APP: ${{ secrets.GAPI_KEY_APP }}
+          PUBLIC_HOST: ${{ env.PUBLIC_HOST }}
+      - name: Setup SSH
+        uses: ./.github/actions/setup-ssh
+        with:
+          ssh-key: ${{ secrets.SSH_ED25519 }}
+          ssh-host: ${{ secrets.SSH_HOST }}
+          ssh-user: ${{ secrets.SSH_USER }}
+      - name: RSync scripts and html to Host
+        if: ${{ vars.HTML_DEST != '' && vars.ADMIN_DEST != '' }}
+        run: |
+          rsync --delete --dirs -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $SCRIPT_SRC server:$SCRIPT_DEST
+          rsync -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $HTML_SRC server:$HTML_DEST
+        env:
+          SCRIPT_SRC: ./packages/admin/build/static/scripts/admin/
+          SCRIPT_DEST: ${{ vars.ADMIN_DEST }}
+          HTML_SRC: ./packages/admin/build/admin.html
+          HTML_DEST: ${{ vars.HTML_DEST }}
 
   # frontend:
   #   runs-on: ubuntu-latest
@@ -51,7 +51,7 @@ jobs:
   #         node-version: 20.x
   #     - name: Web deps and build
   #       run: |
-  #         yarn workspace web install
+  #         yarn workspaces focus web
   #         yarn workspace web build
   #       env:
   #         GAPI_KEY_APP: ${{ secrets.GAPI_KEY_APP }}
@@ -73,12 +73,12 @@ jobs:
   #         HTML_SRC: ./packages/web/build/index.html
   #         HTML_DEST: ${{ vars.HTML_DEST }}
 
-  backend:
-    runs-on: ubuntu-latest
-    environment: staging
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+  # backend:
+  #   runs-on: ubuntu-latest
+  #   environment: staging
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
       # - name: Set up Docker Buildx
       #   uses: docker/setup-buildx-action@v2
       # - name: Login to Docker Hub
@@ -92,12 +92,12 @@ jobs:
       #     context: .
       #     push: true
       #     tags: kamiyo/sycpiano:latest
-      - name: Setup SSH
-        uses: ./.github/actions/setup-ssh
-        with:
-          ssh-key: ${{ secrets.SSH_ED25519 }}
-          ssh-host: ${{ secrets.SSH_HOST }}
-          ssh-user: ${{ secrets.SSH_USER }}
+      # - name: Setup SSH
+      #   uses: ./.github/actions/setup-ssh
+      #   with:
+      #     ssh-key: ${{ secrets.SSH_ED25519 }}
+      #     ssh-host: ${{ secrets.SSH_HOST }}
+      #     ssh-user: ${{ secrets.SSH_USER }}
       # - name: Create Tunnel to DB
       #   run: ssh -fN -L 5432:localhost:5432 server
       # - name: Migration
@@ -110,8 +110,8 @@ jobs:
       #       dbmate -d ./packages/server/migrations up
       #   env:
       #       DATABASE_URL: ${{ format('postgres://{0}:{1}@localhost:5432/{2}?sslmode=disable', secrets.DB_USER, secrets.DB_PASS, secrets.DB_NAME) }}
-      - name: Run docker compose pull and up and prune
-        run: |
-          ssh server $COMMAND
-        env:
-          COMMAND: ${{ format('cd {0} && ls && docker compose pull && docker compose up -d && docker image prune', vars.COMPOSE_DIR) }}
+      # - name: Run docker compose pull and up and prune
+      #   run: |
+      #     ssh server $COMMAND
+      #   env:
+      #     COMMAND: ${{ format('cd {0} && docker compose pull && docker compose up -d && docker image prune -f', vars.COMPOSE_DIR) }}
