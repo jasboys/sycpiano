@@ -28,16 +28,17 @@ jobs:
           ssh-key: ${{ secrets.SSH_ED25519 }}
           ssh-host: ${{ secrets.SSH_HOST }}
       - name: RSync scripts and html to Host
+        if: ${{ vars.HTML_DEST != '' && vars.ADMIN_DEST != '' }}
         run: |
           rsync --delete --dirs -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $SCRIPT_SRC $SSH_USER@$SSH_HOST:$SCRIPT_DEST
           rsync -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $HTML_SRC $SSH_USER@$SSH_HOST:$HTML_DEST
         env:
           SCRIPT_SRC: ./packages/admin/build/static/scripts/admin/
           HTML_SRC: ./packages/admin/build/admin.html
-          HTML_DEST: ${{ env.HTML_DEST}}
+          HTML_DEST: ${{ vars.HTML_DEST }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.SSH_USER }}
-          SCRIPT_DEST: ${{ env.ADMIN_DEST }}
+          SCRIPT_DEST: ${{ vars.ADMIN_DEST }}
 
   # frontend:
   #   runs-on: ubuntu-latest
