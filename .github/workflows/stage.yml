@@ -96,7 +96,7 @@ jobs:
       - name: RSync scripts and html to Host
         if: ${{ vars.BACKEND_DIR != '' }}
         run: |
-          rsync --delete -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p --files-from=$SYNC_FILE_LIST --exclude=.env $SRC server:$DEST
+          rsync --delete -rpivz --chown=deploy:www-data --chmod=Dg=rwx,Fg=rwx --files-from=$SYNC_FILE_LIST --exclude=.env $SRC server:$DEST
         env:
           SYNC_FILE_LIST: ${{ format('{0}/rsync-server-list', github.workspace) }}
           SRC: ${{ github.workspace }}
