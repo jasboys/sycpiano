@@ -1,5 +1,6 @@
 package.json
 yarn.lock
+ecosystem.config.js
 .yarnrc.yml
 .yarn/releases
 packages/server/migrations
