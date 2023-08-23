@@ -701,7 +701,11 @@ const populateImages = async (entity: Calendar) => {
         if (location) {
             try {
                 const otherCal = await orm.em.findOne(Calendar, {
-                    $and: [{ location }, { photoReference: { $ne: null } }],
+                    $and: [
+                        { location },
+                        { photoReference: { $ne: null } },
+                        { photoReference: { $ne: '' } },
+                    ],
                 });
                 if (otherCal) {
                     entity.photoReference = otherCal.photoReference;

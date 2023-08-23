@@ -19,7 +19,8 @@
         "transform": {
             "legacyDecorator": true,
             "decoratorMetadata": true
-        }
+        },
+        "preserveAllComments": true
     },
     "sourceMaps": "inline",
     "module": {
