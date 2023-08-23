@@ -17,9 +17,11 @@ export const getPhotos = async (search: string) => {
             key: gapiKey,
         },
     });
+    console.log(place.data.candidates);
     for (const can of place.data.candidates) {
         const placeId = can.place_id;
         let photos = can.photos;
+        console.log(photos, placeId);
         if (!photos && placeId) {
             photos = (
                 await mapsClient.placeDetails({

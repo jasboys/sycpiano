@@ -614,7 +614,7 @@ adminRest.post(
         } else {
             res.json({
                 images: req.files?.['samples[]']?.map((f) => f.filename),
-                pdf: req.files?.['pdf']?.[0].filename,
+                pdf: req.files?.pdf?.[0].filename,
             });
         }
     },
@@ -687,7 +687,7 @@ adminRest.post(
 const populateImages = async (entity: Calendar) => {
     try {
         const { website, imageUrl, location } = entity;
-
+        console.log(website, imageUrl, location);
         if (website) {
             if (imageUrl === null) {
                 const fetchedImageUrl = await getImageFromMetaTag(website);
@@ -707,6 +707,7 @@ const populateImages = async (entity: Calendar) => {
                     entity.photoReference = otherCal.photoReference;
                     entity.placeId = otherCal.placeId;
                 } else {
+                    console.log('Get Photos');
                     const { photoReference, placeId } = await getPhotos(
                         location,
                     );
