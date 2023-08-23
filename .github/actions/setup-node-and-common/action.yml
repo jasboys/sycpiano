@@ -15,5 +15,5 @@ runs:
     - name: Common deps and build
       shell: bash
       run: |
-        yarn workspace common install
+        yarn workspaces focus common
         yarn workspace common build

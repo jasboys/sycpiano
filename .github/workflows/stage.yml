@@ -101,14 +101,15 @@ jobs:
           SYNC_FILE_LIST: ${{ format('{0}/rsync-server-list', github.workspace) }}
           SRC: ${{ github.workspace }}
           DEST: ${{ vars.BACKEND_DIR }}
+      - name: install prod deps
+        run: |
+          ssh server $COMMAND
+        env:
+          COMMAND: ${{ format('cd {0} && yarn workspaces focus server --production, vars.BACKEND_DIR) }}
       # - name: Migrate db
       #   run: |
       #     dbmate -d ./packages/server/migrations up
-      # - name: install prod deps
-      #   run: |
-      #     ssh server $COMMAND
-      #   env:
-      #     COMMAND: ${{ format('cd {0} && yarn workspaces focus server --production, vars.BACKEND_DIR) }}
+
       # - name: start app
       #   run: |
       #     ssh server $COMMAND

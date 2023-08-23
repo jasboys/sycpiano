@@ -8,7 +8,7 @@ module.exports = {
             args: 'node packages/server/build/app.js',
             exec_mode: 'fork',
             interpreter: '/bin/bash',
-            watch: true,
+            watch: ['packages/server/build', 'packages/common/dist'],
             watch_delay: 1000,
             exp_backoff_restart_delay: 100,
             stop_exit_codes: [0],
