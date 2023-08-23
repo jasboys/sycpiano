@@ -108,7 +108,7 @@ jobs:
           COMMAND: ${{ format('cd {0} && . ~/.nvm/nvm.sh && nvm use 20 && yarn workspaces focus server --production', vars.BACKEND_DIR) }}
       - name: Migrate db
         run: |
-          dbmate -d ./packages/server/migrations up
+          /usr/local/bin/dbmate -d ./packages/server/migrations up
 
       - name: start app
         run: |
