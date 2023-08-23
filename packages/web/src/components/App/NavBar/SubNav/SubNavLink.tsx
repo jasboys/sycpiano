@@ -61,11 +61,18 @@ const styles = {
         color: 'white',
         backgroundColor: 'transparent',
         boxShadow: 'none',
+        [toMedia(isHamburger)]: {
+            color: 'white',
+        },
         '&:hover': {
             textShadow: '0 0 1px rgba(255, 255, 255, 1)',
             backgroundColor: 'rgba(53, 53, 53, 0.27)',
             boxShadow: '0 6px 11px -5px rgba(0, 0, 0, 0.5)',
             color: 'white',
+            [toMedia(isHamburger)]: {
+                boxShadow: 'none',
+                backgroundColor: 'transparent',
+            },
         },
     }),
 };

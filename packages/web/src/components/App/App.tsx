@@ -504,7 +504,7 @@ const App: React.FC<Record<never, unknown>> = () => {
                                         element={<Navigate to="/not-found" />}
                                     />
                                 </Route>
-                                <Route path="shop/*" element={<Container />}>
+                                {/* <Route path="shop/*" element={<Container />}>
                                     <Route
                                         path="scores/*"
                                         element={
@@ -545,7 +545,7 @@ const App: React.FC<Record<never, unknown>> = () => {
                                         path="*"
                                         element={<Navigate to="/not-found" />}
                                     />
-                                </Route>
+                                </Route> */}
                                 <Route
                                     path="not-found"
                                     element={
