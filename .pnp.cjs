@@ -13610,6 +13610,7 @@ const RAW_RUNTIME_STATE =
           ["paseto", "npm:3.1.4"],\
           ["pino", "npm:8.15.0"],\
           ["pino-http", "npm:8.4.0"],\
+          ["pm2", "npm:5.3.0"],\
           ["qs", "npm:6.11.2"],\
           ["reflect-metadata", "npm:0.1.13"],\
           ["serve-favicon", "npm:2.5.0"],\
