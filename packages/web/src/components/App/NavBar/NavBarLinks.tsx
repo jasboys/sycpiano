@@ -58,7 +58,7 @@ const LinksDiv = styled.div<{ isHome: boolean; isHamburger: boolean }>(
             width: '100%',
             boxShadow: 'inset 0 7px 6px -5px rgba(0, 0, 0, 0.25)',
             backdropFilter: 'blur(1px)',
-            overflowY: 'scroll',
+            overflowY: 'auto',
             background: isHome
                 ? 'transparent'
                 : `linear-gradient(-90deg, ${gradient})`,

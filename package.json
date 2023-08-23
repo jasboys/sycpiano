@@ -14,23 +14,10 @@
         "packages/*"
     ],
     "scripts": {
-        "build": "trash server/build && yarn buildServer && yarn buildApp",
-        "buildApp": "webpack --config webpack.prod.config.js",
-        "buildServer": "cd server && swc src -d build",
         "dev": "turbo run watch",
-        "lintServer": "cd server && eslint src/**",
-        "start": "node server/build/app.js",
-        "startProd": "scripts/start.sh",
-        "typecheckServer": "cd server && tsc --noEmit --incremental --tsBuildInfoFile ./.tsbuildinfo",
+        "start": "node packages/server/build/app.js",
         "watch": "nodemon --config nodemon.json packages/server/build/app.js",
-        "watchAndLintCheckApp": "nodemon --config nodemon.frontend.json",
-        "watchAndLintCheckServer": "nodemon --config nodemon.backend.json",
-        "watchServer": "cd server && cross-env NODE_ENV=development swc src -d build -w",
-        "windowsDev": "powershell contrib/dev.ps1",
-        "bundle": "run-script-os",
-        "migrate": "dbmate -d ./packages/server/migrations -s ./schema.sql",
-        "bundle:win32": "del sycpiano.zip && git archive --format=zip --output ./sycpiano.zip main && 7z a -r sycpiano.zip web/build server/build",
-        "bundle:linux": "rm sycpiano.zip && git archive --format=zip --output ./sycpiano.zip main && zip -r sycpiano.zip web/build server/build"
+        "migrate": "dbmate -d ./packages/server/migrations -s ./schema.sql"
     },
     "packageManager": "yarn@4.0.0-rc.49",
     "engines": {

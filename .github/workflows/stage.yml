@@ -5,73 +5,73 @@ on:
     branches: [ "staging" ]
 
 jobs:
-  # admin:
-  #   runs-on: ubuntu-latest
-  #   environment: staging
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-  #     - name: Setup Node and Common
-  #       uses: ./.github/actions/setup-node-and-common
-  #       with:
-  #         node-version: 20.x
-  #     - name: Admin deps and build
-  #       run: |
-  #         yarn workspaces focus admin
-  #         yarn workspace admin build
-  #       env:
-  #         GAPI_KEY_APP: ${{ secrets.GAPI_KEY_APP }}
-  #         PUBLIC_HOST: ${{ env.PUBLIC_HOST }}
-  #     - name: Setup SSH
-  #       uses: ./.github/actions/setup-ssh
-  #       with:
-  #         ssh-key: ${{ secrets.SSH_ED25519 }}
-  #         ssh-host: ${{ secrets.SSH_HOST }}
-  #         ssh-user: ${{ secrets.SSH_USER }}
-  #     - name: RSync scripts and html to Host
-  #       if: ${{ vars.HTML_DEST != '' && vars.ADMIN_DEST != '' }}
-  #       run: |
-  #         rsync --delete --dirs -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $SCRIPT_SRC server:$SCRIPT_DEST
-  #         rsync -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $HTML_SRC server:$HTML_DEST
-  #       env:
-  #         SCRIPT_SRC: ./packages/admin/build/static/scripts/admin/
-  #         SCRIPT_DEST: ${{ vars.ADMIN_DEST }}
-  #         HTML_SRC: ./packages/admin/build/admin.html
-  #         HTML_DEST: ${{ vars.HTML_DEST }}
+  admin:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Node and Common
+        uses: ./.github/actions/setup-node-and-common
+        with:
+          node-version: 20.x
+      - name: Admin deps and build
+        run: |
+          yarn workspaces focus admin
+          yarn workspace admin build
+        env:
+          GAPI_KEY_APP: ${{ secrets.GAPI_KEY_APP }}
+          PUBLIC_HOST: ${{ env.PUBLIC_HOST }}
+      - name: Setup SSH
+        uses: ./.github/actions/setup-ssh
+        with:
+          ssh-key: ${{ secrets.SSH_ED25519 }}
+          ssh-host: ${{ secrets.SSH_HOST }}
+          ssh-user: ${{ secrets.SSH_USER }}
+      - name: RSync scripts and html to Host
+        if: ${{ vars.HTML_DEST != '' && vars.ADMIN_DEST != '' }}
+        run: |
+          rsync --delete --dirs -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $SCRIPT_SRC server:$SCRIPT_DEST
+          rsync -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $HTML_SRC server:$HTML_DEST
+        env:
+          SCRIPT_SRC: ./packages/admin/build/static/scripts/admin/
+          SCRIPT_DEST: ${{ vars.ADMIN_DEST }}
+          HTML_SRC: ./packages/admin/build/admin.html
+          HTML_DEST: ${{ vars.HTML_DEST }}
 
-  # frontend:
-  #   runs-on: ubuntu-latest
-  #   environment: staging
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v3
-  #     - name: Setup Node and Common
-  #       uses: ./.github/actions/setup-node-and-common
-  #       with:
-  #         node-version: 20.x
-  #     - name: Web deps and build
-  #       run: |
-  #         yarn workspaces focus web
-  #         yarn workspace web build
-  #       env:
-  #         GAPI_KEY_APP: ${{ secrets.GAPI_KEY_APP }}
-  #         STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
-  #     - name: Setup SSH
-  #       uses: ./.github/actions/setup-ssh
-  #       with:
-  #         ssh-key: ${{ secrets.SSH_ED25519 }}
-  #         ssh-host: ${{ secrets.SSH_HOST }}
-  #         ssh-user: ${{ secrets.SSH_USER }}
-  #     - name: RSync scripts and html to Host
-  #       if: ${{ vars.HTML_DEST != '' && vars.WEB_DEST != '' }}
-  #       run: |
-  #         rsync --delete --dirs -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $SCRIPT_SRC server:$SCRIPT_DEST
-  #         rsync -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $HTML_SRC server:$HTML_DEST
-  #       env:
-  #         SCRIPT_SRC: ./packages/web/build/static/scripts/web/
-  #         SCRIPT_DEST: ${{ vars.WEB_DEST }}
-  #         HTML_SRC: ./packages/web/build/index.html
-  #         HTML_DEST: ${{ vars.HTML_DEST }}
+  frontend:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Node and Common
+        uses: ./.github/actions/setup-node-and-common
+        with:
+          node-version: 20.x
+      - name: Web deps and build
+        run: |
+          yarn workspaces focus web
+          yarn workspace web build
+        env:
+          GAPI_KEY_APP: ${{ secrets.GAPI_KEY_APP }}
+          STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
+      - name: Setup SSH
+        uses: ./.github/actions/setup-ssh
+        with:
+          ssh-key: ${{ secrets.SSH_ED25519 }}
+          ssh-host: ${{ secrets.SSH_HOST }}
+          ssh-user: ${{ secrets.SSH_USER }}
+      - name: RSync scripts and html to Host
+        if: ${{ vars.HTML_DEST != '' && vars.WEB_DEST != '' }}
+        run: |
+          rsync --delete --dirs -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $SCRIPT_SRC server:$SCRIPT_DEST
+          rsync -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $HTML_SRC server:$HTML_DEST
+        env:
+          SCRIPT_SRC: ./packages/web/build/static/scripts/web/
+          SCRIPT_DEST: ${{ vars.WEB_DEST }}
+          HTML_SRC: ./packages/web/build/index.html
+          HTML_DEST: ${{ vars.HTML_DEST }}
 
   backend:
     runs-on: ubuntu-latest
@@ -115,7 +115,7 @@ jobs:
         run: |
           ssh server $COMMAND
         env:
-          COMMAND: ${{ format('cd {0} && . ~/.nvm/nvm.sh && nvm use 20 && pm2 start ecosystem.config.js', vars.BACKEND_DIR) }}
+          COMMAND: ${{ format('cd {0} && . ~/.nvm/nvm.sh && nvm use 20 && pm2 start ecosystem.config.cjs', vars.BACKEND_DIR) }}
 
 
   # backend:
