@@ -31,8 +31,8 @@ jobs:
       - name: RSync scripts and html to Host
         if: ${{ vars.HTML_DEST != '' && vars.ADMIN_DEST != '' }}
         run: |
-          rsync --delete --dirs -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $SCRIPT_SRC server:$SCRIPT_DEST
-          rsync -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $HTML_SRC server:$HTML_DEST
+          rsync --delete --dirs -ivz --chown=deploy:www-data --chmod=Dg=rwx,Fg=rwx -p $SCRIPT_SRC server:$SCRIPT_DEST
+          rsync -ivz --chown=deploy:www-data --chmod=Dg=rwx,Fg=rwx -p $HTML_SRC server:$HTML_DEST
         env:
           SCRIPT_SRC: ./packages/admin/build/static/scripts/admin/
           SCRIPT_DEST: ${{ vars.ADMIN_DEST }}
@@ -65,8 +65,8 @@ jobs:
       - name: RSync scripts and html to Host
         if: ${{ vars.HTML_DEST != '' && vars.WEB_DEST != '' }}
         run: |
-          rsync --delete --dirs -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $SCRIPT_SRC server:$SCRIPT_DEST
-          rsync -ivz --chown=deploy:www-data --chmod=Dg=rw,Fg=rw -p $HTML_SRC server:$HTML_DEST
+          rsync --delete --dirs -ivz --chown=deploy:www-data --chmod=Dg=rwx,Fg=rwx -p $SCRIPT_SRC server:$SCRIPT_DEST
+          rsync -ivz --chown=deploy:www-data --chmod=Dg=rwx,Fg=rwx -p $HTML_SRC server:$HTML_DEST
         env:
           SCRIPT_SRC: ./packages/web/build/static/scripts/web/
           SCRIPT_DEST: ${{ vars.WEB_DEST }}
