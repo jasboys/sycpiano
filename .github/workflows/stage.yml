@@ -5,6 +5,27 @@ on:
     branches: [ "staging" ]
 
 jobs:
+  assets:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup SSH
+        uses: ./.github/actions/setup-ssh
+        with:
+          ssh-key: ${{ secrets.SSH_ED25519 }}
+          ssh-host: ${{ secrets.SSH_HOST }}
+          ssh-user: ${{ secrets.SSH_USER }}
+      - name: Rsync Assets
+        if: ${{ vars.ASSETS_DIR != '' }}
+        run: |
+          rsync -rpivz --chown=deploy:www-data --chmod=Dg=rwx,Fg=rwx --files-from=$SYNC_FILE_LIST $SRC server:$DEST
+        env:
+          SYNC_FILE_LIST: ${{ format('{0}/rsync-assets-list', github.workspace) }}
+          SRC: ${{ format('{0}/assets', github.workspace) }}
+          DEST: ${{ vars.ASSETS_DIR }}
+
   admin:
     runs-on: ubuntu-latest
     environment: staging
@@ -15,7 +36,7 @@ jobs:
         uses: ./.github/actions/setup-node-and-common
         with:
           node-version: 20.x
-      - name: Admin deps and build
+      - name: Admin Install Deps and Build
         run: |
           yarn workspaces focus admin
           yarn workspace admin build
@@ -28,7 +49,7 @@ jobs:
           ssh-key: ${{ secrets.SSH_ED25519 }}
           ssh-host: ${{ secrets.SSH_HOST }}
           ssh-user: ${{ secrets.SSH_USER }}
-      - name: RSync scripts and html to Host
+      - name: Rsync Scripts and HTML
         if: ${{ vars.HTML_DEST != '' && vars.ADMIN_DEST != '' }}
         run: |
           rsync --delete --dirs -ivz --chown=deploy:www-data --chmod=Dg=rwx,Fg=rwx -p $SCRIPT_SRC server:$SCRIPT_DEST
@@ -49,7 +70,7 @@ jobs:
         uses: ./.github/actions/setup-node-and-common
         with:
           node-version: 20.x
-      - name: Web deps and build
+      - name: Web Install Deps and Build
         run: |
           yarn workspaces focus web
           yarn workspace web build
@@ -62,7 +83,7 @@ jobs:
           ssh-key: ${{ secrets.SSH_ED25519 }}
           ssh-host: ${{ secrets.SSH_HOST }}
           ssh-user: ${{ secrets.SSH_USER }}
-      - name: RSync scripts and html to Host
+      - name: Rsync Scripts and HTML
         if: ${{ vars.HTML_DEST != '' && vars.WEB_DEST != '' }}
         run: |
           rsync --delete --dirs -ivz --chown=deploy:www-data --chmod=Dg=rwx,Fg=rwx -p $SCRIPT_SRC server:$SCRIPT_DEST
@@ -83,7 +104,7 @@ jobs:
         uses: ./.github/actions/setup-node-and-common
         with:
           node-version: 20.x
-      - name: Server deps and build
+      - name: Server Install Deps and Build
         run: |
           yarn workspaces focus server
           yarn workspace server build
@@ -93,7 +114,7 @@ jobs:
           ssh-key: ${{ secrets.SSH_ED25519 }}
           ssh-host: ${{ secrets.SSH_HOST }}
           ssh-user: ${{ secrets.SSH_USER }}
-      - name: RSync scripts and html to Host
+      - name: Rsync Build Artifacts
         if: ${{ vars.BACKEND_DIR != '' }}
         run: |
           rsync --delete -rpivz --chown=deploy:www-data --chmod=Dg=rwx,Fg=rwx --files-from=$SYNC_FILE_LIST --exclude=.env $SRC server:$DEST
@@ -101,17 +122,17 @@ jobs:
           SYNC_FILE_LIST: ${{ format('{0}/rsync-server-list', github.workspace) }}
           SRC: ${{ github.workspace }}
           DEST: ${{ vars.BACKEND_DIR }}
-      - name: install prod deps
+      - name: Install Deps on Server
         run: |
           ssh server $COMMAND
         env:
           COMMAND: ${{ format('cd {0} && . ~/.nvm/nvm.sh && nvm use 20 && yarn workspaces focus server --production', vars.BACKEND_DIR) }}
-      - name: Migrate db
+      - name: Migrate Up
         run: |
           ssh server $COMMAND
         env:
           COMMAND: ${{ format('cd {0} && dbmate -d ./packages/server/migrations up', vars.BACKEND_DIR) }}
-      - name: start app
+      - name: PM2 Start App
         run: |
           ssh server $COMMAND
         env:
