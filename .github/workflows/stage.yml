@@ -21,8 +21,8 @@ jobs:
       - name: Early Exit
         if: ${{ steps.changes.outputs.assets == false }}
         run: |
-          gh run cancel ${{ github.run_id }}
-          gh run watch ${{ github.run_id }}
+          gh run cancel ${{ github.job }}
+          gh run watch ${{ github.job }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup SSH
@@ -59,8 +59,8 @@ jobs:
       - name: Early Exit
         if: ${{ steps.changes.outputs.admin == false }}
         run: |
-          gh run cancel ${{ github.run_id }}
-          gh run watch ${{ github.run_id }}
+          gh run cancel ${{ github.job }}
+          gh run watch ${{ github.job }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Node and Common
@@ -110,8 +110,8 @@ jobs:
       - name: Early Exit
         if: ${{ steps.changes.outputs.web == false }}
         run: |
-          gh run cancel ${{ github.run_id }}
-          gh run watch ${{ github.run_id }}
+          gh run cancel ${{ github.job }}
+          gh run watch ${{ github.job }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Node and Common
@@ -161,8 +161,8 @@ jobs:
       - name: Early Exit
         if: ${{ steps.changes.outputs.admin == false }}
         run: |
-          gh run cancel ${{ github.run_id }}
-          gh run watch ${{ github.run_id }}
+          gh run cancel ${{ github.job }}
+          gh run watch ${{ github.job }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Setup Node and Common
