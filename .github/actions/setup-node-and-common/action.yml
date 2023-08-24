@@ -12,6 +12,7 @@ runs:
   using: "composite"
   steps:
     - name: Use Node
+      id: node
       uses: actions/setup-node@v3
       with:
         node-version: ${{ inputs.node-version }}
@@ -21,7 +22,7 @@ runs:
       with:
         path: |
           ${{ github.workspace }}/.yarn
-        key: ${{inputs.cache-name}}-${{ runner.os }}-${{ outputs.node-version }}-${{ hashFiles('yarn.lock') }}
+        key: ${{ inputs.cache-name }}-${{ runner.os }}-${{ steps.node.outputs.node-version }}-${{ hashFiles('yarn.lock') }}
     - name: Common deps and build
       shell: bash
       run: |
