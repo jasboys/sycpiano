@@ -4,6 +4,9 @@ inputs:
   node-version:
     required: true
     description: "Node version"
+  cache-id:
+    required: true
+    description: "Cache ID"
 
 runs:
   using: "composite"
@@ -12,6 +15,7 @@ runs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ inputs.node-version }}
+        cache: yarn
     - name: Common deps and build
       shell: bash
       run: |
