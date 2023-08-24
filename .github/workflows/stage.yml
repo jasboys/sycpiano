@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Detect changes
         id: changes
-        use: dorny/paths-filter@v2
+        uses: dorny/paths-filter@v2
         with:
           filters: |
             assets:
@@ -48,7 +48,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Detect changes
         id: changes
-        use: dorny/paths-filter@v2
+        uses: dorny/paths-filter@v2
         with:
           filters: |
             admin:
@@ -99,7 +99,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Detect changes
         id: changes
-        use: dorny/paths-filter@v2
+        uses: dorny/paths-filter@v2
         with:
           filters: |
             web:
@@ -150,7 +150,7 @@ jobs:
         uses: actions/checkout@v3
       - name: Detect changes
         id: changes
-        use: dorny/paths-filter@v2
+        uses: dorny/paths-filter@v2
         with:
           filters: |
             server:
