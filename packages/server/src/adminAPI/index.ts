@@ -504,7 +504,6 @@ adminRest.post(
     async (req, res) => {
         try {
             const imageData = await genThumbnail(req.body.fileName);
-            console.log(imageData);
             res.json({ fileName: req.body.fileName, ...imageData });
         } catch (e) {
             res.statusMessage = 'Error generating thumbnail';
@@ -562,7 +561,6 @@ const productStorage = multer.diskStorage({
         cb(null, dest);
     },
     filename: (req, file, cb) => {
-        console.log(req.body);
         if (file.fieldname === 'pdf') {
             const { name, ext } = parse(req.body.fileName.replace(/ /g, '_'));
             const exists = statSync(
@@ -687,7 +685,6 @@ adminRest.post(
 const populateImages = async (entity: Calendar) => {
     try {
         const { website, imageUrl, location } = entity;
-        console.log(website, imageUrl, location);
         if (website) {
             if (imageUrl === null) {
                 const fetchedImageUrl = await getImageFromMetaTag(website);
@@ -711,7 +708,6 @@ const populateImages = async (entity: Calendar) => {
                     entity.photoReference = otherCal.photoReference;
                     entity.placeId = otherCal.placeId;
                 } else {
-                    console.log('Get Photos');
                     const { photoReference, placeId } = await getPhotos(
                         location,
                     );
@@ -719,7 +715,6 @@ const populateImages = async (entity: Calendar) => {
                     entity.placeId = placeId;
                 }
             } catch (e) {
-                console.log(`[Hook: BeforeCreate] ${e}`);
                 entity.photoReference = '';
                 entity.placeId = '';
             }

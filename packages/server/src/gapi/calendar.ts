@@ -131,7 +131,6 @@ export const updateCalendar = async (
     }: GoogleCalendarParams,
 ): Promise<AxiosResponse<unknown>> => {
     try {
-        console.log('here we are');
         const token = await getToken(em);
         const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events/${id}`;
         const eventResource = {
