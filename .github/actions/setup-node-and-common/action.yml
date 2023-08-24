@@ -4,9 +4,6 @@ inputs:
   node-version:
     required: true
     description: "Node version"
-  cache-name:
-    required: true
-    description: "Cache Name"
 
 runs:
   using: "composite"
@@ -16,13 +13,7 @@ runs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ inputs.node-version }}
-    - name: Cache
-      id: cache
-      uses: actions/cache@v3
-      with:
-        path: |
-          ${{ github.workspace }}/.yarn
-        key: ${{ inputs.cache-name }}-${{ runner.os }}-${{ steps.node.outputs.node-version }}-${{ hashFiles('yarn.lock') }}
+        cache: yarn
     - name: Common deps and build
       shell: bash
       run: |

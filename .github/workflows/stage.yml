@@ -11,6 +11,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Detect changes
+        id: changes
+        use: dorny/paths-filter@v2
+        with:
+          filters: |
+            assets:
+              - ${{ github.workspace }}/assets/**
+      - name: Early Exit
+        if: ${{ steps.changes.outputs.assets == false }}
+        run: |
+          gh run cancel ${{ github.run_id }}
+          gh run watch ${{ github.run_id }}
+        env:
+          GITHUB_TOKEN: ${{ secret.GITHUB_TOKEN }}
       - name: Setup SSH
         uses: ./.github/actions/setup-ssh
         with:
@@ -22,8 +36,8 @@ jobs:
         run: |
           rsync -rpivz --chown=deploy:www-data --chmod=Dg=rwx,Fg=rwx --files-from=$SYNC_FILE_LIST $SRC server:$DEST
         env:
-          SYNC_FILE_LIST: ${{ format('{0}/rsync-assets-list', github.workspace) }}
-          SRC: ${{ format('{0}/assets', github.workspace) }}
+          SYNC_FILE_LIST: ${{ github.workspace }}/rsync-assets-list
+          SRC: ${{ github.workspace }}/assets
           DEST: ${{ vars.ASSETS_DIR }}
 
   admin:
@@ -32,11 +46,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Detect changes
+        id: changes
+        use: dorny/paths-filter@v2
+        with:
+          filters: |
+            admin:
+              - ${{ github.workspace }}/packages/admin/**
+              - ${{ github.workspace }}/yarn.lock
+              - ${{ github.workspace }}/package.json
+              - ${{ github.workspace }}/.yarnrc.yml
+      - name: Early Exit
+        if: ${{ steps.changes.outputs.admin == false }}
+        run: |
+          gh run cancel ${{ github.run_id }}
+          gh run watch ${{ github.run_id }}
+        env:
+          GITHUB_TOKEN: ${{ secret.GITHUB_TOKEN }}
       - name: Setup Node and Common
         uses: ./.github/actions/setup-node-and-common
         with:
           node-version: 20.x
-          cache-name: admin
       - name: Admin Install Deps and Build
         run: |
           yarn workspaces focus admin
@@ -67,11 +97,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Detect changes
+        id: changes
+        use: dorny/paths-filter@v2
+        with:
+          filters: |
+            web:
+              - ${{ github.workspace }}/packages/web/**
+              - ${{ github.workspace }}/yarn.lock
+              - ${{ github.workspace }}/package.json
+              - ${{ github.workspace }}/.yarnrc.yml
+      - name: Early Exit
+        if: ${{ steps.changes.outputs.web == false }}
+        run: |
+          gh run cancel ${{ github.run_id }}
+          gh run watch ${{ github.run_id }}
+        env:
+          GITHUB_TOKEN: ${{ secret.GITHUB_TOKEN }}
       - name: Setup Node and Common
         uses: ./.github/actions/setup-node-and-common
         with:
           node-version: 20.x
-          cache-name: web
       - name: Web Install Deps and Build
         run: |
           yarn workspaces focus web
@@ -102,11 +148,27 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Detect changes
+        id: changes
+        use: dorny/paths-filter@v2
+        with:
+          filters: |
+            server:
+              - ${{ github.workspace }}/packages/server/**
+              - ${{ github.workspace }}/yarn.lock
+              - ${{ github.workspace }}/package.json
+              - ${{ github.workspace }}/.yarnrc.yml
+      - name: Early Exit
+        if: ${{ steps.changes.outputs.admin == false }}
+        run: |
+          gh run cancel ${{ github.run_id }}
+          gh run watch ${{ github.run_id }}
+        env:
+          GITHUB_TOKEN: ${{ secret.GITHUB_TOKEN }}
       - name: Setup Node and Common
         uses: ./.github/actions/setup-node-and-common
         with:
           node-version: 20.x
-          cache-name: server
       - name: Server Install Deps and Build
         run: |
           yarn workspaces focus server
