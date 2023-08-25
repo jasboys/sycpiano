@@ -33,7 +33,7 @@ jobs:
         uses: actions/cache/restore@v3
         id: cache
         with:
-          path: /.action-cache
+          path: .cache
           key: hashes-${{ steps.compute-hashes.outputs.checksum }}
           restore-keys: |
             hashes-
@@ -49,10 +49,12 @@ jobs:
         id: get-hashes
         if: steps.cache.outputs.cache-hit == 'false' && steps.cache.outputs.cache-matched-key != ''
         run: |
-          echo "admin=$(cat ${{ runner.temp }}/hashes | jq '.admin')" >> $GITHUB_OUTPUT
-          echo "web=$(cat ${{ runner.temp }}/hashes | jq '.web')" >> $GITHUB_OUTPUT
-          echo "server=$(cat ${{ runner.temp }}/hashes | jq '.server')" >> $GITHUB_OUTPUT
-          echo "assets=$(cat ${{ runner.temp }}/hashes | jq '.assets')" >> $GITHUB_OUTPUT
+          echo "admin=$(cat $HASH_FILE | jq '.admin')" >> $GITHUB_OUTPUT
+          echo "web=$(cat $HASH_FILE | jq '.web')" >> $GITHUB_OUTPUT
+          echo "server=$(cat $HASH_FILE | jq '.server')" >> $GITHUB_OUTPUT
+          echo "assets=$(cat $HASH_FILE | jq '.assets')" >> $GITHUB_OUTPUT
+        env:
+          HASH_FILE: .cache/hashes
       - name: Handle yes Cache
         id: second-check
         if: steps.cache.outputs.cache-hit == 'false' && steps.cache.outputs.cache-matched-key != ''
@@ -68,7 +70,7 @@ jobs:
           ASSETS: ${{ steps.compute-hashes.outputs.assets == steps.get-hashes.outputs.assets }}
       - name: Write Cache
         run: |
-          cat > ${{ runner.temp }}/hashes << EOF
+          cat > .cache/hashes << EOF
           {
             "admin": "$ADMIN",
             "web": "$WEB",
@@ -84,7 +86,7 @@ jobs:
       - name: Save Cache
         uses: actions/cache/save@v3
         with:
-          path: ${{ runner.temp }}
+          path: .cache
           key: hashes-${{ steps.compute-hashes.outputs.checksum }}
 
   # assets:
