@@ -45,6 +45,11 @@ jobs:
           echo "web=true" >> $GITHUB_OUTPUT
           echo "assets=true" >> $GITHUB_OUTPUT
           echo "server=true" >> $GITHUB_OUTPUT
+      - name: Dummy
+        run: |
+          echo $TEST
+        env:
+          TEST: ${{ toJSON(steps.cache.outputs) }}
       - name: Get cached hashes
         id: get-hashes
         if: steps.cache.outputs.cache-hit == 'false' && steps.cache.outputs.cache-matched-key != ''
@@ -53,10 +58,8 @@ jobs:
           echo "web=$(cat $HASH_FILE | jq '.web')" >> $GITHUB_OUTPUT
           echo "server=$(cat $HASH_FILE | jq '.server')" >> $GITHUB_OUTPUT
           echo "assets=$(cat $HASH_FILE | jq '.assets')" >> $GITHUB_OUTPUT
-          echo $TEST
         env:
           HASH_FILE: .cache/hashes
-          TEST: ${{ toJSON(steps.cache.outputs) }}
       - name: Handle yes Cache
         id: second-check
         if: steps.cache.outputs.cache-hit == 'false' && steps.cache.outputs.cache-matched-key != ''
