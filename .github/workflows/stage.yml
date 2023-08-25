@@ -53,8 +53,10 @@ jobs:
           echo "web=$(cat $HASH_FILE | jq '.web')" >> $GITHUB_OUTPUT
           echo "server=$(cat $HASH_FILE | jq '.server')" >> $GITHUB_OUTPUT
           echo "assets=$(cat $HASH_FILE | jq '.assets')" >> $GITHUB_OUTPUT
+          echo $TEST
         env:
           HASH_FILE: .cache/hashes
+          TEST: ${{ toJSON(steps.cache.outputs) }}
       - name: Handle yes Cache
         id: second-check
         if: steps.cache.outputs.cache-hit == 'false' && steps.cache.outputs.cache-matched-key != ''
@@ -70,6 +72,7 @@ jobs:
           ASSETS: ${{ steps.compute-hashes.outputs.assets == steps.get-hashes.outputs.assets }}
       - name: Write Cache
         run: |
+          mkdir -p .cache
           cat > .cache/hashes << EOF
           {
             "admin": "$ADMIN",
