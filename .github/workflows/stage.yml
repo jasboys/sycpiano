@@ -23,7 +23,7 @@ jobs:
           echo "web=$WEB" >> $GITHUB_OUTPUT
           echo "server=$SERVER" >> $GITHUB_OUTPUT
           echo "assets=$ASSETS" >> $GITHUB_OUTPUT
-          echo "checksum=$(echo -n $ADMIN$WEB$SERVER$ASSETS | sha256sum)" >> $GITHUB_OUTPUT
+          echo "checksum=$(echo -n $ADMIN$WEB$SERVER$ASSETS | sha256sum | cut -f 1 -d ' ')" >> $GITHUB_OUTPUT
         env:
           ADMIN: ${{ hashFiles('packages/admin/**', 'yarn.lock') }}
           WEB: ${{ hashFiles('packages/web/**', 'yarn.lock') }}
