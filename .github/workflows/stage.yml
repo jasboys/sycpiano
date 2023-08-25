@@ -67,9 +67,9 @@ jobs:
         run: |
           cat > ${{ runner.temp }}/hashes << EOF
           {
-            "admin": "$ADMIN"
-            "web": "$WEB"
-            "server": "$SERVER"
+            "admin": "$ADMIN",
+            "web": "$WEB",
+            "server": "$SERVER",
             "assets": "$ASSETS"
           }
           EOF
