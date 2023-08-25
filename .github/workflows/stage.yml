@@ -34,7 +34,10 @@ jobs:
         id: get-hashes
         if: steps.cache.outputs.cache-hit == 'true'
         run: |
-          echo "hash-file=$(cat ${{ runner.temp }}/hashes)" >> $GITHUB_OUTPUT
+          echo "admin=$(cat ${{ runner.temp }}/hashes | jq '.admin')" >> $GITHUB_OUTPUT
+          echo "web=$(cat ${{ runner.temp }}/hashes | jq '.web')" >> $GITHUB_OUTPUT
+          echo "server=$(cat ${{ runner.temp }}/hashes | jq '.server')" >> $GITHUB_OUTPUT
+          echo "assets=$(cat ${{ runner.temp }}/hashes | jq '.assets')" >> $GITHUB_OUTPUT
       - name: Compute new hashes
         id: compute-hashes
         run: |
@@ -56,10 +59,10 @@ jobs:
           echo "server=$SERVER" >> $GITHUB_OUTPUT
           echo "assets=$ASSETS" >> $GITHUB_OUTPUT
         env:
-          ADMIN: ${{ steps.compute-hashes.admin == fromJSON(steps.get-hashes.hash-file).admin }}
-          WEB: ${{ steps.compute-hashes.web == fromJSON(steps.get-hashes.hash-file).web }}
-          SERVER: ${{ steps.compute-hashes.server == fromJSON(steps.get-hashes.hash-file).server }}
-          ASSETS: ${{ steps.compute-hashes.assets == fromJSON(steps.get-hashes.hash-file).assets }}
+          ADMIN: ${{ steps.compute-hashes.admin == steps.get-hashes.admin }}
+          WEB: ${{ steps.compute-hashes.web == steps.get-hashes.web }}
+          SERVER: ${{ steps.compute-hashes.server == steps.get-hashes.server }}
+          ASSETS: ${{ steps.compute-hashes.assets == steps.get-hashes.assets }}
       - name: Write Cache
         run: |
           cat > ${{ runner.temp }}/hashes << EOF
