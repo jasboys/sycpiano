@@ -59,10 +59,10 @@ jobs:
           echo "server=$SERVER" >> $GITHUB_OUTPUT
           echo "assets=$ASSETS" >> $GITHUB_OUTPUT
         env:
-          ADMIN: ${{ steps.compute-hashes.admin == steps.get-hashes.admin }}
-          WEB: ${{ steps.compute-hashes.web == steps.get-hashes.web }}
-          SERVER: ${{ steps.compute-hashes.server == steps.get-hashes.server }}
-          ASSETS: ${{ steps.compute-hashes.assets == steps.get-hashes.assets }}
+          ADMIN: ${{ steps.compute-hashes.outputs.admin == steps.get-hashes.outputs.admin }}
+          WEB: ${{ steps.compute-hashes.outputs.web == steps.get-hashes.outputs.web }}
+          SERVER: ${{ steps.compute-hashes.outputs.server == steps.get-hashes.outputs.server }}
+          ASSETS: ${{ steps.compute-hashes.outputs.assets == steps.get-hashes.outputs.assets }}
       - name: Write Cache
         run: |
           cat > ${{ runner.temp }}/hashes << EOF
@@ -74,10 +74,10 @@ jobs:
           }
           EOF
         env:
-          ADMIN: ${{ steps.compute-hashes.admin }}
-          WEB: ${{ steps.compute-hashes.web }}
-          SERVER: ${{ steps.compute-hashes.server }}
-          ASSETS: ${{ steps.compute-hashes.assets }}
+          ADMIN: ${{ steps.compute-hashes.outputs.admin }}
+          WEB: ${{ steps.compute-hashes.outputs.web }}
+          SERVER: ${{ steps.compute-hashes.outputs.server }}
+          ASSETS: ${{ steps.compute-hashes.outputs.assets }}
       - name: Save Cache
         uses: actions/cache/save@v3
         with:
