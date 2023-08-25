@@ -8,36 +8,14 @@ jobs:
   check-and-cache-assets:
     runs-on: ubuntu-latest
     outputs:
-      admin-changed: ${{ steps.first-check.outputs.admin || steps.second-check.outputs.admin }}
-      web-changed: ${{ steps.first-check.outputs.web || steps.second-check.outputs.web }}
-      assets-changed: ${{ steps.first-check.outputs.assets || steps.second-check.outputs.assets }}
-      server-changed: ${{ steps.first-check.outputs.server || steps.second-check.outputs.server }}
+      admin-matched: ${{ steps.first-check.outputs.admin || steps.second-check.outputs.admin }}
+      web-matched: ${{ steps.first-check.outputs.web || steps.second-check.outputs.web }}
+      assets-matched: ${{ steps.first-check.outputs.assets || steps.second-check.outputs.assets }}
+      server-matched: ${{ steps.first-check.outputs.server || steps.second-check.outputs.server }}
     environment: ${{ vars.CURRENT_ENVIRONMENT }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Get Cached Hashes
-        uses: actions/cache/restore@v3
-        id: cache
-        with:
-          path: ${{ runner.temp }}
-          key: hashes
-      - name: Handle no Cache
-        id: first-check
-        if: steps.cache.outputs.cache-hit == 'false'
-        run: |
-          echo "admin=true" >> $GITHUB_OUTPUT
-          echo "web=true" >> $GITHUB_OUTPUT
-          echo "assets=true" >> $GITHUB_OUTPUT
-          echo "server=true" >> $GITHUB_OUTPUT
-      - name: Get cached hashes
-        id: get-hashes
-        if: steps.cache.outputs.cache-hit == 'true'
-        run: |
-          echo "admin=$(cat ${{ runner.temp }}/hashes | jq '.admin')" >> $GITHUB_OUTPUT
-          echo "web=$(cat ${{ runner.temp }}/hashes | jq '.web')" >> $GITHUB_OUTPUT
-          echo "server=$(cat ${{ runner.temp }}/hashes | jq '.server')" >> $GITHUB_OUTPUT
-          echo "assets=$(cat ${{ runner.temp }}/hashes | jq '.assets')" >> $GITHUB_OUTPUT
       - name: Compute new hashes
         id: compute-hashes
         run: |
@@ -45,14 +23,39 @@ jobs:
           echo "web=$WEB" >> $GITHUB_OUTPUT
           echo "server=$SERVER" >> $GITHUB_OUTPUT
           echo "assets=$ASSETS" >> $GITHUB_OUTPUT
+          echo "checksum=$(echo -n $ADMIN$WEB$SERVER$ASSETS | sha256sum)" >> $GITHUB_OUTPUT
         env:
           ADMIN: ${{ hashFiles('packages/admin/**', 'yarn.lock') }}
           WEB: ${{ hashFiles('packages/web/**', 'yarn.lock') }}
           SERVER: ${{ hashFiles('packages/server/**', 'yarn.lock') }}
           ASSETS: ${{ hashFiles('assets/**', 'yarn.lock') }}
+      - name: Get Cached Hashes
+        uses: actions/cache/restore@v3
+        id: cache
+        with:
+          path: /.action-cache
+          key: hashes-${{ steps.compute-hashes.outputs.checksum }}
+          restore-keys: |
+            hashes-
+      - name: Handle Cache Found
+        id: first-check
+        if: steps.cache.outputs.cache-hit == 'true'
+        run: |
+          echo "admin=true" >> $GITHUB_OUTPUT
+          echo "web=true" >> $GITHUB_OUTPUT
+          echo "assets=true" >> $GITHUB_OUTPUT
+          echo "server=true" >> $GITHUB_OUTPUT
+      - name: Get cached hashes
+        id: get-hashes
+        if: steps.cache.outputs.cache-hit == 'false' && steps.cache.outputs.cache-matched-key != ''
+        run: |
+          echo "admin=$(cat ${{ runner.temp }}/hashes | jq '.admin')" >> $GITHUB_OUTPUT
+          echo "web=$(cat ${{ runner.temp }}/hashes | jq '.web')" >> $GITHUB_OUTPUT
+          echo "server=$(cat ${{ runner.temp }}/hashes | jq '.server')" >> $GITHUB_OUTPUT
+          echo "assets=$(cat ${{ runner.temp }}/hashes | jq '.assets')" >> $GITHUB_OUTPUT
       - name: Handle yes Cache
         id: second-check
-        if: steps.cache.outputs.cache-hit == 'true'
+        if: steps.cache.outputs.cache-hit == 'false' && steps.cache.outputs.cache-matched-key != ''
         run: |
           echo "admin=$ADMIN" >> $GITHUB_OUTPUT
           echo "web=$WEB" >> $GITHUB_OUTPUT
@@ -82,7 +85,7 @@ jobs:
         uses: actions/cache/save@v3
         with:
           path: ${{ runner.temp }}
-          key: hashes
+          key: hashes-${{ steps.compute-hashes.outputs.checksum }}
 
   # assets:
   #   runs-on: ubuntu-latest
