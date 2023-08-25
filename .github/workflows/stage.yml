@@ -37,7 +37,6 @@ jobs:
           echo "hash-file=$(cat ${{ runner.temp }}/hashes)" >> $GITHUB_OUTPUT
       - name: Compute new hashes
         id: compute-hashes
-        if: steps.cache.outputs.cache-hit == 'true'
         run: |
           echo "admin=$ADMIN" >> $GITHUB_OUTPUT
           echo "web=$WEB" >> $GITHUB_OUTPUT
@@ -57,12 +56,11 @@ jobs:
           echo "server=$SERVER" >> $GITHUB_OUTPUT
           echo "assets=$ASSETS" >> $GITHUB_OUTPUT
         env:
-          ADMIN: ${{ steps.compute-hashes?.admin == fromJSON(steps.get-hashes.hash-file).admin }}
-          WEB: ${{ steps.compute-hashes?.web == fromJSON(steps.get-hashes.hash-file).web }}
-          SERVER: ${{ steps.compute-hashes?.server == fromJSON(steps.get-hashes.hash-file).server }}
-          ASSETS: ${{ steps.compute-hashes?.assets == fromJSON(steps.get-hashes.hash-file).assets }}
+          ADMIN: ${{ steps.compute-hashes.admin == fromJSON(steps.get-hashes.hash-file).admin }}
+          WEB: ${{ steps.compute-hashes.web == fromJSON(steps.get-hashes.hash-file).web }}
+          SERVER: ${{ steps.compute-hashes.server == fromJSON(steps.get-hashes.hash-file).server }}
+          ASSETS: ${{ steps.compute-hashes.assets == fromJSON(steps.get-hashes.hash-file).assets }}
       - name: Write Cache
-        if: steps.cache.outputs.cache-hit == 'true'
         run: |
           cat > ${{ runner.temp }}/hashes << EOF
           {
@@ -78,7 +76,6 @@ jobs:
           SERVER: ${{ steps.compute-hashes.server }}
           ASSETS: ${{ steps.compute-hashes.assets }}
       - name: Save Cache
-        if: steps.cache.outputs.cache-hit == 'true'
         uses: actions/cache/save@v3
         with:
           path: ${{ runner.temp }}
