@@ -63,7 +63,7 @@ ALTER TABLE calendar_piece
     ALTER COLUMN calendar_id TYPE text,
     DROP CONSTRAINT calendar_piece_pkey,
     ALTER COLUMN id SET DEFAULT gen_random_uuid(),
-    ADD PRIMARY KEY (calendar_id, piece_id),
+    ADD PRIMARY KEY (id),
     DROP CONSTRAINT IF EXISTS calendar_piece_calendar_id_fkey,
     ADD CONSTRAINT calendar_piece_calendar_id_fkey
         FOREIGN KEY (calendar_id)
@@ -81,7 +81,7 @@ ALTER TABLE calendar_collaborator
     ALTER COLUMN calendar_id TYPE text,
     DROP CONSTRAINT calendar_collaborator_pkey,
     ALTER COLUMN id SET DEFAULT gen_random_uuid(),
-    ADD PRIMARY KEY (calendar_id, collaborator_id),
+    ADD PRIMARY KEY (id),
     DROP CONSTRAINT IF EXISTS calendar_collaborator_calendar_id_fkey,
     ADD CONSTRAINT calendar_collaborator_calendar_id_fkey
         FOREIGN KEY (calendar_id)
@@ -393,12 +393,13 @@ CREATE INDEX IF NOT EXISTS user_username_idx ON "user" (username);
 ALTER TABLE user_product
     DROP COLUMN IF EXISTS created_at,
     DROP COLUMN IF EXISTS updated_at,
+    ADD COLUMN IF NOT EXISTS id uuid DEFAULT gen_random_uuid(),
     ALTER COLUMN user_id TYPE text,
     ALTER COLUMN product_id TYPE text,
     DROP CONSTRAINT IF EXISTS customer_product_customer_id_fkey, -- old naming
     DROP CONSTRAINT IF EXISTS customer_product_product_id_fkey, -- old naming
     DROP CONSTRAINT IF EXISTS user_product_pkey,
-    ADD PRIMARY KEY (user_id, product_id),
+    ADD PRIMARY KEY (id),
     DROP CONSTRAINT IF EXISTS user_product_user_id_fkey,
     DROP CONSTRAINT IF EXISTS user_product_product_id_fkey,
     ADD CONSTRAINT user_product_user_id_fkey
