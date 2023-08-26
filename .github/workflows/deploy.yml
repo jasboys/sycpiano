@@ -27,6 +27,7 @@ jobs:
       - name: Compute new hashes
         id: compute-hashes
         run: |
+          echo $CWD
           echo "admin=$ADMIN" >> $GITHUB_OUTPUT
           echo "web=$WEB" >> $GITHUB_OUTPUT
           echo "server=$SERVER" >> $GITHUB_OUTPUT
@@ -37,6 +38,7 @@ jobs:
           WEB: ${{ hashFiles('packages/web/**', 'yarn.lock') }}
           SERVER: ${{ hashFiles('packages/server/**', 'yarn.lock') }}
           ASSETS: ${{ hashFiles('assets/**', 'yarn.lock') }}
+          CWD: ${{ github.workspace }}
       - name: Get Cached Hashes
         uses: actions/cache/restore@v3
         id: cache
@@ -44,6 +46,7 @@ jobs:
           path: .cache
           key: hashes-${{ github.ref_name }}-${{ steps.compute-hashes.outputs.checksum }}
           restore-keys: |
+            hashes-${{ github.ref_name }}-${{ steps.compute-hashes.outputs.checksum }}
             hashes-${{ github.ref_name }}-
             hashes-
       - name: Debug
@@ -311,8 +314,9 @@ jobs:
     steps:
       - name: Write Cache
         run: |
-          mkdir -p /tmp/.cache
-          cat > /tmp/.cache/hashes << EOF
+          echo $CWD
+          mkdir -p .cache
+          cat > .cache/hashes << EOF
           {
             "admin": "$ADMIN",
             "web": "$WEB",
@@ -325,8 +329,9 @@ jobs:
           WEB: ${{ needs.check-cache.outputs.web-hash }}
           SERVER: ${{ needs.check-cache.outputs.server-hash }}
           ASSETS: ${{ needs.check-cache.outputs.assets-hash }}
+          CWD: ${{ github.workspace }}
       - name: Save Cache
         uses: actions/cache/save@v3
         with:
-          path: /tmp/.cache
+          path: .cache
           key: hashes-${{ github.ref_name }}-${{ needs.check-cache.outputs.checksum }}

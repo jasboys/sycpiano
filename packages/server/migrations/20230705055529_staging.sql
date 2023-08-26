@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS "user" (
 CREATE TABLE IF NOT EXISTS user_product (
     id              uuid DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id         text REFERENCES customer ON DELETE CASCADE,
-    product_id      text REFERENCES product ON DELETE CASCADE,
+    product_id      text REFERENCES product ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS faq (
