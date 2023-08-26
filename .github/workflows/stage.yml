@@ -1,8 +1,10 @@
-name: Deploy Website to Staging
+run-name: Deploy to ${{ github.ref_name }}
 
 on:
   push:
-    branches: [ "deploy" ]
+    branches:
+      - staging
+      - production
 
 jobs:
   check-cache:
