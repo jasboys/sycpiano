@@ -20,8 +20,6 @@ import { AdminRest } from './adminAPI/index.js';
 import type { Options } from 'pino-http';
 import { csrfMiddleware } from './csrf.js';
 
-// genWaveform('bartok_etude_1.mp3');
-
 const main = async () => {
     await precheck();
 
