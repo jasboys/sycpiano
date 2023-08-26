@@ -17,7 +17,8 @@ jobs:
       assets-hash: ${{ steps.compute-hashes.outputs.assets }}
       server-hash: ${{ steps.compute-hashes.outputs.server }}
       checksum: ${{ steps.compute-hashes.outputs.checksum }}
-    environment: ${{ vars.CURRENT_ENVIRONMENT }}
+    environment:
+      name: ${{ github.ref_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -39,7 +40,7 @@ jobs:
         id: cache
         with:
           path: .cache
-          key: hashes-${{ steps.compute-hashes.outputs.checksum }}
+          key: hashes-${{ github.ref_name }}-${{ steps.compute-hashes.outputs.checksum }}
           restore-keys: |
             hashes-
       - name: Handle Cache Found
@@ -99,7 +100,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: check-cache
     if: needs.check-cache.outputs.assets-matched != 'true'
-    environment: ${{ vars.CURRENT_ENVIRONMENT }}
+    environment:
+      name: ${{ github.ref_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -121,7 +123,7 @@ jobs:
   #       run: |
   #         yarn
   #         yarn build
-  #       env: 
+  #       env:
   #         GAPI_KEY_APP: ${{ secrets.GAPI_KEY_APP }}
   #         PUBLIC_HOST: ${{ vars.PUBLIC_HOST }}
   #         STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
@@ -172,7 +174,8 @@ jobs:
 
   admin:
     runs-on: ubuntu-latest
-    environment: ${{ vars.CURRENT_ENVIRONMENT }}
+    environment:
+      name: ${{ github.ref_name }}
     needs: check-cache
     if: needs.check-cache.outputs.admin-matched != 'true'
     steps:
@@ -208,7 +211,8 @@ jobs:
 
   web:
     runs-on: ubuntu-latest
-    environment: ${{ vars.CURRENT_ENVIRONMENT }}
+    environment:
+      name: ${{ github.ref_name }}
     needs: check-cache
     if: needs.check-cache.outputs.web-matched != 'true'
     steps:
@@ -244,7 +248,8 @@ jobs:
 
   server:
     runs-on: ubuntu-latest
-    environment: ${{ vars.CURRENT_ENVIRONMENT }}
+    environment:
+      name: ${{ github.ref_name }}
     needs: check-cache
     if: needs.check-cache.outputs.server-matched != 'true'
     steps:
@@ -292,7 +297,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [check-cache, assets, web, server, admin]
     if: ${{ always() && contains(format('{0},{1},{2},{3}', needs.assets.result, needs.web.result, needs.server.result, needs.assets.result), 'success') }}
-    environment: ${{ vars.CURRENT_ENVIRONMENT }}
+    environment:
+      name: ${{ github.ref_name }}
     steps:
       - name: Write Cache
         run: |
@@ -314,4 +320,4 @@ jobs:
         uses: actions/cache/save@v3
         with:
           path: /tmp/.cache
-          key: hashes-${{ needs.check-cache.outputs.checksum }}
+          key: hashes-${{ github.ref_name }}-${{ needs.check-cache.outputs.checksum }}
