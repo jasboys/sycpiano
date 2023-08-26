@@ -44,7 +44,13 @@ jobs:
           path: .cache
           key: hashes-${{ github.ref_name }}-${{ steps.compute-hashes.outputs.checksum }}
           restore-keys: |
+            hashes-${{ github.ref_name }}-
             hashes-
+      - name: Debug
+        run: |
+          echo $CACHE
+        env:
+          CACHE: ${{ toJSON(steps.cache.outputs) }}
       - name: Handle Cache Found
         id: first-check
         if: steps.cache.outputs.cache-hit == 'true'
