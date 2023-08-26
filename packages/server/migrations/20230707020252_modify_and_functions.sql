@@ -398,7 +398,6 @@ ALTER TABLE user_product
     DROP CONSTRAINT IF EXISTS customer_product_customer_id_fkey, -- old naming
     DROP CONSTRAINT IF EXISTS customer_product_product_id_fkey, -- old naming
     DROP CONSTRAINT IF EXISTS user_product_pkey,
-    DROP COLUMN IF EXISTS id,
     ADD PRIMARY KEY (user_id, product_id),
     DROP CONSTRAINT IF EXISTS user_product_user_id_fkey,
     DROP CONSTRAINT IF EXISTS user_product_product_id_fkey,
