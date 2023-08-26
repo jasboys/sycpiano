@@ -6,6 +6,9 @@ on:
       - staging
       - production
 
+env:
+  ACTIONS_STEP_DEBUG: true
+
 jobs:
   check-cache:
     runs-on: ubuntu-latest
