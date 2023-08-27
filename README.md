@@ -1,13 +1,14 @@
 # The official web page of pianist Sean Chen.
 
-This is a monorepo of all the parts that make up sycpiano. Uses [turborepo](https://turbo.build/) for task management.
-This website backend is an [express](http://expressjs.com/) app with a PostgreSQL database. Migration is done by [dbmate](https://github.com/amacneil/dbmate)
-The frontend is built with [react](https://facebook.github.io/react/) and built with [vite](https://vitejs.dev/).
-The admin panel uses [react-admin](https://marmelab.com/react-admin/) and built with [vite](https://vitejs.dev/).
-Development is assisted by [vite](https://vitejs.dev/).
-Use [yarn](https://yarnpkg.com/en/) or npm for package management.
-Code is in [typescript](https://www.typescriptlang.org/) and styling is done in [emotion](https://github.com/emotion-js/emotion).
-Deployment uses github actions.
+This is a monorepo of all the parts that make up sycpiano. Uses [turborepo](https://turbo.build/) for task management.\
+This website backend is an [express](http://expressjs.com/) app with a PostgreSQL database. Migration is done by [dbmate](https://github.com/amacneil/dbmate).\
+The frontend is built with [react](https://facebook.github.io/react/) and built with [vite](https://vitejs.dev/).\
+The admin panel uses [react-admin](https://marmelab.com/react-admin/) and built with [vite](https://vitejs.dev/).\
+Development is streamlined by [vite](https://vitejs.dev/).\
+Use modern [yarn](https://yarnpkg.com/en/) for package management.\
+Code is in [typescript](https://www.typescriptlang.org/) and styling is done in [emotion](https://github.com/emotion-js/emotion).\
+Deployment uses github actions.\
+Service is persisted with PM2.\
 
 ## Getting Started
 Make sure at least version 16 of Node.js is installed.
