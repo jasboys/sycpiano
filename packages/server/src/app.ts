@@ -20,7 +20,7 @@ import { AdminRest } from './adminAPI/index.js';
 import type { Options } from 'pino-http';
 import { csrfMiddleware } from './csrf.js';
 
-// oh no change
+// oh yes change
 
 const main = async () => {
     await precheck();
