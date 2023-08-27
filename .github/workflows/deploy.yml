@@ -66,10 +66,10 @@ jobs:
         id: get-hashes
         if: steps.cache.outputs.cache-hit == 'false' && steps.cache.outputs.cache-matched-key != ''
         run: |
-          echo "admin=$(cat $HASH_FILE | jq -a '.admin')" >> $GITHUB_OUTPUT
-          echo "web=$(cat $HASH_FILE | jq -a '.web')" >> $GITHUB_OUTPUT
-          echo "server=$(cat $HASH_FILE | jq -a '.server')" >> $GITHUB_OUTPUT
-          echo "assets=$(cat $HASH_FILE | jq -a '.assets')" >> $GITHUB_OUTPUT
+          echo "admin=$(cat $HASH_FILE | jq -j '.admin')" >> $GITHUB_OUTPUT
+          echo "web=$(cat $HASH_FILE | jq -j '.web')" >> $GITHUB_OUTPUT
+          echo "server=$(cat $HASH_FILE | jq -j '.server')" >> $GITHUB_OUTPUT
+          echo "assets=$(cat $HASH_FILE | jq -j '.assets')" >> $GITHUB_OUTPUT
         env:
           HASH_FILE: .cache/hashes
       - name: Handle yes Cache
