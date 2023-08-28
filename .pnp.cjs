@@ -5386,13 +5386,13 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["argon2", [\
-      ["npm:0.30.3", {\
-        "packageLocation": "./.yarn/unplugged/argon2-npm-0.30.3-26d693a42c/node_modules/argon2/",\
+      ["npm:0.31.0", {\
+        "packageLocation": "./.yarn/unplugged/argon2-npm-0.31.0-40840ad360/node_modules/argon2/",\
         "packageDependencies": [\
-          ["argon2", "npm:0.30.3"],\
+          ["argon2", "npm:0.31.0"],\
           ["@mapbox/node-pre-gyp", "npm:1.0.11"],\
           ["@phc/format", "npm:1.0.0"],\
-          ["node-addon-api", "npm:5.1.0"]\
+          ["node-addon-api", "npm:7.0.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10190,18 +10190,18 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["node-addon-api", [\
-      ["npm:5.1.0", {\
-        "packageLocation": "./.yarn/unplugged/node-addon-api-npm-5.1.0-b50d00f739/node_modules/node-addon-api/",\
-        "packageDependencies": [\
-          ["node-addon-api", "npm:5.1.0"],\
-          ["node-gyp", "npm:9.4.0"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["npm:6.1.0", {\
         "packageLocation": "./.yarn/unplugged/node-addon-api-npm-6.1.0-634c545b39/node_modules/node-addon-api/",\
         "packageDependencies": [\
           ["node-addon-api", "npm:6.1.0"],\
+          ["node-gyp", "npm:9.4.0"]\
+        ],\
+        "linkType": "HARD"\
+      }],\
+      ["npm:7.0.0", {\
+        "packageLocation": "./.yarn/unplugged/node-addon-api-npm-7.0.0-988c806c8b/node_modules/node-addon-api/",\
+        "packageDependencies": [\
+          ["node-addon-api", "npm:7.0.0"],\
           ["node-gyp", "npm:9.4.0"]\
         ],\
         "linkType": "HARD"\
@@ -12753,7 +12753,7 @@ const RAW_RUNTIME_STATE =
           ["@types/validator", "npm:13.11.1"],\
           ["app-root-path", "npm:3.1.0"],\
           ["archiver", "npm:5.3.2"],\
-          ["argon2", "npm:0.30.3"],\
+          ["argon2", "npm:0.31.0"],\
           ["axios", "npm:1.4.0"],\
           ["chokidar", "npm:3.5.3"],\
           ["common", "workspace:packages/common"],\

@@ -4,7 +4,6 @@ import orm from './database.js';
 import { User } from './models/User.js';
 
 async function main() {
-    console.log(process.argv);
     if (process.argv.length < 4) {
         console.log(
             'usage: node server/build/createAdmin.js username password',
@@ -14,15 +13,16 @@ async function main() {
     const username = process.argv[2];
     const password = process.argv[3];
     try {
-        const passHash = await argon2.hash(password, { type: argon2.argon2id });
+        const passHash = await argon2.hash(password, { type: 2 });
+        const em = orm.em.fork();
 
-        const user = orm.em.create(User, {
+        const user = em.create(User, {
             id: randomUUID(),
             username,
             passHash,
             role: 'admin',
         });
-        orm.em.persist(user).flush();
+        em.persist(user).flush();
         console.log('Successfully created Admin user.');
     } catch (e) {
         console.log('Failed to create Admin user.');

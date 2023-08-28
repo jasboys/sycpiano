@@ -34,9 +34,9 @@ jobs:
           echo "assets=$ASSETS" >> $GITHUB_OUTPUT
           echo "checksum=$(echo -n $ADMIN$WEB$SERVER$ASSETS | sha256sum | cut -f 1 -d ' ')" >> $GITHUB_OUTPUT
         env:
-          ADMIN: ${{ hashFiles('packages/admin/**', 'yarn.lock', '.yarnrc.yml') }}
-          WEB: ${{ hashFiles('packages/web/**', 'yarn.lock', '.yarnrc.yml') }}
-          SERVER: ${{ hashFiles('packages/server/**', 'yarn.lock', '.yarnrc.yml', 'ecosystem.config.cjs') }}
+          ADMIN: ${{ hashFiles('packages/admin/**', 'packages/common/**', 'yarn.lock', '.yarnrc.yml') }}
+          WEB: ${{ hashFiles('packages/web/**', 'packages/common/**', 'yarn.lock', '.yarnrc.yml') }}
+          SERVER: ${{ hashFiles('packages/server/**', 'packages/common/**', 'yarn.lock', '.yarnrc.yml', 'ecosystem.config.cjs') }}
           ASSETS: ${{ hashFiles('assets/**') }}
           CWD: ${{ github.workspace }}
       - name: Get Cached Hashes

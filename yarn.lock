@@ -1891,7 +1891,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@mapbox/node-pre-gyp@npm:^1.0.10":
+"@mapbox/node-pre-gyp@npm:^1.0.11":
   version: 1.0.11
   resolution: "@mapbox/node-pre-gyp@npm:1.0.11"
   dependencies:
@@ -3584,14 +3584,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"argon2@npm:^0.30.3":
-  version: 0.30.3
-  resolution: "argon2@npm:0.30.3"
+"argon2@npm:^0.31.0":
+  version: 0.31.0
+  resolution: "argon2@npm:0.31.0"
   dependencies:
-    "@mapbox/node-pre-gyp": "npm:^1.0.10"
+    "@mapbox/node-pre-gyp": "npm:^1.0.11"
     "@phc/format": "npm:^1.0.0"
-    node-addon-api: "npm:^5.0.0"
-  checksum: af617195c75562a40cdad3043128c472b041cc20a97b0441ca479938d2fcda1165d5035033175c1857b94aa8a1abb46e6413b23265f2507890f7309e4e406b8e
+    node-addon-api: "npm:^7.0.0"
+  checksum: 5cb269b9b79c4a32d9e738d5691bc930896428abcf61a0debf61aa2c11dfda604b2958d92e3b86852603f10b6ac36217580a10c63a629489eb5239101faeafd1
   languageName: node
   linkType: hard
 
@@ -7772,21 +7772,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-addon-api@npm:^5.0.0":
-  version: 5.1.0
-  resolution: "node-addon-api@npm:5.1.0"
-  dependencies:
-    node-gyp: "npm:latest"
-  checksum: 595f59ffb4630564f587c502119cbd980d302e482781021f3b479f5fc7e41cf8f2f7280fdc2795f32d148e4f3259bd15043c52d4a3442796aa6f1ae97b959636
-  languageName: node
-  linkType: hard
-
 "node-addon-api@npm:^6.1.0":
   version: 6.1.0
   resolution: "node-addon-api@npm:6.1.0"
   dependencies:
     node-gyp: "npm:latest"
   checksum: 8eea1d4d965930a177a0508695beb0d89b4c1d80bf330646a035357a1e8fc31e0d09686e2374996e96e757b947a7ece319f98ede3146683f162597c0bcb4df90
+  languageName: node
+  linkType: hard
+
+"node-addon-api@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "node-addon-api@npm:7.0.0"
+  dependencies:
+    node-gyp: "npm:latest"
+  checksum: f1a54ae38f6cbd4cdfe69d1b2f3f0c4a3d227eb50f5073f0a3b985d29a0c39c94b82c88213e5075ee1bc262f2e869841c733ebe7111a5e376f1732649edf6a93
   languageName: node
   linkType: hard
 
@@ -9802,7 +9802,7 @@ __metadata:
     "@types/validator": "npm:^13.7.17"
     app-root-path: "npm:^3.1.0"
     archiver: "npm:^5.3.1"
-    argon2: "npm:^0.30.3"
+    argon2: "npm:^0.31.0"
     axios: "npm:^1.4.0"
     chokidar: "npm:^3.5.3"
     common: "workspace:^"
