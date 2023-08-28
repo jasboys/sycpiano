@@ -1,9 +1,15 @@
 /* eslint-disable no-var, strict, prefer-arrow-callback */
+const path = require('path');
+
+function getName() {
+    const folderName = path.parse(process.cwd()).name;
+    return `sycpiano-${folderName}`;
+}
 
 module.exports = {
     apps: [
         {
-            name: 'sycpiano',
+            name: getName(),
             script: 'yarn',
             args: 'start',
             exec_mode: 'fork',
