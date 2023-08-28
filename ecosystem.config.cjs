@@ -3,7 +3,7 @@ const path = require('path');
 
 function getName() {
     const folderName = path.parse(process.cwd()).name;
-    return `sycpiano-${folderName}`;
+    return folderName;
 }
 
 module.exports = {
