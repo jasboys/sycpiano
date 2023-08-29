@@ -220,17 +220,21 @@ export class Calendar {
     })
     collaborators = new Collection<Collaborator>(this);
 
-    @OneToOne({ entity: () => CalendarTrgmMatview, joinColumn: 'id' })
-    calendarTrgmMatview!: CalendarTrgmMatview;
+    @OneToOne({
+        entity: () => CalendarTrgmMatview,
+        joinColumn: 'id',
+        nullable: true,
+    })
+    calendarTrgmMatview?: CalendarTrgmMatview;
 
     @BeforeCreate()
     async beforeCreate(args: EventArgs<Calendar>) {
-        beforeCreateHook(args);
+        await beforeCreateHook(args);
     }
 
     @BeforeUpdate()
     async beforeUpdate(args: EventArgs<Calendar>) {
-        beforeUpdateHook(args);
+        await beforeUpdateHook(args);
     }
 
     @AfterDelete()

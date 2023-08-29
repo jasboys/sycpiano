@@ -14,7 +14,7 @@ export const CalendarCreate = (props: CreateProps) => {
     return (
         <Create {...props}>
             <SimpleForm>
-                <TextInput source="name" />
+                <TextInput source="name" fullWidth/>
                 <TextInput
                     source="dateTimeInput"
                     helperText="YYYY-MM-DD HH:MM"
@@ -47,10 +47,10 @@ export const CalendarCreate = (props: CreateProps) => {
                 <BooleanInput source="allDay" />
                 <EndDate />
                 <TextInput source="timezone" disabled />
-                <TextInput source="location" />
+                <TextInput source="location" fullWidth />
                 <TextInput source="type" />
-                <TextInput source="website" />
-                <TextInput source="imageUrl" />
+                <TextInput source="website" fullWidth />
+                <TextInput source="imageUrl" fullWidth />
             </SimpleForm>
         </Create>
     );
