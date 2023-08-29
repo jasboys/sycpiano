@@ -79,33 +79,23 @@ adminRest.use(
                 Calendar,
                 { id },
                 {
-                    populate: [
-                        'collaborators',
-                        'collaborators.calendarCollaborators',
-                        'pieces',
-                        'pieces.calendarPieces',
-                    ],
+                    populate: ['collaborators', 'pieces'],
                 },
             );
             const plainCal = wrap(cal).toPOJO();
             return {
                 ...plainCal,
-                collaborators: plainCal.collaborators.map((val) => {
-                    const { calendarCollaborators, ...valWithoutJoin } = val;
-                    const calendarCollaborator = calendarCollaborators.find(
-                        (v) => v.calendar.id === id,
-                    );
+                collaborators: plainCal.collaborators.map((val, idx) => {
                     return {
-                        ...valWithoutJoin,
-                        order: calendarCollaborator?.order,
+                        ...val,
+                        order: idx,
                     };
                 }),
-                pieces: plainCal.pieces.map((val) => {
-                    const { calendarPieces, ...valWithoutJoin } = val;
-                    const calendarPiece = calendarPieces.find(
-                        (v) => v.calendar.id === id,
-                    );
-                    return { ...valWithoutJoin, order: calendarPiece?.order };
+                pieces: plainCal.pieces.map((val, idx) => {
+                    return {
+                        ...val,
+                        order: idx,
+                    };
                 }),
             };
         },
@@ -114,12 +104,7 @@ adminRest.use(
                 limit,
                 offset,
                 orderBy: order,
-                populate: [
-                    'collaborators',
-                    'collaborators.calendarCollaborators',
-                    'pieces',
-                    'pieces.calendarPieces',
-                ],
+                populate: ['collaborators', 'pieces'],
             });
 
             return {
@@ -129,26 +114,16 @@ adminRest.use(
                     return {
                         ...pojo,
                         // dateTime: transformDateTime(cal.dateTime, cal.timezone),
-                        collaborators: pojo.collaborators.map((val) => {
-                            const { calendarCollaborators, ...valWithoutJoin } =
-                                val;
-                            const calendarCollaborator =
-                                calendarCollaborators.find(
-                                    (v) => v.calendar.id === cal.id,
-                                );
+                        collaborators: pojo.collaborators.map((val, idx) => {
                             return {
-                                ...valWithoutJoin,
-                                order: calendarCollaborator?.order,
+                                ...val,
+                                order: idx,
                             };
                         }),
-                        pieces: pojo.pieces.map((val) => {
-                            const { calendarPieces, ...valWithoutJoin } = val;
-                            const calendarPiece = calendarPieces.find(
-                                (v) => v.calendar.id === cal.id,
-                            );
+                        pieces: pojo.pieces.map((val, idx) => {
                             return {
-                                ...valWithoutJoin,
-                                order: calendarPiece?.order,
+                                ...val,
+                                order: idx,
                             };
                         }),
                     };
@@ -184,12 +159,7 @@ adminRest.use(
                 };
             }
             const calendarResults = await orm.em.findAndCount(Calendar, where, {
-                populate: [
-                    'collaborators',
-                    'collaborators.calendarCollaborators',
-                    'pieces',
-                    'pieces.calendarPieces',
-                ],
+                populate: ['collaborators', 'pieces'],
                 orderBy: [{ dateTime: 'DESC' }],
                 limit,
             });
@@ -200,26 +170,16 @@ adminRest.use(
                     return {
                         ...pojo,
                         // dateTime: transformDateTime(cal.dateTime, cal.timezone),
-                        collaborators: pojo.collaborators.map((val) => {
-                            const { calendarCollaborators, ...valWithoutJoin } =
-                                val;
-                            const calendarCollaborator =
-                                calendarCollaborators.find(
-                                    (v) => v.calendar.id === cal.id,
-                                );
+                        collaborators: pojo.collaborators.map((val, idx) => {
                             return {
-                                ...valWithoutJoin,
-                                order: calendarCollaborator?.order,
+                                ...val,
+                                order: idx,
                             };
                         }),
-                        pieces: pojo.pieces.map((val) => {
-                            const { calendarPieces, ...valWithoutJoin } = val;
-                            const calendarPiece = calendarPieces.find(
-                                (v) => v.calendar.id === cal.id,
-                            );
+                        pieces: pojo.pieces.map((val, idx) => {
                             return {
-                                ...valWithoutJoin,
-                                order: calendarPiece?.order,
+                                ...val,
+                                order: idx,
                             };
                         }),
                     };
