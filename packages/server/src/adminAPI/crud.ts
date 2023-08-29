@@ -20,9 +20,9 @@ const parseQuery = <R extends object, Q extends QueryString.ParsedQs>(
     query: Q,
     options?: FilterOptions<R>,
 ) => {
-    const range = query['range'] as string | undefined;
-    const sort = query['sort'] as string | undefined;
-    const filter = query['filter'] as string | object;
+    const range = query.range as string | undefined;
+    const sort = query.sort as string | undefined;
+    const filter = query.filter as string | object;
     const [from, to] = range ? JSON.parse(range) : [undefined, undefined];
 
     console.log(filter, typeof filter);

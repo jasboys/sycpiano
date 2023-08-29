@@ -2,6 +2,7 @@ import {
     EntityProperty,
     LoadStrategy,
     MikroORM,
+    PopulateHint,
     ReflectMetadataProvider,
 } from '@mikro-orm/core';
 import { PostgreSqlDriver, PostgreSqlPlatform } from '@mikro-orm/postgresql';
@@ -55,6 +56,7 @@ const orm = await MikroORM.init<FixedPostgresql>({
     debug: true,
     driver: FixedPostgresql,
     loadStrategy: LoadStrategy.JOINED,
+    populateWhere: PopulateHint.INFER,
 });
 
 export default orm;

@@ -91,13 +91,21 @@ adminRest.use(
             return {
                 ...plainCal,
                 collaborators: plainCal.collaborators.map((val) => {
+                    const { calendarCollaborators, ...valWithoutJoin } = val;
+                    const calendarCollaborator = calendarCollaborators.find(
+                        (v) => v.calendar.id === id,
+                    );
                     return {
-                        ...val,
-                        order: val.calendarCollaborators[0].order,
+                        ...valWithoutJoin,
+                        order: calendarCollaborator?.order,
                     };
                 }),
                 pieces: plainCal.pieces.map((val) => {
-                    return { ...val, order: val.calendarPieces[0].order };
+                    const { calendarPieces, ...valWithoutJoin } = val;
+                    const calendarPiece = calendarPieces.find(
+                        (v) => v.calendar.id === id,
+                    );
+                    return { ...valWithoutJoin, order: calendarPiece?.order };
                 }),
             };
         },
@@ -122,15 +130,25 @@ adminRest.use(
                         ...pojo,
                         // dateTime: transformDateTime(cal.dateTime, cal.timezone),
                         collaborators: pojo.collaborators.map((val) => {
+                            const { calendarCollaborators, ...valWithoutJoin } =
+                                val;
+                            const calendarCollaborator =
+                                calendarCollaborators.find(
+                                    (v) => v.calendar.id === cal.id,
+                                );
                             return {
-                                ...val,
-                                order: val.calendarCollaborators[0].order,
+                                ...valWithoutJoin,
+                                order: calendarCollaborator?.order,
                             };
                         }),
                         pieces: pojo.pieces.map((val) => {
+                            const { calendarPieces, ...valWithoutJoin } = val;
+                            const calendarPiece = calendarPieces.find(
+                                (v) => v.calendar.id === cal.id,
+                            );
                             return {
-                                ...val,
-                                order: val.calendarPieces[0].order,
+                                ...valWithoutJoin,
+                                order: calendarPiece?.order,
                             };
                         }),
                     };
@@ -183,15 +201,25 @@ adminRest.use(
                         ...pojo,
                         // dateTime: transformDateTime(cal.dateTime, cal.timezone),
                         collaborators: pojo.collaborators.map((val) => {
+                            const { calendarCollaborators, ...valWithoutJoin } =
+                                val;
+                            const calendarCollaborator =
+                                calendarCollaborators.find(
+                                    (v) => v.calendar.id === cal.id,
+                                );
                             return {
-                                ...val,
-                                order: val.calendarCollaborators[0].order,
+                                ...valWithoutJoin,
+                                order: calendarCollaborator?.order,
                             };
                         }),
                         pieces: pojo.pieces.map((val) => {
+                            const { calendarPieces, ...valWithoutJoin } = val;
+                            const calendarPiece = calendarPieces.find(
+                                (v) => v.calendar.id === cal.id,
+                            );
                             return {
-                                ...val,
-                                order: val.calendarPieces[0].order,
+                                ...valWithoutJoin,
+                                order: calendarPiece?.order,
                             };
                         }),
                     };
