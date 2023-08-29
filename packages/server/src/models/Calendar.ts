@@ -22,7 +22,6 @@ import {
     transformModelToGoogle,
     updateCalendar,
 } from '../gapi/calendar.js';
-import { getPhotos } from '../gapi/places.js';
 import { CalendarCollaborator } from './CalendarCollaborator.js';
 import { CalendarPiece } from './CalendarPiece.js';
 import { Collaborator } from './Collaborator.js';
@@ -51,7 +50,7 @@ async function beforeCreateHook(args: EventArgs<Calendar>) {
     }
     console.log('[Hook: BeforeCreate] Finished image url from tags.');
 
-    console.log('[Hook: BeforeCreate] Fetching photos from Places API');
+    console.log('[Hook: BeforeCreate] Fetching photos from existing places');
     if (location) {
         try {
             const otherCal = await args.em.findOne(Calendar, {
@@ -61,19 +60,20 @@ async function beforeCreateHook(args: EventArgs<Calendar>) {
                 console.log('[Hook: BeforeCreate] Found existing photo.');
                 args.entity.photoReference = otherCal.photoReference;
                 args.entity.placeId = otherCal.placeId;
-            } else {
-                const { photoReference, placeId } = await getPhotos(location);
-                console.log('[Hook: BeforeCreate]: Parsed photo from API.');
-                args.entity.photoReference = photoReference;
-                args.entity.placeId = placeId;
             }
+            // else {
+            //     const { photoReference, placeId } = await getPhotos(location);
+            //     console.log('[Hook: BeforeCreate]: Parsed photo from API.');
+            //     args.entity.photoReference = photoReference;
+            //     args.entity.placeId = placeId;
+            // }
         } catch (e) {
             console.log(`[Hook: BeforeCreate] ${e}`);
             args.entity.photoReference = '';
             args.entity.placeId = '';
         }
     }
-    console.log('[Hook: BeforeCreate] Done with Places API');
+    console.log('[Hook: BeforeCreate] Done with Places');
 
     /* eslint-disable require-atomic-updates */
     args.entity.timezone = timezone;
@@ -133,12 +133,13 @@ async function beforeUpdateHook(args: EventArgs<Calendar>) {
                 console.log('[Hook: BeforeUpdate] Found existing photo.');
                 args.changeSet.payload.photoReference = otherCal.photoReference;
                 args.changeSet.payload.placeId = otherCal.placeId;
-            } else {
-                const { photoReference, placeId } = await getPhotos(location);
-                console.log('[Hook: BeforeUpdate]: Parsed photo from API.');
-                args.changeSet.payload.photoReference = photoReference;
-                args.changeSet.payload.placeId = placeId;
             }
+            // else {
+            //     const { photoReference, placeId } = await getPhotos(location);
+            //     console.log('[Hook: BeforeUpdate]: Parsed photo from API.');
+            //     args.changeSet.payload.photoReference = photoReference;
+            //     args.changeSet.payload.placeId = placeId;
+            // }
         } catch (e) {
             console.log(`[Hook: BeforeUpdate] ${e}`);
             args.changeSet.payload.photoReference = '';
