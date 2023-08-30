@@ -42,24 +42,19 @@ async function beforeCreateHook(args: EventArgs<Calendar>) {
     }
     console.log(`[Hook: BeforeCreate] timezone: ${timezone}`);
 
-    console.log('[Hook: BeforeCreate] Fetching image url from tags');
-    if (!imageUrl && website) {
-        const fetchedImageUrl = await getImageFromMetaTag(website);
-        args.entity.imageUrl = fetchedImageUrl;
-        args.entity.usePlacePhoto = fetchedImageUrl === '';
-    }
-    console.log('[Hook: BeforeCreate] Finished image url from tags.');
-
     console.log('[Hook: BeforeCreate] Fetching photos from existing places');
     if (location) {
         try {
             const otherCal = await args.em.findOne(Calendar, {
-                $and: [{ location }, { photoReference: { $ne: null } }],
+                $and: [
+                    { location },
+                    { imageUrl: { $ne: null } },
+                    { imageUrl: { $ne: '' } },
+                ],
             });
             if (otherCal) {
                 console.log('[Hook: BeforeCreate] Found existing photo.');
-                args.entity.photoReference = otherCal.photoReference;
-                args.entity.placeId = otherCal.placeId;
+                args.entity.imageUrl = otherCal.imageUrl;
             }
             // else {
             //     const { photoReference, placeId } = await getPhotos(location);
@@ -69,11 +64,18 @@ async function beforeCreateHook(args: EventArgs<Calendar>) {
             // }
         } catch (e) {
             console.log(`[Hook: BeforeCreate] ${e}`);
-            args.entity.photoReference = '';
-            args.entity.placeId = '';
         }
     }
     console.log('[Hook: BeforeCreate] Done with Places');
+
+    console.log('[Hook: BeforeCreate] Fetching image url from tags');
+    if (!imageUrl && website) {
+        const fetchedImageUrl = await getImageFromMetaTag(website);
+        if (fetchedImageUrl !== '') {
+            args.entity.imageUrl = fetchedImageUrl;
+        }
+    }
+    console.log('[Hook: BeforeCreate] Finished image url from tags.');
 
     /* eslint-disable require-atomic-updates */
     args.entity.timezone = timezone;
@@ -127,12 +129,15 @@ async function beforeUpdateHook(args: EventArgs<Calendar>) {
         console.log('[Hook: BeforeUpdate] Fetching photos from Places API');
         try {
             const otherCal = await args.em.findOne(Calendar, {
-                $and: [{ location }, { photoReference: { $ne: null } }],
+                $and: [
+                    { location },
+                    { imageUrl: { $ne: null } },
+                    { imageUrl: { $ne: '' } },
+                ],
             });
             if (otherCal) {
                 console.log('[Hook: BeforeUpdate] Found existing photo.');
-                args.changeSet.payload.photoReference = otherCal.photoReference;
-                args.changeSet.payload.placeId = otherCal.placeId;
+                args.changeSet.payload.imageUrl = otherCal.imageUrl;
             }
             // else {
             //     const { photoReference, placeId } = await getPhotos(location);
@@ -142,8 +147,6 @@ async function beforeUpdateHook(args: EventArgs<Calendar>) {
             // }
         } catch (e) {
             console.log(`[Hook: BeforeUpdate] ${e}`);
-            args.changeSet.payload.photoReference = '';
-            args.changeSet.payload.placeId = '';
         }
         console.log('[Hook: BeforeUpdate] Done with Places API');
     }
@@ -151,8 +154,9 @@ async function beforeUpdateHook(args: EventArgs<Calendar>) {
     if (websiteChanged && !args.entity.imageUrl && args.entity.website) {
         console.log('[Hook: BeforeUpdate] Fetching image url from tags');
         const fetchedImageUrl = await getImageFromMetaTag(args.entity.website);
-        args.changeSet.payload.imageUrl = fetchedImageUrl;
-        args.changeSet.payload.usePlacePhoto = fetchedImageUrl === '';
+        if (fetchedImageUrl !== '') {
+            args.changeSet.payload.imageUrl = fetchedImageUrl;
+        }
     }
 
     if (!isEmpty(args.changeSet?.payload)) {
@@ -197,15 +201,6 @@ export class Calendar {
 
     @Property({ columnType: 'text', nullable: true })
     imageUrl?: string;
-
-    @Property({ columnType: 'text', nullable: true })
-    photoReference?: string;
-
-    @Property({ columnType: 'text', nullable: true })
-    placeId?: string;
-
-    @Property({ nullable: true, default: true })
-    usePlacePhoto?: boolean = true;
 
     @ManyToMany({
         entity: () => Piece,

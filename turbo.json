@@ -9,6 +9,9 @@
             "dependsOn": ["^watch"],
             "cache": false,
             "persistent": true
+        },
+        "build": {
+            "dependsOn": ["^build"]
         }
     }
 }

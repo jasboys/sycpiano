@@ -676,10 +676,9 @@ const populateImages = async (entity: Calendar) => {
         if (website) {
             if (imageUrl === null) {
                 const fetchedImageUrl = await getImageFromMetaTag(website);
-                entity.imageUrl = fetchedImageUrl;
-                entity.usePlacePhoto = fetchedImageUrl === '';
-            } else {
-                entity.usePlacePhoto = imageUrl === '';
+                if (fetchedImageUrl !== '') {
+                    entity.imageUrl = fetchedImageUrl;
+                }
             }
         }
 
@@ -688,23 +687,15 @@ const populateImages = async (entity: Calendar) => {
                 const otherCal = await orm.em.findOne(Calendar, {
                     $and: [
                         { location },
-                        { photoReference: { $ne: null } },
-                        { photoReference: { $ne: '' } },
+                        { imageUrl: { $ne: null } },
+                        { imageUrl: { $ne: '' } },
                     ],
                 });
                 if (otherCal) {
-                    entity.photoReference = otherCal.photoReference;
-                    entity.placeId = otherCal.placeId;
-                } else {
-                    const { photoReference, placeId } = await getPhotos(
-                        location,
-                    );
-                    entity.photoReference = photoReference;
-                    entity.placeId = placeId;
+                    entity.imageUrl = otherCal.imageUrl;
                 }
             } catch (e) {
-                entity.photoReference = '';
-                entity.placeId = '';
+                console.log('No images to populate');
             }
         }
     } catch (e) {

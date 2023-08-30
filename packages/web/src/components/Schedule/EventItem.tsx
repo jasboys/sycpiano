@@ -22,10 +22,16 @@ import { latoFont } from 'src/styles/fonts.js';
 import { cardShadow } from 'src/styles/mixins.js';
 import { fadeOnEnter, fadeOnExit, titleStringBase } from 'src/utils.js';
 import { ShareIconInstance } from './ShareIconSVG.jsx';
-import { EventItem as EventItemType, EventListName } from './types.js';
+import { EventItem as EventItemType, EventListName, EventType } from './types.js';
+import { staticImage } from 'src/imageUrls.js';
 
-const getGooglePlacePhoto = (photoReference: string, maxHeight: number) =>
-    `https://maps.googleapis.com/maps/api/place/photo?maxheight=${maxHeight}&photo_reference=${photoReference}&key=${GAPI_KEY}`;
+const eventPictureFallbackMap: Record<EventType, string> = {
+    concerto: staticImage('/gallery/thumbnails/cip_5.jpg'),
+    solo: staticImage('/gallery/thumbnails/cliburn1.jpg'),
+    chamber: staticImage('/gallery/thumbnails/chamber1.jpg'),
+    masterclass: staticImage('/gallery/thumbnails/masterclass1.jpg'),
+    adjudication: staticImage('/gallery/thumbnails/score1.jpg'),
+};
 
 type EventItemProps = EventItemType & {
     className?: string;
@@ -181,7 +187,6 @@ const EventItem: React.FC<EventItemProps> = ({
     permaLink,
     timezone,
     imageUrl,
-    photoReference,
     usePlacePhoto,
 }) => {
     const arrowRef = React.useRef<HTMLDivElement | null>(null);
@@ -233,10 +238,7 @@ const EventItem: React.FC<EventItemProps> = ({
         [permaLink],
     );
 
-    const src =
-        (usePlacePhoto && photoReference
-            ? getGooglePlacePhoto(photoReference, 300)
-            : imageUrl) ?? '';
+    const src = (!usePlacePhoto && imageUrl) ? imageUrl : eventPictureFallbackMap[type];
 
     const DateChildren = (
         <EventDate

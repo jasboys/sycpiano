@@ -55,7 +55,7 @@ const StyledCredit = styled.div(latoFont(200), {
 });
 
 const Photos: React.FC<Record<never, unknown>> = () => {
-    const isHamburger = useAppSelector(mqSelectors.isHamburger);
+    const screenXS = useAppSelector(mqSelectors.screenXS);
     const dispatch = useAppDispatch();
     const currentItem = useAppSelector(
         ({ photoViewer }) => photoViewer.currentItem,
@@ -89,7 +89,7 @@ const Photos: React.FC<Record<never, unknown>> = () => {
 
     return (
         <StyledPhotos style={{ background }}>
-            {!isHamburger && (
+            {!screenXS && (
                 <StyledPhotoViewer>
                     <TransitionGroup component={null}>
                         {items.map((item, idx) => {
@@ -100,7 +100,7 @@ const Photos: React.FC<Record<never, unknown>> = () => {
                                     idx={idx}
                                     item={item}
                                     isCurrent={isCurrent}
-                                    isMobile={isHamburger}
+                                    isMobile={screenXS}
                                 />
                             );
                         })}

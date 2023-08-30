@@ -77,6 +77,9 @@ const loadingStyle = css({
     height: '100%',
     width: '100%',
     position: 'absolute',
+    svg: {
+        width: 64,
+    },
 });
 
 const PhotoListItem: React.FC<ChildRendererProps<PhotoItem>> = (props) => {

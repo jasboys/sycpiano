@@ -9,6 +9,7 @@ import { readFileSync } from 'fs';
 import helmet from 'helmet';
 import mustacheExpress from 'mustache-express';
 import path from 'path';
+import compression from 'compression';
 
 import { ApiRouter } from './publicAPI/index.js';
 import { AuthRouter, authAndGetRole, checkAdmin } from './authorization.js';
@@ -65,6 +66,8 @@ const main = async () => {
             );
         }
     })();
+
+    app.use(compression());
 
     app.use(logger);
 

@@ -63,7 +63,7 @@ interface PhotoListProps {
 }
 
 const PhotoList: React.FC<PhotoListProps> = (props) => {
-    const isHamburger = useAppSelector(mqSelectors.isHamburger);
+    const screenXS = useAppSelector(mqSelectors.screenXS);
     const hiDpx = useAppSelector(mqSelectors.hiDpx);
     const dispatch = useAppDispatch();
 
@@ -85,7 +85,7 @@ const PhotoList: React.FC<PhotoListProps> = (props) => {
                 isShow={true}
                 shouldAppear={false}
                 onScroll={
-                    isHamburger
+                    screenXS
                         ? scrollFn(navBarHeight.get(hiDpx), onScrollDispatch)
                         : undefined
                 }
@@ -94,11 +94,11 @@ const PhotoList: React.FC<PhotoListProps> = (props) => {
                     <PhotoListItem
                         key={item.file}
                         item={item}
-                        isMobile={isHamburger}
+                        isMobile={screenXS}
                         currentItemId={
-                            isHamburger ? undefined : idFromItem(currentItem)
+                            screenXS ? undefined : idFromItem(currentItem)
                         }
-                        onClick={isHamburger ? undefined : selectPhoto}
+                        onClick={screenXS ? undefined : selectPhoto}
                     />
                 ))}
             </Playlist>

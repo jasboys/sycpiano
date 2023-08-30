@@ -19,12 +19,13 @@
         "watch": "nodemon --config nodemon.json packages/server/build/app.js",
         "migrate": "dbmate -d ./packages/server/migrations -s ./schema.sql"
     },
-    "packageManager": "yarn@4.0.0-rc.49",
+    "packageManager": "yarn@4.0.0-rc.50",
     "engines": {
         "node": ">=16.0.0"
     },
     "dependencies": {
         "cross-env": "^7.0.3",
+        "react-is": "^18.2.0",
         "turbo": "^1.10.12",
         "typescript": "^5.1.6"
     },

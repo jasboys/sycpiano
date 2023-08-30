@@ -14,7 +14,12 @@ import {
 } from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
 
-export type EventType = 'concerto' | 'chamber' | 'solo' | 'masterclass';
+export type EventType =
+    | 'concerto'
+    | 'chamber'
+    | 'solo'
+    | 'masterclass'
+    | 'adjudication';
 
 export const eventListNamesArr = [
     'upcoming',

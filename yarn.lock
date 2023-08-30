@@ -2634,6 +2634,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/compression@npm:^1.7.2":
+  version: 1.7.2
+  resolution: "@types/compression@npm:1.7.2"
+  dependencies:
+    "@types/express": "npm:*"
+  checksum: c88090c713cd57766af38aa9cf944da57edf05d3fe1851f9288d5ff7989583724f61fce8ab5f807ebf2edff00baa714d88b0bc1c49e5de83ce9d8caad7d6c760
+  languageName: node
+  linkType: hard
+
 "@types/connect@npm:*":
   version: 3.4.35
   resolution: "@types/connect@npm:3.4.35"
@@ -3326,7 +3335,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"accepts@npm:~1.3.8":
+"accepts@npm:~1.3.5, accepts@npm:~1.3.8":
   version: 1.3.8
   resolution: "accepts@npm:1.3.8"
   dependencies:
@@ -3393,9 +3402,10 @@ __metadata:
     history: "npm:^5.3.0"
     lodash-es: "npm:^4.17.21"
     react: "npm:^18.2.0"
-    react-admin: "npm:^4.13.0"
+    react-admin: "npm:^4.13.2"
     react-dom: "npm:^18.2.0"
     react-hook-form: "npm:^7.45.2"
+    react-is: "npm:^18.2.0"
     react-query: "npm:^3.39.3"
     react-router: "npm:^6.14.2"
     react-router-dom: "npm:^6.14.2"
@@ -4031,6 +4041,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"bytes@npm:3.0.0":
+  version: 3.0.0
+  resolution: "bytes@npm:3.0.0"
+  checksum: a2b386dd8188849a5325f58eef69c3b73c51801c08ffc6963eddc9be244089ba32d19347caf6d145c86f315ae1b1fc7061a32b0c1aa6379e6a719090287ed101
+  languageName: node
+  linkType: hard
+
 "bytes@npm:3.1.2":
   version: 3.1.2
   resolution: "bytes@npm:3.1.2"
@@ -4385,6 +4402,30 @@ __metadata:
     normalize-path: "npm:^3.0.0"
     readable-stream: "npm:^3.6.0"
   checksum: 7e3581650366b48ffc57a2780448d62b3dbc25233ec35543bf09bc0971ed6d337ce0fd2323685e53be3f19e523df67890b09a4a7e1cedc121b1a75d114dad4f5
+  languageName: node
+  linkType: hard
+
+"compressible@npm:~2.0.16":
+  version: 2.0.18
+  resolution: "compressible@npm:2.0.18"
+  dependencies:
+    mime-db: "npm:>= 1.43.0 < 2"
+  checksum: 58321a85b375d39230405654721353f709d0c1442129e9a17081771b816302a012471a9b8f4864c7dbe02eef7f2aaac3c614795197092262e94b409c9be108f0
+  languageName: node
+  linkType: hard
+
+"compression@npm:^1.7.4":
+  version: 1.7.4
+  resolution: "compression@npm:1.7.4"
+  dependencies:
+    accepts: "npm:~1.3.5"
+    bytes: "npm:3.0.0"
+    compressible: "npm:~2.0.16"
+    debug: "npm:2.6.9"
+    on-headers: "npm:~1.0.2"
+    safe-buffer: "npm:5.1.2"
+    vary: "npm:~1.1.2"
+  checksum: 469cd097908fe1d3ff146596d4c24216ad25eabb565c5456660bdcb3a14c82ebc45c23ce56e19fc642746cf407093b55ab9aa1ac30b06883b27c6c736e6383c2
   languageName: node
   linkType: hard
 
@@ -7422,7 +7463,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mime-db@npm:1.52.0, mime-db@npm:^1.28.0":
+"mime-db@npm:1.52.0, mime-db@npm:>= 1.43.0 < 2, mime-db@npm:^1.28.0":
   version: 1.52.0
   resolution: "mime-db@npm:1.52.0"
   checksum: 54bb60bf39e6f8689f6622784e668a3d7f8bed6b0d886f5c3c446cb3284be28b30bf707ed05d0fe44a036f8469976b2629bbea182684977b084de9da274694d7
@@ -8782,9 +8823,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ra-core@npm:^4.13.0":
-  version: 4.13.0
-  resolution: "ra-core@npm:4.13.0"
+"ra-core@npm:^4.13.2":
+  version: 4.13.2
+  resolution: "ra-core@npm:4.13.2"
   dependencies:
     clsx: "npm:^1.1.1"
     date-fns: "npm:^2.19.0"
@@ -8803,32 +8844,32 @@ __metadata:
     react-hook-form: ^7.43.9
     react-router: ^6.1.0
     react-router-dom: ^6.1.0
-  checksum: e10afbef7265263800e6116ce160031da224851548c5616f8c310cc180e0a3cc244d85dde4770839797ef83aae15242308d2569171588252e8076a36b1462119
+  checksum: e09cd70a8324f22f9f1aa27b5f78dec50cc6eb484266ea05b396f623b99199df94b6b8362fc98891f3a9e0d4d6a21c89c27784f908b8bd4ac92e126245aff2d6
   languageName: node
   linkType: hard
 
-"ra-i18n-polyglot@npm:^4.13.0":
-  version: 4.13.0
-  resolution: "ra-i18n-polyglot@npm:4.13.0"
+"ra-i18n-polyglot@npm:^4.13.2":
+  version: 4.13.2
+  resolution: "ra-i18n-polyglot@npm:4.13.2"
   dependencies:
     node-polyglot: "npm:^2.2.2"
-    ra-core: "npm:^4.13.0"
-  checksum: c941e0fa59e41222649af6916825314c79f12bfd6ca7a4a5308e7e07a51acc087e419cd942b826ae9db200bff7f32584409e22bcd7a14aaf4dfbeefb64e640c9
+    ra-core: "npm:^4.13.2"
+  checksum: 0d9eb1270d42aad9a5438049b2a44ec460967dcf0ba4fee28fa4398803d5b2e85201e0370770c1b7d1f82468b58ea0dcdcc22acfdaad3e13c89225bf291eb12a
   languageName: node
   linkType: hard
 
-"ra-language-english@npm:^4.13.0":
-  version: 4.13.0
-  resolution: "ra-language-english@npm:4.13.0"
+"ra-language-english@npm:^4.13.2":
+  version: 4.13.2
+  resolution: "ra-language-english@npm:4.13.2"
   dependencies:
-    ra-core: "npm:^4.13.0"
-  checksum: c006fb2fc29dcf3608745fb5a5f373df51b256f63cee92599930bbbd775d47563016d25ef5679b2bebbda007f2bd1bbaf7fb836d5843c8c8bebf328a1a0d79bd
+    ra-core: "npm:^4.13.2"
+  checksum: 3f6e305c086ddba36af1df569507b8ee92a61a92954f73dbe37d8dfe55aa2c923b3f9ba1fc5f2c375f9adf74959abe04130cd4a290f9effbb635f6205caa96d1
   languageName: node
   linkType: hard
 
-"ra-ui-materialui@npm:^4.13.0":
-  version: 4.13.0
-  resolution: "ra-ui-materialui@npm:4.13.0"
+"ra-ui-materialui@npm:^4.13.2":
+  version: 4.13.2
+  resolution: "ra-ui-materialui@npm:4.13.2"
   dependencies:
     autosuggest-highlight: "npm:^3.1.1"
     clsx: "npm:^1.1.1"
@@ -8851,9 +8892,10 @@ __metadata:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0
     react-hook-form: "*"
+    react-is: ^16.9.0 || ^17.0.0 || ^18.0.0
     react-router: ^6.1.0
     react-router-dom: ^6.1.0
-  checksum: a89e72628402dc6fdcba59ba8ce8235b7e443e362cd94a0bf77c9e78aa88b0e08e6fd4117f6b541b72185bf339e4bffcfcecc3e2b494cd90f79294439089ddba
+  checksum: ecb1e13285be7f1a599119ec6bfce39666d3c5c258af272478842c357992b63d0715c3f381b7c1fa6698471432f08808001d837f0078b2f0650817bf9ddca7f2
   languageName: node
   linkType: hard
 
@@ -8908,26 +8950,26 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-admin@npm:^4.13.0":
-  version: 4.13.0
-  resolution: "react-admin@npm:4.13.0"
+"react-admin@npm:^4.13.2":
+  version: 4.13.2
+  resolution: "react-admin@npm:4.13.2"
   dependencies:
     "@emotion/react": "npm:^11.4.1"
     "@emotion/styled": "npm:^11.3.0"
     "@mui/icons-material": "npm:^5.0.1"
     "@mui/material": "npm:^5.0.2"
     history: "npm:^5.1.0"
-    ra-core: "npm:^4.13.0"
-    ra-i18n-polyglot: "npm:^4.13.0"
-    ra-language-english: "npm:^4.13.0"
-    ra-ui-materialui: "npm:^4.13.0"
+    ra-core: "npm:^4.13.2"
+    ra-i18n-polyglot: "npm:^4.13.2"
+    ra-language-english: "npm:^4.13.2"
+    ra-ui-materialui: "npm:^4.13.2"
     react-hook-form: "npm:^7.43.9"
     react-router: "npm:^6.1.0"
     react-router-dom: "npm:^6.1.0"
   peerDependencies:
     react: ^16.9.0 || ^17.0.0 || ^18.0.0
     react-dom: ^16.9.0 || ^17.0.0 || ^18.0.0
-  checksum: 703bf4c2414b829c26c6e45881937ccf4b7ded9ac5c80d523b3e20e51c05df62c96089fd51b7d1631cf3f8892b3b75f851b0acc520611beaec7fcd9c40aee496
+  checksum: 81ee4c66f1d5aba40944991e259b3f182840a7981d7dc4ac3b81e6ac5091ed9db027af9cdd6ced1a8003fa3d9a1c2715d5d687b1670e0bf08ddd85cee02abb59
   languageName: node
   linkType: hard
 
@@ -9010,13 +9052,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-is@npm:*, react-is@npm:^18.0.0, react-is@npm:^18.2.0":
-  version: 18.2.0
-  resolution: "react-is@npm:18.2.0"
-  checksum: 200cd65bf2e0be7ba6055f647091b725a45dd2a6abef03bf2380ce701fd5edccee40b49b9d15edab7ac08a762bf83cb4081e31ec2673a5bfb549a36ba21570df
-  languageName: node
-  linkType: hard
-
 "react-is@npm:^16.13.1, react-is@npm:^16.7.0":
   version: 16.13.1
   resolution: "react-is@npm:16.13.1"
@@ -9028,6 +9063,13 @@ __metadata:
   version: 17.0.2
   resolution: "react-is@npm:17.0.2"
   checksum: 73b36281e58eeb27c9cc6031301b6ae19ecdc9f18ae2d518bdb39b0ac564e65c5779405d623f1df9abf378a13858b79442480244bd579968afc1faf9a2ce5e05
+  languageName: node
+  linkType: hard
+
+"react-is@npm:^18.0.0, react-is@npm:^18.2.0":
+  version: 18.2.0
+  resolution: "react-is@npm:18.2.0"
+  checksum: 200cd65bf2e0be7ba6055f647091b725a45dd2a6abef03bf2380ce701fd5edccee40b49b9d15edab7ac08a762bf83cb4081e31ec2673a5bfb549a36ba21570df
   languageName: node
   linkType: hard
 
@@ -9668,6 +9710,7 @@ __metadata:
   dependencies:
     cross-env: "npm:^7.0.3"
     nodemon: "npm:^3.0.1"
+    react-is: "npm:^18.2.0"
     rome: "npm:nightly"
     turbo: "npm:^1.10.12"
     typescript: "npm:^5.1.6"
@@ -9783,6 +9826,7 @@ __metadata:
     "@swc/cli": "npm:^0.1.62"
     "@swc/core": "npm:^1.3.70"
     "@types/archiver": "npm:^5.3.2"
+    "@types/compression": "npm:^1.7.2"
     "@types/cookie-parser": "npm:^1.4.3"
     "@types/cors": "npm:^2.8.13"
     "@types/csurf": "npm:^1.11.2"
@@ -9806,6 +9850,7 @@ __metadata:
     axios: "npm:^1.4.0"
     chokidar: "npm:^3.5.3"
     common: "workspace:^"
+    compression: "npm:^1.7.4"
     cookie-parser: "npm:^1.4.6"
     cors: "npm:^2.8.5"
     cross-env: "npm:^7.0.3"

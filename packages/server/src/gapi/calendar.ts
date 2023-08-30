@@ -262,8 +262,6 @@ export const transformModelToGoogle = (c: Calendar) => {
             type: c.type,
             website: encodeURI(c.website ?? ''),
             imageUrl: encodeURI(c.imageUrl ?? ''),
-            placeId: c.placeId,
-            photoReference: c.photoReference,
         }),
     };
     if (c.id) {
