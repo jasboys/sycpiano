@@ -48,7 +48,6 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["cross-env", "npm:7.0.3"],\
           ["nodemon", "npm:3.0.1"],\
-          ["react-is", "npm:18.2.0"],\
           ["rome", "npm:12.1.3-nightly.4c8cf32"],\
           ["turbo", "npm:1.10.12"],\
           ["typescript", "patch:typescript@npm%3A5.1.6#optional!builtin<compat/typescript>::version=5.1.6&hash=5da071"]\
@@ -11556,7 +11555,7 @@ const RAW_RUNTIME_STATE =
           ["react-dropzone", "virtual:d2937f4d078c3ea806726d55f01859c8fb273905ab7a01345dd0d08cfeff74e84a72573afa279014d094ce4d684c36dcdc98713c3b6745190621e6141a49905f#npm:12.1.0"],\
           ["react-error-boundary", "virtual:d2937f4d078c3ea806726d55f01859c8fb273905ab7a01345dd0d08cfeff74e84a72573afa279014d094ce4d684c36dcdc98713c3b6745190621e6141a49905f#npm:3.1.4"],\
           ["react-hook-form", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:7.45.4"],\
-          ["react-is", null],\
+          ["react-is", "npm:18.2.0"],\
           ["react-query", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:3.39.3"],\
           ["react-router", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:6.15.0"],\
           ["react-router-dom", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:6.15.0"],\
@@ -11577,7 +11576,6 @@ const RAW_RUNTIME_STATE =
           "ra-core",\
           "react-dom",\
           "react-hook-form",\
-          "react-is",\
           "react-router-dom",\
           "react-router",\
           "react"\
@@ -12659,7 +12657,6 @@ const RAW_RUNTIME_STATE =
           ["seanchenpiano", "workspace:."],\
           ["cross-env", "npm:7.0.3"],\
           ["nodemon", "npm:3.0.1"],\
-          ["react-is", "npm:18.2.0"],\
           ["rome", "npm:12.1.3-nightly.4c8cf32"],\
           ["turbo", "npm:1.10.12"],\
           ["typescript", "patch:typescript@npm%3A5.1.6#optional!builtin<compat/typescript>::version=5.1.6&hash=5da071"]\
