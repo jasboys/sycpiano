@@ -52,7 +52,7 @@ const ContentContainer = styled.div<{ menuExpanded: boolean; hiDpx: boolean }>(
         transition: 'filter 0.25s',
     },
     ({ menuExpanded, hiDpx }) => ({
-        filter: menuExpanded ? 'blur(8px)' : 'unset',
+        filter: menuExpanded ? 'blur(8px)' : 'blur(0px)',
         height: `calc(100% - ${navBarHeight.get(hiDpx)}px)`,
     }),
 );

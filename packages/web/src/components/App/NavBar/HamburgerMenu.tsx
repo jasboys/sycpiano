@@ -23,10 +23,8 @@ const hamburgerLayerStyles = (backgroundColor: string) =>
         transform: 'rotate(0deg)',
         transition: `
             transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-                left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-                top 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-                opacity 0.3s ease-in-out,
-                background-color 0.3s;`,
+            opacity 0.3s ease-in-out,
+            background-color 0.3s;`,
     });
 
 interface HamburgerLayerProps {
@@ -34,33 +32,38 @@ interface HamburgerLayerProps {
     backgroundColor: string;
 }
 
-const HamburgerTop = styled.span<HamburgerLayerProps>(
+const HamburgerTop = styled.span<HamburgerLayerProps>({
+    top: 0
+},
     (props) => hamburgerLayerStyles(props.backgroundColor),
     (props) => ({
-        top: props.isExpanded ? hamburgerLayerOffsetMultiple : 0,
+        // top: props.isExpanded ? hamburgerLayerOffsetMultiple : 0,
         transform: props.isExpanded
-            ? `rotate(-${hamburgerLayerExpandRotation}deg)`
+            ? `translate3d(0, ${hamburgerLayerOffsetMultiple}px, 0) rotate(${hamburgerLayerExpandRotation + 90}deg)`
             : 'none',
     }),
 );
 
 const HamburgerMiddle = styled.span<HamburgerLayerProps>(
+    {
+        top: hamburgerLayerOffsetMultiple,
+    },
     (props) => hamburgerLayerStyles(props.backgroundColor),
     (props) => ({
-        top: hamburgerLayerOffsetMultiple,
         opacity: props.isExpanded ? 0 : 1,
-        left: props.isExpanded ? 60 : 0,
+        transform: props.isExpanded
+            ? 'translate3d(60px, 0, 0)'
+            : 'translate3d(0, 0, 0)',
     }),
 );
 
-const HamburgerBottom = styled.span<HamburgerLayerProps>(
+const HamburgerBottom = styled.span<HamburgerLayerProps>({
+    top: hamburgerLayerOffsetMultiple * 2
+},
     (props) => hamburgerLayerStyles(props.backgroundColor),
     (props) => ({
-        top: props.isExpanded
-            ? hamburgerLayerOffsetMultiple
-            : hamburgerLayerOffsetMultiple * 2,
         transform: props.isExpanded
-            ? `rotate(${hamburgerLayerExpandRotation}deg)`
+            ? `translate3d(0, -${hamburgerLayerOffsetMultiple}px, 0) rotate(${hamburgerLayerExpandRotation}deg)`
             : 'none',
     }),
 );
@@ -77,7 +80,7 @@ const StyledHamburger = styled.div({
     width: hamburgerMenuWidth,
     height: hamburgerMenuHeight,
     position: 'relative',
-    transform: 'rotate(0deg)',
+    // transform: 'rotate(0deg)',
     transition: '0.5s ease-in-out',
     cursor: 'pointer',
     WebkitTapHighlightColor: 'transparent',
