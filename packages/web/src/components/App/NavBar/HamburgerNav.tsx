@@ -57,7 +57,9 @@ const HamburgerNav: React.FC<Omit<NavBarLinksProps, 'isHamburger'>> = ({
                 onEnter={onEnter}
                 onExit={onExit}
                 timeout={1000}
-                appear={true}
+                mountOnEnter
+                mountOnExit
+                appear
             >
                 <NavBarLinks
                     currentBasePath={currentBasePath}

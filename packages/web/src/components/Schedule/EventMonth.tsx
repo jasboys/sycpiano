@@ -22,6 +22,7 @@ const Events = styled.div({
 const MonthGroup = styled.div({
     marginBottom: 4,
     width: '100vw',
+    transform: 'translateZ(0)',
 });
 
 const MonthBar = styled.div<{ isMobile: boolean }>(
@@ -30,7 +31,7 @@ const MonthBar = styled.div<{ isMobile: boolean }>(
         fontSize: 'min(10vw, 2rem)',
         position: 'sticky',
         top: 0,
-        zIndex: 11,
+        zIndex: 4,
         width: '86vw',
         display: 'flex',
         // background: `linear-gradient(${offWhite} 0% 95%, rgba(255, 255, 255, 0))`,

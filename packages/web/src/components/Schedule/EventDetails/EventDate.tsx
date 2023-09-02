@@ -11,6 +11,7 @@ import { EventDateTimeProps } from '../types.js';
 const Connector = styled.div({
     flex: '1 1 1rem',
     width: '100%',
+    zIndex: 2,
     background: `linear-gradient(
             to right,
             transparent 0%,
@@ -42,7 +43,7 @@ const eventDateStyle = css(interFont(300), {
     width: 80,
     padding: '1.0rem 1.0rem',
     flex: '0 0 auto',
-    zIndex: 5,
+    zIndex: 3,
     position: 'relative',
     top: 0,
     display: 'flex',
@@ -59,6 +60,7 @@ const MonthDay = styled.div({
     flex: '0 0 auto',
     fontSize: '2.0rem',
     lineHeight: '2.2rem',
+    zIndex: 2,
     [toMedia(screenXS)]: {
         fontSize: '1.6rem',
     },
@@ -68,6 +70,7 @@ const DayOfWeek = styled.div({
     flex: '0 0 auto',
     fontSize: '0.8rem',
     lineHeight: '0.75rem',
+    zIndex: 2,
 });
 
 const Overlay = styled.div({
@@ -76,7 +79,7 @@ const Overlay = styled.div({
     top: 0,
     width: '100%',
     height: '100%',
-    zIndex: -1,
+    zIndex: 1,
     backgroundColor: '#00000020',
     backdropFilter: 'blur(1px)',
 });

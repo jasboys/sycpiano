@@ -2,6 +2,7 @@ import { Global } from '@emotion/react';
 import styled from '@emotion/styled';
 import { arrow, offset, shift, useFloating } from '@floating-ui/react-dom';
 import format from 'date-fns/format';
+import gsap from 'gsap';
 import { omit, startCase, toLower } from 'lodash-es';
 import { parse, stringify } from 'qs';
 import * as React from 'react';
@@ -51,6 +52,7 @@ import { LogoSVG } from 'src/components/LogoSVG';
 import { eventListNamesArr } from 'src/components/Schedule/types';
 import { fetchShopItems } from 'src/components/Shop/ShopList/reducers';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { staticImage } from 'src/imageUrls.js';
 import extractModule from 'src/module';
 import { GLOBAL_QUERIES } from 'src/screens';
 import store from 'src/store';
@@ -63,6 +65,7 @@ import {
     slideOnExit,
     titleStringBase,
 } from 'src/utils';
+import { BlurFilter } from './Filter.jsx';
 import { setMatches } from './reducers';
 
 const register = extractModule(store);
@@ -150,21 +153,15 @@ const RootContainer = styled.div<{ isHome: boolean }>({
     backgroundColor: 'white',
 });
 
-const FadingContainer = styled.div<{ shouldBlur: boolean }>(
-    {
-        height: '100%',
-        width: '100%',
-        visibility: 'hidden',
-        transition: 'all 0.25s',
-        overflow: 'hidden',
-        position: 'absolute',
-    },
-    ({ shouldBlur }) =>
-        shouldBlur &&
-        {
-            // filter: 'blur(8px)',
-        },
-);
+const FadingContainer = styled.div({
+    height: '100%',
+    width: '100%',
+    visibility: 'hidden',
+    transition: 'all 0.25s',
+    overflow: 'hidden',
+    position: 'absolute',
+    filter: 'url(#main-blur)',
+});
 
 const getRouteBase = (pathname: string) => {
     const matches = pathname.match(/^(\/[^/]+)?(\/[^/]+)?/);
@@ -256,6 +253,8 @@ const StyledClickDiv = styled(ClickListenerOverlay)<{
 const App: React.FC<Record<never, unknown>> = () => {
     const location = useLocation();
     const dispatch = useAppDispatch();
+    const blurTween = React.useRef<gsap.core.Tween>();
+    const blurRef = React.useRef<SVGFEGaussianBlurElement | null>(null);
     const navbarVisible = useAppSelector(({ navbar }) => navbar.isVisible);
     const menuOpen = useAppSelector(({ navbar }) => navbar.isExpanded);
     const cartOpen = useAppSelector(({ cart }) => cart.visible);
@@ -329,6 +328,25 @@ const App: React.FC<Record<never, unknown>> = () => {
         update();
     }, [mediaMatches, menuOpen]);
 
+    React.useLayoutEffect(() => {
+        blurTween.current = gsap.to(blurRef.current, {
+            duration: 0.1,
+            attr: { stdDeviation: 1.5 },
+        }).pause();
+    }, []);
+
+    React.useLayoutEffect(() => {
+        if (isHamburger && delayedRouteBase !== '/') {
+            console.log(cartOpen, menuOpen);
+            if (cartOpen || menuOpen) {
+                blurTween.current?.play();
+            } else {
+                console.log(blurTween.current);
+                blurTween.current?.reverse();
+            }
+        }
+    }, [isHamburger, cartOpen, menuOpen, delayedRouteBase]);
+
     let currentPage = getMostSpecificRouteName(location.pathname);
     currentPage = currentPage ? startCase(currentPage) : 'Home';
     const description =
@@ -339,6 +357,7 @@ const App: React.FC<Record<never, unknown>> = () => {
 
     return (
         <HelmetProvider>
+            <BlurFilter filterName="main-blur" ref={blurRef} />
             <Global styles={globalCss} />
             <Helmet
                 title={`${titleStringBase} ${currentPage}`}
@@ -386,13 +405,7 @@ const App: React.FC<Record<never, unknown>> = () => {
                         timeout={800}
                         appear={true}
                     >
-                        <FadingContainer
-                            shouldBlur={
-                                isMobile &&
-                                (cartOpen || menuOpen) &&
-                                delayedRouteBase !== '/'
-                            }
-                        >
+                        <FadingContainer>
                             <Routes
                                 location={{
                                     ...location,

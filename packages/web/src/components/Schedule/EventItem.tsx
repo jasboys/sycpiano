@@ -82,7 +82,7 @@ const Image = styled.img({
     width: '100%',
     position: 'absolute',
     // boxShadow: '0px 3px 5px -2px rgba(0 0 0 / 0.5)',
-    zIndex: 3,
+    zIndex: 2,
     [toMedia(screenXS)]: {
         left: 0,
     },
@@ -94,7 +94,7 @@ const Right = styled.div(latoFont(300), {
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
-    zIndex: 10,
+    zIndex: 0,
     // backdropFilter: 'blur(2px) contrast(0.1) brightness(1.8)',
     // backgroundColor: 'rgba(255 255 255 / 0.92)',
     height: '100%',
