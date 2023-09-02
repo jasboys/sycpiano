@@ -299,6 +299,22 @@ jobs:
           ssh server $COMMAND
         env:
           COMMAND: ${{ format('cd {0} && dbmate -d ./packages/server/migrations up', vars.BACKEND_DIR) }}
+
+  restart-app:
+    runs-on: ubuntu-latest
+    needs: [web, server, admin]
+    if: ${{ always() && contains(format('{0},{1},{2},{3}', needs.assets.result, needs.web.result, needs.server.result, needs.assets.result), 'success') }}
+    environment:
+      name: ${{ github.ref_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup SSH
+        uses: ./.github/actions/setup-ssh
+        with:
+          ssh-key: ${{ secrets.SSH_ED25519 }}
+          ssh-host: ${{ secrets.SSH_HOST }}
+          ssh-user: ${{ secrets.SSH_USER }}
       - name: PM2 Start App
         run: |
           ssh server $COMMAND
