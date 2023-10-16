@@ -3411,7 +3411,7 @@ __metadata:
     react-router-dom: "npm:^6.14.2"
     terser: "npm:^5.19.2"
     typescript: "npm:^5.1.6"
-    vite: "npm:^4.4.6"
+    vite: "npm:^4.4.11"
   languageName: unknown
   linkType: soft
 
@@ -11012,9 +11012,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:^4.4.4, vite@npm:^4.4.6":
-  version: 4.4.9
-  resolution: "vite@npm:4.4.9"
+"vite@npm:^4.4.11":
+  version: 4.4.11
+  resolution: "vite@npm:4.4.11"
   dependencies:
     esbuild: "npm:^0.18.10"
     fsevents: "npm:~2.3.2"
@@ -11048,7 +11048,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: d15543bded36f2083c13286b5420e89673be99abd28664f27a73980f2099f10e427b07e24f4e035dcd682989ebf8e1e5f5257664771edd4b466e2599119d1a47
+  checksum: 325e2955fe939bc5706aab2aa46498d98adace1df4d11f42cf4539754b886798b6bf7c247c94d23fb6cf3a569e56bad4a11561bf25e8e6dcc8c0e2f73ecc5e5b
   languageName: node
   linkType: hard
 
@@ -11158,7 +11158,7 @@ __metadata:
     terser: "npm:^5.19.0"
     typescript: "npm:^5.1.6"
     validator: "npm:^13.9.0"
-    vite: "npm:^4.4.4"
+    vite: "npm:^4.4.11"
     webpack: "npm:^5.88.1"
     webpack-bundle-analyzer: "npm:^4.9.0"
     webpack-cli: "npm:^5.1.4"
