@@ -15,25 +15,6 @@ const MenuContainer = styled.div({
     margin: 'auto 0',
 });
 
-const onEnter = (el: HTMLElement) => {
-    gsap.to(el, { autoAlpha: 1, duration: 0.3 });
-    gsap.fromTo(
-        '.navlink-entry',
-        { autoAlpha: 0, x: 80 },
-        { autoAlpha: 1, x: 0, stagger: 0.08, duration: 0.3 },
-    );
-};
-
-const onExit = (el: HTMLElement) => {
-    gsap.to('.navlink-entry', {
-        autoAlpha: 0,
-        x: 80,
-        stagger: 0.05,
-        duration: 0.25,
-    });
-    gsap.to(el, { autoAlpha: 0, duration: 0.3, delay: 0.15 });
-};
-
 const HamburgerNav: React.FC<Omit<NavBarLinksProps, 'isHamburger'>> = ({
     currentBasePath,
     specificPath,
@@ -41,6 +22,43 @@ const HamburgerNav: React.FC<Omit<NavBarLinksProps, 'isHamburger'>> = ({
     const isExpanded = useAppSelector(({ navbar }) => navbar.isExpanded);
     const cartOpen = useAppSelector(({ cart }) => cart.visible);
     const dispatch = useAppDispatch();
+    const enterTimeline = React.useRef<GSAPTimeline>();
+    const exitTimeline = React.useRef<GSAPTimeline>();
+    const el = React.useRef<HTMLDivElement>(null);
+
+    React.useLayoutEffect(() => {
+        if (el.current) {
+            const ctx = gsap.context(() => {
+                enterTimeline.current = gsap
+                    .timeline({ paused: true })
+                    .to(el.current, { autoAlpha: 1, duration: 0.3 }, 0)
+                    .fromTo(
+                        '.navlink-entry',
+                        { autoAlpha: 0, x: 80 },
+                        { autoAlpha: 1, x: 0, stagger: 0.08, duration: 0.3 },
+                        0,
+                    );
+                exitTimeline.current = gsap
+                    .timeline({ paused: true })
+                    .to(
+                        '.navlink-entry',
+                        {
+                            autoAlpha: 0,
+                            x: 80,
+                            stagger: 0.05,
+                            duration: 0.25,
+                        },
+                        0,
+                    )
+                    .to(
+                        el.current,
+                        { autoAlpha: 0, duration: 0.3, delay: 0.15 },
+                        0,
+                    );
+            }, el.current);
+            return () => ctx.revert();
+        }
+    }, []);
 
     return (
         <MenuContainer>
@@ -52,16 +70,20 @@ const HamburgerNav: React.FC<Omit<NavBarLinksProps, 'isHamburger'>> = ({
                 }}
                 layerColor={specificPath === '' ? 'white' : logoBlue}
             />
-            <Transition<undefined>
+            <Transition<HTMLDivElement>
+                nodeRef={el}
                 in={isExpanded}
-                onEnter={onEnter}
-                onExit={onExit}
+                onEnter={() => {
+                    enterTimeline.current?.restart().play();
+                }}
+                onExit={() => {
+                    exitTimeline.current?.restart().play();
+                }}
                 timeout={1000}
-                mountOnEnter
-                mountOnExit
                 appear
             >
                 <NavBarLinks
+                    ref={el}
                     currentBasePath={currentBasePath}
                     isHamburger={true}
                     specificPath={specificPath}
@@ -71,4 +93,4 @@ const HamburgerNav: React.FC<Omit<NavBarLinksProps, 'isHamburger'>> = ({
     );
 };
 
-export default HamburgerNav;
+export default React.memo(HamburgerNav);

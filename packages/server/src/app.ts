@@ -21,8 +21,6 @@ import { AdminRest } from './adminAPI/index.js';
 import type { Options } from 'pino-http';
 import { csrfMiddleware } from './csrf.js';
 
-// oh yes change again!
-
 const main = async () => {
     await precheck();
 
@@ -164,7 +162,7 @@ const main = async () => {
         credentials: true,
     };
 
-    let viewPaths: string[] = [path.resolve(process.env.PARTIALS_DIR)];
+    let viewPaths: string[];
     // only for dev
     // prod uses caddy to serve static files
     if (!isProduction) {
@@ -197,6 +195,8 @@ const main = async () => {
             path.resolve(rootPath.toString(), 'packages', 'web', 'src'),
             path.resolve(rootPath.toString(), 'packages', 'admin', 'src'),
         ];
+    } else {
+        viewPaths = [path.resolve(process.env.PARTIALS_DIR)];
     }
 
     app.engine('html', mustacheExpress());

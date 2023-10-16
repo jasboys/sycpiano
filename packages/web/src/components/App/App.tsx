@@ -2,7 +2,6 @@ import { Global } from '@emotion/react';
 import styled from '@emotion/styled';
 import { arrow, offset, shift, useFloating } from '@floating-ui/react-dom';
 import format from 'date-fns/format';
-import gsap from 'gsap';
 import { omit, startCase, toLower } from 'lodash-es';
 import { parse, stringify } from 'qs';
 import * as React from 'react';
@@ -65,7 +64,6 @@ import {
     slideOnExit,
     titleStringBase,
 } from 'src/utils';
-import { BlurFilter } from './Filter.jsx';
 import { setMatches } from './reducers';
 
 const register = extractModule(store);
@@ -160,7 +158,7 @@ const FadingContainer = styled.div({
     transition: 'all 0.25s',
     overflow: 'hidden',
     position: 'absolute',
-    filter: 'url(#main-blur)',
+    // filter: 'url(#main-blur)',
 });
 
 const getRouteBase = (pathname: string) => {
@@ -173,6 +171,12 @@ const getMostSpecificRouteName = (pathname: string) => {
     const match = matches?.[2] || matches?.[1];
     return match ? match.slice(1) : '';
 };
+
+const fadeOnEnter0 = fadeOnEnter(0);
+const slideOnEnter0 = slideOnEnter(0);
+const slideOnExit0 = slideOnExit(0);
+const fadeOnEnter02 = fadeOnEnter(0.2);
+const fadeOnExit05 = fadeOnExit(0.5);
 
 type RouterMatchPaths =
     | PathMatch<'about'>
@@ -253,8 +257,6 @@ const StyledClickDiv = styled(ClickListenerOverlay)<{
 const App: React.FC<Record<never, unknown>> = () => {
     const location = useLocation();
     const dispatch = useAppDispatch();
-    const blurTween = React.useRef<gsap.core.Tween>();
-    const blurRef = React.useRef<SVGFEGaussianBlurElement | null>(null);
     const navbarVisible = useAppSelector(({ navbar }) => navbar.isVisible);
     const menuOpen = useAppSelector(({ navbar }) => navbar.isExpanded);
     const cartOpen = useAppSelector(({ cart }) => cart.visible);
@@ -328,25 +330,6 @@ const App: React.FC<Record<never, unknown>> = () => {
         update();
     }, [mediaMatches, menuOpen]);
 
-    React.useLayoutEffect(() => {
-        blurTween.current = gsap.to(blurRef.current, {
-            duration: 0.1,
-            attr: { stdDeviation: 1.5 },
-        }).pause();
-    }, []);
-
-    React.useLayoutEffect(() => {
-        if (isHamburger && delayedRouteBase !== '/') {
-            console.log(cartOpen, menuOpen);
-            if (cartOpen || menuOpen) {
-                blurTween.current?.play();
-            } else {
-                console.log(blurTween.current);
-                blurTween.current?.reverse();
-            }
-        }
-    }, [isHamburger, cartOpen, menuOpen, delayedRouteBase]);
-
     let currentPage = getMostSpecificRouteName(location.pathname);
     currentPage = currentPage ? startCase(currentPage) : 'Home';
     const description =
@@ -357,7 +340,6 @@ const App: React.FC<Record<never, unknown>> = () => {
 
     return (
         <HelmetProvider>
-            <BlurFilter filterName="main-blur" ref={blurRef} />
             <Global styles={globalCss} />
             <Helmet
                 title={`${titleStringBase} ${currentPage}`}
@@ -381,12 +363,12 @@ const App: React.FC<Record<never, unknown>> = () => {
                     in={navbarVisible || !isMobile}
                     onEntering={(el, isAppearing) => {
                         if (isAppearing) {
-                            fadeOnEnter(0)(el, isAppearing);
+                            fadeOnEnter0(el, isAppearing);
                         } else {
-                            slideOnEnter(0)(el);
+                            slideOnEnter0(el);
                         }
                     }}
-                    onExiting={slideOnExit(0)}
+                    onExiting={slideOnExit0}
                     timeout={250}
                     appear={true}
                 >
@@ -400,8 +382,8 @@ const App: React.FC<Record<never, unknown>> = () => {
                 <SwitchTransition>
                     <Transition<undefined>
                         key={transitionMatch?.pathnameBase}
-                        onEntering={fadeOnEnter(0.2)}
-                        onExiting={fadeOnExit(0.5)}
+                        onEntering={fadeOnEnter02}
+                        onExiting={fadeOnExit05}
                         timeout={800}
                         appear={true}
                     >

@@ -22,7 +22,7 @@ const ContactContainer = styled.div(pushed, {
     position: 'absolute',
     top: 0,
     overflowX: 'hidden',
-    overflowY: 'unset',
+    overflowY: 'hidden',
     backgroundColor: 'white',
     [toMedia([minRes, webkitMinDPR])]: {
         height: '100%',

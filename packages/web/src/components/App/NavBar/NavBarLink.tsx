@@ -1,94 +1,20 @@
 import { css } from '@emotion/react';
-import styled from '@emotion/styled';
 import { gsap } from 'gsap';
 import { mix } from 'polished';
 import * as React from 'react';
 import { Link, LinkProps } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
 
-import { toMedia } from 'src/mediaQuery';
+import Highlight from 'src/components/App/NavBar/Highlight';
 import SubNav from 'src/components/App/NavBar/SubNav/SubNav';
 import { showSubNav, toggleExpanded } from 'src/components/App/NavBar/reducers';
 import { LinkShape } from 'src/components/App/NavBar/types';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { minRes, webkitMinDPR } from 'src/screens';
 import { lightBlue, logoBlue, navFontColor } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
-import { navBarHeight, navBarMarginTop } from 'src/styles/variables';
-
-interface HighlightProps {
-    readonly active: boolean;
-    readonly expanded?: boolean;
-    readonly isHamburger: boolean;
-    readonly isHome: boolean;
-    readonly link: LinkShape;
-}
-
-const HighlightDiv = styled.div<{ active: boolean; isHome: boolean }>(
-    {
-        width: '100%',
-        position: 'absolute',
-        bottom: 0,
-        padding: 0,
-        marginTop: navBarMarginTop,
-        height: 5,
-        zIndex: -1,
-        transition: 'opacity 0.2s',
-    },
-    ({ active, isHome }) => ({
-        opacity: active ? 1 : 0,
-        backgroundColor: isHome ? 'white' : lightBlue,
-    }),
-);
-
-const MobileHighlight = styled.div<{ active: boolean; isHome: boolean }>(
-    {
-        flex: '0 0 5px',
-    },
-    ({ active, isHome }) => ({
-        opacity: active ? 1 : 0,
-        backgroundColor: isHome ? 'white' : lightBlue,
-    }),
-);
-
-const HyperlinkText = styled.div<{ isHamburger: boolean }>(
-    {
-        height: navBarHeight.lowDpx - navBarMarginTop,
-        padding: '20px 10px 0 10px',
-        marginTop: navBarMarginTop,
-    },
-    ({ isHamburger }) =>
-        isHamburger
-            ? {
-                  marginTop: 'unset',
-                  height: 'unset',
-                  lineHeight: '1.5rem',
-                  padding: '1rem 0.8rem',
-                  flex: '0 0 auto',
-              }
-            : {
-                  [toMedia([minRes, webkitMinDPR])]: {
-                      height: navBarHeight.hiDpx - navBarMarginTop,
-                  },
-              },
-);
-
-const Highlight: React.FC<HighlightProps> = ({
-    active,
-    isHome,
-    link,
-    isHamburger,
-}) => (
-    <React.Fragment>
-        {!isHamburger && <HighlightDiv active={active} isHome={isHome} />}
-        <HyperlinkText isHamburger={isHamburger}>{link.name}</HyperlinkText>
-        {isHamburger && <MobileHighlight active={active} isHome={isHome} />}
-    </React.Fragment>
-);
 
 interface NavBarLinkProps {
-    readonly className?: string;
     readonly active: boolean;
     readonly isHome: boolean;
     readonly link: LinkShape;
@@ -97,106 +23,67 @@ interface NavBarLinkProps {
     readonly currentSpecificPath: string;
 }
 
-const linkStyle = css(noHighlight, {
-    color: navFontColor,
-    textDecoration: 'none',
-    cursor: 'pointer',
-    transition: 'all 0.5s',
-    WebkitTapHighlightColor: 'transparent',
+const linkStyles = {
+    base: css(noHighlight, {
+        color: navFontColor,
+        textDecoration: 'none',
+        cursor: 'pointer',
+        transition: 'all 0.5s',
+        WebkitTapHighlightColor: 'transparent',
 
-    '&:hover': {
-        color: mix(0.5, logoBlue, '#444'),
-        [`${HighlightDiv}`]: {
-            opacity: 0.5,
+        '&:hover': {
+            color: mix(0.5, logoBlue, '#444'),
+            '.highlight': {
+                opacity: 0.5,
+            },
         },
-    },
-});
-
-const linkActiveStyle = css({
-    color: lightBlue,
-});
-
-const linkHomeStyle = css({
-    color: 'white',
-    // textShadow: '0 0 1px rgba(0, 0, 0, 0.8)',
-    '&:hover': {
-        color: 'white',
-        textShadow: '0 0 1px rgba(255, 255, 255, 1)',
-    },
-});
-
-const linkHomeActiveStyle = css({
-    textShadow: '0 0 1px rgba(255, 255, 255, 1)',
-});
-
-const mobileLinkStyle = css({
-    display: 'flex',
-    justifyContent: 'flex-end',
-});
-
-const SubNavContainer = styled.div<{ isHamburger: boolean }>(
-    {
-        visibility: 'hidden',
-    },
-    ({ isHamburger }) =>
-        isHamburger && {
-            visibility: 'unset',
-            height: 0,
-            overflow: 'hidden',
-            display: 'flex',
-            marginRight: '1rem',
-        },
-);
-
-const SubNavLine = styled.div<{ isHome: boolean }>(
-    {
-        flex: '0 0 1px',
-    },
-    ({ isHome }) => ({
-        backgroundColor: isHome ? 'white' : navFontColor,
     }),
-);
-
-const enterAnimation = (
-    el: HTMLElement,
-    isAppearing: boolean,
-    isHamburger: boolean,
-    path: string,
-) => {
-    if (isHamburger) {
-        if (isAppearing) {
-            el.style.height = 'auto';
-        } else {
-            gsap.set(el, { height: 'auto' });
-            gsap.from(el, { height: 0, duration: 0.25 });
-            gsap.fromTo(
-                `.${path}`,
-                { autoAlpha: 0, x: 80 },
-                { autoAlpha: 1, x: 0, stagger: 0.08, duration: 0.3 },
-            );
-        }
-    } else {
-        gsap.to(el, { autoAlpha: 1, duration: 0.25 });
-    }
+    active: css({
+        color: lightBlue,
+    }),
+    home: css({
+        color: 'white',
+        '&:hover': {
+            color: 'white',
+            textShadow: '0 0 1px rgba(255, 255, 255, 1)',
+        },
+    }),
+    activeHome: css({
+        textShadow: '0 0 1px rgba(255, 255, 255, 1)',
+    }),
+    hamburger: css({
+        textShadow: 'none',
+        display: 'flex',
+        justifyContent: 'flex-start',
+        flexDirection: 'row-reverse',
+    }),
 };
 
-const exitAnimation = (el: HTMLElement, isHamburger: boolean, path: string) => {
-    if (isHamburger) {
-        gsap.to(el, { height: 0, duration: 0.25 });
-        gsap.to(`.${path}`, {
-            autoAlpha: 0,
-            x: 80,
-            stagger: 0.05,
-            duration: 0.25,
-        });
-    } else {
-        gsap.to(el, { autoAlpha: 0, duration: 0.25 });
-    }
+const subNavStyles = {
+    base: css({
+        visibility: 'hidden',
+    }),
+    hamburger: css({
+        visibility: 'unset',
+        height: 0,
+        overflow: 'hidden',
+        display: 'flex',
+        marginRight: '1rem',
+    }),
 };
 
-const StyledLi = styled.li<{ isHamburger: boolean }>(
-    latoFont(300),
-    {
+const subNavHighlight = {
+    base: css({
+        flex: '0 0 1px',
+        backgroundColor: navFontColor,
+    }),
+    home: css({
+        backgroundColor: 'white',
+    }),
+};
+
+const liStyles = {
+    base: css(latoFont(300), {
         fontSize: '1.4rem',
         position: 'relative',
         letterSpacing: 0,
@@ -208,14 +95,13 @@ const StyledLi = styled.li<{ isHamburger: boolean }>(
         '&:last-child': {
             marginRight: 0,
         },
-    },
-    ({ isHamburger }) =>
-        isHamburger && {
-            textAlign: 'right',
-            visibility: 'hidden',
-            opacity: 0,
-        },
-);
+    }),
+    hamburger: css({
+        textAlign: 'right',
+        visibility: 'hidden',
+        opacity: 0,
+    }),
+};
 
 interface AorLink {
     href?: string;
@@ -233,16 +119,19 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
 }) => {
     const showSubs = useAppSelector(({ navbar }) => navbar.showSubs);
     const dispatch = useAppDispatch();
+    const enterTimeline = React.useRef<GSAPTimeline>();
+    const exitTimeline = React.useRef<GSAPTimeline>();
+    const el = React.useRef<HTMLDivElement>(null);
 
     // css attr is common
     const attr: AorLink = {};
-    const style = css(
-        linkStyle,
-        active && !isHome && linkActiveStyle,
-        isHome && linkHomeStyle,
-        active && isHome && !isHamburger && linkHomeActiveStyle,
-        isHamburger && mobileLinkStyle,
-    );
+    const linkInstanceStyle = css([
+        linkStyles.base,
+        active && linkStyles.active,
+        isHome && linkStyles.home,
+        active && isHome && linkStyles.activeHome,
+        isHamburger && linkStyles.hamburger,
+    ]);
 
     // add attr's conditionally
     if (link.name === 'blog') {
@@ -269,28 +158,95 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
         />
     );
 
+    React.useLayoutEffect(() => {
+        if (el.current) {
+            const ctx = gsap.context(() => {
+                enterTimeline.current = gsap.timeline({ paused: true });
+                exitTimeline.current = gsap.timeline({ paused: true });
+                if (isHamburger) {
+                    enterTimeline.current = enterTimeline.current
+                        .fromTo(el.current, { height: 0 }, { height: 'auto' }, 0)
+                        .fromTo(
+                            `.${link.name}`,
+                            { autoAlpha: 0, x: 80 },
+                            {
+                                autoAlpha: 1,
+                                x: 0,
+                                stagger: 0.08,
+                                duration: 0.3,
+                            },
+                            0,
+                        );
+
+                    exitTimeline.current = exitTimeline.current
+                        .to(el.current, { height: 0, duration: 0.25 }, 0)
+                        .to(
+                            `.${link.name}`,
+                            {
+                                autoAlpha: 0,
+                                x: 80,
+                                stagger: 0.05,
+                                duration: 0.25,
+                            },
+                            0,
+                        );
+                } else {
+                    enterTimeline.current = enterTimeline.current.to(
+                        el.current,
+                        {
+                            autoAlpha: 1,
+                            duration: 0.25,
+                        },
+                    );
+                    exitTimeline.current = exitTimeline.current.to(el.current, {
+                        autoAlpha: 0,
+                        duration: 0.25,
+                    });
+                }
+            }, el.current);
+            return () => ctx.revert();
+        }
+    }, [link.name, isHamburger]);
+
     return (
-        <StyledLi className="navlink-entry" isHamburger={isHamburger}>
+        <li
+            className="navlink-entry"
+            css={[liStyles.base, isHamburger && liStyles.hamburger]}
+        >
             {subNavLinks || link.name === 'blog' ? (
-                <a css={style} {...attr}>
+                <a css={linkInstanceStyle} {...attr}>
                     {HighlightComponent}
                 </a>
             ) : (
-                <Link css={style} {...(attr as LinkProps)}>
+                <Link css={linkInstanceStyle} {...(attr as LinkProps)}>
                     {HighlightComponent}
                 </Link>
             )}
             {subNavLinks && (
-                <Transition<undefined>
+                <Transition<HTMLDivElement>
+                    nodeRef={el}
                     in={showSubs.includes(link.name)}
-                    onEnter={(el, isAppearing) =>
-                        enterAnimation(el, isAppearing, isHamburger, link.name)
-                    }
-                    onExit={(el) => exitAnimation(el, isHamburger, link.name)}
+                    onEnter={(isAppearing) => {
+                        if (isAppearing && el.current) {
+                            el.current.style.height = 'auto';
+                        }
+                        if (!isAppearing) {
+                            enterTimeline.current?.restart().play();
+                        }
+                    }}
+                    onExit={() => {
+                        exitTimeline.current?.restart().play();
+                    }}
                     timeout={250}
                     appear={true}
                 >
-                    <SubNavContainer isHamburger={isHamburger}>
+                    <div
+                        ref={el}
+                        css={[
+                            subNavStyles.base,
+                            isHamburger && subNavStyles.hamburger,
+                        ]}
+                    >
                         <SubNav
                             basePath={link}
                             links={subNavLinks}
@@ -301,12 +257,27 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
                             }}
                             isHome={isHome}
                         />
-                        {isHamburger && <SubNavLine isHome={isHome} />}
-                    </SubNavContainer>
+                        {isHamburger && (
+                            <div
+                                css={[
+                                    subNavHighlight.base,
+                                    isHome && subNavHighlight.home,
+                                ]}
+                            />
+                        )}
+                    </div>
                 </Transition>
             )}
-        </StyledLi>
+        </li>
     );
 };
 
-export default NavBarLink;
+// export default NavBarLink;
+export default React.memo(NavBarLink, (prev, next) => {
+    return (
+        prev.active === next.active &&
+        prev.isHome === next.isHome &&
+        prev.isHamburger === next.isHamburger &&
+        prev.currentSpecificPath === next.currentSpecificPath
+    );
+});

@@ -7,7 +7,6 @@ import { LinkShape } from 'src/components/App/NavBar/types';
 import { isHamburger } from 'src/screens';
 
 interface SubNavProps {
-    readonly className?: string;
     readonly isHome: boolean;
     readonly basePath: LinkShape;
     readonly currentSpecificPath: string;
@@ -51,4 +50,9 @@ const SubNav: React.FC<SubNavProps> = ({ links, ...props }) => (
     </ul>
 );
 
-export default React.memo(SubNav);
+export default React.memo(SubNav, (prev, next) => {
+    return (
+        prev.isHome === next.isHome &&
+        prev.currentSpecificPath === next.currentSpecificPath
+    );
+});

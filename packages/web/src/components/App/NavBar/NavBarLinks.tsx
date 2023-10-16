@@ -1,4 +1,3 @@
-import styled from '@emotion/styled';
 import * as React from 'react';
 
 import { toMedia } from 'src/mediaQuery';
@@ -8,22 +7,7 @@ import { LinkShape, NavBarLinksProps } from 'src/components/App/NavBar/types';
 import { hiDpx } from 'src/screens';
 import { noHighlight, pushedHelper } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
-
-const StyledUL = styled.ul<{ isHamburger: boolean }>(
-    {
-        padding: 0,
-        margin: 0,
-    },
-    ({ isHamburger }) =>
-        isHamburger && {
-            display: 'flex',
-            flexDirection: 'column',
-            width: '100%',
-            paddingTop: '1.8rem',
-            overflow: 'hidden auto',
-            alignItems: 'flex-end',
-        },
-);
+import { css } from '@emotion/react';
 
 const getGradientStops = (
     startPos: number | string,
@@ -45,39 +29,57 @@ const getGradientStops = (
 
 const gradient = getGradientStops(180, 'px', 'min(100%, 400px)', '', 12);
 
-const LinksDiv = styled.div<{ isHome: boolean; isHamburger: boolean }>(
-    noHighlight,
-    {
+const styles = {
+    ul: css({
+        padding: 0,
+        margin: 0,
+    }),
+    ulHamburger: css({
+        display: 'flex',
+        flexDirection: 'column',
+        width: '100%',
+        paddingTop: '1.8rem',
+        overflow: 'hidden auto',
+        alignItems: 'flex-end',
+    }),
+    linkBase: css(noHighlight, {
         textTransform: 'uppercase',
-        // transition: 'backdrop-filter 0.2s'
-    },
-    ({ isHamburger, isHome }) =>
-        isHamburger && {
-            position: 'fixed',
-            left: 0,
-            top: 0,
-            width: '100%',
-            boxShadow: 'inset 0 7px 6px -5px rgba(0, 0, 0, 0.25)',
-            // backdropFilter: isHome ? 'none' : 'blur(1px)',
-            overflowY: 'auto',
-            background: isHome
-                ? 'transparent'
-                : `linear-gradient(-90deg, ${gradient})`,
-        },
-    ({ isHamburger }) => isHamburger && pushedHelper(navBarHeight.lowDpx, 'vh'),
-    ({ isHamburger }) =>
-        isHamburger && {
-            [toMedia(hiDpx)]: pushedHelper(navBarHeight.hiDpx, 'vh'),
-        },
-);
+        transition: 'backdrop-filter 0.2s',
+    }),
+    linkHamburger: css({
+        opacity: 0,
+        visibility: 'hidden',
+        position: 'fixed',
+        left: 0,
+        top: 0,
+        width: '100%',
+        boxShadow: 'inset 0 7px 6px -5px rgba(0, 0, 0, 0.25)',
+        backdropFilter: 'blur(1px)',
+        overflowY: 'auto',
+        background: `linear-gradient(-90deg, ${gradient})`,
+        ...pushedHelper(navBarHeight.lowDpx, 'vh'),
+        [toMedia(hiDpx)]: pushedHelper(navBarHeight.hiDpx, 'vh'),
+    }),
+    linkHamburgerHome: css({
+        backdropFilter: 'none',
+        background: 'transparent',
+    }),
+};
 
-const NavBarLinks: React.FC<NavBarLinksProps> = ({
+const NavBarLinks = React.forwardRef<HTMLDivElement, NavBarLinksProps>(({
     specificPath,
     currentBasePath,
     isHamburger,
-}) => (
-    <LinksDiv isHome={specificPath === ''} isHamburger={isHamburger}>
-        <StyledUL isHamburger={isHamburger}>
+}, ref) => (
+    <div
+        ref={ref}
+        css={[
+            styles.linkBase,
+            isHamburger && styles.linkHamburger,
+            isHamburger && specificPath === '' && styles.linkHamburgerHome,
+        ]}
+    >
+        <ul css={[styles.ul, isHamburger && styles.ulHamburger]}>
             {links.map((link: LinkShape) => {
                 return (
                     <NavBarLink
@@ -91,10 +93,16 @@ const NavBarLinks: React.FC<NavBarLinksProps> = ({
                     />
                 );
             })}
-        </StyledUL>
-    </LinksDiv>
-);
+        </ul>
+    </div>
+));
 
-const MemoizedLinks = React.memo(NavBarLinks);
+const MemoizedLinks = React.memo(NavBarLinks, (prev, next) => {
+    return (
+        prev.currentBasePath === next.currentBasePath &&
+        prev.isHamburger === next.isHamburger &&
+        prev.specificPath === next.specificPath
+    );
+});
 
 export default MemoizedLinks;

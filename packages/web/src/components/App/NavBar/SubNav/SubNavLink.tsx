@@ -1,5 +1,4 @@
 import { css } from '@emotion/react';
-import styled from '@emotion/styled';
 import { darken, saturate } from 'polished';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
@@ -47,13 +46,13 @@ const styles = {
         },
     }),
     isActive: css({
+        [toMedia(isHamburger)]: {
+            color: lightBlue,
+        },
         '&:hover': {
             color: 'white',
             [toMedia(isHamburger)]: {
-                color: lightBlue,
-                '&:hover': {
-                    color: saturate(0.2, darken(0.1, lightBlue)),
-                },
+                color: saturate(0.2, darken(0.1, lightBlue)),
             },
         },
     }),
@@ -77,8 +76,6 @@ const styles = {
     }),
 };
 
-const StyledLi = styled.li(noHighlight);
-
 const SubNavLink: React.FC<SubNavLinkProps> = ({
     basePath,
     link,
@@ -88,12 +85,12 @@ const SubNavLink: React.FC<SubNavLinkProps> = ({
 }) => {
     const isActive = link.name === currentSpecificPath;
     return (
-        <StyledLi className={basePath.name}>
+        <li css={noHighlight} className={basePath.name}>
             <Link
                 css={[
                     styles.link,
-                    isActive && styles.isActive,
                     isHome && styles.isHome,
+                    isActive && styles.isActive,
                 ]}
                 to={`${basePath.path}${link.path}`}
                 onClick={() => {
@@ -102,8 +99,13 @@ const SubNavLink: React.FC<SubNavLinkProps> = ({
             >
                 {link.name}
             </Link>
-        </StyledLi>
+        </li>
     );
 };
 
-export default SubNavLink;
+export default React.memo(SubNavLink, (prev, next) => {
+    return (
+        prev.isHome === next.isHome &&
+        prev.currentSpecificPath === next.currentSpecificPath
+    );
+});
