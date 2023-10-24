@@ -202,7 +202,7 @@ class Music extends React.Component<MusicProps, MusicState> {
 
         const sampleRate = this.audioCtx.sampleRate;
         // smooth more when sampleRate is higher
-        const smoothing = 0.9 * Math.pow(sampleRate / 192000, 2);
+        const smoothing = 0.9 * (sampleRate / 192000) ** 2;
 
         // source -> split(L, R) => analyzer(L, R) => merge -> dest
         this.analyzerL = new ConstantQNode(this.audioCtx, {
@@ -561,7 +561,7 @@ class Music extends React.Component<MusicProps, MusicState> {
     async componentDidMount() {
         this.initializeAudioPlayer();
         const gl = this.detectWebGL();
-        if (gl) {
+        if (gl && !this.props.isHamburger) {
             if (gl instanceof WebGL2RenderingContext) {
                 const component = await register(
                     'visualizer',

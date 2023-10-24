@@ -26,7 +26,6 @@ export const cqFragWebGL2 = `#version 300 es
         delta = fwidth(r);
         alpha = smoothstep(uRadius - delta, uRadius + delta, r);
 
-
         outputColor = vec4(uGlobalColor.xyz, alpha);
     }
 `

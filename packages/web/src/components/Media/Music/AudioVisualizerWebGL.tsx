@@ -145,7 +145,7 @@ class AudioVisualizer extends AudioVisualizerBase<WebGLRenderingContext> {
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); // To disable the background color of the canvas element
         gl.enable(gl.BLEND);
         gl.disable(gl.DEPTH_TEST);
-        gl.enable(gl.SAMPLE_COVERAGE);
+        gl.enable(gl.SAMPLE_ALPHA_TO_COVERAGE);
 
         const angle = -Math.PI / 4;
         const cosTheta = Math.cos(angle);
@@ -505,7 +505,7 @@ class AudioVisualizer extends AudioVisualizerBase<WebGLRenderingContext> {
             let i = 1;
             for (const phase of this.history) {
                 // color[3] = Math.pow(0.8, maxLength - i);
-                color[3] = Math.pow(i / this.maxHistoryLength, 4);
+                color[3] = (i / this.maxHistoryLength) ** 4;
                 this.drawPhaseVerts(phase, color);
                 i++;
             }

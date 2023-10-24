@@ -83,10 +83,10 @@ const StyledContactInfo = styled(ContactInfo)` flex: 1 0 31%; `;
 
 const StyledContactSocialMedia = styled(ContactSocialMedia)` flex: 1 0 auto; `;
 
-const imageLoaderStyle = css`
-    visibility: hidden;
-    position: absolute;
-`;
+const imageLoaderStyle = css({
+    visibility: 'hidden',
+    position: 'absolute',
+});
 
 const StyledContactItem = styled.div({
     display: 'flex',

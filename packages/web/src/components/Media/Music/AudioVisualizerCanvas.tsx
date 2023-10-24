@@ -231,9 +231,9 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
             let i = 1;
             for (const phase of this.history) {
                 // color[3] = Math.pow(0.8, maxLength - i);
-                const opacified = opacify(
-                    Math.pow(i / this.maxHistoryLength, 4),
-                )(color);
+                const opacified = opacify((i / this.maxHistoryLength) ** 4)(
+                    color,
+                );
                 this.drawPhaseVerts(phase, opacified);
                 i++;
             }
