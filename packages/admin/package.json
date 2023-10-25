@@ -1,6 +1,5 @@
 {
   "name": "admin",
-  "packageManager": "yarn@3.6.1",
   "scripts": {
     "build": "vite build",
     "watch": "vite"

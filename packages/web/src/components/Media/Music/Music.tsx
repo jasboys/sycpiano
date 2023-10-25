@@ -561,7 +561,7 @@ class Music extends React.Component<MusicProps, MusicState> {
     async componentDidMount() {
         this.initializeAudioPlayer();
         const gl = this.detectWebGL();
-        if (gl && !this.props.isHamburger) {
+        if (gl) {
             if (gl instanceof WebGL2RenderingContext) {
                 const component = await register(
                     'visualizer',

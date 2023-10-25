@@ -15,6 +15,7 @@ const VisualizerContainer = styled.div({
     height: '100%',
     left: 0,
     top: 0,
+    backgroundColor: 'black',
 
     [toMedia(screenM)]: {
         width: `calc(100% - ${playlistContainerWidth.tablet})`,
