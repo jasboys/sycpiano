@@ -15,7 +15,7 @@
             ]
         },
         "baseUrl": "./src",
-        "target": "es2022",
+        "target": "esnext",
         "transform": {
             "legacyDecorator": true,
             "decoratorMetadata": true

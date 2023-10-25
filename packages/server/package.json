@@ -1,7 +1,6 @@
 {
     "$schema": "https://json.schemastore.org/package.json",
     "name": "server",
-    "packageManager": "yarn@3.6.1",
     "type": "module",
     "scripts": {
         "build": "cross-env NODE_ENV=production swc src -d build",
