@@ -1,7 +1,6 @@
 import {
     Collection,
     Entity,
-    Index,
     ManyToMany,
     OneToMany,
     OptionalProps,

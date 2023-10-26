@@ -1,6 +1,8 @@
 import {
+    EntityDTO,
     EntityData,
     FilterQuery,
+    Loaded,
     Primary,
     QueryOrderMap,
     RequiredEntityData,
@@ -53,14 +55,14 @@ export interface CrudActions<
     update:
         | (<ExtraParams extends Record<string, string>>(
               id: I,
-              body: EntityData<R> & ExtraParams,
+              body: Partial<EntityDTO<Loaded<R, never>>> & ExtraParams,
               opts: RequestResponse,
           ) => Promise<EntityData<R>>)
         | null;
     updateMany:
         | ((
               ids: I[],
-              body: EntityData<R>,
+              body: Partial<EntityDTO<Loaded<R, never>>>,
               opts: RequestResponse,
           ) => Promise<ListReturn<R>>)
         | null;

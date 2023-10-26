@@ -2,7 +2,6 @@ import {
     EntityClass,
     EntityName,
     FilterQuery,
-    Loaded,
     Populate,
     Primary,
     wrap,

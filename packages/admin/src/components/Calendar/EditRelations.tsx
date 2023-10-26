@@ -30,10 +30,10 @@ export const EditCalendarPiece: MutateForm = ({ setShowDialog, onRefresh }) => {
         const data: Record<string, unknown> = {
             order: order,
         };
-        if (dirtyFields['composer'] || dirtyFields['piece']) {
-            data['pieceId'] = values.id;
-            data['composer'] = values.composer;
-            data['pieceName'] = values.piece;
+        if (dirtyFields.composer || dirtyFields.piece) {
+            data.pieceId = values.id;
+            data.composer = values.composer;
+            data.pieceName = values.piece;
         }
         update(
             'calendar-pieces',
@@ -109,10 +109,10 @@ export const EditCalendarCollaborator: MutateForm = ({
         const data: Record<string, unknown> = {
             order: order,
         };
-        if (dirtyFields['name'] || dirtyFields['instrument']) {
-            data['collaboratorId'] = values.id;
-            data['name'] = values.name;
-            data['instrument'] = values.instrument;
+        if (dirtyFields.name || dirtyFields.instrument) {
+            data.collaboratorId = values.id;
+            data.name = values.name;
+            data.instrument = values.instrument;
         }
         update(
             'calendar-collaborators',

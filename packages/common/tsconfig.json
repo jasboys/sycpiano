@@ -11,7 +11,7 @@
                 "@types/*",
             ]
         },
-        "module": "ESNext",
+        "module": "NodeNext",
         "target": "ESNext",
         "allowJs": true,
         "moduleResolution": "NodeNext",

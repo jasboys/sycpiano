@@ -4,7 +4,7 @@
         "lib": [
             "esnext",
         ],
-        "module": "ESNext",
+        "module": "NodeNext",
         "target": "ESNext",
         "allowJs": true,
         "moduleResolution": "NodeNext",
@@ -22,10 +22,9 @@
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true
-    },
-    "ts-node": {
-        "esm": true
+        "forceConsistentCasingInFileNames": true,
+        "incremental": true,
+        "tsBuildInfoFile": ".tsbuildinfo"
     },
     "include": [
         "src"

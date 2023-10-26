@@ -6,6 +6,7 @@ import {
     FormDataConsumer,
     SimpleForm,
     TextInput,
+    required,
 } from 'react-admin';
 import { toUTC } from '../../utils.js';
 import { EndDate } from './EndDate.jsx';
@@ -18,6 +19,7 @@ export const CalendarCreate = (props: CreateProps) => {
                 <TextInput
                     source="dateTimeInput"
                     helperText="YYYY-MM-DD HH:MM"
+                    validate={required()}
                 />
                 <FormDataConsumer>
                     {({ formData }) => (
@@ -47,8 +49,8 @@ export const CalendarCreate = (props: CreateProps) => {
                 <BooleanInput source="allDay" />
                 <EndDate />
                 <TextInput source="timezone" disabled />
-                <TextInput source="location" fullWidth />
-                <TextInput source="type" />
+                <TextInput source="location" fullWidth validate={required()} />
+                <TextInput source="type" validate={required()} />
                 <TextInput source="website" fullWidth />
                 <TextInput source="imageUrl" fullWidth />
             </SimpleForm>

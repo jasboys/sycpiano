@@ -19,7 +19,6 @@ import { parse, resolve } from 'path';
 import { csrfMiddleware } from '../csrf.js';
 import orm from '../database.js';
 import { getImageFromMetaTag } from '../gapi/calendar.js';
-import { getPhotos } from '../gapi/places.js';
 import { Acclaim } from '../models/Acclaim.js';
 import { Bio } from '../models/Bio.js';
 import { Calendar } from '../models/Calendar.js';

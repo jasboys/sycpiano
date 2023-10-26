@@ -12,8 +12,11 @@ import { useMutation } from 'react-query';
 import { useAppDataProvider } from 'src/providers/restProvider.js';
 import { MutateForm } from 'src/types.js';
 
-export const Empty = ({ assoc }: { assoc: string }) => (
-    <Typography sx={{ marginBottom: '1rem' }}>No associated {assoc} found.</Typography>
+export const Empty = ({ assoc, children }: React.PropsWithChildren<{ assoc: string }>) => (
+    <div>
+        <Typography sx={{ marginBottom: '1rem' }}>No associated {assoc} found.</Typography>
+        {children}
+    </div>
 );
 
 export const EditReferenceButton: React.FC<{

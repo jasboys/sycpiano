@@ -13,7 +13,9 @@ import { omit } from 'lodash-es';
 import { toUTC } from '../utils';
 import { ADMIN_URI } from 'src/uris.js';
 
-const ingestArrayTransformer = <RecordType extends RaRecord = RaRecord>(
+const ingestArrayTransformer = <
+    RecordType extends Omit<RaRecord, 'id'> = Omit<RaRecord, 'id'>,
+>(
     resource: string,
     data: RecordType[],
 ) => {
@@ -30,7 +32,9 @@ const ingestArrayTransformer = <RecordType extends RaRecord = RaRecord>(
     });
 };
 
-const ingestTransformer = <RecordType extends RaRecord = RaRecord>(
+const ingestTransformer = <
+    RecordType extends Omit<RaRecord, 'id'> = Omit<RaRecord, 'id'>,
+>(
     resource: string,
     data: RecordType,
 ) => {
@@ -45,7 +49,9 @@ const ingestTransformer = <RecordType extends RaRecord = RaRecord>(
     };
 };
 
-const egressParamTransformer = <RecordType extends RaRecord = RaRecord>(
+const egressParamTransformer = <
+    RecordType extends Omit<RaRecord, 'id'> = Omit<RaRecord, 'id'>,
+>(
     resource: string,
     params: RecordType,
 ) => {
