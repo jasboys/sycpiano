@@ -21,8 +21,15 @@ const initialState: AudioPlaylistStateShape = {
 const musicListIfExists = (
     response: MusicResponse,
     category: MusicCategories,
+    sortByDate = false,
 ) => {
-    const curr = response[category];
+    const curr = sortByDate
+        ? response[category].sort((a, b) =>
+              a.year && b.year
+                  ? b.year - a.year
+                  : a.piece.localeCompare(b.piece),
+          )
+        : response[category];
     if (curr !== undefined && curr.length !== 0) {
         return [{ type: category, id: category }, ...curr];
     } else {
@@ -86,8 +93,8 @@ export const fetchPlaylist = createAsyncThunk<ThunkReturn, void, ThunkAPIType>(
                 ...musicListIfExists(mappedResponse, 'solo'),
                 ...musicListIfExists(mappedResponse, 'concerto'),
                 ...musicListIfExists(mappedResponse, 'chamber'),
-                ...musicListIfExists(mappedResponse, 'composition'),
-                ...musicListIfExists(mappedResponse, 'videogame'),
+                ...musicListIfExists(mappedResponse, 'composition', true),
+                ...musicListIfExists(mappedResponse, 'videogame', true),
             ]);
             // dispatch(fetchPlaylistSuccess(items, flatItems));
             return { items, flatItems };
@@ -128,4 +135,3 @@ const audioPlaylistSlice = createSlice({
 });
 
 export const audioPlaylistReducer = audioPlaylistSlice.reducer;
-
