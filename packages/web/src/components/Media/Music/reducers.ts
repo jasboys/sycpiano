@@ -96,7 +96,6 @@ export const fetchPlaylist = createAsyncThunk<ThunkReturn, void, ThunkAPIType>(
                 ...musicListIfExists(mappedResponse, 'composition', true),
                 ...musicListIfExists(mappedResponse, 'videogame', true),
             ]);
-            // dispatch(fetchPlaylistSuccess(items, flatItems));
             return { items, flatItems };
         } catch (e) {
             console.log(e);

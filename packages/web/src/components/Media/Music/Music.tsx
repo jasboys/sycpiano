@@ -645,6 +645,7 @@ class Music extends React.Component<MusicProps, MusicState> {
                     userInteracted={this.state.userInteracted}
                     toggleShuffle={this.toggleShuffle}
                     isShuffle={this.state.isShuffle}
+                    isMobile={isHamburger}
                 />
                 <AudioUI
                     seekAudio={this.seekAudio}

@@ -19,6 +19,7 @@ interface MusicPlaylistOwnProps {
     readonly userInteracted: boolean;
     readonly toggleShuffle: () => void;
     readonly isShuffle: boolean;
+    readonly isMobile: boolean;
 }
 
 type MusicPlaylistProps = MusicPlaylistOwnProps;
@@ -60,6 +61,7 @@ const MusicPlaylist: React.FC<MusicPlaylistProps> = ({
     userInteracted,
     isShuffle,
     toggleShuffle,
+    isMobile,
 }) => {
     const didRun = React.useRef<boolean>(false);
     const items = useAppSelector(({ audioPlaylist }) => audioPlaylist.items);
@@ -67,11 +69,11 @@ const MusicPlaylist: React.FC<MusicPlaylistProps> = ({
     React.useEffect(() => {
         if (didRun.current === false) {
             if (items.length && currentTrackId) {
-                document.getElementById(currentTrackId)?.scrollIntoView();
+                isMobile && document.getElementById(currentTrackId)?.scrollIntoView();
                 didRun.current = true;
             }
         }
-    }, [items, currentTrackId]);
+    }, [items, currentTrackId, isMobile]);
 
     return (
         <PlaylistContainer>
