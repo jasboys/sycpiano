@@ -69,7 +69,7 @@ const MusicPlaylist: React.FC<MusicPlaylistProps> = ({
     React.useEffect(() => {
         if (didRun.current === false) {
             if (items.length && currentTrackId) {
-                isMobile && document.getElementById(currentTrackId)?.scrollIntoView();
+                !isMobile && document.getElementById(currentTrackId)?.scrollIntoView();
                 didRun.current = true;
             }
         }
