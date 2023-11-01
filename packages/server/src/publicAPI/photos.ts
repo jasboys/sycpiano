@@ -10,7 +10,16 @@ const photosHandler = async (
 ): Promise<void> => {
     const response = await orm.em.find(
         Photo,
-        {},
+        {
+            $or: [
+                {
+                    omitFromGallery: { $eq: null },
+                },
+                {
+                    omitFromGallery: { $ne: true },
+                },
+            ],
+        },
         { orderBy: { dateTaken: QueryOrder.DESC_NULLS_LAST } },
     );
     res.json(response);

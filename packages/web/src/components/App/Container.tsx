@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
 import * as React from 'react';
 import { Outlet } from 'react-router-dom';
-import { useAppSelector } from 'src/hooks.js';
 
 import { container } from 'src/styles/mixins';
 

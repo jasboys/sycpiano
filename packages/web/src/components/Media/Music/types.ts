@@ -34,7 +34,7 @@ export type MusicCategories = typeof musicCategories[number];
 
 export const categoryMap = {
     concerto: 'Concerti',
-    solo: 'Solo Works',
+    solo: 'Solo Works (live)',
     chamber: 'Chamber Works',
     composition: 'Original Compositions',
     videogame: 'Videogame-Inspired Works',

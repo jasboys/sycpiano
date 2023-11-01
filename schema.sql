@@ -387,7 +387,7 @@ CREATE TABLE public.calendar_collaborator (
     calendar_id text NOT NULL,
     collaborator_id uuid NOT NULL,
     "order" integer,
-    id uuid DEFAULT gen_random_uuid()
+    id uuid DEFAULT gen_random_uuid() NOT NULL
 );
 
 
@@ -399,7 +399,7 @@ CREATE TABLE public.calendar_piece (
     calendar_id text NOT NULL,
     piece_id uuid NOT NULL,
     "order" integer,
-    id uuid DEFAULT gen_random_uuid()
+    id uuid DEFAULT gen_random_uuid() NOT NULL
 );
 
 
@@ -532,7 +532,9 @@ CREATE TABLE public.photo (
     height integer,
     thumbnail_width integer,
     thumbnail_height integer,
-    credit text
+    credit text,
+    date_taken timestamp without time zone,
+    omit_from_gallery boolean
 );
 
 
@@ -606,7 +608,8 @@ CREATE TABLE public."user" (
 
 CREATE TABLE public.user_product (
     user_id text NOT NULL,
-    product_id text NOT NULL
+    product_id text NOT NULL,
+    id uuid DEFAULT gen_random_uuid() NOT NULL
 );
 
 
@@ -645,7 +648,7 @@ ALTER TABLE ONLY public.calendar_collaborator
 --
 
 ALTER TABLE ONLY public.calendar_collaborator
-    ADD CONSTRAINT calendar_collaborator_pkey PRIMARY KEY (calendar_id, collaborator_id);
+    ADD CONSTRAINT calendar_collaborator_pkey PRIMARY KEY (id);
 
 
 --
@@ -661,7 +664,7 @@ ALTER TABLE ONLY public.calendar_piece
 --
 
 ALTER TABLE ONLY public.calendar_piece
-    ADD CONSTRAINT calendar_piece_pkey PRIMARY KEY (calendar_id, piece_id);
+    ADD CONSTRAINT calendar_piece_pkey PRIMARY KEY (id);
 
 
 --
@@ -789,7 +792,7 @@ ALTER TABLE ONLY public.token
 --
 
 ALTER TABLE ONLY public.user_product
-    ADD CONSTRAINT user_product_pkey PRIMARY KEY (user_id, product_id);
+    ADD CONSTRAINT user_product_pkey PRIMARY KEY (id);
 
 
 --
@@ -1016,4 +1019,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20230705033408'),
     ('20230705055529'),
     ('20230707020252'),
-    ('20230707021812');
+    ('20230707021812'),
+    ('20231101033621');

@@ -27,4 +27,7 @@ export class Photo {
 
     @Property({ columnType: 'text', nullable: true })
     credit?: string;
+
+    @Property({ nullable: true })
+    omitFromGallery?: boolean;
 }

@@ -1,4 +1,5 @@
 import {
+    BooleanInput,
     Button,
     Create,
     CreateButton,
@@ -14,6 +15,7 @@ import {
     ListProps,
     NumberInput,
     RaRecord,
+    SelectInput,
     Show,
     ShowProps,
     SimpleForm,
@@ -94,6 +96,13 @@ export const PhotoList = (props: ListProps) => (
             <TextField source="credit" />
             <DateField source="dateTaken" />
             <FunctionField
+                label="omitFromGallery"
+                render={(record?: RaRecord) => {
+                    const omit = record?.omitFromGallery;
+                    return typeof omit === 'boolean' ? omit.toString() : 'null';
+                }}
+            />
+            <FunctionField
                 label="dimensions"
                 render={(record?: RaRecord) =>
                     `${record?.width}x${record?.height}`
@@ -117,6 +126,13 @@ export const PhotoShow = (props: ShowProps) => (
             <TextField source="file" />
             <TextField source="credit" />
             <DateField source="dateTaken" />
+            <FunctionField
+                label="omitFromGallery"
+                render={(record?: RaRecord) => {
+                    const omit = record?.omitFromGallery;
+                    return typeof omit === 'boolean' ? omit.toString() : 'null';
+                }}
+            />
             <FunctionField
                 label="thumbnail dimensions"
                 render={(record?: RaRecord) =>
@@ -142,6 +158,14 @@ export const PhotoEdit = (props: EditProps) => (
             <TextInput source="file" fullWidth />
             <TextInput source="credit" />
             <DateField source="dateTaken" disabled />
+            <SelectInput
+                source="omitFromGallery"
+                choices={[
+                    { id: true, name: 'true' },
+                    { id: false, name: 'false' },
+                    { id: null, name: 'null' },
+                ]}
+            />
             <NumberInput source="width" />
             <NumberInput source="height" />
             <NumberInput source="thumbnailWidth" />
@@ -160,6 +184,14 @@ const PhotoFields = () => {
                 <ImageField source="src" title="title" />
             </ImageInput>
             <TextInput source="credit" />
+            <SelectInput
+                source="omitFromGallery"
+                choices={[
+                    { id: true, name: 'true' },
+                    { id: false, name: 'false' },
+                    { id: null, name: 'null' },
+                ]}
+            />
         </>
     );
 };
