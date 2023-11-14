@@ -1,5 +1,4 @@
 import {
-    BooleanInput,
     Button,
     Create,
     CreateButton,

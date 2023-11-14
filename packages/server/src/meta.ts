@@ -66,7 +66,12 @@ export const getMetaFromPathAndSanitize = async (
     url: string,
     query?: string,
 ): Promise<Meta> => {
-    const matchInstance: PartialPathMatch = bind(matchPath, null, url); // Make my typing easier
+    const matchInstance: PartialPathMatch = bind(
+        matchPath,
+        null,
+        bind.placeholder,
+        url,
+    ); // Make my typing easier
     let match: PathMatch<string> | null;
     if ((match = matchInstance('/'))) {
         return {
