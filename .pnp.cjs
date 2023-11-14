@@ -3070,7 +3070,7 @@ const RAW_RUNTIME_STATE =
           ["@googlemaps/google-maps-services-js", "npm:3.3.41"],\
           ["@googlemaps/url-signature", "npm:1.0.29"],\
           ["agentkeepalive", "npm:4.5.0"],\
-          ["axios", "npm:1.5.1"],\
+          ["axios", "npm:1.6.1"],\
           ["query-string", "npm:7.1.3"],\
           ["retry-axios", "virtual:8ceae6296e49416eda329d6d05041ca1129fd2aac3a3f10385b7f4c2d0ecbfd7bc02b707c273a6a0623672fa2b5e8e4d713f93a2670c2df56daf0df4c97c9e5e#npm:2.6.0"]\
         ],\
@@ -5101,7 +5101,7 @@ const RAW_RUNTIME_STATE =
           ["@types/react-dom", "npm:18.2.14"],\
           ["@vitejs/plugin-legacy", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:4.1.1"],\
           ["@vitejs/plugin-react-swc", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:3.4.0"],\
-          ["axios", "npm:1.5.1"],\
+          ["axios", "npm:1.6.1"],\
           ["date-fns", "npm:2.30.0"],\
           ["date-fns-tz", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:2.0.0"],\
           ["dotenv", "npm:16.3.1"],\
@@ -5470,11 +5470,11 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["axios", [\
-      ["npm:1.5.1", {\
-        "packageLocation": "./.yarn/cache/axios-npm-1.5.1-6bc68e7d25-67633db586.zip/node_modules/axios/",\
+      ["npm:1.6.1", {\
+        "packageLocation": "./.yarn/cache/axios-npm-1.6.1-ffaff76449-fb091af3ad.zip/node_modules/axios/",\
         "packageDependencies": [\
-          ["axios", "npm:1.5.1"],\
-          ["follow-redirects", "virtual:6bc68e7d25b7055a51c269c1fa5648c8246286db1b7949168396e2ffbde7ed58cf742783c99b4e376ba9a3e96fcc4d029f96bd1b532b606b5055545461060ec6#npm:1.15.2"],\
+          ["axios", "npm:1.6.1"],\
+          ["follow-redirects", "virtual:ffaff76449f02e83712a7d24e03c564489516739c78ebeffb0fbcdb3893ad9a0e48504f9acfa70fe6f16debe9c8dabde3679d63bf648278ea98a5ff38cf77a9e#npm:1.15.2"],\
           ["form-data", "npm:4.0.0"],\
           ["proxy-from-env", "npm:1.1.0"]\
         ],\
@@ -7499,10 +7499,10 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:6bc68e7d25b7055a51c269c1fa5648c8246286db1b7949168396e2ffbde7ed58cf742783c99b4e376ba9a3e96fcc4d029f96bd1b532b606b5055545461060ec6#npm:1.15.2", {\
-        "packageLocation": "./.yarn/__virtual__/follow-redirects-virtual-ec65af1aae/0/cache/follow-redirects-npm-1.15.2-1ec1dd82be-8be0d39919.zip/node_modules/follow-redirects/",\
+      ["virtual:ffaff76449f02e83712a7d24e03c564489516739c78ebeffb0fbcdb3893ad9a0e48504f9acfa70fe6f16debe9c8dabde3679d63bf648278ea98a5ff38cf77a9e#npm:1.15.2", {\
+        "packageLocation": "./.yarn/__virtual__/follow-redirects-virtual-c2d5794c26/0/cache/follow-redirects-npm-1.15.2-1ec1dd82be-8be0d39919.zip/node_modules/follow-redirects/",\
         "packageDependencies": [\
-          ["follow-redirects", "virtual:6bc68e7d25b7055a51c269c1fa5648c8246286db1b7949168396e2ffbde7ed58cf742783c99b4e376ba9a3e96fcc4d029f96bd1b532b606b5055545461060ec6#npm:1.15.2"],\
+          ["follow-redirects", "virtual:ffaff76449f02e83712a7d24e03c564489516739c78ebeffb0fbcdb3893ad9a0e48504f9acfa70fe6f16debe9c8dabde3679d63bf648278ea98a5ff38cf77a9e#npm:1.15.2"],\
           ["@types/debug", null],\
           ["debug", null]\
         ],\
@@ -11893,7 +11893,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["retry-axios", "virtual:8ceae6296e49416eda329d6d05041ca1129fd2aac3a3f10385b7f4c2d0ecbfd7bc02b707c273a6a0623672fa2b5e8e4d713f93a2670c2df56daf0df4c97c9e5e#npm:2.6.0"],\
           ["@types/axios", null],\
-          ["axios", "npm:1.5.1"]\
+          ["axios", "npm:1.6.1"]\
         ],\
         "packagePeers": [\
           "@types/axios",\
@@ -12226,7 +12226,7 @@ const RAW_RUNTIME_STATE =
           ["app-root-path", "npm:3.1.0"],\
           ["archiver", "npm:6.0.1"],\
           ["argon2", "npm:0.31.1"],\
-          ["axios", "npm:1.5.1"],\
+          ["axios", "npm:1.6.1"],\
           ["chokidar", "npm:3.5.3"],\
           ["common", "workspace:packages/common"],\
           ["compression", "npm:1.7.4"],\
@@ -13628,7 +13628,7 @@ const RAW_RUNTIME_STATE =
           ["@vitejs/plugin-legacy", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:4.1.1"],\
           ["@vitejs/plugin-react", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:4.1.0"],\
           ["@vitejs/plugin-react-swc", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:3.4.0"],\
-          ["axios", "npm:1.5.1"],\
+          ["axios", "npm:1.6.1"],\
           ["binary-search", "npm:1.3.6"],\
           ["blazy", "npm:1.8.2"],\
           ["browserslist", "npm:4.22.1"],\
