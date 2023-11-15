@@ -92,7 +92,7 @@ export const getMetaFromPathAndSanitize = async (
         }
         return {
             title: `${baseString}About | ${startCase(about)}`,
-            description: descriptions[about],
+            description: descriptions[about] as string,
         };
     }
     if ((match = matchInstance('/shop/:shop'))) {
@@ -102,7 +102,7 @@ export const getMetaFromPathAndSanitize = async (
         }
         return {
             title: `${baseString}Shop | ${startCase(shop)}`,
-            description: descriptions[shop],
+            description: descriptions[shop] as string,
         };
     }
     if ((match = matchInstance('/media/photos'))) {
@@ -209,7 +209,7 @@ export const getMetaFromPathAndSanitize = async (
                 }
                 return {
                     title: `${baseString}Schedule | ${startCase(type)}`,
-                    description: descriptions[type],
+                    description: descriptions[type] as string,
                 };
             }
             const date = parseISO(eventISO);
