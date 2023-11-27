@@ -171,7 +171,7 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         }
         const angle =
             this.props.currentPosition && this.props.duration
-                ? Math.min(TWO_PI * playbackHead / this.props.duration)
+                ? Math.min((TWO_PI * playbackHead) / this.props.duration)
                 : 0;
         this.drawPlaybackHead(
             angle,
@@ -193,7 +193,7 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         }
     };
 
-    drawPhaseVerts = (verts: Float32Array, color: string) => {
+    drawPhaseVerts = (verts: number[], color: string) => {
         if (!this.renderingContext) return;
         this.renderingContext.fillStyle = 'rgba(0, 0, 0, 0)';
         this.renderingContext.strokeStyle = color;
@@ -220,23 +220,17 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         this.renderingContext.save();
         this.renderingContext.rotate(-Math.PI / 4.0);
 
-        if (this.props.isMobile) {
-            this.drawPhaseVerts(new Float32Array(verts), color);
-        } else {
-            this.history.push(new Float32Array(verts));
-            if (this.history.length > this.maxHistoryLength) {
-                this.history.shift();
-            }
+        this.history.push(verts);
+        if (this.history.length > this.maxHistoryLength) {
+            this.history.shift();
+        }
 
-            let i = 1;
-            for (const phase of this.history) {
-                // color[3] = Math.pow(0.8, maxLength - i);
-                const opacified = opacify((i / this.maxHistoryLength) ** 4)(
-                    color,
-                );
-                this.drawPhaseVerts(phase, opacified);
-                i++;
-            }
+        let i = 1;
+        for (const phase of this.history) {
+            // color[3] = Math.pow(0.8, maxLength - i);
+            const opacified = opacify((i / this.maxHistoryLength) ** 4)(color);
+            this.drawPhaseVerts(phase, opacified);
+            i++;
         }
         this.renderingContext.restore();
     };
@@ -274,7 +268,8 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
             this.height,
         ]);
         this.drawSeekArea(radius, color, timestamp);
-        this.drawPhase(this.RADIUS_BASE, opacify(0.5)(color));
+        this.props.isMobile &&
+            this.drawPhase(this.RADIUS_BASE, opacify(0.5)(color));
     };
 
     onResize = (): void => {

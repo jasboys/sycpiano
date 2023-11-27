@@ -152,6 +152,9 @@ const mediaSelectors = createStructuredSelector({
     hiDpx: mqSelectors.hiDpx,
     isHamburger: mqSelectors.isHamburger,
     screenPortrait: mqSelectors.screenPortrait,
+    screenM: mqSelectors.screenM,
+    screenLandscape: mqSelectors.screenLandscape,
+    screenL: mqSelectors.screenL
 });
 
 const Music: React.FC = () => {
@@ -184,7 +187,7 @@ const Music: React.FC = () => {
     const shouldPlay = React.useRef<boolean>();
     const nextTrack = React.useRef<MusicFileItem>();
 
-    const { isHamburger, hiDpx, screenPortrait } =
+    const { isHamburger, hiDpx, screenPortrait, screenM, screenL, screenLandscape } =
         useAppSelector(mediaSelectors);
 
     const musicPlayer = React.useRef<MusicPlayer>(
@@ -529,7 +532,7 @@ const Music: React.FC = () => {
                         isPlaying={isPlaying}
                         duration={duration}
                         volume={volume}
-                        isMobile={isHamburger}
+                        isMobile={(screenM && screenPortrait || screenL && screenLandscape)}
                         isHoverSeekring={isHoverSeekring}
                         hoverAngle={angle}
                         setRadii={updateRadii}

@@ -46,6 +46,15 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
     internalOffset!: number;
     deviceRatio!: number;
 
+    // persistent buffers
+    cqVertices: Float32Array = new Float32Array(CIRCLE_SAMPLES * 2 + 4);
+    waveformVertices!: Float32Array;
+    phaseVertices!: Float32Array;
+    lineVertices = new Float32Array(16);
+    colorArray = new Float32Array(4);
+    white = new Float32Array([1.0, 1.0, 1.0, 1.0]);
+    gray = new Float32Array([0.5, 0.5, 0.5, 1.0]);
+
     initializeVisualizer = async (): Promise<void> => {
         if (!this.visualization.current) {
             console.error('visualization element does not exist.');
@@ -132,10 +141,7 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
                 vertices: gl.createBuffer(),
             },
             uniforms: {
-                globalColor: gl.getUniformLocation(
-                    phaseShader,
-                    'uGlobalColor',
-                ),
+                globalColor: gl.getUniformLocation(phaseShader, 'uGlobalColor'),
                 thickness: gl.getUniformLocation(phaseShader, 'uThickness'),
                 viewMatrix: gl.getUniformLocation(phaseShader, 'uMatrix'),
                 rotateMatrix: gl.getUniformLocation(phaseShader, 'uRotate'),
@@ -263,6 +269,8 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
         this.onResize();
 
         await this.initialize();
+
+        this.phaseVertices = new Float32Array(10 * this.leftData.length);
     };
 
     drawConstantQBins = (radius: number, color: Float32Array): void => {
@@ -273,9 +281,8 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
         let currentSample = 0;
         let currentFraction = 0;
 
-        const vertices = new Float32Array(CIRCLE_SAMPLES * 2 + 4);
-        vertices[0] = 0;
-        vertices[1] = 0;
+        this.cqVertices[0] = 0;
+        this.cqVertices[1] = 0;
 
         // "resampling" constantQ from CQ_BINS to CIRCLE_SAMPLES using FIR
         while (currentSample < CIRCLE_SAMPLES && currentInput < this.CQ_BINS) {
@@ -306,8 +313,8 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
             x *= result;
             y *= result;
 
-            vertices[2 + 2 * currentSample] = x;
-            vertices[2 + 2 * currentSample + 1] = y;
+            this.cqVertices[2 + 2 * currentSample] = x;
+            this.cqVertices[2 + 2 * currentSample + 1] = y;
 
             // update for next sample
             currentSample += 1;
@@ -318,8 +325,8 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
             }
         }
 
-        vertices[2 + CIRCLE_SAMPLES * 2] = vertices[2];
-        vertices[2 + CIRCLE_SAMPLES * 2 + 1] = vertices[3];
+        this.cqVertices[2 + CIRCLE_SAMPLES * 2] = this.cqVertices[2];
+        this.cqVertices[2 + CIRCLE_SAMPLES * 2 + 1] = this.cqVertices[3];
 
         const gl = this.renderingContext;
 
@@ -327,7 +334,7 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
 
         gl.bindVertexArray(this.cqProgram.vertexArray);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.cqProgram.buffers.vertices);
-        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.DYNAMIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.cqVertices, gl.DYNAMIC_DRAW);
 
         const {
             globalColor: uGlobalColor,
@@ -347,7 +354,7 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
 
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-        gl.drawArrays(gl.TRIANGLE_FAN, 0, vertices.length / 2);
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, this.cqVertices.length / 2);
 
         gl.bindVertexArray(null);
     };
@@ -361,19 +368,22 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
 
         const waveformLength = waveform.length / 2;
         const volumeHeightScale = this.props.volume * this.WAVEFORM_HALF_HEIGHT;
-        const vertices = new Float32Array(waveformLength * 4);
-        // going through mins from start to end
+        if (
+            !this.waveformVertices ||
+            this.waveformVertices.length !== waveformLength * 4
+        ) {
+            this.waveformVertices = new Float32Array(waveformLength * 4);
+        }
+        // going through mins and maxes from start to end
         for (let j = 0; j < waveformLength; j++) {
-            let scale = centerAxis + waveform[j * 2] * volumeHeightScale;
+            const minScale = centerAxis + waveform[j * 2] * volumeHeightScale;
+            const maxScale =
+                centerAxis + waveform[j * 2 + 1] * volumeHeightScale;
             const { x, y } = angles?.[j] || { x: 0, y: 0 };
-
-            vertices[j * 4] = x * scale;
-            vertices[j * 4 + 1] = y * scale;
-
-            scale = centerAxis + waveform[j * 2 + 1] * volumeHeightScale;
-
-            vertices[j * 4 + 2] = x * scale;
-            vertices[j * 4 + 3] = y * scale;
+            this.waveformVertices.set(
+                [x * minScale, y * minScale, x * maxScale, y * maxScale],
+                j * 4,
+            );
         }
 
         const gl = this.renderingContext;
@@ -381,7 +391,7 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
         gl.useProgram(this.genProgram.shader);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.genProgram.buffers.vertices);
-        gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.DYNAMIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.waveformVertices, gl.DYNAMIC_DRAW);
 
         gl.uniform4fv(this.genProgram.uniforms.globalColor, color);
 
@@ -405,31 +415,34 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
         dx /= length;
         dy /= length;
 
-        const verts = new Float32Array([
-            xStart,
-            yStart,
-            -dy,
-            dx,
-            xStart,
-            yStart,
-            dy,
-            -dx,
-            xEnd,
-            yEnd,
-            -dy,
-            dx,
-            xEnd,
-            yEnd,
-            dy,
-            -dx,
-        ]);
+        this.lineVertices.set(
+            [
+                xStart,
+                yStart,
+                -dy,
+                dx,
+                xStart,
+                yStart,
+                dy,
+                -dx,
+                xEnd,
+                yEnd,
+                -dy,
+                dx,
+                xEnd,
+                yEnd,
+                dy,
+                -dx,
+            ],
+            0,
+        );
 
         const gl = this.renderingContext;
 
         gl.useProgram(this.lineProgram.shader);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.lineProgram.buffers.vertices);
-        gl.bufferData(gl.ARRAY_BUFFER, verts, gl.DYNAMIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.lineVertices, gl.DYNAMIC_DRAW);
 
         gl.bindVertexArray(this.lineProgram.vertexArray);
 
@@ -467,7 +480,10 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
 
         const angle =
             playbackHead && this.props.duration
-                ? Math.min(TWO_PI, TWO_PI * playbackHead / this.props.duration)
+                ? Math.min(
+                      TWO_PI,
+                      (TWO_PI * playbackHead) / this.props.duration,
+                  )
                 : 0;
 
         this.drawPlaybackHead(
@@ -476,7 +492,7 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
                 this.props.volume * this.WAVEFORM_HALF_HEIGHT,
             WAVEFORM_CENTER_AXIS +
                 this.props.volume * this.WAVEFORM_HALF_HEIGHT,
-            new Float32Array([1.0, 1.0, 1.0, 1.0]),
+            this.white,
         );
         if (this.props.isHoverSeekring && this.props.hoverAngle !== undefined) {
             this.drawPlaybackHead(
@@ -485,7 +501,7 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
                     this.props.volume * this.WAVEFORM_HALF_HEIGHT,
                 WAVEFORM_CENTER_AXIS +
                     this.props.volume * this.WAVEFORM_HALF_HEIGHT,
-                new Float32Array([0.5, 0.5, 0.5, 1.0]),
+                this.gray,
             );
         }
     };
@@ -521,37 +537,33 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
             // tempArray.push([0, i]);
         }
         const normalData = getNormals(tempArray);
-        const vertsArray: number[] = [];
         for (let i = 0; i < tempArray.length; i++) {
-            vertsArray.push(
-                ...tempArray[i],
-                ...normalData[i][0],
-                normalData[i][1],
-            );
-            vertsArray.push(
-                ...tempArray[i],
-                -normalData[i][0][0],
-                -normalData[i][0][1],
-                normalData[i][1],
+            this.phaseVertices.set(
+                [
+                    ...tempArray[i],
+                    ...normalData[i][0],
+                    normalData[i][1],
+                    ...tempArray[i],
+                    -normalData[i][0][0],
+                    -normalData[i][0][1],
+                    normalData[i][1],
+                ],
+                10 * i,
             );
         }
 
-        if (this.props.isMobile) {
-            this.drawPhaseVerts(new Float32Array(vertsArray), color);
-        } else {
-            const verts = new Float32Array(vertsArray);
-            this.history.push(verts);
-            if (this.history.length > this.maxHistoryLength) {
-                this.history.shift();
-            }
+        const verts = this.phaseVertices;
+        this.history.push(verts);
+        if (this.history.length > this.maxHistoryLength) {
+            this.history.shift();
+        }
 
-            let i = 1;
-            for (const phase of this.history) {
-                // color[3] = Math.pow(0.8, maxLength - i);
-                color[3] = (i / this.maxHistoryLength) ** 4;
-                this.drawPhaseVerts(phase, color);
-                i++;
-            }
+        let i = 1;
+        for (const phase of this.history) {
+            // color[3] = Math.pow(0.8, maxLength - i);
+            color[3] = (i / this.maxHistoryLength) ** 4;
+            this.drawPhaseVerts(phase, color);
+            i++;
         }
     };
 
@@ -571,7 +583,7 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
             47 + lightness * 53,
         )}%)`;
         const color = parseToRgb(hsl);
-        const colorArray = new Float32Array([
+        this.colorArray.set([
             color.red / 255,
             color.green / 255,
             color.blue / 255,
@@ -597,9 +609,10 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
         gl.clear(gl.COLOR_BUFFER_BIT);
 
-        this.drawConstantQBins(radius, colorArray);
-        this.drawSeekArea(radius, colorArray, timestamp);
-        this.drawPhase(this.RADIUS_BASE, colorArray);
+        this.drawConstantQBins(radius, this.colorArray);
+        this.drawSeekArea(radius, this.colorArray, timestamp);
+        !this.props.isMobile &&
+            this.drawPhase(this.RADIUS_BASE, this.colorArray);
     };
 
     onResize = (): void => {

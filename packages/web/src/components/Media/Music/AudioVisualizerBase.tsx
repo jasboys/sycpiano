@@ -46,6 +46,10 @@ type ColorType<C> = C extends WebGL2RenderingContext | WebGLRenderingContext
     ? Float32Array
     : string;
 
+type ArrayType<C> = C extends WebGL2RenderingContext | WebGLRenderingContext
+    ? Float32Array[]
+    : number[][];
+
 export abstract class AudioVisualizerBase<
     C extends RenderingContext,
 > extends React.Component<AudioVisualizerProps> {
@@ -91,7 +95,7 @@ export abstract class AudioVisualizerBase<
     requestId = 0;
     lastCallback!: number;
 
-    history: Float32Array[] = [];
+    history: ArrayType<C> = [];
     maxHistoryLength = 30;
 
     abstract drawConstantQBins: (radius: number, color: ColorType<C>) => void;
@@ -179,6 +183,7 @@ export abstract class AudioVisualizerBase<
 
         const { left: leftPhase, right: rightPhase } =
             this.props.musicPlayer.phasalyzers;
+
         if (
             !this.vizBins ||
             !this.renderingContext ||
