@@ -12,7 +12,6 @@ import {
     constantQ,
     drawCircleMask,
     firLoader,
-    waveformLoader,
 } from 'src/components/Media/Music/VisualizationUtils';
 
 declare global {
@@ -97,8 +96,8 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
     };
 
     drawWaveForm = (centerAxis: number, color: string): void => {
-        const waveform = waveformLoader.waveform;
-        const angles = waveformLoader.angles;
+        const waveform = this.props.musicPlayer.getCurrentWaveform().waveform;
+        const angles = this.props.musicPlayer.getCurrentWaveform().angles;
         if (!waveform || waveform.length === 0 || !this.renderingContext) {
             return;
         }
@@ -166,13 +165,13 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         ) {
             playbackHead =
                 this.props.currentPosition +
-                (timestamp - this.props.prevTimestamp) / 1000;
+                (timestamp - this.lastPositionUpdateTimestamp) / 1000;
         } else {
             this.lastPlayheadPosition = this.props.currentPosition;
         }
         const angle =
             this.props.currentPosition && this.props.duration
-                ? (TWO_PI * playbackHead) / this.props.duration
+                ? Math.min(TWO_PI * playbackHead / this.props.duration)
                 : 0;
         this.drawPlaybackHead(
             angle,
@@ -222,6 +221,7 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         this.renderingContext.rotate(-Math.PI / 4.0);
 
         if (this.props.isMobile) {
+            this.drawPhaseVerts(new Float32Array(verts), color);
         } else {
             this.history.push(new Float32Array(verts));
             if (this.history.length > this.maxHistoryLength) {

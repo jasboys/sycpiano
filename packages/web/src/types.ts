@@ -2,7 +2,7 @@ import { BioStateShape } from 'src/components/About/Bio/types';
 import { DiscsStateShape } from 'src/components/About/Discs/types';
 import { AcclaimsListStateShape } from 'src/components/About/Press/types';
 import { NavBarStateShape } from 'src/components/App/NavBar/types';
-import { AudioPlaylistStateShape } from 'src/components/Media/Music/types';
+import { MusicStateShape } from 'src/components/Media/Music/types';
 import {
     PhotoListReducerShape,
     PhotoViewerReducerShape,
@@ -17,7 +17,7 @@ import { ShopStateShape } from 'src/components/Shop/ShopList/types';
 import { bioReducer } from 'src/components/About/Bio/reducers';
 import { discsReducer } from 'src/components/About/Discs/reducers';
 import { acclaimsListReducer } from 'src/components/About/Press/reducers';
-import { audioPlaylistReducer } from 'src/components/Media/Music/reducers';
+import { musicPlayerReducer } from 'src/components/Media/Music/reducers';
 import {
     photoListReducer,
     photoViewerReducer,
@@ -44,7 +44,7 @@ export type MediaQueryStateShape = Record<keyof typeof GLOBAL_QUERIES, boolean>;
 export type AnyStateShape =
     | BioStateShape
     | DiscsStateShape
-    | AudioPlaylistStateShape
+    | MusicStateShape
     | PhotoListReducerShape
     | PhotoViewerReducerShape
     | AcclaimsListStateShape
@@ -63,7 +63,7 @@ export interface IndexableGlobalStateShape extends GlobalStateShape {
 export type AnyReducerType =
     | typeof bioReducer
     | typeof discsReducer
-    | typeof audioPlaylistReducer
+    | typeof musicPlayerReducer
     | typeof photoListReducer
     | typeof photoViewerReducer
     | typeof acclaimsListReducer
@@ -77,7 +77,7 @@ export type AnyReducerType =
 export interface Reducers {
     readonly bio: typeof bioReducer;
     readonly discs: typeof discsReducer;
-    readonly audioPlaylist: typeof audioPlaylistReducer;
+    readonly musicPlayer: typeof musicPlayerReducer;
     readonly photoList: typeof photoListReducer;
     readonly photoViewer: typeof photoViewerReducer;
     readonly pressAcclaimsList: typeof acclaimsListReducer;

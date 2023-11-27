@@ -3,5 +3,5 @@ import * as music from 'src/components/Media/Music/reducers';
 
 export const Component = Music;
 export const reducers = {
-    audioPlaylist: music.audioPlaylistReducer,
+    musicPlayer: music.musicPlayerReducer,
 };

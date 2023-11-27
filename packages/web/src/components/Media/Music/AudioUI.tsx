@@ -18,32 +18,31 @@ import {
     SkipButton,
 } from 'src/components/Media/Music/Buttons';
 import { cartesianToPolar } from 'src/components/Media/Music/utils';
-import { screenM, screenPortrait, screenXS } from 'src/screens';
+import { isHamburger } from 'src/screens';
 import { lightBlue } from 'src/styles/colors';
-import { navBarHeight, playlistContainerWidth } from 'src/styles/variables';
 import { fadeOnEnter, fadeOnExit } from 'src/utils.js';
+import { useAppDispatch, useAppSelector } from 'src/hooks.js';
+import {
+    hoverSeekringAction,
+    isMouseMoveAction,
+    updateAction,
+} from './reducers.js';
+import { mqSelectors } from 'src/components/App/reducers.js';
+import { createSelector } from 'reselect';
+import { GlobalStateShape } from 'src/store.js';
+
+const isMouseEvent = <E extends Element>(
+    event: AggregateUIEvent<E>,
+): event is React.MouseEvent<E> => {
+    return event.type.match(/(m|M)ouse/) !== null;
+};
 
 interface AudioUIOwnProps {
-    readonly currentPosition: number;
-    readonly isPlaying: boolean;
+    readonly togglePlay: () => void;
     readonly onDrag: (percent: number) => void;
     readonly onStartDrag: (percent: number) => void;
-    readonly pause: () => void;
-    readonly play: () => void;
-    readonly next: () => void;
-    readonly prev: () => void;
+    readonly playSubsequent: (which: 'prev' | 'next', fade?: boolean) => void;
     readonly seekAudio: (percent: number) => void;
-    readonly isMobile: boolean;
-    readonly isLoading: boolean;
-    readonly isMouseMove: boolean;
-    readonly radii: {
-        readonly inner: number;
-        readonly outer: number;
-        readonly base: number;
-    };
-    readonly setMouseMove: (move: boolean) => void;
-    readonly setRadii: (inner: number, outer: number, base: number) => void;
-    readonly setHoverSeekring: (isHover: boolean, angle?: number) => void;
 }
 
 type AudioUIProps = AudioUIOwnProps;
@@ -63,7 +62,7 @@ const loadingInstanceStyle = css({
     fill: 'none',
     stroke: lightBlue,
 
-    [toMedia([screenXS, screenPortrait])]: {
+    [toMedia(isHamburger)]: {
         top: `calc(50% + ${HEIGHT_ADJUST_MOBILE}px)`,
     },
 });
@@ -78,7 +77,7 @@ const LoadingOverlay = styled.div({
 
 const UIContainer = styled.div({
     position: 'absolute',
-    width: `calc(100% - ${playlistContainerWidth.desktop})`,
+    width: '100%',
     height: '100%',
     left: 0,
     top: 0,
@@ -86,14 +85,6 @@ const UIContainer = styled.div({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-around',
-    [toMedia(screenM)]: {
-        width: `calc(100% - ${playlistContainerWidth.tablet})`,
-    },
-    [toMedia(screenPortrait)]: {
-        width: '100%',
-        height: 360,
-        top: navBarHeight.hiDpx,
-    },
 });
 
 const ControlsContainer = styled.div({
@@ -121,51 +112,66 @@ type AggregateUIEvent<E> =
     | React.TouchEvent<E>
     | TouchEvent;
 
-class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
-    state: AudioUIState = {
+const selector = createSelector(
+    (state: GlobalStateShape) => state.musicPlayer,
+    ({ isPlaying, isMouseMove, isLoading, radii: { inner, outer, base } }) => ({
+        isPlaying,
+        isMouseMove,
+        isLoading,
+        inner,
+        outer,
+        base,
+    }),
+);
+
+const AudioUI: React.FC<AudioUIProps> = ({
+    seekAudio,
+    onStartDrag,
+    playSubsequent,
+    onDrag,
+    togglePlay,
+}) => {
+    const [state, setState] = React.useState<AudioUIState>({
         isHoverPlaypause: false,
         isHoverNext: false,
         isHoverPrev: false,
         showUI: true,
-    };
-    playIcon: HTMLDivElement | null = null;
-    pauseIcon: HTMLDivElement | null = null;
-    buttonRefs: {
+    });
+
+    const playIcon = React.useRef<HTMLDivElement>(null);
+    const pauseIcon = React.useRef<HTMLDivElement>(null);
+    const buttonRefs = React.useRef<{
         play: HTMLDivElement | null;
         pause: HTMLDivElement | null;
         prev: HTMLDivElement | null;
         next: HTMLDivElement | null;
-    } = {
+    }>({
         play: null,
         pause: null,
         prev: null,
         next: null,
-    };
+    });
+    const dimensions = React.useRef<{
+        height: number;
+        width: number;
+        centerX: number;
+        centerY: number;
+    }>({ height: 0, width: 0, centerX: 0, centerY: 0 });
 
-    height!: number;
-    width!: number;
-    centerX!: number;
-    centerY!: number;
-    timerId!: ReturnType<typeof setTimeout>;
+    const timerId = React.useRef<ReturnType<typeof setTimeout>>();
+    const prevPercentage = React.useRef<number>(0);
+    const isDragging = React.useRef<boolean>();
 
-    prevPercentage!: number;
+    const seekRing = React.useRef<HTMLCanvasElement | null>(null);
+    const visualizationCtx = React.useRef<CanvasRenderingContext2D | null>();
 
-    isDragging!: boolean;
+    const { isLoading, isMouseMove, isPlaying, inner, outer, base } =
+        useAppSelector(selector);
+    const isHamburger = useAppSelector(mqSelectors.isHamburger);
 
-    seekRing: HTMLCanvasElement | null = null;
-    visualizationCtx: CanvasRenderingContext2D | null = null;
+    const dispatch = useAppDispatch();
 
-    listenerAdded = false;
-
-    setPlayIconRef = (ref: HTMLDivElement | null): void => {
-        this.playIcon = ref;
-    };
-
-    setPauseIconRef = (ref: HTMLDivElement | null): void => {
-        this.pauseIcon = ref;
-    };
-
-    togglePlaying = <E extends Element>(
+    const togglePlaying = <E extends Element>(
         event:
             | React.KeyboardEvent<E>
             | React.MouseEvent<E>
@@ -176,209 +182,105 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
             (event as React.KeyboardEvent<E> | KeyboardEvent).key === ' ' ||
             (event as React.MouseEvent<E> | MouseEvent).button === 0
         ) {
-            if (this.props.isPlaying) {
-                this.props.pause();
-            } else {
-                this.props.play();
-            }
+            dispatch(updateAction({ playing: !isPlaying }));
             event.preventDefault();
         }
     };
 
-    onResize = (): void => {
-        if (this.seekRing) {
-            this.height = this.seekRing.offsetHeight;
-            this.width = this.seekRing.offsetWidth;
-            this.seekRing.height = this.height;
-            this.seekRing.width = this.width;
-            this.centerX = this.width / 2;
-            this.centerY =
-                this.height / 2 +
-                (this.props.isMobile
-                    ? HEIGHT_ADJUST_MOBILE
-                    : HEIGHT_ADJUST_DESKTOP);
-        }
-    };
-
-    initializeUI = (): void => {
-        if (this.seekRing) {
-            this.onResize();
-            this.visualizationCtx = this.seekRing.getContext('2d');
-            this.isDragging = false;
-            this.props.setMouseMove(false);
-            this.setState({
-                isHoverPlaypause: false,
-            });
-        }
-    };
-
-    isMouseEvent = <E extends Element>(
-        event: AggregateUIEvent<E>,
-    ): event is React.MouseEvent<E> => {
-        return event.type.match(/(m|M)ouse/) !== null;
-    };
-
-    getMousePositionInCanvas = <E extends Element>(
-        event: AggregateUIEvent<E>,
-    ): { x: number; y: number } => {
-        if (!this.seekRing) {
-            return {
-                x: 0,
-                y: 0,
+    const onResize = React.useCallback(() => {
+        if (seekRing.current) {
+            dimensions.current = {
+                ...dimensions.current,
+                height: seekRing.current.offsetHeight,
+                width: seekRing.current.offsetWidth,
+                centerX: seekRing.current.offsetWidth / 2,
+                centerY:
+                    seekRing.current.offsetHeight / 2 +
+                    (isHamburger
+                        ? HEIGHT_ADJUST_MOBILE
+                        : HEIGHT_ADJUST_DESKTOP),
             };
         }
-        const mouseX = this.isMouseEvent(event)
-            ? event.clientX
-            : event.touches[0].clientX;
-        const mouseY = this.isMouseEvent(event)
-            ? event.clientY
-            : event.touches[0].clientY;
-        const boundingRect = this.seekRing.getBoundingClientRect();
-        return {
-            x: mouseX - boundingRect.left,
-            y: mouseY - boundingRect.top,
-        };
-    };
+    }, [isHamburger]);
 
-    isPointInCircle = (
-        point: [number, number],
-        radius: number,
-        center: [number, number],
-    ): boolean => {
-        const context = this.visualizationCtx;
-        if (!context) {
-            return false;
-        }
-        context.beginPath();
-        context.arc(center[0], center[1], radius, 0, 2 * Math.PI);
-        context.closePath();
-        return context.isPointInPath(point[0], point[1]);
-    };
-
-    isEventInSeekRing = <E extends Element>(
-        event: AggregateUIEvent<E>,
-    ): boolean => {
-        const { inner, outer } = this.props.radii;
-        const canvasPos = this.getMousePositionInCanvas(event);
-        const isInOuter = this.isPointInCircle(
-            [canvasPos.x, canvasPos.y],
-            outer,
-            [this.centerX, this.centerY],
-        );
-        const isInInner = this.isPointInCircle(
-            [canvasPos.x, canvasPos.y],
-            inner,
-            [this.centerX, this.centerY],
-        );
-        return isInOuter && !isInInner;
-    };
-
-    handleMousemove = <E extends Element>(
-        event: AggregateUIEvent<E>,
-        passive = true,
-    ): void => {
-        const prevMoving = this.props.isMouseMove;
-        if (!this.seekRing) {
-            return;
-        }
-        if (this.isDragging) {
-            this.prevPercentage = this.mousePositionToPercentage(event);
-            this.props.onDrag(this.prevPercentage);
-            this.seekRing.style.cursor = this.isMouseEvent(event)
-                ? 'pointer'
-                : 'default';
-            this.props.setMouseMove(false);
-            if (!passive) {
-                event.preventDefault();
-            }
-        } else {
-            if (this.isEventInSeekRing(event) && !this.props.isMobile) {
-                this.seekRing.style.cursor = 'pointer';
-                this.props.setHoverSeekring(
-                    true,
-                    this.mousePositionToAngle(event),
-                );
-                if (!prevMoving) {
-                    this.props.setMouseMove(false);
-                } else {
-                    if (this.timerId) {
-                        clearTimeout(this.timerId);
-                    }
-                    this.timerId = setTimeout(
-                        () => this.props.setMouseMove(false),
-                        3000,
-                    );
-                }
-            } else {
-                this.seekRing.style.cursor = 'default';
-                this.props.setHoverSeekring(false);
-                if (this.timerId) {
-                    clearTimeout(this.timerId);
-                }
-                this.props.setMouseMove(true);
-                if (
-                    Object.values(this.buttonRefs).includes(
-                        event.currentTarget as HTMLDivElement,
-                    )
-                ) {
-                    event.stopPropagation();
-                } else {
-                    this.timerId = setTimeout(
-                        () => this.props.setMouseMove(false),
-                        3000,
-                    );
-                }
-            }
+    const initializeUI = (): void => {
+        if (seekRing.current) {
+            onResize();
+            visualizationCtx.current = seekRing.current.getContext('2d');
+            isDragging.current = false;
+            dispatch(isMouseMoveAction(false));
+            setState((prev) => ({ ...prev, isHoverPlaypause: false }));
         }
     };
 
-    handleActiveMousemove = <E extends Element>(
-        event: AggregateUIEvent<E>,
-    ): void => {
-        this.handleMousemove(event, false);
-    };
-
-    handleMouseup = <E extends Element>(
-        event: React.MouseEvent<E> | React.TouchEvent<E>,
-    ): void => {
-        const prevMoving = this.props.isMouseMove;
-        if (this.isDragging) {
-            this.props.seekAudio(this.prevPercentage);
-            this.isDragging = false;
-            if (!prevMoving) {
-                this.props.setMouseMove(false);
-            } else {
-                if (this.timerId) {
-                    clearTimeout(this.timerId);
-                }
-                this.timerId = setTimeout(
-                    () => this.props.setMouseMove(false),
-                    3000,
-                );
+    const getMousePositionInCanvas = React.useCallback(
+        <E extends Element>(
+            event: AggregateUIEvent<E>,
+        ): { x: number; y: number } => {
+            if (!seekRing.current) {
+                return {
+                    x: 0,
+                    y: 0,
+                };
             }
-            if (
-                this.isMouseEvent(event) &&
-                !this.isEventInSeekRing(event) &&
-                this.seekRing
-            ) {
-                this.seekRing.style.cursor = 'default';
-            }
-        }
-    };
+            const mouseX = isMouseEvent(event)
+                ? event.clientX
+                : event.touches[0].clientX;
+            const mouseY = isMouseEvent(event)
+                ? event.clientY
+                : event.touches[0].clientY;
+            const boundingRect = seekRing.current.getBoundingClientRect();
+            return {
+                x: mouseX - boundingRect.left,
+                y: mouseY - boundingRect.top,
+            };
+        },
+        [],
+    );
 
-    mousePositionToPercentage = <E extends Element>(
+    const isPointInCircle = React.useCallback(
+        (
+            point: [number, number],
+            radius: number,
+            center: [number, number],
+        ): boolean => {
+            const context = visualizationCtx.current;
+            if (!context) {
+                return false;
+            }
+            context.beginPath();
+            context.arc(center[0], center[1], radius, 0, 2 * Math.PI);
+            context.closePath();
+            return context.isPointInPath(point[0], point[1]);
+        },
+        [],
+    );
+
+    const isEventInSeekRing = React.useCallback(
+        <E extends Element>(event: AggregateUIEvent<E>): boolean => {
+            const canvasPos = getMousePositionInCanvas(event);
+            const isInOuter = isPointInCircle(
+                [canvasPos.x, canvasPos.y],
+                outer,
+                [dimensions.current.centerX, dimensions.current.centerY],
+            );
+            const isInInner = isPointInCircle(
+                [canvasPos.x, canvasPos.y],
+                inner,
+                [dimensions.current.centerX, dimensions.current.centerY],
+            );
+            return isInOuter && !isInInner;
+        },
+        [inner, outer],
+    );
+
+    const mousePositionToAngle = <E extends Element>(
         event: AggregateUIEvent<E>,
     ): number => {
-        return this.mousePositionToAngle(event) / (2 * Math.PI);
-    };
-
-    mousePositionToAngle = <E extends Element>(
-        event: AggregateUIEvent<E>,
-    ): number => {
-        const mousePos = this.getMousePositionInCanvas(event);
+        const mousePos = getMousePositionInCanvas(event);
         const polar = cartesianToPolar(
-            mousePos.x - this.centerX,
-            mousePos.y - this.centerY,
+            mousePos.x - dimensions.current.centerX,
+            mousePos.y - dimensions.current.centerY,
         );
         let angle = polar.angle + Math.PI / 2;
         if (angle < 0) {
@@ -387,48 +289,156 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
         return angle;
     };
 
-    handleMousedown = <E extends Element>(
+    const mousePositionToPercentage = <E extends Element>(
+        event: AggregateUIEvent<E>,
+    ): number => {
+        return mousePositionToAngle(event) / (2 * Math.PI);
+    };
+
+    const handleMousemove = React.useCallback(
+        <E extends Element>(
+            event: AggregateUIEvent<E>,
+            passive = true,
+        ): void => {
+            const prevMoving = isMouseMove;
+            if (!seekRing.current) {
+                return;
+            }
+            if (isDragging.current) {
+                prevPercentage.current = mousePositionToPercentage(event);
+                onDrag(prevPercentage.current);
+                seekRing.current.style.cursor = isMouseEvent(event)
+                    ? 'pointer'
+                    : 'default';
+                dispatch(isMouseMoveAction(false));
+                if (!passive) {
+                    event.preventDefault();
+                }
+            } else {
+                if (isEventInSeekRing(event) && !isHamburger) {
+                    seekRing.current.style.cursor = 'pointer';
+                    dispatch(
+                        hoverSeekringAction({
+                            isHoverSeekring: true,
+                            angle: mousePositionToAngle(event),
+                        }),
+                    );
+                    if (!prevMoving) {
+                        dispatch(isMouseMoveAction(false));
+                    } else {
+                        if (timerId.current) {
+                            clearTimeout(timerId.current);
+                        }
+                        timerId.current = setTimeout(
+                            () => dispatch(isMouseMoveAction(false)),
+                            3000,
+                        );
+                    }
+                } else {
+                    seekRing.current.style.cursor = 'default';
+                    dispatch(
+                        hoverSeekringAction({
+                            isHoverSeekring: false,
+                        }),
+                    );
+                    if (timerId.current) {
+                        clearTimeout(timerId.current);
+                    }
+                    dispatch(isMouseMoveAction(true));
+                    if (
+                        Object.values(buttonRefs.current).includes(
+                            event.currentTarget as HTMLDivElement,
+                        )
+                    ) {
+                        event.stopPropagation();
+                    } else {
+                        timerId.current = setTimeout(
+                            () => dispatch(isMouseMoveAction(false)),
+                            3000,
+                        );
+                    }
+                }
+            }
+        },
+        [isHamburger, isMouseMove],
+    );
+
+    const handleActiveMousemove = <E extends Element>(
+        event: AggregateUIEvent<E>,
+    ): void => {
+        handleMousemove(event, false);
+    };
+
+    const handleMouseup = React.useCallback(
+        <E extends Element>(
+            event: React.MouseEvent<E> | React.TouchEvent<E>,
+        ): void => {
+            const prevMoving = isMouseMove;
+            if (isDragging.current) {
+                seekAudio(prevPercentage.current);
+                isDragging.current = false;
+                if (!prevMoving) {
+                    dispatch(isMouseMoveAction(false));
+                } else {
+                    if (timerId.current) {
+                        clearTimeout(timerId.current);
+                    }
+                    timerId.current = setTimeout(
+                        () => dispatch(isMouseMoveAction(false)),
+                        3000,
+                    );
+                }
+                if (
+                    isMouseEvent(event) &&
+                    !isEventInSeekRing(event) &&
+                    seekRing.current
+                ) {
+                    seekRing.current.style.cursor = 'default';
+                }
+            }
+        },
+        [],
+    );
+
+    const handleMousedown = <E extends Element>(
         event: React.MouseEvent<E> | React.TouchEvent<E>,
     ): void => {
-        if (this.isEventInSeekRing(event)) {
-            this.isDragging = true;
-            this.prevPercentage = this.mousePositionToPercentage(event);
-            this.props.onStartDrag(this.prevPercentage);
+        if (isEventInSeekRing(event)) {
+            isDragging.current = true;
+            prevPercentage.current = mousePositionToPercentage(event);
+            onStartDrag(prevPercentage.current);
         }
     };
 
-    handleMouseover = (state: keyof AudioUIState) => (): void => {
-        this.setState(
-            {
-                [state]: true,
-            } as Pick<AudioUIState, keyof AudioUIState>,
-            () => {
-                if (this.props.isMobile) {
-                    setTimeout(() =>
-                        this.setState({ [state]: true } as Pick<
-                            AudioUIState,
-                            keyof AudioUIState
-                        >),
-                    );
-                }
-            },
+    const handleMouseover = (state: keyof AudioUIState) => (): void => {
+        setState(
+            (prev) =>
+                ({
+                    ...prev,
+                    [state]: true,
+                }) as Pick<AudioUIState, keyof AudioUIState>,
         );
     };
 
-    handleMouseout = (state: keyof AudioUIState) => (): void => {
-        this.setState({
-            [state]: false,
-        } as Pick<AudioUIState, keyof AudioUIState>);
+    const handleMouseout = (state: keyof AudioUIState) => (): void => {
+        setState(
+            (prev) =>
+                ({
+                    ...prev,
+                    [state]: false,
+                }) as Pick<AudioUIState, keyof AudioUIState>,
+        );
     };
 
-    componentDidUpdate(prevProps: AudioUIProps): void {
-        if (prevProps.isMobile !== this.props.isMobile) {
-            this.onResize();
-        }
-        if (prevProps.isPlaying !== this.props.isPlaying && !this.isDragging) {
-            if (this.props.isPlaying) {
+    React.useEffect(() => {
+        onResize();
+    }, [isHamburger]);
+
+    React.useEffect(() => {
+        if (!isDragging) {
+            if (isPlaying) {
                 gsap.fromTo(
-                    this.playIcon,
+                    playIcon.current,
                     { opacity: 1, scale: 1, duration: 0.25 },
                     {
                         opacity: 0,
@@ -440,7 +450,7 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
                 );
             } else {
                 gsap.fromTo(
-                    this.pauseIcon,
+                    pauseIcon.current,
                     { opacity: 1, scale: 1, duration: 0.25 },
                     {
                         opacity: 0,
@@ -452,163 +462,152 @@ class AudioUI extends React.Component<AudioUIProps, AudioUIState> {
                 );
             }
         }
-    }
+    }, [isPlaying, isDragging]);
 
-    componentDidMount(): void {
-        window.addEventListener('keydown', this.togglePlaying);
-        window.addEventListener('resize', this.onResize);
-        this.initializeUI();
-    }
+    React.useEffect(() => {
+        window.addEventListener('keydown', togglePlaying);
+        window.addEventListener('resize', onResize);
+        initializeUI();
+        return () => {
+            window.removeEventListener('keydown', togglePlaying);
+            window.removeEventListener('resize', onResize);
+        };
+    }, []);
 
-    componentWillUnmount(): void {
-        window.removeEventListener('keydown', this.togglePlaying);
-        window.removeEventListener('resize', this.onResize);
-        this.seekRing?.removeEventListener(
-            'touchmove',
-            this.handleActiveMousemove,
-        );
-    }
+    React.useLayoutEffect(() => {
+        if (seekRing.current) {
+            seekRing.current.addEventListener(
+                'touchmove',
+                handleActiveMousemove,
+                { passive: false },
+            );
+            return () => {
+                seekRing.current?.removeEventListener(
+                    'touchmove',
+                    handleActiveMousemove,
+                );
+            };
+        }
+    }, []);
 
-    render() {
-        const buttonLength = this.props.radii.base * Math.SQRT1_2;
-        const verticalOffset = this.props.isMobile
-            ? HEIGHT_ADJUST_MOBILE
-            : HEIGHT_ADJUST_DESKTOP;
-        return (
-            <UIContainer
-                onMouseMove={this.handleMousemove}
-                onMouseOver={this.handleMouseover('showUI')}
-                onMouseOut={this.handleMouseout('showUI')}
-                onMouseUp={this.handleMouseup}
+    const buttonLength = base * Math.SQRT1_2;
+    const verticalOffset = isHamburger
+        ? HEIGHT_ADJUST_MOBILE
+        : HEIGHT_ADJUST_DESKTOP;
+    return (
+        <UIContainer
+            onMouseMove={handleMousemove}
+            onMouseOver={handleMouseover('showUI')}
+            onMouseOut={handleMouseout('showUI')}
+            onMouseUp={handleMouseup}
+        >
+            {isLoading && (
+                <LoadingOverlay>
+                    <LoadingInstance
+                        width={200}
+                        height={200}
+                        css={loadingInstanceStyle}
+                    />
+                </LoadingOverlay>
+            )}
+            <Transition
+                in={isMouseMove}
+                onEnter={fadeOnEnter()}
+                onExit={fadeOnExit()}
+                timeout={250}
+                mountOnEnter={true}
+                unmountOnExit={true}
             >
-                <Transition
-                    in={this.props.isMouseMove}
-                    onEnter={fadeOnEnter()}
-                    onExit={fadeOnExit()}
-                    timeout={250}
-                >
-                    <ControlsContainer>
-                        {this.props.isLoading && (
-                            <LoadingOverlay>
-                                <LoadingInstance
-                                    width={200}
-                                    height={200}
-                                    css={loadingInstanceStyle}
-                                />
-                            </LoadingOverlay>
-                        )}
-                        <PauseIcon
-                            setRef={(el) => (this.pauseIcon = el)}
+                <ControlsContainer>
+                    <PauseIcon
+                        ref={pauseIcon}
+                        width={buttonLength}
+                        height={buttonLength}
+                        verticalOffset={verticalOffset}
+                    />
+                    <PlayIcon
+                        ref={playIcon}
+                        width={buttonLength}
+                        height={buttonLength}
+                        verticalOffset={verticalOffset}
+                    />
+                    <SkipButton
+                        ref={(el) => (buttonRefs.current.prev = el)}
+                        key="prev-button"
+                        onClick={() => playSubsequent('prev')}
+                        isHovering={state.isHoverPrev}
+                        onMouseMove={handleMousemove}
+                        onMouseOver={handleMouseover('isHoverPrev')}
+                        onMouseOut={handleMouseout('isHoverPrev')}
+                        onBlur={handleMouseout('isHoverPrev')}
+                        onFocus={handleMouseover('isHoverPrev')}
+                        onMouseUp={handleMouseup}
+                        width={(buttonLength * 4) / 5}
+                        height={(buttonLength * 8) / 15}
+                        verticalOffset={verticalOffset}
+                        css={flipped}
+                    />
+                    {isPlaying ? (
+                        <PauseButton
+                            ref={(el) => (buttonRefs.current.pause = el)}
+                            key="pause-button"
+                            onClick={togglePlay}
+                            isHovering={state.isHoverPlaypause}
+                            onMouseMove={handleMousemove}
+                            onMouseOver={handleMouseover('isHoverPlaypause')}
+                            onMouseOut={handleMouseout('isHoverPlaypause')}
+                            onBlur={handleMouseout('isHoverPlaypause')}
+                            onFocus={handleMouseover('isHoverPlaypause')}
+                            onMouseUp={handleMouseup}
                             width={buttonLength}
                             height={buttonLength}
                             verticalOffset={verticalOffset}
                         />
-                        <PlayIcon
-                            setRef={(el) => (this.playIcon = el)}
+                    ) : (
+                        <PlayButton
+                            ref={(el) => (buttonRefs.current.play = el)}
+                            key="play-button"
+                            onClick={togglePlay}
+                            isHovering={state.isHoverPlaypause}
+                            onMouseMove={handleMousemove}
+                            onMouseOver={handleMouseover('isHoverPlaypause')}
+                            onMouseOut={handleMouseout('isHoverPlaypause')}
+                            onBlur={handleMouseout('isHoverPlaypause')}
+                            onFocus={handleMouseover('isHoverPlaypause')}
+                            onMouseUp={handleMouseup}
                             width={buttonLength}
                             height={buttonLength}
                             verticalOffset={verticalOffset}
                         />
-                        <SkipButton
-                            ref={(el) => (this.buttonRefs.prev = el)}
-                            key="prev-button"
-                            onClick={this.props.prev}
-                            isHovering={this.state.isHoverPrev}
-                            onMouseMove={this.handleMousemove}
-                            onMouseOver={this.handleMouseover('isHoverPrev')}
-                            onMouseOut={this.handleMouseout('isHoverPrev')}
-                            onBlur={this.handleMouseout('isHoverPrev')}
-                            onFocus={this.handleMouseover('isHoverPrev')}
-                            onMouseUp={this.handleMouseup}
-                            width={(buttonLength * 4) / 5}
-                            height={(buttonLength * 8) / 15}
-                            verticalOffset={verticalOffset}
-                            css={flipped}
-                        />
-                        {this.props.isPlaying ? (
-                            <PauseButton
-                                ref={(el) => (this.buttonRefs.pause = el)}
-                                key="pause-button"
-                                onClick={this.togglePlaying}
-                                isHovering={this.state.isHoverPlaypause}
-                                onMouseMove={this.handleMousemove}
-                                onMouseOver={this.handleMouseover(
-                                    'isHoverPlaypause',
-                                )}
-                                onMouseOut={this.handleMouseout(
-                                    'isHoverPlaypause',
-                                )}
-                                onBlur={this.handleMouseout('isHoverPlaypause')}
-                                onFocus={this.handleMouseover(
-                                    'isHoverPlaypause',
-                                )}
-                                onMouseUp={this.handleMouseup}
-                                width={buttonLength}
-                                height={buttonLength}
-                                verticalOffset={verticalOffset}
-                            />
-                        ) : (
-                            <PlayButton
-                                ref={(el) => (this.buttonRefs.play = el)}
-                                key="play-button"
-                                onClick={this.togglePlaying}
-                                isHovering={this.state.isHoverPlaypause}
-                                onMouseMove={this.handleMousemove}
-                                onMouseOver={this.handleMouseover(
-                                    'isHoverPlaypause',
-                                )}
-                                onMouseOut={this.handleMouseout(
-                                    'isHoverPlaypause',
-                                )}
-                                onBlur={this.handleMouseout('isHoverPlaypause')}
-                                onFocus={this.handleMouseover(
-                                    'isHoverPlaypause',
-                                )}
-                                onMouseUp={this.handleMouseup}
-                                width={buttonLength}
-                                height={buttonLength}
-                                verticalOffset={verticalOffset}
-                            />
-                        )}
-                        <SkipButton
-                            ref={(el) => (this.buttonRefs.next = el)}
-                            key="next-button"
-                            onClick={this.props.next}
-                            isHovering={this.state.isHoverNext}
-                            onMouseMove={this.handleMousemove}
-                            onMouseOver={this.handleMouseover('isHoverNext')}
-                            onMouseOut={this.handleMouseout('isHoverNext')}
-                            onBlur={this.handleMouseout('isHoverNext')}
-                            onFocus={this.handleMouseover('isHoverNext')}
-                            onMouseUp={this.handleMouseup}
-                            width={(buttonLength * 4) / 5}
-                            height={(buttonLength * 8) / 15}
-                            verticalOffset={verticalOffset}
-                        />
-                    </ControlsContainer>
-                </Transition>
-                <StyledSeekRing
-                    ref={(canvas) => {
-                        this.seekRing = canvas;
-                        if (this.seekRing && !this.listenerAdded) {
-                            this.seekRing.addEventListener(
-                                'touchmove',
-                                this.handleActiveMousemove,
-                                { passive: false },
-                            );
-                            this.listenerAdded = true;
-                        }
-                    }}
-                    onMouseMove={this.handleMousemove}
-                    onMouseUp={this.handleMouseup}
-                    onMouseDown={this.handleMousedown}
-                    onTouchStart={this.handleMousedown}
-                    onTouchMove={this.handleMousemove}
-                    onTouchEnd={this.handleMouseup}
-                />
-            </UIContainer>
-        );
-    }
-}
+                    )}
+                    <SkipButton
+                        ref={(el) => (buttonRefs.current.next = el)}
+                        key="next-button"
+                        onClick={() => playSubsequent('next')}
+                        isHovering={state.isHoverNext}
+                        onMouseMove={handleMousemove}
+                        onMouseOver={handleMouseover('isHoverNext')}
+                        onMouseOut={handleMouseout('isHoverNext')}
+                        onBlur={handleMouseout('isHoverNext')}
+                        onFocus={handleMouseover('isHoverNext')}
+                        onMouseUp={handleMouseup}
+                        width={(buttonLength * 4) / 5}
+                        height={(buttonLength * 8) / 15}
+                        verticalOffset={verticalOffset}
+                    />
+                </ControlsContainer>
+            </Transition>
+            <StyledSeekRing
+                ref={seekRing}
+                onMouseMove={handleMousemove}
+                onMouseUp={handleMouseup}
+                onMouseDown={handleMousedown}
+                onTouchStart={handleMousedown}
+                onTouchMove={handleMousemove}
+                onTouchEnd={handleMouseup}
+            />
+        </UIContainer>
+    );
+};
 
 export default AudioUI;

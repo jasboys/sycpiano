@@ -9,7 +9,13 @@ import { LazyImage } from 'src/components/LazyImage';
 import { playVideo } from 'src/components/Media/Videos/reducers';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { cliburn1, generateSrcsetWidths, resizedImage } from 'src/imageUrls';
-import { minRes, screenLengths, screenWidths, webkitMinDPR } from 'src/screens';
+import {
+    minRes,
+    screenLengths,
+    screenPortrait,
+    screenWidths,
+    webkitMinDPR,
+} from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
 import { isImageElement } from 'src/utils';
 
@@ -24,10 +30,13 @@ const StyledPreviewOverlay = styled.div<{ bgImage?: string }>(
         top: 0,
         left: 0,
 
-        [toMedia([minRes, webkitMinDPR])]: {
+        [toMedia(screenPortrait)]: {
             height: '56.25vw',
-            top: navBarHeight.hiDpx,
+            top: navBarHeight.lowDpx,
             position: 'fixed',
+            [toMedia([minRes, webkitMinDPR])]: {
+                top: navBarHeight.hiDpx,
+            },
         },
 
         '&:hover': {

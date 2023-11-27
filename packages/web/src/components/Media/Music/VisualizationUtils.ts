@@ -128,7 +128,6 @@ export class WaveformLoader {
         this.header = undefined;
         this.waveform = undefined;
         this.angles = undefined;
-        this.resolver = undefined;
         this.loaded = undefined;
     };
 
@@ -145,6 +144,9 @@ export class WaveformLoader {
         this.headerStructure = waveformHeaderStructures[header.version];
 
         let offset = 0;
+        if (!this.headerStructure) {
+            return;
+        }
 
         // Get Header
         for (const [key, dataType] of this.headerStructure) {
@@ -171,7 +173,6 @@ export class WaveformLoader {
         this.header = header as WaveformHeader;
         const length = this.waveform.length / 2;
         this.angles = getCirclePoints(length, Math.PI / length);
-        console.log(length);
     };
 
     loadWaveformFile = (filename: string): void => {
@@ -181,7 +182,7 @@ export class WaveformLoader {
     };
 }
 
-export const waveformLoader = new WaveformLoader();
+// export const waveformLoader = new WaveformLoader();
 
 interface FIRHeader {
     numCrossings: number;

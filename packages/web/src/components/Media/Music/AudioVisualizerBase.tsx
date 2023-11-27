@@ -2,29 +2,17 @@ import styled from '@emotion/styled';
 import { gsap } from 'gsap';
 import * as React from 'react';
 
-import { toMedia } from 'src/mediaQuery.js';
-import { screenM, screenPortrait } from 'src/screens.js';
-import { navBarHeight, playlistContainerWidth } from 'src/styles/variables.js';
-import { ConstantQNode } from './ConstantQNode.js';
 import { CIRCLE_SAMPLES, constantQ, firLoader } from './VisualizationUtils.js';
 import { nextPow2 } from './utils.js';
+import { MusicPlayer } from './MusicPlayer.js';
 
 const VisualizerContainer = styled.div({
     position: 'absolute',
-    width: `calc(100% - ${playlistContainerWidth.desktop})`,
+    width: '100%',
     height: '100%',
     left: 0,
     top: 0,
     backgroundColor: 'black',
-
-    [toMedia(screenM)]: {
-        width: `calc(100% - ${playlistContainerWidth.tablet})`,
-    },
-    [toMedia(screenPortrait)]: {
-        width: '100%',
-        height: 360,
-        top: navBarHeight.hiDpx,
-    },
 });
 
 const VisualizerCanvas = styled.canvas({
@@ -43,15 +31,10 @@ export const HIGH_FREQ_SCALE = 10;
 export const MOBILE_MSPF = 1000 / 30;
 
 export interface AudioVisualizerProps {
-    readonly sampleRate: number;
-    readonly leftAnalyzer?: ConstantQNode;
-    readonly rightAnalyzer?: ConstantQNode;
-    readonly leftPhase?: AnalyserNode;
-    readonly rightPhase?: AnalyserNode;
+    readonly musicPlayer: MusicPlayer;
     readonly currentPosition: number;
     readonly duration: number;
     readonly isPlaying: boolean;
-    readonly prevTimestamp: number;
     readonly volume: number;
     readonly isMobile: boolean;
     readonly isHoverSeekring: boolean;
@@ -102,6 +85,7 @@ export abstract class AudioVisualizerBase<
     STEP_SIZE!: number;
     lastIsHover = false;
     lastHover?: number = 0;
+    lastPositionUpdateTimestamp: number = 0;
     lastCurrentPosition = 0;
     idleStart = 0;
     requestId = 0;
@@ -190,13 +174,18 @@ export abstract class AudioVisualizerBase<
         // don't render anything if analyzers are null, i.e. audio not set up yet
         // also limit 30fps on mobile =).
         const timestamp = performance.now();
+        const { left: leftAnalyzer, right: rightAnalyzer } =
+            this.props.musicPlayer.analyzers;
+
+        const { left: leftPhase, right: rightPhase } =
+            this.props.musicPlayer.phasalyzers;
         if (
             !this.vizBins ||
             !this.renderingContext ||
-            !this.props.leftAnalyzer ||
-            !this.props.rightAnalyzer ||
-            !this.props.leftPhase ||
-            !this.props.rightPhase ||
+            !leftAnalyzer ||
+            !rightAnalyzer ||
+            !leftPhase ||
+            !rightPhase ||
             (this.props.isMobile &&
                 this.lastCallback &&
                 timestamp - this.lastCallback < MOBILE_MSPF)
@@ -236,11 +225,11 @@ export abstract class AudioVisualizerBase<
 
             // FFT -> CQ
             const { lowFreq: leftLow, highFreq: leftHigh } =
-                this.props.leftAnalyzer.getConstantQ(this.leftCQResult);
+                leftAnalyzer.getConstantQ(this.leftCQResult);
             const { lowFreq: rightLow, highFreq: rightHigh } =
-                this.props.rightAnalyzer.getConstantQ(this.rightCQResult);
-            this.props.leftPhase?.getFloatTimeDomainData(this.leftData);
-            this.props.rightPhase?.getFloatTimeDomainData(this.rightData);
+                rightAnalyzer.getConstantQ(this.rightCQResult);
+            leftPhase?.getFloatTimeDomainData(this.leftData);
+            rightPhase?.getFloatTimeDomainData(this.rightData);
 
             // concat the results, store in vizBins
             this.vizBins.set(this.leftCQResult);
@@ -293,21 +282,29 @@ export abstract class AudioVisualizerBase<
         this.isRendering = false;
     }
 
-    shouldComponentUpdate(nextProps: AudioVisualizerProps): boolean {
+    componentDidUpdate(prevProps: AudioVisualizerProps): void {
         if (
-            nextProps.isMobile !== this.props.isMobile ||
-            nextProps.currentPosition !== this.props.currentPosition ||
-            (nextProps.isPlaying && !this.props.isPlaying) ||
-            nextProps.isHoverSeekring !== this.props.isHoverSeekring ||
-            nextProps.hoverAngle !== this.props.hoverAngle
+            prevProps.isMobile !== this.props.isMobile ||
+            prevProps.currentPosition !== this.props.currentPosition ||
+            prevProps.isPlaying !== this.props.isPlaying ||
+            prevProps.isHoverSeekring !== this.props.isHoverSeekring ||
+            prevProps.hoverAngle !== this.props.hoverAngle
         ) {
+            if (
+                prevProps.currentPosition !== this.props.currentPosition ||
+                this.props.isPlaying
+            ) {
+                this.lastPositionUpdateTimestamp = performance.now();
+            }
+            if (prevProps.isMobile !== this.props.isMobile) {
+                this.onResize();
+            }
             this.idleStart = performance.now();
             if (!this.isRendering) {
                 gsap.ticker.add(this.onAnalyze);
                 this.isRendering = true;
             }
         }
-        return false;
     }
 
     render() {

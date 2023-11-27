@@ -20,6 +20,7 @@ export interface MusicFileItem {
     readonly contributors?: string;
     readonly year?: number;
     readonly hash: string;
+    readonly idx?: number;
 }
 
 export const musicCategories = [
@@ -61,8 +62,25 @@ export const isMusicItem = (item: MusicListItem): item is MusicItem => {
     );
 };
 
-export interface AudioPlaylistStateShape {
+export interface MusicStateShape {
     readonly isFetching: boolean;
     readonly items: MusicListItem[];
     readonly flatItems: MusicFileItem[];
+    readonly isPlaying: boolean;
+    readonly volume: number;
+    readonly playbackPosition: number;
+    readonly lastUpdateTimestamp: number;
+    readonly duration: number;
+    readonly currentTrack?: MusicFileItem;
+    readonly isLoading: boolean;
+    readonly isShuffle: boolean;
+
+    readonly isHoverSeekring: boolean;
+    readonly isMouseMove: boolean;
+    readonly angle?: number;
+    readonly radii: {
+        readonly inner: number;
+        readonly outer: number;
+        readonly base: number;
+    };
 }

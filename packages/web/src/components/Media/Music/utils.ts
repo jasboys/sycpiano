@@ -1,4 +1,5 @@
 import path from 'path-browserify';
+import { MusicFileItem } from './types.js';
 
 type PolarToCartesianShape = (
     radius: number,
@@ -70,6 +71,12 @@ export const normalizeString = (str: string): string => {
         .replace(/\s+/g, '-')
         .replace(/_$/, '');
 };
+
+export const getSrc = (music: MusicFileItem): string =>
+    `${MUSIC_PATH}/${music.audioFile}`;
+
+export const getWaveformSrc = (music: MusicFileItem): string =>
+    `${MUSIC_PATH}/waveforms/${music.waveformFile}`;
 
 export const getPermaLink = (
     base: string,

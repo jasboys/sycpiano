@@ -13,16 +13,19 @@ import {
 import {
     formatTime,
     getRelativePermaLink,
+    getSrc,
 } from 'src/components/Media/Music/utils';
+import { useAppDispatch, useAppSelector } from 'src/hooks.js';
 import { lightBlue, playlistBackground } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts.js';
+import { updateAction } from './reducers.js';
 
 interface MusicPlaylistItemProps {
-    readonly play: () => void;
     readonly item: MusicListItem;
-    readonly currentItemId: number | string;
-    readonly onClick: (item: MusicFileItem) => void;
-    readonly userInteracted: boolean;
+    readonly onClick: (
+        track: MusicFileItem,
+        fade?: boolean
+    ) => void;
 }
 
 const baseItemStyle = css(latoFont(300), {
@@ -121,12 +124,12 @@ interface MusicItemProps extends MusicPlaylistItemProps {
 }
 
 const MusicItem: React.FC<MusicItemProps> = ({
-    play,
     item,
-    currentItemId,
     onClick,
-    userInteracted,
 }) => {
+    const currentTrack = useAppSelector(({ musicPlayer }) => musicPlayer.currentTrack);
+    const dispatch = useAppDispatch();
+
     const musicFile = item.musicFiles[0];
     return (
         <StyledMusicItem id={musicFile.id}>
@@ -137,18 +140,16 @@ const MusicItem: React.FC<MusicItemProps> = ({
                     musicFile.name,
                 )}
                 onClick={async () => {
-                    if (!userInteracted) {
-                        play();
-                    }
+                    // dispatch(updateAction({ playing: true }));
                     try {
-                        await onClick(musicFile);
-                        play();
+                        onClick(musicFile);
+                        dispatch(updateAction({ playing: true }));
                     } catch (e) {
                         // already loading track;
                     }
                 }}
             >
-                <Highlight active={currentItemId === musicFile.id}>
+                <Highlight active={currentTrack?.id === musicFile.id}>
                     <StyledInfo>
                         <TextLeft>
                             {getComposerTitleYear(
@@ -170,14 +171,14 @@ const MusicItem: React.FC<MusicItemProps> = ({
 const MusicCollectionItem: React.FC<
     MusicItemProps & { index: number; musicFile: MusicFileItem }
 > = ({
-    play,
     item,
-    currentItemId,
     onClick,
-    userInteracted,
     index,
     musicFile,
 }) => {
+    const currentTrack = useAppSelector(({ musicPlayer }) => musicPlayer.currentTrack);
+    const dispatch = useAppDispatch();
+
     return (
         <StyledCollectionItem key={index} id={musicFile.id}>
             <Link
@@ -187,18 +188,15 @@ const MusicCollectionItem: React.FC<
                     musicFile.name,
                 )}
                 onClick={async () => {
-                    if (!userInteracted) {
-                        play();
-                    }
                     try {
-                        await onClick(musicFile);
-                        play();
+                        onClick(musicFile);
+                        dispatch(updateAction({ playing: true }));
                     } catch (e) {
                         // already loading track;
                     }
                 }}
             >
-                <Highlight active={currentItemId === musicFile.id}>
+                <Highlight active={currentTrack?.id === musicFile.id}>
                     <StyledInfo>
                         <TextLeft>{musicFile.name}</TextLeft>
                         <TextRight>

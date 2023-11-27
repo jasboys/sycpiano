@@ -154,8 +154,12 @@ const TextBottom = styled.span(h4style, latoFont(400), {
     paddingBottom: 5,
     fontSize: '0.8rem',
     textAlign: 'right',
-    [toMedia([screenXS, screenPortrait])]: {
+    [toMedia(screenPortrait)]: {
         fontSize: '0.65rem',
+        textAlign: 'left',
+        [toMedia(screenXS)]: {
+            textAlign: 'right',
+        }
     },
 });
 

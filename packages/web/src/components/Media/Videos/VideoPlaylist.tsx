@@ -20,9 +20,9 @@ const StyledPlaylistContainer = styled.div`
     right: 0;
     position: absolute;
 
-    ${toMedia([screenXS, screenPortrait])} {
+    ${toMedia(screenPortrait)} {
         width: 100%;
-        height: calc(100% - 56.25vw);
+        height: 100%;
         top: 56.25vw;
         position: relative;
         right: unset;
@@ -48,6 +48,7 @@ const videoULStyle = css({
 
 const VideoPlaylist: React.FC<Record<never, unknown>> = () => {
     const isHamburger = useAppSelector(mqSelectors.isHamburger);
+    const screenLandscape = useAppSelector(mqSelectors.screenLandscape)
     const isShow = useAppSelector(({ videoPlaylist }) => videoPlaylist.isShow);
     const videos = useAppSelector(({ videoPlaylist }) => videoPlaylist.items);
     const videoId = useAppSelector(({ videoPlayer }) => videoPlayer.videoId);
@@ -73,7 +74,7 @@ const VideoPlaylist: React.FC<Record<never, unknown>> = () => {
                     toggler: videoULStyle,
                 }}
                 isShow={isShow}
-                hasToggler={!isHamburger}
+                hasToggler={screenLandscape}
                 togglePlaylist={toggleDispatch}
                 shouldAppear={false}
             >

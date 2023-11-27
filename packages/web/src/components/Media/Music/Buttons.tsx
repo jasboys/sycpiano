@@ -9,11 +9,10 @@ import {
 } from 'src/components/Media/Music/IconSVGs';
 
 interface IconProps {
-    setRef: (div: HTMLDivElement | null) => void;
+    // setRef: (div: HTMLDivElement | null) => void;
     width: number | string;
     height: number | string;
     verticalOffset: number;
-    /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     Component?: React.ComponentType<React.SVGProps<SVGSVGElement>>;
     className?: string;
 }
@@ -52,30 +51,33 @@ const getInnerSolidStyle = css({
     zIndex: 1,
 });
 
-const Icon: React.FC<IconProps & React.SVGProps<SVGSVGElement>> = ({
-    setRef,
+const Icon = React.forwardRef<HTMLDivElement, IconProps & React.SVGProps<SVGSVGElement>>(({
     verticalOffset,
     Component,
     ...props
-}) => {
+}, ref) => {
     return Component === undefined ? null : (
-        <StyledIcon ref={(div) => setRef(div)} verticalOffset={verticalOffset}>
+        <StyledIcon ref={ref} verticalOffset={verticalOffset}>
             <Component css={getInnerSolidStyle} {...props} />
             <Component css={getInnerBlurStyle} {...props} />
         </StyledIcon>
     );
-};
-export const PlayIcon: React.FC<IconProps> = React.memo(({ ...props }) => (
-    <Icon Component={PlaySVG} {...props} />
-));
+});
+export const PlayIcon = React.memo(
+    React.forwardRef<HTMLDivElement, IconProps>(({ ...props }, ref) => (
+        <Icon ref={ref} Component={PlaySVG} {...props} />
+    )),
+);
 
-export const PauseIcon: React.FC<IconProps> = React.memo(({ ...props }) => (
-    <Icon Component={PauseSVG} {...props} />
-));
+export const PauseIcon = React.memo(
+    React.forwardRef<HTMLDivElement, IconProps>(({ ...props }, ref) => (
+    <Icon ref={ref} Component={PauseSVG} {...props} />
+)));
 
-export const SkipIcon: React.FC<IconProps> = React.memo(({ ...props }) => (
-    <Icon Component={SkipSVG} {...props} />
-));
+export const SkipIcon = React.memo(
+    React.forwardRef<HTMLDivElement, IconProps>(({ ...props }, ref) => (
+    <Icon ref={ref} Component={SkipSVG} {...props} />
+)));
 
 interface ButtonProps {
     readonly isHovering: boolean;

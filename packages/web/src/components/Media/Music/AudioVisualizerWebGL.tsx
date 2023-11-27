@@ -10,7 +10,6 @@ import {
     CIRCLE_SAMPLES,
     constantQ,
     firLoader,
-    waveformLoader,
 } from 'src/components/Media/Music/VisualizationUtils';
 import {
     cqFrag,
@@ -266,8 +265,8 @@ class AudioVisualizer extends AudioVisualizerBase<WebGLRenderingContext> {
     };
 
     drawWaveForm = (centerAxis: number, color: Float32Array): void => {
-        const waveform = waveformLoader.waveform;
-        const angles = waveformLoader.angles;
+        const waveform = this.props.musicPlayer.getCurrentWaveform().waveform;
+        const angles = this.props.musicPlayer.getCurrentWaveform().angles;
         if (!waveform || waveform.length === 0 || !this.renderingContext) {
             return;
         }
@@ -393,13 +392,13 @@ class AudioVisualizer extends AudioVisualizerBase<WebGLRenderingContext> {
         ) {
             playbackHead =
                 this.props.currentPosition +
-                (timestamp - this.props.prevTimestamp) / 1000;
+                (timestamp - this.lastPositionUpdateTimestamp) / 1000;
         } else {
             this.lastPlayheadPosition = this.props.currentPosition;
         }
         const angle =
             this.props.currentPosition && this.props.duration
-                ? (TWO_PI * playbackHead) / this.props.duration
+                ? Math.min(TWO_PI, TWO_PI * playbackHead / this.props.duration)
                 : 0;
         this.drawPlaybackHead(
             angle,

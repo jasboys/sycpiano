@@ -6,28 +6,25 @@ import { toMedia } from 'src/mediaQuery';
 import MusicPlaylistItem from 'src/components/Media/Music/MusicPlaylistItem';
 import ShuffleButton from 'src/components/Media/Music/ShuffleButton';
 import SpotifyButton from 'src/components/Media/Music/SpotifyButton';
-import { MusicFileItem } from 'src/components/Media/Music/types';
 import Playlist from 'src/components/Media/Playlist';
-import { useAppSelector } from 'src/hooks';
-import { screenPortrait, screenXS } from 'src/screens';
+import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { hiDpx, screenPortrait } from 'src/screens';
 import { playlistBackground } from 'src/styles/colors';
+import { mqSelectors } from 'src/components/App/reducers.js';
+import { toggleShuffleAction } from './reducers.js';
+import { MusicFileItem } from './types.js';
+import { createSelector } from 'reselect';
+import { GlobalStateShape } from 'src/store.js';
 
 interface MusicPlaylistOwnProps {
-    readonly currentTrackId: string;
-    readonly onClick: (item: MusicFileItem) => void;
-    readonly play: () => void;
-    readonly userInteracted: boolean;
-    readonly toggleShuffle: () => void;
-    readonly isShuffle: boolean;
-    readonly isMobile: boolean;
+    readonly onClick: (item: MusicFileItem, fade?: boolean) => void;
 }
 
 type MusicPlaylistProps = MusicPlaylistOwnProps;
 
 const musicPlaylistStyle = css({
     position: 'initial',
-    [toMedia([screenXS, screenPortrait])]: {
-        top: 360,
+    [toMedia(screenPortrait)]: {
         position: 'relative',
         overflow: 'visible',
     },
@@ -36,7 +33,7 @@ const musicPlaylistStyle = css({
 const musicULStyle = css({
     backgroundColor: playlistBackground,
     paddingBottom: 80,
-    [toMedia([screenXS, screenPortrait])]: {
+    [toMedia(screenPortrait)]: {
         paddingBottom: 60,
     },
 });
@@ -46,34 +43,45 @@ const PlaylistContainer = styled.div({
     height: '100%',
     right: 0,
     position: 'absolute',
-    [toMedia([screenXS, screenPortrait])]: {
+    top: 0,
+    [toMedia(screenPortrait)]: {
         width: '100%',
         height: 'auto',
-        position: 'unset',
+        position: 'relative',
         right: 'unset',
+        // top: navBarHeight.lowDpx,
+        [toMedia(hiDpx)]: {
+            // top: navBarHeight.hiDpx,
+        },
     },
 });
 
-const MusicPlaylist: React.FC<MusicPlaylistProps> = ({
-    onClick,
-    currentTrackId,
-    play,
-    userInteracted,
-    isShuffle,
-    toggleShuffle,
-    isMobile,
-}) => {
+const selector = createSelector(
+    (state: GlobalStateShape) => state.musicPlayer,
+    ({ currentTrack, isShuffle, items }) => ({
+        currentTrack,
+        isShuffle,
+        items,
+    }),
+);
+
+const MusicPlaylist: React.FC<MusicPlaylistProps> = ({ onClick }) => {
     const didRun = React.useRef<boolean>(false);
-    const items = useAppSelector(({ audioPlaylist }) => audioPlaylist.items);
+    const { currentTrack, isShuffle, items } = useAppSelector(selector);
+    const isHamburger = useAppSelector(mqSelectors.isHamburger);
+    const dispatch = useAppDispatch();
+
+    const currentTrackId = currentTrack?.id;
 
     React.useEffect(() => {
         if (didRun.current === false) {
             if (items.length && currentTrackId) {
-                !isMobile && document.getElementById(currentTrackId)?.scrollIntoView();
+                !isHamburger &&
+                    document.getElementById(currentTrackId)?.scrollIntoView();
                 didRun.current = true;
             }
         }
-    }, [items, currentTrackId, isMobile]);
+    }, [items, currentTrackId, isHamburger]);
 
     return (
         <PlaylistContainer>
@@ -88,16 +96,16 @@ const MusicPlaylist: React.FC<MusicPlaylistProps> = ({
                         key={item.id}
                         item={item}
                         onClick={onClick}
-                        currentItemId={currentTrackId}
-                        play={play}
-                        userInteracted={userInteracted}
                     />
                 ))}
             </Playlist>
             <SpotifyButton />
-            <ShuffleButton onClick={toggleShuffle} on={isShuffle} />
+            <ShuffleButton
+                onClick={() => dispatch(toggleShuffleAction())}
+                on={isShuffle}
+            />
         </PlaylistContainer>
     );
 };
 
-export default MusicPlaylist;
+export default React.memo(MusicPlaylist);

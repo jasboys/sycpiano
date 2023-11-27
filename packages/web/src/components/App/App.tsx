@@ -346,7 +346,7 @@ const App: React.FC<Record<never, unknown>> = () => {
                 meta={[
                     {
                         name: 'description',
-                        content: description,
+                        content: description as string,
                     },
                     {
                         name: 'copyright',

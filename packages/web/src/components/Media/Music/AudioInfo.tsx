@@ -4,24 +4,23 @@ import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
 
 import { toMedia } from 'src/mediaQuery';
-import { MusicFileItem } from 'src/components/Media/Music/types';
 import { formatTime } from 'src/components/Media/Music/utils';
-import { minRes, screenM, screenPortrait, webkitMinDPR } from 'src/screens';
+import { minRes, screenPortrait, webkitMinDPR } from 'src/screens';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
-import { navBarHeight, playlistContainerWidth } from 'src/styles/variables';
 import { metaDescriptions, titleStringBase } from 'src/utils';
+import { useAppSelector } from 'src/hooks.js';
+import { mqSelectors } from 'src/components/App/reducers.js';
+import { createSelector } from 'reselect';
+import { GlobalStateShape } from 'src/store.js';
+import { staticImage } from 'src/imageUrls.js';
 
 interface AudioInfoProps {
-    currentTrack?: MusicFileItem;
-    duration: number;
-    currentPosition: number;
-    isMobile: boolean;
     matchParams: boolean;
 }
 
 const AudioInfoContainer = styled.div(noHighlight, latoFont(200), {
-    width: `calc(100% - ${playlistContainerWidth.desktop})`,
+    width: '100%',
     height: '100%',
     zIndex: 10,
     position: 'absolute',
@@ -36,14 +35,8 @@ const AudioInfoContainer = styled.div(noHighlight, latoFont(200), {
     color: 'white',
     paddingBlock: '3rem',
 
-    [toMedia(screenM)]: {
-        width: `calc(100% - ${playlistContainerWidth.tablet})`,
-    },
-
     [toMedia(screenPortrait)]: {
-        width: '100%',
-        height: 360,
-        top: navBarHeight.hiDpx,
+        top: 0,
         paddingBottom: '1rem',
     },
 });
@@ -75,12 +68,6 @@ const Marquee = styled.div({
     },
 });
 
-// const Movement = styled.div({
-//     padding: '0 0.625rem',
-//     fontSize: '2.0rem',
-//     lineHeight: '3.2rem',
-// });
-
 const ContributingOrDuration = styled.div({
     padding: '0 0.625rem',
     fontSize: '1.5rem',
@@ -92,135 +79,167 @@ const ContributingOrDuration = styled.div({
     },
 });
 
-class AudioInfo extends React.PureComponent<AudioInfoProps> {
-    private tween: gsap.core.Tween | undefined;
-    private titleDiv: React.RefObject<HTMLDivElement> = React.createRef();
-    private marquee: React.RefObject<HTMLDivElement> = React.createRef();
-    private secondSpan: React.RefObject<HTMLSpanElement> = React.createRef();
+const selector = createSelector(
+    (state: GlobalStateShape) => state.musicPlayer,
+    ({ playbackPosition, currentTrack, duration, isPlaying }) => ({
+        playbackPosition,
+        playbackTimeString: formatTime(playbackPosition),
+        currentTrack,
+        duration,
+        isPlaying,
+    }),
+);
 
-    recalculateMarquee = () => {
-        this.tween?.kill();
-        if (
-            this.marquee.current &&
-            this.titleDiv.current &&
-            this.secondSpan.current
-        ) {
-            this.marquee.current.removeAttribute('style');
-            this.titleDiv.current.removeAttribute('style');
-            const divWidth = this.titleDiv.current.offsetWidth;
-            const spanWidth = (
-                this.marquee.current.children[0] as HTMLDivElement
-            ).offsetWidth;
-            if (divWidth > spanWidth) {
-                this.marquee.current.style.left = `${
-                    (divWidth - spanWidth) / 2
-                }px`;
-                this.titleDiv.current.style.padding = '0';
-                this.secondSpan.current.style.visibility = 'hidden';
-            } else {
-                const dur = this.marquee.current.offsetWidth / 100;
-                this.tween = gsap.fromTo(
-                    this.marquee.current,
-                    { x: '0%' },
-                    {
-                        duration: dur,
-                        x: '-50%',
-                        ease: 'linear',
-                        clearProps: 'transform',
-                        delay: 3,
-                        onComplete: () => {
-                            this.tween?.restart(true);
-                        },
-                    },
-                );
-                this.secondSpan.current.style.visibility = 'unset';
-            }
-        }
-    };
+const AudioInfo: React.FC<AudioInfoProps> = ({ matchParams }) => {
+    const timeline = React.useRef<GSAPTimeline>();
+    const titleDiv = React.useRef<HTMLDivElement>(null);
+    const marquee = React.useRef<HTMLDivElement>(null);
+    const secondSpan = React.useRef<HTMLSpanElement>(null);
 
-    componentDidUpdate(prevProps: AudioInfoProps) {
-        if (
-            this.props.currentTrack &&
-            (!prevProps.currentTrack ||
-                prevProps.currentTrack.id !== this.props.currentTrack.id)
-        ) {
-            this.recalculateMarquee();
-        }
-    }
+    const [forceUpdate, setForceUpdate] = React.useState<number>(0);
+    const isHamburger = useAppSelector(mqSelectors.isHamburger);
 
-    componentDidMount() {
-        window.addEventListener('resize', this.recalculateMarquee);
-    }
+    const {
+        isPlaying,
+        playbackPosition,
+        playbackTimeString,
+        currentTrack,
+        duration,
+    } = useAppSelector(selector);
+    const currentTrackId = currentTrack?.id;
 
-    componentWillUnmount() {
-        window.removeEventListener('resize', this.recalculateMarquee);
-    }
-
-    render() {
-        const { isMobile, currentPosition, duration } = this.props;
-
-        const {
-            piece = '',
-            composer = '',
-            contributors = '',
-            year = null,
-        } = (this.props.currentTrack && this.props.currentTrack) || {};
-
-        const { name: movement = '' } = this.props.currentTrack || {};
-
-        const contribArray =
-            contributors === '' || contributors === null
-                ? undefined
-                : contributors.split(', ');
-        const composerTitle = `${composer} ${piece}${year ? ` (${year})` : ''}`;
-        const composerTitleWithMovement =
-            composerTitle + (movement ? ` - ${movement}` : '');
-        const metaTitle = ` | Music | ${composerTitleWithMovement}`;
-        const marqueeText = composerTitleWithMovement
-        return (
-            <>
-                {this.props.matchParams && (
-                    <Helmet
-                        title={`${titleStringBase}${metaTitle}`}
-                        meta={[
+    React.useLayoutEffect(() => {
+        const ctx = gsap.context(() => {
+            timeline.current?.kill();
+            if (marquee.current && titleDiv.current && secondSpan.current) {
+                marquee.current.removeAttribute('style');
+                titleDiv.current.removeAttribute('style');
+                const divWidth = titleDiv.current.offsetWidth;
+                const spanWidth = (
+                    marquee.current.children[0] as HTMLDivElement
+                ).offsetWidth;
+                if (divWidth > spanWidth) {
+                    marquee.current.style.left = `${
+                        (divWidth - spanWidth) / 2
+                    }px`;
+                    titleDiv.current.style.padding = '0';
+                    secondSpan.current.style.visibility = 'hidden';
+                } else {
+                    const dur = marquee.current.offsetWidth / 100;
+                    timeline.current = gsap
+                        .timeline({ repeat: -1 })
+                        .fromTo(
+                            marquee.current,
+                            { x: '0%' },
                             {
-                                name: 'description',
-                                content: metaDescriptions.getMusic(
-                                    composerTitleWithMovement,
-                                    contributors,
-                                ),
+                                duration: dur,
+                                x: '-50%',
+                                ease: 'linear',
+                                clearProps: 'transform',
+                                delay: 3,
                             },
-                        ]}
-                    />
-                )}
-                <AudioInfoContainer>
-                    <ComposerTitle ref={this.titleDiv}>
-                        <Marquee ref={this.marquee}>
-                            <span>{marqueeText}</span>
-                            <span ref={this.secondSpan}>{marqueeText}</span>
-                        </Marquee>
-                    </ComposerTitle>
-                    {contribArray &&
-                        (isMobile ? (
-                            contribArray.map((contributor) => (
-                                <ContributingOrDuration key={contributor}>
-                                    {contributor}
-                                </ContributingOrDuration>
-                            ))
-                        ) : (
-                            <ContributingOrDuration>
-                                {contributors}
-                            </ContributingOrDuration>
-                        ))}
-                    <ContributingOrDuration>
-                        {`${formatTime(currentPosition)} / ${formatTime(
-                            duration,
-                        )}`}
-                    </ContributingOrDuration>
-                </AudioInfoContainer>
-            </>
-        );
-    }
-}
+                        )
+                        .play();
+                    secondSpan.current.style.visibility = 'unset';
+                }
+            }
+        });
+        return () => ctx.revert();
+    }, [currentTrackId, forceUpdate]);
 
-export default AudioInfo;
+    React.useEffect(() => {
+        function windowListenerFn() {
+            setForceUpdate(Math.random());
+        }
+        window.addEventListener('resize', windowListenerFn);
+        return () => {
+            window.removeEventListener('resize', windowListenerFn);
+        };
+    }, []);
+
+    const {
+        piece = '',
+        composer = '',
+        contributors = '',
+        year = null,
+        name: movement = '',
+    } = currentTrack || {};
+
+    const contribArray =
+        contributors === '' || contributors === null
+            ? undefined
+            : contributors.split(', ');
+    const composerTitle = `${composer} ${piece}${year ? ` (${year})` : ''}`;
+    const composerTitleWithMovement =
+        composerTitle + (movement ? ` - ${movement}` : '');
+    const metaTitle = ` | Music | ${composerTitleWithMovement}`;
+    const marqueeText = composerTitleWithMovement;
+
+    React.useEffect(() => {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: composerTitleWithMovement,
+            artist: 'Sean Chen',
+            album: 'seanchenpiano.com',
+            artwork: [
+                { src: `${staticImage('/syc_withpiano_square_512.jpg')}` },
+            ],
+        });
+    }, [composerTitleWithMovement, duration, isPlaying, playbackPosition]);
+
+    React.useEffect(() => {
+        console.log('set', isPlaying);
+        navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+    }, [isPlaying]);
+
+    React.useEffect(() => {
+        navigator.mediaSession.setPositionState({
+            duration: duration === -1 ? 0 : duration,
+            playbackRate: 1,
+            position: playbackPosition,
+        });
+    }, [isPlaying, playbackPosition, duration]);
+
+    return (
+        <>
+            {matchParams && (
+                <Helmet
+                    title={`${titleStringBase}${metaTitle}`}
+                    meta={[
+                        {
+                            name: 'description',
+                            content: metaDescriptions.getMusic(
+                                composerTitleWithMovement,
+                                contributors,
+                            ),
+                        },
+                    ]}
+                />
+            )}
+            <AudioInfoContainer>
+                <ComposerTitle ref={titleDiv}>
+                    <Marquee ref={marquee}>
+                        <span>{marqueeText}</span>
+                        <span ref={secondSpan}>{marqueeText}</span>
+                    </Marquee>
+                </ComposerTitle>
+                {contribArray &&
+                    (isHamburger ? (
+                        contribArray.map((contributor) => (
+                            <ContributingOrDuration key={contributor}>
+                                {contributor}
+                            </ContributingOrDuration>
+                        ))
+                    ) : (
+                        <ContributingOrDuration>
+                            {contributors}
+                        </ContributingOrDuration>
+                    ))}
+                <ContributingOrDuration>
+                    {`${playbackTimeString} / ${formatTime(duration)}`}
+                </ContributingOrDuration>
+            </AudioInfoContainer>
+        </>
+    );
+};
+
+export default React.memo(AudioInfo);

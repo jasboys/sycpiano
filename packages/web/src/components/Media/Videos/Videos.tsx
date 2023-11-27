@@ -17,7 +17,7 @@ import {
 import VideoPlaylist from 'src/components/Media/Videos/VideoPlaylist';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { toMedia } from 'src/mediaQuery';
-import { minRes, screenXS, webkitMinDPR } from 'src/screens';
+import { minRes, screenPortrait, screenXS, webkitMinDPR } from 'src/screens';
 import youTube from 'src/services/YouTube';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
@@ -29,20 +29,26 @@ const StyledVideos = styled.div(pushed, {
     width: '100%',
     backgroundColor: 'black',
     position: 'relative',
-    [toMedia([minRes, webkitMinDPR])]: {
+    [toMedia(screenPortrait)]: {
         marginTop: 0,
-        paddingTop: navBarHeight.hiDpx,
+        paddingTop: navBarHeight.lowDpx,
         height: '100%',
+        [toMedia([webkitMinDPR, minRes])]: {
+            paddingTop: navBarHeight.hiDpx,
+        },
     },
     iframe: {
         width: '100%',
         height: '100%',
-        [toMedia([minRes, webkitMinDPR])]: {
+        [toMedia(screenPortrait)]: {
             position: 'fixed',
-            top: navBarHeight.hiDpx,
+            top: navBarHeight.lowDpx,
             height: '56.25vw',
             zIndex: 5,
             boxShadow: '0 0 7px 2px rgba(0 0 0 / 0.5)',
+            [toMedia([webkitMinDPR, minRes])]: {
+                top: navBarHeight.hiDpx,
+            },
         },
     },
 });
