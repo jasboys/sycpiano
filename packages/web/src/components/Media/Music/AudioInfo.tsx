@@ -184,10 +184,9 @@ const AudioInfo: React.FC<AudioInfoProps> = ({ matchParams }) => {
                 { src: `${staticImage('/syc_withpiano_square_512.jpg')}` },
             ],
         });
-    }, [composerTitleWithMovement, duration, isPlaying, playbackPosition]);
+    }, [composerTitleWithMovement]);
 
     React.useEffect(() => {
-        console.log('set', isPlaying);
         navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
     }, [isPlaying]);
 

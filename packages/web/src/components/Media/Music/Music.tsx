@@ -58,40 +58,6 @@ const detectWebGL = () => {
     return gl;
 };
 
-const register = module(store);
-const gl = detectWebGL();
-let Visualizer: AudioVisualizerType;
-if (gl) {
-    if (gl instanceof WebGL2RenderingContext) {
-        const component = await register(
-            'visualizer',
-            import(
-                /* webpackChunkName: 'visualizerWebGL2' */ 'src/components/Media/Music/AudioVisualizerWebGL2.js'
-            ),
-        );
-        console.log('Using WebGL2');
-        Visualizer = component;
-    } else {
-        const component = await register(
-            'visualizer',
-            import(
-                /* webpackChunkName: 'visualizerWebGL' */ 'src/components/Media/Music/AudioVisualizerWebGL.js'
-            ),
-        );
-        console.log('Using WebGL');
-        Visualizer = component;
-    }
-} else {
-    const component = await register(
-        'visualizer',
-        import(
-            /* webpackChunkName: 'visualizerCanvas' */ 'src/components/Media/Music/AudioVisualizerCanvas'
-        ),
-    );
-    console.log('Using Canvas');
-    Visualizer = component;
-}
-
 interface MusicStateToProps {
     readonly items: MusicListItem[];
     readonly flatItems: MusicFileItem[];
@@ -195,7 +161,9 @@ const Music: React.FC = () => {
     ].reduce((prev, curr) => prev ?? curr, null);
     const navigate = useNavigate();
 
-    // const [Visualizer, setVisualizer] = React.useState<AudioVisualizerType | null>(null);
+    const Visualizer = React.useRef<AudioVisualizerType>();
+    const [visualizerLoaded, setVisualizerLoaded] =
+        React.useState<boolean>(false);
     const dispatch = useAppDispatch();
     const {
         isPlaying,
@@ -306,6 +274,44 @@ const Music: React.FC = () => {
         }
     }, []);
 
+    const importVisualizer = React.useCallback(async () => {
+        const register = module(store);
+        const gl = detectWebGL();
+        if (gl) {
+            if (gl instanceof WebGL2RenderingContext) {
+                const component = await register(
+                    'visualizer',
+                    import(
+                        /* webpackChunkName: 'visualizerWebGL2' */ 'src/components/Media/Music/AudioVisualizerWebGL2.js'
+                    ),
+                );
+                console.log('Using WebGL2');
+                Visualizer.current = component;
+                setVisualizerLoaded(true);
+            } else {
+                const component = await register(
+                    'visualizer',
+                    import(
+                        /* webpackChunkName: 'visualizerWebGL' */ 'src/components/Media/Music/AudioVisualizerWebGL.js'
+                    ),
+                );
+                console.log('Using WebGL');
+                Visualizer.current = component;
+                setVisualizerLoaded(true);
+            }
+        } else {
+            const component = await register(
+                'visualizer',
+                import(
+                    /* webpackChunkName: 'visualizerCanvas' */ 'src/components/Media/Music/AudioVisualizerCanvas'
+                ),
+            );
+            console.log('Using Canvas');
+            Visualizer.current = component;
+            setVisualizerLoaded(true);
+        }
+    }, []);
+
     React.useLayoutEffect(() => {
         const initialize = async () => {
             if (!audios.current[0] || !audios.current[1]) {
@@ -320,6 +326,7 @@ const Music: React.FC = () => {
             );
         };
         dispatch(isLoadingAction(true));
+        importVisualizer();
         initialize();
         return () => {
             musicPlayer.current.pause();
@@ -515,8 +522,8 @@ const Music: React.FC = () => {
                     playSubsequent={playSubsequent}
                 />
                 <AudioInfo matchParams={!isEmpty(matches?.params)} />
-                {Visualizer && (
-                    <Visualizer
+                {visualizerLoaded && Visualizer.current && (
+                    <Visualizer.current
                         currentPosition={playbackPosition}
                         musicPlayer={musicPlayer.current}
                         isPlaying={isPlaying}
