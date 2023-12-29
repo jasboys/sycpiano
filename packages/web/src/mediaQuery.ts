@@ -55,12 +55,17 @@ const processFeature = (feature: string, value: MediaQueryValue) => {
     }
 };
 
+const logicOperator = {
+    or: ', ',
+    and: ' and ',
+};
+
 const obj2mq = (obj: MediaQueryObject, logic?: 'or' | 'and') => {
     if (Array.isArray(obj)) {
         const strings: string[] = obj.map((val) => obj2mq(val));
         return strings.length === 1
             ? strings[0]
-            : `(${strings.join(` ${logic ?? 'or'} `)})`;
+            : `${strings.join(logicOperator[logic ?? 'or'])}`;
     } else {
         const strings: string[] = Object.entries(obj).map(
             ([feature, value]) => {
@@ -87,10 +92,10 @@ const obj2mq = (obj: MediaQueryObject, logic?: 'or' | 'and') => {
         );
         return strings.length === 1
             ? strings[0]
-            : `(${strings.join(` ${logic ?? 'and'} `)})`;
+            : `${strings.join(logicOperator[logic ?? 'and'])}`;
     }
 };
 
 export const toMedia = (obj: MediaQueryObject) => {
-    return `@media only screen and ${obj2mq(obj)}`;
+    return `@media ${obj2mq(obj)}`;
 };

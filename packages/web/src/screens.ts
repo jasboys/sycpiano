@@ -20,7 +20,7 @@ export const screenL = { maxWidth: l };
 export const screenPortrait = { orientation: 'portrait' };
 export const screenLandscape = { orientation: 'landscape' };
 export const screenShort = { maxHeight: short };
-export const minRes = { minResolution: '2.1dppx' };
+export const minRes = { minResolution: 2.1 };
 export const webkitMinDPR = { '-webkit-min-device-pixel-ratio': 2.1 };
 export const isHamburger = {
     or: [
