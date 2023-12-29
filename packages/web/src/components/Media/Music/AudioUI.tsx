@@ -511,7 +511,7 @@ const AudioUI: React.FC<AudioUIProps> = ({
                 </LoadingOverlay>
             )}
             <Transition
-                in={isMouseMove}
+                in={isMouseMove || isHamburger}
                 onEnter={fadeOnEnter()}
                 onExit={fadeOnExit()}
                 timeout={250}
