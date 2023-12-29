@@ -46,19 +46,7 @@ declare global {
 const AudioContextFill = window.AudioContext || window.webkitAudioContext;
 const acx: AudioContext = new AudioContextFill();
 
-export const getAudioContext = (): AudioContext => {
-    if (acx.state === 'suspended') {
-        const resume = async () => {
-            await acx.resume();
-            if (acx.state === 'running') {
-                document.body.removeEventListener('touchend', resume, false);
-            }
-        };
-
-        document.body.addEventListener('touchend', resume, false);
-    }
-    return acx;
-};
+export const getAudioContext = (): AudioContext => acx;
 
 export const getLastName = (name: string): string | undefined => {
     return /([^\s]+)\s?(?:\(.*\))?$/.exec(name)?.[1];

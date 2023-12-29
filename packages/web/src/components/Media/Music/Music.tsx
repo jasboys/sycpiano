@@ -455,6 +455,10 @@ const Music: React.FC = () => {
 
     const selectTrack = React.useCallback(
         (musicFile: MusicFileItem, fade?: boolean) => {
+            console.log(musicPlayer.current.context?.state === 'suspended')
+            if (musicPlayer.current.context?.state === 'suspended') {
+                musicPlayer.current.context.resume();
+            }
             if (musicFile.id !== currentTrack?.id) {
                 dispatch(isLoadingAction(true));
                 dispatch(setTrackAction(musicFile));
