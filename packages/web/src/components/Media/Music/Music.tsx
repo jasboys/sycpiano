@@ -208,7 +208,7 @@ const Music: React.FC = () => {
     }, [isHamburger]);
 
     const togglePlay = React.useCallback(() => {
-        if (isPlaying) {
+        if (isPlaying && musicPlayer.current.getCurrentAudio().isPlaying) {
             musicPlayer.current.pause();
         } else {
             musicPlayer.current.play();
@@ -454,10 +454,10 @@ const Music: React.FC = () => {
     );
 
     const selectTrack = React.useCallback(
-        (musicFile: MusicFileItem, fade?: boolean) => {
+        async (musicFile: MusicFileItem, fade?: boolean) => {
             console.log(musicPlayer.current.context?.state === 'suspended')
             if (musicPlayer.current.context?.state === 'suspended') {
-                musicPlayer.current.context.resume();
+                await musicPlayer.current.context.resume();
             }
             if (musicFile.id !== currentTrack?.id) {
                 dispatch(isLoadingAction(true));
