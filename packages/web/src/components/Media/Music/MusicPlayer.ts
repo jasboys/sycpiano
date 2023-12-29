@@ -18,6 +18,10 @@ class Audio {
         this.element?.pause();
     };
 
+    load = () => {
+        this.element?.load();
+    };
+
     set positionPercent(percent: number) {
         if (this.element) {
             this.element.currentTime = this.element.duration * percent;
@@ -202,6 +206,7 @@ export class MusicPlayer {
         if (this.audios[nextBuffer].rawSrc !== src) {
             this.audios[nextBuffer].resetPromise();
             this.audios[nextBuffer].src = src;
+            this.audios[nextBuffer].load();
             this.waveforms[nextBuffer].loadWaveformFile(waveform);
         }
     };
@@ -209,6 +214,7 @@ export class MusicPlayer {
     queueCurrentBuffer = (src: string, waveform: string) => {
         this.audios[this.currentBuffer].resetPromise();
         this.audios[this.currentBuffer].src = src;
+        this.audios[this.currentBuffer].load();
         this.waveforms[this.currentBuffer].loadWaveformFile(waveform);
     };
 
