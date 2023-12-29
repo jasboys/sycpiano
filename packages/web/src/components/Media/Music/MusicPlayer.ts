@@ -113,7 +113,11 @@ export class MusicPlayer {
         firstWaveForm: string,
     ) {
         this.context = getAudioContext();
-
+        this.context.onstatechange = () => {
+            if (this.context?.state !== 'running') {
+                this.context?.resume();
+            }
+        };
         const sampleRate = this.context.sampleRate;
         const smoothing = 0.9 * (sampleRate / 192000) ** 2;
         this.analyzers.left = new ConstantQNode(this.context, {
