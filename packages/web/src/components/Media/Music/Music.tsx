@@ -208,12 +208,11 @@ const Music: React.FC = () => {
     }, [isHamburger]);
 
     const togglePlay = React.useCallback(() => {
-        console.log('toggle');
-        // if (isPlaying && musicPlayer.current.getCurrentAudio().isPlaying) {
-        //     musicPlayer.current.pause();
-        // } else {
+        if (isPlaying && musicPlayer.current.getCurrentAudio().isPlaying) {
+            musicPlayer.current.pause();
+        } else {
             musicPlayer.current.play();
-        // }
+        }
     }, [isPlaying]);
 
     const playSubsequent = React.useCallback(
