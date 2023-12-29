@@ -281,7 +281,6 @@ export class MusicPlayer {
     };
 
     audioOnLoad = (buff: 0 | 1) => () => {
-        console.log(`audio loaded ${buff}`);
         this.audios[buff].promiseResolver();
         this.audios[buff].loaded = true;
     };

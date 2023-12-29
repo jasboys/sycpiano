@@ -455,7 +455,6 @@ const Music: React.FC = () => {
 
     const selectTrack = React.useCallback(
         async (musicFile: MusicFileItem, fade?: boolean) => {
-            console.log(musicPlayer.current.context?.state === 'suspended')
             if (musicPlayer.current.context?.state === 'suspended') {
                 await musicPlayer.current.context.resume();
             }
