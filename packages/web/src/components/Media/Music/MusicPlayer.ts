@@ -8,6 +8,7 @@ class Audio {
     element: HTMLAudioElement | null = null;
     audioPromise: Promise<void> = Promise.resolve();
     promiseResolver: () => void = () => {};
+    promiseRejector: () => void = () => {};
     loaded: boolean = false;
 
     play = () => {
@@ -33,6 +34,7 @@ class Audio {
     }
 
     resetPromise = () => {
+        this.promiseRejector();
         this.audioPromise = new Promise((resolve) => {
             this.promiseResolver = resolve;
         });
@@ -227,8 +229,7 @@ export class MusicPlayer {
         const currAudio = this.audios[currBuff];
         const nextBuff = this.currentBuffer ? 0 : 1;
         const nextAudio = this.audios[nextBuff];
-        currAudio.pause();
-        currAudio.currentTime = 0;
+
         if (fade) {
             await new Promise((resolve: (arg: void) => void) => {
                 gsap.fromTo(
@@ -243,12 +244,17 @@ export class MusicPlayer {
                             this.volumeCallback(currAudio.volume);
                         },
                         onComplete: () => {
+                            currAudio.pause();
+                            currAudio.currentTime = 0;
                             setTimeout(resolve, 100);
                         },
                     },
                 );
             });
         } else {
+            currAudio.promiseRejector();
+            currAudio.pause();
+            currAudio.currentTime = 0;
             currAudio.volume = 0;
         }
         if (!nextAudio.loaded) {
