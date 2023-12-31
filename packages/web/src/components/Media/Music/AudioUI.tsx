@@ -501,7 +501,7 @@ const AudioUI: React.FC<AudioUIProps> = ({
             onMouseOut={handleMouseout('showUI')}
             onMouseUp={handleMouseup}
         >
-            {(isLoading && false) && (
+            {isLoading && false && (
                 <LoadingOverlay>
                     <LoadingInstance
                         width={200}

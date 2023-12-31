@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import parseISO from 'date-fns/parseISO';
+import { parseISO } from 'date-fns';
 import * as React from 'react';
 
 import { toMedia } from 'src/mediaQuery';

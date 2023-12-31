@@ -18,9 +18,9 @@ const videoPlayerInitialState: VideoPlayerStateShape = {
     isPlaying: false,
 };
 
-export const playerIsReady = createAction<void>('videoPlayer/isReady');
+export const playerIsReady = createAction<undefined>('videoPlayer/isReady');
 const playVideoAction = createAction<string>('videoPlayer/playVideo');
-export const resetPlayer = createAction<void>('videoPlayer/reset');
+export const resetPlayer = createAction<undefined>('videoPlayer/reset');
 
 const videoPlayerSlice = createSlice({
     name: 'videoPlayer',
@@ -94,7 +94,7 @@ export const togglePlaylist = createAction<boolean | undefined>(
 
 export const fetchVideoPlaylist = createAsyncThunk<
     VideoItemShape[],
-    void,
+    undefined,
     ThunkAPIType
 >(
     'videoPlayer/fetchPlaylist',
@@ -110,22 +110,22 @@ export const fetchVideoPlaylist = createAsyncThunk<
         const videoIds = videoItems.reduce(
             (prev: string[], item: Youtube.PlaylistItem) => {
                 if (item?.snippet?.resourceId?.videoId !== undefined) {
-                    return [...prev, item.snippet.resourceId.videoId];
-                } else {
+                    prev.push(item.snippet.resourceId.videoId);
                     return prev;
                 }
+                return prev;
             },
             [],
         );
         const videosResponse = await youTube.getVideos(videoIds);
-        videosResponse.data.items.forEach((item: Youtube.Video) => {
+        for (const item of videosResponse.data.items) {
             const idx = videoItems.findIndex(
                 (vi) => vi.snippet?.resourceId?.videoId === item.id,
             );
             if (idx >= 0) {
                 videoItems[idx] = { ...videoItems[idx], ...item };
             }
-        });
+        }
         return videoItems;
     },
     {

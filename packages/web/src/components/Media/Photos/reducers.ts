@@ -21,12 +21,14 @@ const initialListState: PhotoListReducerShape = {
     background: 'rgb(248 248 248)',
 };
 
-export const fetchPhotos = createAsyncThunk<PhotoItem[], void, ThunkAPIType>(
+export const fetchPhotos = createAsyncThunk<
+    PhotoItem[],
+    undefined,
+    ThunkAPIType
+>(
     'photos/fetch',
     async (_, thunkAPI) => {
-        const { data: photo } = await axios.get<void, { data: PhotoItem[] }>(
-            '/api/photos',
-        );
+        const { data: photo } = await axios.get<PhotoItem[]>('/api/photos');
         thunkAPI.dispatch(selectPhoto(photo[0]));
         return photo;
     },

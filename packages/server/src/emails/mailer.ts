@@ -221,7 +221,7 @@ class ConnectedMailer implements Mailer {
                     zlib: { level: 9 },
                 });
 
-                zip.on('warning', function (err) {
+                zip.on('warning', (err) => {
                     if (err.code === 'ENOENT') {
                         // log warning
                         console.error(err);
@@ -232,18 +232,18 @@ class ConnectedMailer implements Mailer {
                 });
 
                 // good practice to catch this error explicitly
-                zip.on('error', function (err) {
+                zip.on('error', (err) => {
                     throw err;
                 });
 
-                products.forEach((prod) => {
+                for (const prod of products) {
                     zip.file(
                         path.resolve(process.env.PRODUCTS_DIR, prod.file),
                         {
                             name: prod.file,
                         },
                     );
-                });
+                }
                 await zip.finalize();
                 attachments = [
                     ...attachments,

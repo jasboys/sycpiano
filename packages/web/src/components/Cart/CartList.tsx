@@ -230,7 +230,8 @@ const CheckoutForm: React.FC<{ cartLength: number }> = ({ cartLength }) => {
                     e.preventDefault();
                     if (error) {
                         return;
-                    } else if (email === '') {
+                    }
+                    if (email === '') {
                         setError(true);
                         return;
                     }

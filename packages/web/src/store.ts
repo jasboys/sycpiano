@@ -8,15 +8,15 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
-import { combineReducers } from 'redux';
-import thunk from 'redux-thunk';
+import { Reducer, combineReducers } from 'redux';
+import { thunk } from 'redux-thunk';
 
 import { navBarReducer } from 'src/components/App/NavBar/reducers';
 import { mediaQueryReducer } from 'src/components/App/reducers';
 import { cartReducer } from 'src/components/Cart/reducers';
 import { shopReducer } from 'src/components/Shop/ShopList/reducers';
 
-import { AsyncStore, Reducers } from 'src/types';
+import { AsyncStore, FullState, Reducers } from 'src/types';
 
 const staticReducers = {
     navbar: navBarReducer,
@@ -29,14 +29,14 @@ const createReducer = (reducers: Partial<Reducers>) => {
     return combineReducers({
         ...staticReducers,
         ...reducers,
-    });
+    }) as any as Reducer<FullState>;
 };
 
 const store = (() => {
     const store = configureStore({
         reducer: createReducer({}),
         middleware: (getDefaultMiddleware) =>
-            getDefaultMiddleware({}).concat(thunk),
+            getDefaultMiddleware().concat(thunk),
     });
     (store as AsyncStore).async = {};
     return store;

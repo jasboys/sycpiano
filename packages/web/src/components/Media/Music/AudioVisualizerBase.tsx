@@ -196,60 +196,59 @@ export abstract class AudioVisualizerBase<
                 timestamp - this.lastCallback < MOBILE_MSPF)
         ) {
             return;
-        } else {
-            if (this.props.isMobile) {
-                if (this.lastCallback) {
-                    const timeAdjusted =
-                        (timestamp - this.lastCallback) % MOBILE_MSPF;
-                    this.lastCallback = timestamp - timeAdjusted;
-                } else {
-                    this.lastCallback = timestamp;
-                }
-            }
-
-            if (!this.props.isPlaying) {
-                // reset idleStart time if either hover, hoverangle, or currPos changes
-                if (
-                    this.lastIsHover !== this.props.isHoverSeekring ||
-                    this.lastCurrentPosition !== this.props.currentPosition ||
-                    this.lastHover !== this.props.hoverAngle
-                ) {
-                    this.idleStart = timestamp;
-                }
-                // update hover, hoverangle, currPos (no effect obviously if no change)
-                this.lastIsHover = this.props.isHoverSeekring;
-                this.lastHover = this.props.hoverAngle;
-                this.lastCurrentPosition = this.props.currentPosition;
-                // if has been idle for over 3.5 seconds, cancel animation
-                if (this.idleStart !== 0 && timestamp - this.idleStart > 3500) {
-                    gsap.ticker.remove(this.onAnalyze);
-                    this.isRendering = false;
-                    return;
-                }
-            }
-
-            // FFT -> CQ
-            const { lowFreq: leftLow, highFreq: leftHigh } =
-                leftAnalyzer.getConstantQ(this.leftCQResult);
-            const { lowFreq: rightLow, highFreq: rightHigh } =
-                rightAnalyzer.getConstantQ(this.rightCQResult);
-            leftPhase?.getFloatTimeDomainData(this.leftData);
-            rightPhase?.getFloatTimeDomainData(this.rightData);
-
-            // concat the results, store in vizBins
-            this.vizBins.set(this.leftCQResult);
-            this.vizBins.set(
-                this.rightCQResult.reverse(),
-                this.leftCQResult.length,
-            );
-
-            // Average left and right for each high and low accumulator, and divide by number of bins
-            let highFreq = (leftHigh + rightHigh) / 2;
-            const lowFreq = (leftLow + rightLow) / 2;
-            highFreq = HIGH_FREQ_SCALE * highFreq;
-
-            this.drawVisualization(lowFreq, highFreq, timestamp);
         }
+        if (this.props.isMobile) {
+            if (this.lastCallback) {
+                const timeAdjusted =
+                    (timestamp - this.lastCallback) % MOBILE_MSPF;
+                this.lastCallback = timestamp - timeAdjusted;
+            } else {
+                this.lastCallback = timestamp;
+            }
+        }
+
+        if (!this.props.isPlaying) {
+            // reset idleStart time if either hover, hoverangle, or currPos changes
+            if (
+                this.lastIsHover !== this.props.isHoverSeekring ||
+                this.lastCurrentPosition !== this.props.currentPosition ||
+                this.lastHover !== this.props.hoverAngle
+            ) {
+                this.idleStart = timestamp;
+            }
+            // update hover, hoverangle, currPos (no effect obviously if no change)
+            this.lastIsHover = this.props.isHoverSeekring;
+            this.lastHover = this.props.hoverAngle;
+            this.lastCurrentPosition = this.props.currentPosition;
+            // if has been idle for over 3.5 seconds, cancel animation
+            if (this.idleStart !== 0 && timestamp - this.idleStart > 3500) {
+                gsap.ticker.remove(this.onAnalyze);
+                this.isRendering = false;
+                return;
+            }
+        }
+
+        // FFT -> CQ
+        const { lowFreq: leftLow, highFreq: leftHigh } =
+            leftAnalyzer.getConstantQ(this.leftCQResult);
+        const { lowFreq: rightLow, highFreq: rightHigh } =
+            rightAnalyzer.getConstantQ(this.rightCQResult);
+        leftPhase?.getFloatTimeDomainData(this.leftData);
+        rightPhase?.getFloatTimeDomainData(this.rightData);
+
+        // concat the results, store in vizBins
+        this.vizBins.set(this.leftCQResult);
+        this.vizBins.set(
+            this.rightCQResult.reverse(),
+            this.leftCQResult.length,
+        );
+
+        // Average left and right for each high and low accumulator, and divide by number of bins
+        let highFreq = (leftHigh + rightHigh) / 2;
+        const lowFreq = (leftLow + rightLow) / 2;
+        highFreq = HIGH_FREQ_SCALE * highFreq;
+
+        this.drawVisualization(lowFreq, highFreq, timestamp);
     };
 
     onVisibilityChange = (): void => {

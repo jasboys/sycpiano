@@ -10,7 +10,6 @@ export const csrfMiddleware: express.RequestHandler = async (
     if (csrfHeader === undefined) {
         res.sendStatus(403);
         return;
-    } else {
-        next();
     }
+    next();
 };

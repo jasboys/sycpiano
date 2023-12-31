@@ -244,7 +244,7 @@ const provider = (apiUrl: string): AdminProvider => {
             };
         },
 
-        pull: async (resource: string, _params: {}) => {
+        pull: async (resource: string, _params: unknown) => {
             if (resource !== 'products') {
                 return Promise.reject('Pull called with incorrect resource.');
             }
@@ -347,7 +347,7 @@ export interface AdminProvider<ResourceType extends string = string>
     extends DataProvider<ResourceType> {
     pull: <RecordType extends RaRecord>(
         resource: string,
-        params: {},
+        params: unknown,
     ) => Promise<GetListResult<RecordType>>;
     populateImageFields: <RecordType extends RaRecord>(
         resource: string,
@@ -355,11 +355,11 @@ export interface AdminProvider<ResourceType extends string = string>
     ) => Promise<GetListResult<RecordType>>;
     trim: <RecordType extends RaRecord>(
         resource: string,
-        params: {},
+        params: unknown,
     ) => Promise<GetListResult<RecordType>>;
     populateDateTaken: <RecordType extends RaRecord>(
         resource: string,
-        params: {},
+        params: unknown,
     ) => Promise<GetListResult<RecordType>>;
 }
 

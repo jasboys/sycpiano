@@ -751,7 +751,6 @@ namespace GoogleCalendar {
             dateTime: datetime;
             timeZone?: string;
         };
-        // rome-ignore lint/suspicious/noExplicitAny: <explanation>
         [key: string]: any;
     }
 

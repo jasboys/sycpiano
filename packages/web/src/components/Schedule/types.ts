@@ -28,7 +28,7 @@ export const eventListNamesArr = [
     'event',
 ] as const;
 
-export type EventListName = typeof eventListNamesArr[number];
+export type EventListName = (typeof eventListNamesArr)[number];
 
 export interface Collaborator {
     name: string;
@@ -80,14 +80,14 @@ function eventEquals(a: EventItem, b: EventItem) {
     return a.dateTime === b.dateTime;
 }
 
-function eventAscend(a: HasDate, b: HasDate) {
+export function eventAscend(a: HasDate, b: HasDate) {
     // if (a.dateTime.isSame(b.dateTime, 'minute')) { return 0; }
     // if (a.dateTime.isBefore(b.dateTime, 'minute')) { return -1; }
     // if (a.dateTime.isAfter(b.dateTime, 'minute')) { return 1; }
     return compareAsc(parseISO(a.dateTime), parseISO(b.dateTime));
 }
 
-function eventDescend(a: HasDate, b: HasDate) {
+export function eventDescend(a: HasDate, b: HasDate) {
     // if (aTime.isSame(bTime, 'minute')) { return 0; }
     // if (aTime.isBefore(bTime, 'minute')) { return 1; }
     // if (aTime.isAfter(bTime, 'minute')) { return -1; }
@@ -110,21 +110,19 @@ export interface MonthGroups {
 export const minOfMonthGroups = (mg: MonthGroups) => {
     if (mg.order === 'asc') {
         return mg.monthGroups[0].events[0];
-    } else {
-        const mgLength = mg.monthGroups.length;
-        const eventsLength = mg.monthGroups[mgLength - 1].events.length;
-        return mg.monthGroups[mgLength - 1].events[eventsLength - 1];
     }
+    const mgLength = mg.monthGroups.length;
+    const eventsLength = mg.monthGroups[mgLength - 1].events.length;
+    return mg.monthGroups[mgLength - 1].events[eventsLength - 1];
 };
 
 export const maxOfMonthGroups = (mg: MonthGroups) => {
     if (mg.order === 'desc') {
         return mg.monthGroups[0].events[0];
-    } else {
-        const mgLength = mg.monthGroups.length;
-        const eventsLength = mg.monthGroups[mgLength - 1].events.length;
-        return mg.monthGroups[mgLength - 1].events[eventsLength - 1];
     }
+    const mgLength = mg.monthGroups.length;
+    const eventsLength = mg.monthGroups[mgLength - 1].events.length;
+    return mg.monthGroups[mgLength - 1].events[eventsLength - 1];
 };
 
 // export const lengthOfMonthGroups = (mg: MonthGroups) => {
@@ -191,54 +189,53 @@ export const createMonthGroups = (
             length: count,
             monthGroups: result,
         };
-    } else {
-        const sortedEvents = events.sort(eventAscend);
-        const firstMonth = endOfMonth(
-            utcToZonedTime(
-                parseISO(sortedEvents[0].dateTime),
-                sortedEvents[0].timezone,
-            ),
-        );
-        const lastMonth = endOfMonth(
-            utcToZonedTime(
-                parseISO(sortedEvents[events.length - 1].dateTime),
-                sortedEvents[events.length - 1].timezone,
-            ),
-        );
-        const result: MonthGroup[] = [];
-        let count = 0;
-        for (
-            let it = firstMonth;
-            it <= lastMonth && sortedEvents.length !== 0;
-            it = addMonths(it, 1)
-        ) {
-            let pointer = binarySearch(
-                sortedEvents,
-                { dateTime: it.toISOString() },
-                eventAscend,
-            );
-            if (pointer < 0) {
-                pointer = -1 * pointer - 1;
-            } else {
-                pointer += 1;
-            }
-            const extracted = sortedEvents.splice(0, pointer);
-            if (extracted.length !== 0) {
-                result.push({
-                    month: getMonth(it),
-                    year: getYear(it),
-                    dateTime: startOfMonth(it).toISOString(),
-                    events: extracted,
-                });
-                count += extracted.length;
-            }
-        }
-        return {
-            order,
-            length: count,
-            monthGroups: result,
-        };
     }
+    const sortedEvents = events.sort(eventAscend);
+    const firstMonth = endOfMonth(
+        utcToZonedTime(
+            parseISO(sortedEvents[0].dateTime),
+            sortedEvents[0].timezone,
+        ),
+    );
+    const lastMonth = endOfMonth(
+        utcToZonedTime(
+            parseISO(sortedEvents[events.length - 1].dateTime),
+            sortedEvents[events.length - 1].timezone,
+        ),
+    );
+    const result: MonthGroup[] = [];
+    let count = 0;
+    for (
+        let it = firstMonth;
+        it <= lastMonth && sortedEvents.length !== 0;
+        it = addMonths(it, 1)
+    ) {
+        let pointer = binarySearch(
+            sortedEvents,
+            { dateTime: it.toISOString() },
+            eventAscend,
+        );
+        if (pointer < 0) {
+            pointer = -1 * pointer - 1;
+        } else {
+            pointer += 1;
+        }
+        const extracted = sortedEvents.splice(0, pointer);
+        if (extracted.length !== 0) {
+            result.push({
+                month: getMonth(it),
+                year: getYear(it),
+                dateTime: startOfMonth(it).toISOString(),
+                events: extracted,
+            });
+            count += extracted.length;
+        }
+    }
+    return {
+        order,
+        length: count,
+        monthGroups: result,
+    };
 };
 
 export const mergeMonthGroups = (
@@ -267,9 +264,8 @@ export const mergeMonthGroups = (
                     localLeft.order === 'asc' ? eventAscend : eventDescend,
                 ),
             };
-        } else {
-            return mg;
         }
+        return mg;
     });
     const result = [
         ...localLeft.monthGroups, // any duplicate months have been removed because of popping
@@ -298,11 +294,11 @@ function monthGroupEquals(a: MonthGroup, b: MonthGroup) {
     return isSameMonth(parseISO(a.dateTime), parseISO(b.dateTime));
 }
 
-function monthGroupAscend(a: MonthGroup, b: MonthGroup) {
+export function monthGroupAscend(a: MonthGroup, b: MonthGroup) {
     return compareAsc(parseISO(a.dateTime), parseISO(b.dateTime));
 }
 
-function monthGroupDescend(a: MonthGroup, b: MonthGroup) {
+export function monthGroupDescend(a: MonthGroup, b: MonthGroup) {
     return compareDesc(parseISO(a.dateTime), parseISO(b.dateTime));
 }
 

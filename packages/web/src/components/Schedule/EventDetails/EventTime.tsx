@@ -43,7 +43,6 @@ const timeStyle = css({
 export const EventTime: React.FC<Omit<EventDateTimeProps, 'rounded'>> = ({
     dateTime,
     timezone,
-    isMobile,
 }) => (
     <div css={eventTimeStyle}>
         <div css={{ margin: '0 3px', display: 'flex' }}>

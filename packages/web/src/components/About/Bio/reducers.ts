@@ -8,12 +8,10 @@ const initialState: BioStateShape = {
     bio: [],
 };
 
-export const fetchBio = createAsyncThunk<Blurb[], void, ThunkAPIType>(
+export const fetchBio = createAsyncThunk<Blurb[], undefined, ThunkAPIType>(
     'bio/fetch',
     async () => {
-        const { data: bio } = await axios.get<void, { data: Blurb[] }>(
-            '/api/bio',
-        );
+        const { data: bio } = await axios.get<Blurb[]>('/api/bio');
         return bio;
     },
     {

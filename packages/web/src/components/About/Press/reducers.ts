@@ -13,13 +13,13 @@ const initialState: AcclaimsListStateShape = {
 
 export const fetchAcclaims = createAsyncThunk<
     AcclaimItemShape[],
-    void,
+    undefined,
     ThunkAPIType
 >(
     'acclaims/fetch',
     async () => {
-        const { data: acclaims }: { data: AcclaimItemShape[] } =
-            await axios.get('/api/acclaims');
+        const { data: acclaims } =
+            await axios.get<AcclaimItemShape[]>('/api/acclaims');
         return acclaims;
     },
     {

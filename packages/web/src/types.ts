@@ -60,6 +60,22 @@ export interface IndexableGlobalStateShape extends GlobalStateShape {
     [key: string]: AnyStateShape | undefined;
 }
 
+export interface FullState {
+    readonly bio: BioStateShape;
+    readonly discs: DiscsStateShape;
+    readonly musicPlayer: MusicStateShape;
+    readonly photoList: PhotoListReducerShape;
+    readonly photoViewer: PhotoViewerReducerShape;
+    readonly pressAcclaimsList: AcclaimsListStateShape;
+    readonly scheduleEventItems: ScheduleStateShape;
+    readonly videoPlayer: VideoPlayerStateShape;
+    readonly videoPlaylist: VideoPlaylistStateShape;
+    readonly mediaQuery: MediaQueryStateShape;
+    readonly shop: ShopStateShape;
+    readonly cart: CartStateShape;
+    readonly navbar: NavBarStateShape;
+}
+
 export type AnyReducerType =
     | typeof bioReducer
     | typeof discsReducer

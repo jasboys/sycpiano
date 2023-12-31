@@ -82,7 +82,10 @@ interface CalendarQuery {
 
 calendarRouter.get(
     '/search',
-    async (req: express.Request<{}, object, {}, CalendarQuery>, res) => {
+    async (
+        req: express.Request<unknown, object, unknown, CalendarQuery>,
+        res,
+    ) => {
         const str = req.query.q;
         if (str === undefined || str === '') {
             res.json([]);
@@ -121,7 +124,10 @@ calendarRouter.get(
 
 calendarRouter.get(
     '/',
-    async (req: express.Request<{}, object, {}, CalendarQuery>, res) => {
+    async (
+        req: express.Request<unknown, object, unknown, CalendarQuery>,
+        res,
+    ) => {
         const limit =
             (!!req.query.limit && parseInt(req.query.limit)) || undefined;
         const date = !!req.query.date && parseISO(req.query.date);

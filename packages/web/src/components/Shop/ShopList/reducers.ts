@@ -8,12 +8,14 @@ interface FetchReturn {
     items: ProductMap;
 }
 
-export const fetchShopItems = createAsyncThunk<FetchReturn, void, ThunkAPIType>(
+export const fetchShopItems = createAsyncThunk<
+    FetchReturn,
+    undefined,
+    ThunkAPIType
+>(
     'shop/fetchItems',
     async () => {
-        const { data: items } = await axios.get<void, { data: ProductMap }>(
-            '/api/shop/items',
-        );
+        const { data: items } = await axios.get<ProductMap>('/api/shop/items');
         return {
             items,
         };
@@ -30,7 +32,7 @@ const initialState: ShopStateShape = {
     fetchSuccess: false,
 };
 
-const shopSlice = createSlice({
+export const shopSlice = createSlice({
     name: 'shop',
     initialState,
     reducers: {},

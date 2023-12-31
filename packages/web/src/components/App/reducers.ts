@@ -10,11 +10,11 @@ const defaultMedia = Object.fromEntries(
 ) as MediaQueryStateShape;
 
 export const setMatches = createAction<MediaQueryStateShape>(
-    'src/MediaQuery/setMatches',
+    'mediaQuery/setMatches',
 );
 
 export const mediaQuerySlice = createSlice({
-    name: 'src/MediaQuery',
+    name: 'mediaQuery',
     initialState: defaultMedia,
     reducers: {},
     extraReducers: (builder) => {

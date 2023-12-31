@@ -98,7 +98,7 @@ class YouTube {
     }
 
     public getPlaylistItems() {
-        return axios.get<void, { data: { items: Youtube.PlaylistItem[] } }>(
+        return axios.get<{ items: Youtube.PlaylistItem[] }>(
             PLAYLIST_ITEMS_URL,
             {
                 params: {
@@ -112,16 +112,13 @@ class YouTube {
     }
 
     public getVideos(listOfIds: string[]) {
-        return axios.get<void, { data: { items: Youtube.Video[] } }>(
-            VIDEOS_URL,
-            {
-                params: {
-                    id: listOfIds.join(','),
-                    key: API_KEY,
-                    part: 'id, contentDetails, statistics',
-                },
+        return axios.get<{ items: Youtube.Video[] }>(VIDEOS_URL, {
+            params: {
+                id: listOfIds.join(','),
+                key: API_KEY,
+                part: 'id, contentDetails, statistics',
             },
-        );
+        });
     }
 
     public destroyPlayer() {

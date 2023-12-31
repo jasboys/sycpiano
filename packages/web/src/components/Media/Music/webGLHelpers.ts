@@ -14,9 +14,9 @@ export const loadShader = (
     // See if it compiled successfully
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
         alert(
-            `An error occurred compiling the shaders: ${gl.getShaderInfoLog(shader)} ${(type === gl.VERTEX_SHADER)}`
-                ? 'vertex'
-                : 'fragment',
+            `An error occurred compiling the shaders: ${gl.getShaderInfoLog(
+                shader,
+            )} ${type === gl.VERTEX_SHADER ? 'vertex' : 'fragment'}`,
         );
         gl.deleteShader(shader);
         return undefined;
@@ -45,7 +45,9 @@ export const initShader = (
 
     if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
         alert(
-            `Unable to initialize the shader program: ${gl.getProgramInfoLog(shaderProgram)}`,
+            `Unable to initialize the shader program: ${gl.getProgramInfoLog(
+                shaderProgram,
+            )}`,
         );
         return undefined;
     }

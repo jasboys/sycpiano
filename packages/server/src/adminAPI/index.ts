@@ -596,12 +596,11 @@ adminRest.post(
     async (req, res) => {
         if (Array.isArray(req.files)) {
             throw Error('unexpected array');
-        } else {
-            res.json({
-                images: req.files?.['samples[]']?.map((f) => f.filename),
-                pdf: req.files?.pdf?.[0].filename,
-            });
         }
+        res.json({
+            images: req.files?.['samples[]']?.map((f) => f.filename),
+            pdf: req.files?.pdf?.[0].filename,
+        });
     },
 );
 
@@ -652,7 +651,7 @@ adminRest.post(
                                   v.replace(stripeClient.THUMBNAIL_STATIC, ''),
                               )
                             : undefined,
-                    type: type as typeof ProductTypes[number],
+                    type: type as (typeof ProductTypes)[number],
                     sample,
                     priceId: default_price.id ?? '',
                     permalink: permalink ?? '',

@@ -53,9 +53,8 @@ const musicListIfExists = (
         : response[category];
     if (curr !== undefined && curr.length !== 0) {
         return [{ type: category, id: category }, ...curr];
-    } else {
-        return [];
     }
+    return [];
 };
 
 export interface FetchPlaylistThunkReturn {
@@ -78,10 +77,8 @@ export const fetchPlaylistThunk = createAsyncThunk<
     'music/fetchPlaylist',
     async ({ composer, piece, movement }) => {
         try {
-            const { data: response } = await axios.get<
-                void,
-                { data: MusicResponse }
-            >('/api/music');
+            const { data: response } =
+                await axios.get<MusicResponse>('/api/music');
             const mappedResponse: MusicResponse = {};
             for (const category in response) {
                 mappedResponse[category] = response[category].map(
@@ -129,11 +126,11 @@ export const fetchPlaylistThunk = createAsyncThunk<
             ]);
 
             let flatItems: MusicFileItem[] = [];
-            items.forEach((musicListItem) => {
+            for (const musicListItem of items) {
                 if (isMusicItem(musicListItem)) {
                     flatItems.push(...musicListItem.musicFiles);
                 }
-            });
+            }
 
             flatItems = flatItems.map((item, idx) => ({ ...item, idx }));
 
@@ -196,9 +193,8 @@ export const getFirstTrack = (
                 }
             }) ?? flatItems[0]
         );
-    } else {
-        return flatItems[0];
     }
+    return flatItems[0];
 };
 
 export const getNextTrack = (
@@ -217,7 +213,9 @@ export const getNextTrack = (
     }
 };
 
-export const toggleShuffleAction = createAction<void>('music/toggleShuffle');
+export const toggleShuffleAction = createAction<undefined>(
+    'music/toggleShuffle',
+);
 export const isLoadingAction = createAction<boolean>('music/isLoading');
 export const setTrackAction = createAction<MusicFileItem>('music/setTrack');
 export const updateAction = createAction<{

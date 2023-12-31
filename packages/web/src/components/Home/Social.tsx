@@ -105,7 +105,10 @@ const SocialMediaLink: React.FC<SocialMediaLinkProps> = (props) => (
         href={props.url}
         target="_blank"
     >
-        <img alt={`${props.social} icon`} src={staticImage(`/logos/${props.social}.svg`)} />
+        <img
+            alt={`${props.social} icon`}
+            src={staticImage(`/logos/${props.social}.svg`)}
+        />
     </SocialLink>
 );
 
@@ -115,12 +118,13 @@ interface SocialState {
 }
 
 class Social extends React.PureComponent<Record<never, unknown>, SocialState> {
-    defaultCanHover = Object.keys(socials).reduce((prev, curr) => {
-        return {
-            ...prev,
-            [curr]: false,
-        };
-    }, {});
+    defaultCanHover = Object.keys(socials).reduce(
+        (prev, curr) => {
+            prev[curr] = false;
+            return prev;
+        },
+        {} as Record<string, boolean>,
+    );
 
     state: SocialState = {
         show: false,
@@ -131,48 +135,52 @@ class Social extends React.PureComponent<Record<never, unknown>, SocialState> {
         this.setState({ show: !this.state.show });
     };
 
-    onSocialEnter = (id: number) => (el: HTMLElement): void => {
-        const relative = id - (Object.keys(socials).length / 2 - 0.5);
-        gsap.fromTo(
-            el,
-            {
-                opacity: 0,
-                y: '-50%',
-                x: `${relative * -100}%`,
-                duration: 0.25,
-            },
-            {
-                opacity: 1,
-                y: '0%',
-                x: '0%',
-                delay: 0.05 * id,
-                ease: Elastic.easeOut.config(1, 0.75),
-                clearProps: 'transform',
-            },
-        );
-    };
+    onSocialEnter =
+        (id: number) =>
+        (el: HTMLElement): void => {
+            const relative = id - (Object.keys(socials).length / 2 - 0.5);
+            gsap.fromTo(
+                el,
+                {
+                    opacity: 0,
+                    y: '-50%',
+                    x: `${relative * -100}%`,
+                    duration: 0.25,
+                },
+                {
+                    opacity: 1,
+                    y: '0%',
+                    x: '0%',
+                    delay: 0.05 * id,
+                    ease: Elastic.easeOut.config(1, 0.75),
+                    clearProps: 'transform',
+                },
+            );
+        };
 
-    onSocialExit = (id: number) => (el: HTMLElement): void => {
-        const relative = id - Math.floor(Object.keys(socials).length / 2);
-        gsap.fromTo(
-            el,
-            {
-                opacity: 1,
-                y: '0%',
-                x: '0%',
-                duration: 0.25,
-            },
-            {
-                opacity: 0,
-                y: '-50%',
-                x: `${relative * -100}%`,
-                delay: 0.05 * id,
-                ease: Elastic.easeOut.config(1, 0.75),
-                clearProps: 'transform',
-            },
-        );
-        this.setState({ canHover: this.defaultCanHover });
-    };
+    onSocialExit =
+        (id: number) =>
+        (el: HTMLElement): void => {
+            const relative = id - Math.floor(Object.keys(socials).length / 2);
+            gsap.fromTo(
+                el,
+                {
+                    opacity: 1,
+                    y: '0%',
+                    x: '0%',
+                    duration: 0.25,
+                },
+                {
+                    opacity: 0,
+                    y: '-50%',
+                    x: `${relative * -100}%`,
+                    delay: 0.05 * id,
+                    ease: Elastic.easeOut.config(1, 0.75),
+                    clearProps: 'transform',
+                },
+            );
+            this.setState({ canHover: this.defaultCanHover });
+        };
     render() {
         return (
             <SocialContainer>

@@ -15,7 +15,7 @@ const authRouter = express.Router();
 authRouter.use(express.json());
 authRouter.use(express.urlencoded({ extended: true }));
 
-const authorize = async (user: string) => {
+export const authorize = async (user: string) => {
     try {
         const key = await paseto.generateKey('local', { format: 'paserk' });
         const token = await paseto.encrypt({}, key, {
@@ -159,9 +159,8 @@ authRouter.post('/login', async (req, res) => {
                 sameSite: true,
             });
             return res.status(200).json();
-        } else {
-            throw new Error('password wrong');
         }
+        throw new Error('password wrong');
     } catch (e) {
         console.log(e);
         return res

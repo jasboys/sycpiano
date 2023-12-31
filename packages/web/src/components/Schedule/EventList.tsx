@@ -237,7 +237,7 @@ export const EventList: React.FC<EventListProps> = (props) => {
     const title =
         `${titleStringBase}Schedule | ${(props.type === 'archive' ? 'Archived' : startCase(props.type))}Events${(searchQ ?? `: ${searchQ}`)}`;
 
-    const description = metaDescriptions[props.type];
+    const description = metaDescriptions[props.type] as string;
 
     const loadingDimension = isHamburger ? 50 : 72;
 

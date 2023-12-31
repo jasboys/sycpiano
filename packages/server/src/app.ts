@@ -44,10 +44,9 @@ const main = async () => {
                     err: pino.stdSerializers.err,
                 },
             } as Options);
-        } else {
-            const { default: morgan } = await import('morgan');
-            return morgan('dev');
         }
+        const { default: morgan } = await import('morgan');
+        return morgan('dev');
     })();
 
     // Stupid favicon

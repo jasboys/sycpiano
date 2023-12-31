@@ -47,9 +47,8 @@ shopRouter.post(
                     await stripeClient.getProductIDsFromPaymentIntent(
                         session.payment_intent as string,
                     );
-                const email = await stripeClient.getEmailFromCustomer(
-                    customerId,
-                );
+                const email =
+                    await stripeClient.getEmailFromCustomer(customerId);
                 // Add associations to local model
                 const user = await orm.em.findOne(User, { id: customerId });
                 if (user === null) {
@@ -86,8 +85,8 @@ const productSortPredicate = (a: ShopItem, b: ShopItem) => {
 
 shopRouter.get('/items', async (_, res) => {
     const products = await orm.em.find(Product, {});
-    const storeItems: Partial<Record<typeof ProductTypes[number], ShopItem[]>> =
-        ProductTypes.reduce((acc, type) => {
+    const storeItems = ProductTypes.reduce(
+        (acc, type) => {
             const prods = products
                 .filter(({ type: t }) => t === type)
                 .map((product) => {
@@ -97,11 +96,11 @@ shopRouter.get('/items', async (_, res) => {
                     };
                 })
                 .sort(productSortPredicate);
-            return {
-                ...acc,
-                [type]: prods,
-            };
-        }, {});
+            acc[type] = prods;
+            return acc;
+        },
+        {} as Record<(typeof ProductTypes)[number], ShopItem[]>,
+    );
     res.json(storeItems);
 });
 
@@ -119,9 +118,8 @@ const getOrCreateLocalCustomer = async (email: string) => {
         );
 
         if (localCustomer === null) {
-            const stripeCustomer = await stripeClient.getOrCreateCustomer(
-                email,
-            );
+            const stripeCustomer =
+                await stripeClient.getOrCreateCustomer(email);
             const user = orm.em.create(User, {
                 id: stripeCustomer.id,
                 username: email,
@@ -136,7 +134,7 @@ const getOrCreateLocalCustomer = async (email: string) => {
     }
 };
 
-shopRouter.get<{}, object, {}, { session_id: string }>(
+shopRouter.get<unknown, unknown, unknown, { session_id: string }>(
     '/checkout-success',
     async (req, res) => {
         const { session_id: sessionId } = req.query;
@@ -183,13 +181,16 @@ shopRouter.post('/checkout', async (req, res) => {
             .toArray()
             .map((prod) => prod.id);
 
-        const duplicates = productIds.reduce((acc, pID) => {
-            if (previouslyPurchasedIds.includes(pID)) {
-                return [pID, ...acc];
-            } else {
+        const duplicates = productIds.reduce(
+            (acc, pID) => {
+                if (previouslyPurchasedIds.includes(pID)) {
+                    acc.push(pID);
+                    return acc;
+                }
                 return acc;
-            }
-        }, [] as string[]);
+            },
+            [] as string[],
+        );
 
         if (duplicates.length !== 0) {
             res.status(422).json({

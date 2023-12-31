@@ -30,19 +30,19 @@ export const precheck = async () => {
     // Check DB stuff
     if (!process.env.DATABASE_URL) {
         const dbRequired = ['DB_USER', 'DB_PASS'];
-        dbRequired.forEach((key) => {
+        for (const key of dbRequired) {
             const value = process.env[key];
             if (!value) {
                 throw Error(`${key} is not defined, nor DB_URL`);
             }
-        });
+        }
     }
-    required.forEach((key) => {
+    for (const key of required) {
         const value = process.env[key];
         if (!value) {
             throw Error(`${key} is not defined.`);
         }
-    });
+    }
 
     return Promise.resolve();
     // run migrations!

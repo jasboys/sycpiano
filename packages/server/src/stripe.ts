@@ -70,9 +70,8 @@ export const getOrCreateCustomer = async (
         if (customers.data.length === 0) {
             const customer = await stripe.customers.create({ email });
             return customer;
-        } else {
-            return customers.data[0];
         }
+        return customers.data[0];
     } catch (e) {
         console.error('Stripe create/get customer failed.', e);
         throw e;
@@ -97,11 +96,11 @@ export const createCheckoutSession = async (
             customer: customerId,
             payment_intent_data: {
                 metadata: productIDs.reduce(
-                    (acc, pID, idx) => ({
-                        ...acc,
-                        [idx]: pID,
-                    }),
-                    {},
+                    (acc, pID, idx) => {
+                        acc[idx] = pID;
+                        return acc;
+                    },
+                    {} as Record<number, string>,
                 ),
             },
             client_reference_id: uniqid.time(),
@@ -132,9 +131,8 @@ export const getEmailFromCustomer = async (cid: string): Promise<string> => {
         const customer = await stripe.customers.retrieve(cid);
         if (stripeCustomerActive(customer) && customer.email) {
             return customer.email;
-        } else {
-            throw new Error('Customer not active, or email is empty');
         }
+        throw new Error('Customer not active, or email is empty');
     } catch (e) {
         console.error(`Couldn't get email from customer.`, e);
         throw e;
@@ -249,9 +247,8 @@ export const getCheckoutSession = async (
 }> => {
     try {
         const session = await stripe.checkout.sessions.retrieve(sessionId);
-        const lineItems = await stripe.checkout.sessions.listLineItems(
-            sessionId,
-        );
+        const lineItems =
+            await stripe.checkout.sessions.listLineItems(sessionId);
         // console.log(session);
         // console.log(lineItems);
         return {

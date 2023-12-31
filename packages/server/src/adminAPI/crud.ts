@@ -126,9 +126,8 @@ export const crud = <I extends NonNullable<Primary<R>>, R extends object>(
                     return res.status(404).json({
                         error: 'Record not found',
                     });
-                } else {
-                    next(e);
                 }
+                next(e);
             }
         });
     }
@@ -169,9 +168,8 @@ export const crud = <I extends NonNullable<Primary<R>>, R extends object>(
                     return res.status(404).json({
                         error: 'Record not found',
                     });
-                } else {
-                    next(e);
                 }
+                next(e);
             }
         });
     }
@@ -195,9 +193,8 @@ export const crud = <I extends NonNullable<Primary<R>>, R extends object>(
                     return res.status(404).json({
                         error: 'Record not found',
                     });
-                } else {
-                    next(e);
                 }
+                next(e);
             }
         });
     }

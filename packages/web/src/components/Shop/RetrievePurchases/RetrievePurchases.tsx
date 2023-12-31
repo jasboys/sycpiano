@@ -153,7 +153,8 @@ const RetrievalForm: React.FC<Record<never, unknown>> = () => {
                         e.preventDefault();
                         if (error) {
                             return;
-                        } else if (email === '') {
+                        }
+                        if (email === '') {
                             setError(true);
                             return;
                         }
@@ -201,8 +202,8 @@ const RetrievalForm: React.FC<Record<never, unknown>> = () => {
                         {state === SubmitState.submitting
                             ? 'Submitting...'
                             : state === SubmitState.success
-                            ? 'Submitted'
-                            : 'Submit'}
+                              ? 'Submitted'
+                              : 'Submit'}
                     </StyledSubmitButton>
                 </StyledForm>
             </ThemeProvider>

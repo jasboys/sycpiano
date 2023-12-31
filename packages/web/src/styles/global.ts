@@ -1,5 +1,5 @@
 import { CSSInterpolation } from '@emotion/css';
-import { css } from '@emotion/react';
+import { CSSObject, css } from '@emotion/react';
 import { toMedia } from 'src/mediaQuery';
 import { hiDpx, screenM } from 'src/screens';
 
@@ -57,17 +57,13 @@ export const globalCss = css([
     {
         ':root': {
             ...Object.entries(CSSVariables).reduce((prev, [prop, val]) => {
-                return {
-                    ...prev,
-                    [camel2prop(prop as CSSVariableKeys)]: toPx(val),
-                };
-            }, {}),
+                prev[camel2prop(prop as CSSVariableKeys)] = toPx(val);
+                return prev;
+            }, {} as CSSObject),
             ...Object.entries(colorVars).reduce((prev, [prop, val]) => {
-                return {
-                    ...prev,
-                    [camel2prop(prop as CSSVariableKeys)]: toPx(val),
-                };
-            }, {}),
+                prev[camel2prop(prop as CSSVariableKeys)] = toPx(val);
+                return prev;
+            }, {} as CSSObject),
             [toMedia(hiDpx)]: {
                 [camel2prop('navBarHeight')]: toPx(navBarHeight.hiDpx),
             },

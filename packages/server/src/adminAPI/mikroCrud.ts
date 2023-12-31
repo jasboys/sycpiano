@@ -35,15 +35,14 @@ const mapSearchFields =
                         $ilike: `%${token}%`,
                     },
                 };
-            } else {
-                return {
-                    [field]: token,
-                };
             }
+            return {
+                [field]: token,
+            };
         });
     };
 
-const mikroSearchFields = <R extends Object, K extends keyof R & string>(
+const mikroSearchFields = <R extends {}, K extends keyof R & string>(
     entity: EntityName<R>,
     searchableFields?: K[],
     populate?: string[],

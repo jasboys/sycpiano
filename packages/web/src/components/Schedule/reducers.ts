@@ -17,9 +17,9 @@ import {
     SearchEventsArguments,
     createMonthGroups,
     maxOfMonthGroups,
-    mergeMonthGroups,
     minOfMonthGroups,
 } from 'src/components/Schedule/types';
+import { mergeMonthGroups } from './mergeMonthGroups';
 import { ThunkAPIType } from 'src/types';
 import { transformCachedEventsToListItems } from './utils';
 
@@ -103,7 +103,7 @@ export const searchEvents = createAsyncThunk<
             q,
         };
 
-        const { data } = await axios.get<void, { data: CachedEvent[] }>(
+        const { data } = await axios.get<CachedEvent[]>(
             '/api/calendar/search',
             { params },
         );

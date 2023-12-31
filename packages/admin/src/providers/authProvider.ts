@@ -11,8 +11,8 @@ const authProvider = (apiUrl: string): AuthProvider => {
     return {
         login: async ({ username, password }) => {
             await axiosInstance.post<
-                {},
-                {},
+                undefined,
+                undefined,
                 { username: string; password: string }
             >('/login', {
                 username,

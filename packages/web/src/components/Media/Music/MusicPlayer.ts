@@ -79,7 +79,7 @@ class Audio {
     }
 
     get isPlaying() {
-        return !this.element?.paused ?? false;
+        return !this.element?.paused;
     }
 }
 
@@ -143,7 +143,7 @@ export class MusicPlayer {
 
         const gain = this.context.createGain();
 
-        this.audios.forEach((audio) => {
+        for (const audio of this.audios) {
             if (audio.element) {
                 audio.element.volume = 0;
                 const src = this.context?.createMediaElementSource(
@@ -151,7 +151,7 @@ export class MusicPlayer {
                 );
                 src?.connect(gain);
             }
-        });
+        }
 
         gain.connect(this.context.destination);
         const splitter = this.context.createChannelSplitter(2);
@@ -231,7 +231,7 @@ export class MusicPlayer {
         const nextAudio = this.audios[nextBuff];
 
         if (fade) {
-            await new Promise((resolve: (arg: void) => void) => {
+            await new Promise((resolve: (arg: unknown) => void) => {
                 gsap.fromTo(
                     currAudio,
                     {

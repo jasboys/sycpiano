@@ -4,7 +4,6 @@ export interface ChildRendererProps<T> {
     readonly key: number | string;
     readonly currentItemId?: number | string;
     readonly item: T;
-    // rome-ignore lint/suspicious/noExplicitAny: <explanation>
     readonly onClick?: (...args: any[]) => void;
     readonly isMobile: boolean;
 }

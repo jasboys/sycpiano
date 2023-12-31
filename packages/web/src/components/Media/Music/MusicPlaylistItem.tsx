@@ -21,10 +21,7 @@ import { updateAction } from './reducers.js';
 
 interface MusicPlaylistItemProps {
     readonly item: MusicListItem;
-    readonly onClick: (
-        track: MusicFileItem,
-        fade?: boolean
-    ) => void;
+    readonly onClick: (track: MusicFileItem, fade?: boolean) => void;
 }
 
 const baseItemStyle = css(latoFont(300), {
@@ -122,11 +119,10 @@ interface MusicItemProps extends MusicPlaylistItemProps {
     item: MusicItemType;
 }
 
-const MusicItem: React.FC<MusicItemProps> = ({
-    item,
-    onClick,
-}) => {
-    const currentTrack = useAppSelector(({ musicPlayer }) => musicPlayer.currentTrack);
+const MusicItem: React.FC<MusicItemProps> = ({ item, onClick }) => {
+    const currentTrack = useAppSelector(
+        ({ musicPlayer }) => musicPlayer.currentTrack,
+    );
     const dispatch = useAppDispatch();
 
     const musicFile = item.musicFiles[0];
@@ -169,13 +165,10 @@ const MusicItem: React.FC<MusicItemProps> = ({
 
 const MusicCollectionItem: React.FC<
     MusicItemProps & { index: number; musicFile: MusicFileItem }
-> = ({
-    item,
-    onClick,
-    index,
-    musicFile,
-}) => {
-    const currentTrack = useAppSelector(({ musicPlayer }) => musicPlayer.currentTrack);
+> = ({ item, onClick, index, musicFile }) => {
+    const currentTrack = useAppSelector(
+        ({ musicPlayer }) => musicPlayer.currentTrack,
+    );
     const dispatch = useAppDispatch();
 
     return (
@@ -242,13 +235,11 @@ const MusicPlaylistItem: React.FC<MusicPlaylistItemProps> = (props) => {
 
     if (!isMusicItem(item)) {
         return <StyledCategory>{categoryMap[item.type]}</StyledCategory>;
-    } else {
-        if (item.musicFiles.length === 1) {
-            return <MusicItem {...props} item={item} />;
-        } else {
-            return <MusicCollection {...props} item={item} />;
-        }
     }
+    if (item.musicFiles.length === 1) {
+        return <MusicItem {...props} item={item} />;
+    }
+    return <MusicCollection {...props} item={item} />;
 };
 
 const MemoizedPlaylistItem = React.memo(MusicPlaylistItem);

@@ -83,7 +83,7 @@ export const MusicList = (props: ListProps) => (
             expand={(props) => <MusicPanel {...props} />}
             sx={{
                 '& .RaDatagrid-expandedPanel': {
-                    'th': {
+                    th: {
                         backgroundColor: '#f8f8f8',
                     },
                     backgroundColor: '#f8f8f8',
