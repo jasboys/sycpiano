@@ -130,7 +130,7 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(
                             isHamburger={false}
                         />
                     )}
-                    {/* <CartButton isHome={isHome} ref={ref} /> */}
+                    <CartButton isHome={isHome} ref={ref} />
                 </StyledNavAndCart>
             </StyledNavBar>
         );

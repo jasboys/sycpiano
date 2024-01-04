@@ -1,7 +1,7 @@
 import { css } from '@emotion/react';
 import { toMedia } from 'src/mediaQuery';
-import { isHamburger, minRes, webkitMinDPR } from 'src/screens';
-import { navBarMarginTop, navBarHeight } from 'src/styles/variables';
+import { isHamburger } from 'src/screens';
+import { navBarMarginTop } from 'src/styles/variables';
 import { LinkShape } from './types';
 import { lightBlue } from 'src/styles/colors';
 import React from 'react';
@@ -16,7 +16,7 @@ export interface HighlightProps {
 
 const highlightStyles = {
     base: css({
-        backgroundColor: lightBlue,
+        backgroundColor: 'var(--light-blue)',
         opacity: 0,
     }),
     home: css({
@@ -30,7 +30,7 @@ const highlightStyles = {
         position: 'absolute',
         bottom: 0,
         padding: 0,
-        marginTop: navBarMarginTop,
+        marginTop: 'var(--nav-bar-margin-top)',
         height: 5,
         zIndex: -1,
         transition: 'opacity 0.2s',
@@ -41,12 +41,9 @@ const highlightStyles = {
 };
 
 const linkTextStyles = css({
-    height: navBarHeight.lowDpx - navBarMarginTop,
+    height: 'calc(var(--nav-bar-height) - var(--nav-bar-margin-top))',
     padding: '20px 10px 0 10px',
-    marginTop: navBarMarginTop,
-    [toMedia([minRes, webkitMinDPR])]: {
-        height: navBarHeight.hiDpx - navBarMarginTop,
-    },
+    marginTop: 'var(--nav-bar-margin-top)',
     [toMedia(isHamburger)]: {
         marginTop: 'unset',
         height: 'unset',

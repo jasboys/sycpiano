@@ -6,40 +6,15 @@ import { isHamburger, screenM, screenXS, screenPortrait } from 'src/screens';
 import { offWhite, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { Blurb } from './types';
-import { pictureHeight } from './common';
 
 const bioTextStyles = {
-    // p: css({
-    //     fontSize: '1.0rem',
-    //     lineHeight: '2rem',
-    //     margin: '1.6rem 0',
-
-    //     [toMedia(isHamburger)]: {
-    //         '&:first-of-type': {
-    //             marginTop: 0,
-    //         },
-    //     },
-
-    //     [toMedia(screenM)]: {
-    //         fontSize: '1rem',
-    //     },
-
-    //     [toMedia([screenXS, screenPortrait])]: {
-    //         fontSize: '1rem',
-    //         lineHeight: '1.6rem',
-    //         margin: '1.3rem 0',
-    //         '&:last-of-type': {
-    //             marginBottom: '3rem',
-    //         },
-    //     },
-    // }),
     spacer: css({
         display: 'none',
 
         [toMedia([screenXS, screenPortrait])]: {
             display: 'block',
-            minHeight: pictureHeight,
-            height: 'min(50vw, 33vh)',
+            minHeight: 'var(--bio-pic-min-height)',
+            height: 'var(--bio-pic-height)',
             width: '100%',
             backgroundColor: 'transparent',
         },

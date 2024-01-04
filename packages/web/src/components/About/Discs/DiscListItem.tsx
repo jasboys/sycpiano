@@ -63,6 +63,13 @@ const styles = {
         justifyContent: 'center',
         alignItems: 'flex-end',
     }),
+    leftHighlight: css({
+        borderLeft: '3px solid var(--light-blue)',
+        span: {
+            margin: '0.8rem',
+            display: 'block',
+        }
+    })
 };
 
 interface DiscListProps {
@@ -82,8 +89,10 @@ const DiscListItem: React.FC<DiscListProps> = ({ item }) => {
                 </div>
                 <div css={styles.details}>
                     <span css={styles.title}>{item.title}</span>
-                    <span css={styles.span}>{item.label}</span>
-                    <span css={styles.span}>{item.releaseDate}</span>
+                    <div css={styles.leftHighlight}>
+                        <span>{item.label}</span>
+                        <span>{item.releaseDate}</span>
+                    </div>
                     <p>{item.description}</p>
                     <div css={styles.divider} />
                     <div css={styles.links}>

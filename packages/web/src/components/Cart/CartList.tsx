@@ -41,7 +41,6 @@ const CartListDiv = styled.div(latoFont(300), {
         height: '100%',
         maxHeight: 'unset',
         borderRadius: 'unset',
-        overflowY: 'unset',
     },
 });
 
@@ -276,7 +275,7 @@ const InnerBorderContainer = styled.div({
     height: '100%',
     width: '100%',
     borderRadius: 4,
-    overflowY: 'auto',
+    // overflowY: 'auto',
 });
 
 export const CartList: React.FC<Record<never, unknown>> = () => {

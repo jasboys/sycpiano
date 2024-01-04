@@ -9,6 +9,8 @@ import { CartList } from 'src/components/Cart/CartList';
 import { initCartAction, syncLocalStorage } from 'src/components/Cart/reducers';
 import { LoadingInstance } from 'src/components/LoadingSVG';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { toMedia } from 'src/mediaQuery.js';
+import { hiDpx, isHamburger } from 'src/screens.js';
 import { navBarHeight } from 'src/styles/variables';
 
 const Arrow = styled.div({
@@ -42,7 +44,7 @@ const CartFilterGroup = styled.div<{ isCheckingOut: boolean }>(
             filter: 'brightness(0.75)',
         },
 );
-const CartContainer = styled.div<{ hiDpx: boolean; top: number }>(
+const CartContainer = styled.div<{ top: number }>(
     {
         zIndex: 5001,
         filter: 'drop-shadow(0px 4px 8px rgba(0 0 0 / 0.5))',
@@ -50,17 +52,19 @@ const CartContainer = styled.div<{ hiDpx: boolean; top: number }>(
         visibility: 'hidden',
         opacity: 0,
         maxHeight: '100%',
+        [toMedia(isHamburger)]: {
+            position: 'absolute',
+            paddingTop: navBarHeight.lowDpx,
+            zIndex: 4999,
+            height: '100%',
+            [toMedia(hiDpx)]: {
+                paddingTop: navBarHeight.hiDpx,
+            },
+        },
     },
     ({ top }) => ({
         height: `calc(100% - ${top}px)`,
     }),
-    ({ hiDpx }) =>
-        hiDpx && {
-            position: 'absolute',
-            paddingTop: navBarHeight.hiDpx,
-            zIndex: 4999,
-            height: '100%',
-        },
 );
 
 interface CartProps {
@@ -88,7 +92,6 @@ const Cart: React.FC<CartProps> = ({
     update,
 }) => {
     const isHamburger = useAppSelector(mqSelectors.isHamburger);
-    const hiDpx = useAppSelector(mqSelectors.hiDpx);
     const dispatch = useAppDispatch();
     const visible = useAppSelector(({ cart }) => cart.visible);
     const isCheckingOut = useAppSelector(({ cart }) => cart.isCheckingOut);
@@ -145,7 +148,6 @@ const Cart: React.FC<CartProps> = ({
                     }
                 }
                 top={!isHamburger && position.y !== null ? position.y : 0}
-                hiDpx={hiDpx}
                 ref={
                     isHamburger ? () => {} : floatingRef
                 } /* eslint-disable-line @typescript-eslint/no-empty-function */

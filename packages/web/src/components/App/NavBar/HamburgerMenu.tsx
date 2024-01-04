@@ -80,7 +80,6 @@ const StyledHamburger = styled.div({
     width: hamburgerMenuWidth,
     height: hamburgerMenuHeight,
     position: 'relative',
-    // transform: 'rotate(0deg)',
     transition: '0.5s ease-in-out',
     cursor: 'pointer',
     WebkitTapHighlightColor: 'transparent',

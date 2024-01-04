@@ -51,7 +51,6 @@ import { LogoSVG } from 'src/components/LogoSVG';
 import { eventListNamesArr } from 'src/components/Schedule/types';
 import { fetchShopItems } from 'src/components/Shop/ShopList/reducers';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { staticImage } from 'src/imageUrls.js';
 import extractModule from 'src/module';
 import { GLOBAL_QUERIES } from 'src/screens';
 import store from 'src/store';
@@ -499,7 +498,7 @@ const App: React.FC<Record<never, unknown>> = () => {
                                         element={<Navigate to="/not-found" />}
                                     />
                                 </Route>
-                                {/* <Route path="shop/*" element={<Container />}>
+                                <Route path="shop/*" element={<Container />}>
                                     <Route
                                         path="scores/*"
                                         element={
@@ -540,7 +539,7 @@ const App: React.FC<Record<never, unknown>> = () => {
                                         path="*"
                                         element={<Navigate to="/not-found" />}
                                     />
-                                </Route> */}
+                                </Route>
                                 <Route
                                     path="not-found"
                                     element={

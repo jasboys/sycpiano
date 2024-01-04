@@ -15,72 +15,62 @@ import { toMedia } from 'src/mediaQuery';
 const cartStyles = {
     base: css(latoFont(400), {
         noHighlight,
-        fill: '#4d4d4d',
+        fill: 'var(--cart-color)',
         textDecoration: 'none',
         cursor: 'pointer',
         transition: 'all 0.5s',
         webkitTapHighlightColor: 'transparent',
         paddingBottom: 12,
+        text: noHighlight,
+        circle: {
+            stroke: 'var(--cart-color)',
+            transition: 'all 0.5s',
+            fill: 'white',
+        },
+        svg: {
+            verticalAlign: 'middle',
+        },
         '&:hover': {
             cursor: 'pointer',
-            fill: mix(0.5, logoBlue, '#444'),
+            '--cart-color': mix(0.5, logoBlue, '#444'),
         },
         [toMedia(isHamburger)]: {
-            fill: logoBlue,
+            '--cart-color': logoBlue,
             paddingBottom: 0,
             marginRight: '1rem',
         },
+        '--cart-color': '#4d4d4d',
     }),
     isHome: css({
-        fill: 'white',
-        filter: 'drop-shadow(0 0 1px rgba(0 0 0 / 0.8))',
+        '--cart-drop-shadow': 'drop-shadow(0 0 1px rgba(0 0 0 / 0.8))',
+        '--cart-color': 'white',
+        filter: 'var(--cart-drop-shadow)',
+        circle: {
+            fill: 'none',
+        },
         '&:hover': {
-            fill: 'white',
-            filter: 'drop-shadow(0 0 1px rgba(255 255 255 / 1))',
+            '--cart-color': 'white',
+            '--cart-drop-shadow': 'drop-shadow(0 0 1px white)',
         },
         [toMedia(isHamburger)]: {
-            fill: 'white',
-            filter: 'drop-shadow(0 0 1px rgba(0 0 0 / 0.8))',
+            '--cart-drop-shadow': 'drop-shadow(0 0 1px rgba(0 0 0 / 0.8))',
+            '--cart-color': 'white',
             '&:hover': {
-                filter: 'drop-shadow(0 0 1px rgba(255 255 255 / 1))',
-            }
-        }
+                '--cart-color': 'white',
+                '--cart-drop-shadow': 'drop-shadow(0 0 1px white)',
+            },
+        },
     }),
     isOpen: css({
         [toMedia(isHamburger)]: {
-            fill: lightBlue,
-            filter: 'drop-shadow(0 0 1px white)',
+            '--cart-color': lightBlue,
+            '--cart-drop-shadow': 'drop-shadow(0 0 1px white)',
+            circle: {
+                fill: 'white',
+            },
         },
     }),
 };
-
-const circleStyles = {
-    base: css({
-        stroke: '#4d4d4d',
-        transition: 'all 0.5s',
-        fill: 'white',
-        '&:hover': {
-            stroke: mix(0.5, logoBlue, '#444'),
-        },
-        [toMedia(isHamburger)]: {
-            stroke: logoBlue,
-        },
-    }),
-    isHome: css({
-        stroke: 'white',
-        fill: 'none',
-        '&:hover': {
-            stroke: 'white',
-        },
-        [toMedia(isHamburger)]: {
-            stroke: 'white',
-        },
-    }),
-};
-
-const svgStyle = css({ verticalAlign: 'middle' });
-
-const textStyle = css(noHighlight);
 
 const scaleDown = (tl: gsap.core.Tween) => {
     tl.reverse();
@@ -141,14 +131,13 @@ const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(
                 css={[
                     cartStyles.base,
                     isHome && cartStyles.isHome,
-                    cartOpened && cartStyles.isOpen,
+                    cartOpened && !isHome && cartStyles.isOpen,
                 ]}
                 onClick={onClick}
                 onKeyUp={onClick}
                 ref={makeRef}
             >
                 <svg
-                    css={svgStyle}
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="-4 -5 36 32"
                     height="36"
@@ -162,17 +151,12 @@ const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(
                     {cartCount !== 0 && (
                         <>
                             <circle
-                                css={[
-                                    circleStyles.base,
-                                    isHome && circleStyles.isHome,
-                                ]}
                                 cx="23"
                                 cy="2"
                                 r="6"
                                 strokeWidth="1"
                             />
                             <text
-                                css={textStyle}
                                 x="23.5"
                                 y="3"
                                 textAnchor="middle"

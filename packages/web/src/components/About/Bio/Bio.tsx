@@ -24,7 +24,7 @@ import {
     screenXS,
 } from 'src/screens';
 import { pushed } from 'src/styles/mixins';
-import { camel2var, navBarHeight } from 'src/styles/variables';
+import { navBarHeight } from 'src/styles/variables';
 import { isImageElement } from 'src/utils';
 import { MemoizedBioText } from './BioText';
 import { pictureHeight } from './common';
@@ -38,6 +38,8 @@ const bioStyles = {
         backgroundRepeat: 'no-repeat',
         backgroundColor: 'black',
         visibility: 'hidden',
+        '--bio-pic-min-height': pictureHeight,
+        '--bio-pic-height': 'min(50vw, 33vh)',
 
         [toMedia(screenM)]: {
             backgroundSize: 'cover',
@@ -47,13 +49,13 @@ const bioStyles = {
         [toMedia([screenXS, screenPortrait])]: {
             position: 'fixed',
             zIndex: 0,
-            minHeight: pictureHeight,
-            height: 'min(50vw, 33vh)',
+            minHeight: 'var(--bio-pic-min-height)',
+            height: 'var(--bio-pic-height)',
             width: '100%',
             backgroundSize: '106%',
             backgroundPosition: 'center 15%',
             maxWidth: 'unset',
-            paddingTop: camel2var('navBarHeight'),
+            paddingTop: 'var(--nav-bar-height)',
         },
     }),
     hasBgImage: (bgImage: string) =>
@@ -71,7 +73,7 @@ const bioStyles = {
             height: '100%',
             overflowY: 'scroll',
             backgroundColor: 'white',
-            paddingTop: camel2var('navBarHeight'),
+            paddingTop: 'var(--nav-bar-height)',
         },
     }),
     loader: css({
