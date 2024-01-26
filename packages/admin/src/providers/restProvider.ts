@@ -566,7 +566,6 @@ export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
         {
             resource: 'products',
             beforeSave: async (data, _dataProvider) => {
-                console.log(data);
                 const {
                     newImages,
                     pdf,
@@ -578,10 +577,10 @@ export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
                 if (!pdf && !newImages) {
                     return {
                         ...restData,
-                        images,
+                        file: fileName,
+                        images: [imageBaseNameWithExt],
                     };
                 }
-                console.log(data);
                 const pdfRaw: File | undefined = pdf?.rawFile;
                 const sampleRaws: File[] | undefined = newImages?.map(
                     (img: { rawFile: File }) => img.rawFile,

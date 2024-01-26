@@ -1,7 +1,7 @@
 import orm from '../database.js';
 import { format } from 'date-fns';
 import express from 'express';
-import { statSync } from 'fs';
+import { statSync, renameSync } from 'fs';
 import { Product, ProductTypes } from '../models/Product.js';
 import multer from 'multer';
 import { parse, resolve } from 'path';
@@ -24,7 +24,7 @@ const productStorage = multer.diskStorage({
         }
         cb(null, dest);
     },
-    filename: (req, file, cb) => {
+    filename: async (req, file, cb) => {
         if (file.fieldname === 'pdf') {
             const { name, ext } = parse(req.body.fileName.replace(/ /g, '_'));
             const exists = statSync(
@@ -33,11 +33,18 @@ const productStorage = multer.diskStorage({
                     throwIfNoEntry: false,
                 },
             );
-            if (exists === undefined) {
-                cb(null, `${name}${ext}`);
-            } else {
-                cb(null, `${name}_${format(new Date(), 'yyyyMMdd')}${ext}`);
+            if (exists !== undefined) {
+                const oldDate = exists.ctime;
+                renameSync(
+                    resolve(process.env.PRODUCTS_DIR, `${name}${ext}`),
+                    resolve(
+                        process.env.PRODUCTS_DIR,
+                        'oldversions',
+                        `${name}_${format(oldDate, 'yyyyMMdd')}${ext}`,
+                    ),
+                );
             }
+            cb(null, `${name}${ext}`);
         } else {
             let fileName = req.body.imageBaseNameWithExt.replace(/ /g, '_');
             const { name, ext } = parse(fileName);
