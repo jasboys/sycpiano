@@ -156,7 +156,7 @@ export const constructEvent = (
 
 export const createProduct = async (attributes: Product): Promise<string[]> => {
     try {
-        console.log(attributes);
+        console.log('attributes', attributes);
         const product = await stripe.products.create({
             name: attributes.name,
             description: attributes.description,

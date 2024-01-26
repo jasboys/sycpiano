@@ -578,7 +578,7 @@ export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
                     return {
                         ...restData,
                         file: fileName,
-                        images: [imageBaseNameWithExt],
+                        images: images ?? [imageBaseNameWithExt],
                     };
                 }
                 const pdfRaw: File | undefined = pdf?.rawFile;
