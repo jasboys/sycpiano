@@ -23,7 +23,6 @@ export class DiscLink {
 
     @ManyToOne({
         entity: () => Disc,
-        onDelete: 'cascade',
         index: 'disc_link_disc_idx',
     })
     disc!: Rel<Disc>;

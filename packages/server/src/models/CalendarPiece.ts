@@ -27,7 +27,6 @@ export class CalendarPiece {
 
     @ManyToOne({
         entity: () => Calendar,
-        onDelete: 'cascade',
         primary: true,
         index: 'calendar_piece_calendar_idx',
     })
@@ -35,7 +34,6 @@ export class CalendarPiece {
 
     @ManyToOne({
         entity: () => Piece,
-        onDelete: 'cascade',
         primary: true,
         index: 'calendar_piece_piece_idx',
     })

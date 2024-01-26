@@ -37,6 +37,9 @@ const orm = await MikroORM.init<FixedPostgresql>({
     driver: FixedPostgresql,
     loadStrategy: LoadStrategy.JOINED,
     populateWhere: PopulateHint.INFER,
+    discovery: {
+        checkDuplicateFieldNames: false,
+    },
 });
 
 export default orm;

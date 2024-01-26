@@ -1,4 +1,4 @@
-import { DiscLink } from 'models/DiscLink.js';
+import { DiscLink } from '../models/DiscLink.js';
 import { crud } from './crud.js';
 import { mikroCrud } from './mikroCrud.js';
 

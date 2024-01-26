@@ -1,4 +1,4 @@
-import { Acclaim } from 'models/Acclaim.js';
+import { Acclaim } from '../models/Acclaim.js';
 import { crud } from './crud.js';
 import { mikroCrud } from './mikroCrud.js';
 

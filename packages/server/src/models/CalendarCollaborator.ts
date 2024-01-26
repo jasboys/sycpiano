@@ -27,7 +27,6 @@ export class CalendarCollaborator {
 
     @ManyToOne({
         entity: () => Calendar,
-        onDelete: 'cascade',
         primary: true,
         index: 'calendar_collaborator_calendar_idx',
     })
@@ -35,7 +34,6 @@ export class CalendarCollaborator {
 
     @ManyToOne({
         entity: () => Collaborator,
-        onDelete: 'cascade',
         primary: true,
         index: 'calendar_collaborator_collaborator_idx',
     })

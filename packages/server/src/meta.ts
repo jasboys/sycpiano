@@ -15,7 +15,7 @@ import { baseString, descriptions } from 'common';
 import orm from './database.js';
 import { MusicFile } from './models/MusicFile.js';
 import { Calendar } from './models/Calendar.js';
-import { expr } from '@mikro-orm/core';
+import { raw } from '@mikro-orm/core';
 
 dotenv.config({ override: true });
 
@@ -217,7 +217,7 @@ export const getMetaFromPathAndSanitize = async (
                 throw new MatchException(eventISO);
             }
             const event = await orm.em.findOne(Calendar, {
-                [expr('date_time::date')]: date.toISOString(),
+                [raw('date_time::date')]: date.toISOString(),
             });
             if (event === null) {
                 throw new MatchException(eventISO);

@@ -192,12 +192,16 @@ export const createProduct = async (attributes: Product): Promise<string[]> => {
 
 export const deleteProduct = async (
     id: string,
-): Promise<Stripe.Response<Stripe.DeletedProduct>> => {
+): Promise<Stripe.Response<Stripe.DeletedProduct | Stripe.Product>> => {
     try {
         return await stripe.products.del(id);
     } catch (e) {
-        console.error(`Couldn't delete product. `, e);
-        throw e;
+        try {
+            return await stripe.products.update(id, { active: false });
+        } catch (e) {
+            console.error(`Couldn't delete product. `, e);
+            throw e;
+        }
     }
 };
 

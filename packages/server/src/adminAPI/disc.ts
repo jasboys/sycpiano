@@ -1,4 +1,4 @@
-import { Disc } from 'models/Disc.js';
+import { Disc } from '../models/Disc.js';
 import { crud } from './crud.js';
 import { mikroCrud } from './mikroCrud.js';
 

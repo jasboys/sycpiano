@@ -32,7 +32,6 @@ export class MusicFile {
 
     @ManyToOne({
         entity: () => Music,
-        onDelete: 'cascade',
         index: 'music_file_music_idx',
     })
     music!: Rel<Music>;

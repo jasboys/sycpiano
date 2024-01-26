@@ -1,11 +1,11 @@
 import { statSync } from 'fs';
-import { Photo } from 'models/Photo.js';
+import { Photo } from '../models/Photo.js';
 import multer from 'multer';
 import { crud, setGetListHeaders } from './crud.js';
 import { genThumbnail, getDateTaken } from './genThumbnail.js';
 import { mikroCrud } from './mikroCrud.js';
 import { resolve } from 'path';
-import orm from 'database.js';
+import orm from '../database.js';
 
 const photoStorage = multer.diskStorage({
     destination: resolve(process.env.IMAGE_ASSETS_DIR, 'gallery'),

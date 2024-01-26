@@ -1,5 +1,4 @@
 import {
-    EntityDTO,
     EntityData,
     FilterQuery,
     FromEntityType,

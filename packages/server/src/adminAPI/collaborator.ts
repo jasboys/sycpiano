@@ -1,9 +1,9 @@
-import { Collaborator } from 'models/Collaborator.js';
+import orm from '../database.js';
+import { CalendarCollaborator } from '../models/CalendarCollaborator.js';
+import { Collaborator } from '../models/Collaborator.js';
 import { crud, setGetListHeaders } from './crud.js';
-import { mikroCrud } from './mikroCrud.js';
-import orm from 'database.js';
-import { CalendarCollaborator } from 'models/CalendarCollaborator.js';
 import { respondWithError } from './index.js';
+import { mikroCrud } from './mikroCrud.js';
 
 const collaboratorRouter = crud('/collaborators', {
     ...mikroCrud({

@@ -57,12 +57,6 @@ async function beforeCreateHook(args: EventArgs<Calendar>) {
                 console.log('[Hook: BeforeCreate] Found existing photo.');
                 args.entity.imageUrl = otherCal.imageUrl;
             }
-            // else {
-            //     const { photoReference, placeId } = await getPhotos(location);
-            //     console.log('[Hook: BeforeCreate]: Parsed photo from API.');
-            //     args.entity.photoReference = photoReference;
-            //     args.entity.placeId = placeId;
-            // }
         } catch (e) {
             console.log(`[Hook: BeforeCreate] ${e}`);
         }
@@ -140,12 +134,6 @@ async function beforeUpdateHook(args: EventArgs<Calendar>) {
                 console.log('[Hook: BeforeUpdate] Found existing photo.');
                 args.changeSet.payload.imageUrl = otherCal.imageUrl;
             }
-            // else {
-            //     const { photoReference, placeId } = await getPhotos(location);
-            //     console.log('[Hook: BeforeUpdate]: Parsed photo from API.');
-            //     args.changeSet.payload.photoReference = photoReference;
-            //     args.changeSet.payload.placeId = placeId;
-            // }
         } catch (e) {
             console.log(`[Hook: BeforeUpdate] ${e}`);
         }

@@ -255,13 +255,6 @@ const main = async () => {
                       },
             });
         },
-        // createProxyMiddleware({
-        //     target: `http://127.0.0.1:${process.env.ADMIN_PORT}`,
-        //     ws: true,
-        //     onProxyReq: (proxyReq, req) => {
-        //         proxyReq.setHeader('csrf-inject', req.csrfToken());
-        //     }
-        // }),
     );
 
     // Health-check endpoint.

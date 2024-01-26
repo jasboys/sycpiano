@@ -1,4 +1,4 @@
-import { Faq } from 'models/Faq.js';
+import { Faq } from '../models/Faq.js';
 import { crud } from './crud.js';
 import { mikroCrud } from './mikroCrud.js';
 

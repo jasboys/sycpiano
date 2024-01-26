@@ -1,4 +1,4 @@
-import { Loaded, expr } from '@mikro-orm/core';
+import { Loaded, raw } from '@mikro-orm/core';
 import { isBefore, isValid, parseISO, startOfDay } from 'date-fns';
 import * as express from 'express';
 
@@ -9,7 +9,7 @@ function getEventsBefore(before: Date, limit?: number) {
     return orm.em.find(
         Calendar,
         {
-            [expr('date_time::date')]: { $lt: before },
+            [raw('date_time::date')]: { $lt: before },
         },
         {
             limit,
@@ -24,7 +24,7 @@ function getEventsAfter(after: Date, limit?: number) {
     return orm.em.find(
         Calendar,
         {
-            [expr('date_time::date')]: { $gte: after },
+            [raw('date_time::date')]: { $gte: after },
         },
         {
             limit,
@@ -40,8 +40,8 @@ function getEventsBetween(start: Date, end: Date, order: 'ASC' | 'DESC') {
         Calendar,
         {
             $and: [
-                { [expr('date_time::date')]: { $gte: start } },
-                { [expr('date_time::date')]: { $lt: end } },
+                { [raw('date_time::date')]: { $gte: start } },
+                { [raw('date_time::date')]: { $lt: end } },
             ],
         },
         {
@@ -54,7 +54,7 @@ function getEventsBetween(start: Date, end: Date, order: 'ASC' | 'DESC') {
 function getEventAt(at: Date) {
     return orm.em.findOneOrFail(
         Calendar,
-        { [expr('date_time::date')]: at },
+        { [raw('date_time::date')]: at },
         {
             populate: ['collaborators', 'pieces'],
         },
@@ -139,9 +139,24 @@ calendarRouter.get(
         const now = startOfDay(new Date());
 
         let response: Loaded<Calendar, 'collaborators' | 'pieces'>[];
-        let betweenEvents;
-        let futureEvents;
-        let pastEvents;
+        let betweenEvents: Loaded<
+            Calendar,
+            'pieces' | 'collaborators',
+            '*',
+            never
+        >[];
+        let futureEvents: Loaded<
+            Calendar,
+            'pieces' | 'collaborators',
+            '*',
+            never
+        >[];
+        let pastEvents: Loaded<
+            Calendar,
+            'pieces' | 'collaborators',
+            '*',
+            never
+        >[];
 
         console.log(req.query);
         if (at && isValid(at)) {

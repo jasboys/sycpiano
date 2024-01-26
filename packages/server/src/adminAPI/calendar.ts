@@ -1,8 +1,8 @@
 import { FilterQuery, Loaded, wrap } from '@mikro-orm/core';
-import orm from 'database.js';
 import express from 'express';
-import { getImageFromMetaTag } from 'gapi/calendar.js';
-import { Calendar } from 'models/Calendar.js';
+import orm from '../database.js';
+import { getImageFromMetaTag } from '../gapi/calendar.js';
+import { Calendar } from '../models/Calendar.js';
 import { crud, setGetListHeaders } from './crud.js';
 import { respondWithError } from './index.js';
 import { mikroCrud } from './mikroCrud.js';

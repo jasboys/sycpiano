@@ -1,4 +1,4 @@
-import { Bio } from 'models/Bio.js';
+import { Bio } from '../models/Bio.js';
 import { crud } from './crud.js';
 import { mikroCrud } from './mikroCrud.js';
 

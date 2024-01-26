@@ -1,4 +1,4 @@
-import { User } from 'models/User.js';
+import { User } from '../models/User.js';
 import { crud } from './crud.js';
 import { mikroCrud } from './mikroCrud.js';
 

@@ -1,5 +1,5 @@
 import { statSync } from 'fs';
-import { MusicFile } from 'models/MusicFile.js';
+import { MusicFile } from '../models/MusicFile.js';
 import multer from 'multer';
 import { resolve } from 'path';
 import { crud } from './crud.js';
@@ -8,7 +8,7 @@ import {
     getAudioDuration,
 } from './genWaveform.js';
 import { mikroCrud } from './mikroCrud.js';
-import orm from 'database.js';
+import orm from '../database.js';
 import { respondWithError } from './index.js';
 
 const musicStorage = multer.diskStorage({

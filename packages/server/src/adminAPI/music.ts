@@ -1,4 +1,4 @@
-import { Music } from 'models/Music.js';
+import { Music } from '../models/Music.js';
 import { crud } from './crud.js';
 import { mikroCrud } from './mikroCrud.js';
 

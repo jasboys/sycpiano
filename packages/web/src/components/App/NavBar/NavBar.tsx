@@ -13,6 +13,8 @@ import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { navBarHeight } from 'src/styles/variables';
 import { mqSelectors } from '../reducers';
 
+const shopEnabled = JSON.parse(ENABLE_SHOP) === true;
+
 interface NavBarProps {
     readonly currentBasePath: string;
     readonly delayedRouteBase: string;
@@ -130,7 +132,7 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(
                             isHamburger={false}
                         />
                     )}
-                    <CartButton isHome={isHome} ref={ref} />
+                    {shopEnabled && <CartButton isHome={isHome} ref={ref} />}
                 </StyledNavAndCart>
             </StyledNavBar>
         );

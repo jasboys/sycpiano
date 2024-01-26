@@ -241,6 +241,7 @@ jobs:
         env:
           GAPI_KEY_APP: ${{ secrets.GAPI_KEY_APP }}
           STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
+          ENABLE_SHOP: ${{ vars.ENABLE_SHOP }}
       - name: Setup SSH
         uses: ./.github/actions/setup-ssh
         with:

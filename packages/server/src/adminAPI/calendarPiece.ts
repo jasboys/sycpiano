@@ -1,8 +1,8 @@
 import { EntityData } from '@mikro-orm/core';
-import orm from 'database.js';
-import { Calendar } from 'models/Calendar.js';
-import { CalendarPiece } from 'models/CalendarPiece.js';
-import { Piece } from 'models/Piece.js';
+import orm from '../database.js';
+import { Calendar } from '../models/Calendar.js';
+import { CalendarPiece } from '../models/CalendarPiece.js';
+import { Piece } from '../models/Piece.js';
 import { crud } from './crud.js';
 import { mikroCrud } from './mikroCrud.js';
 import { NotFoundError } from './types.js';

@@ -1,8 +1,8 @@
-import orm from 'database.js';
+import orm from '../database.js';
 import { format } from 'date-fns';
 import express from 'express';
 import { statSync } from 'fs';
-import { Product, ProductTypes } from 'models/Product.js';
+import { Product, ProductTypes } from '../models/Product.js';
 import multer from 'multer';
 import { parse, resolve } from 'path';
 import * as stripeClient from '../stripe.js';
