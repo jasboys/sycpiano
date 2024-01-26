@@ -23,7 +23,7 @@ jobs:
       name: ${{ github.ref_name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Compute new hashes
         id: compute-hashes
         run: |
@@ -40,7 +40,7 @@ jobs:
           ASSETS: ${{ hashFiles('assets/**') }}
           CWD: ${{ github.workspace }}
       - name: Get Cached Hashes
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         id: cache
         with:
           path: .cache
@@ -116,7 +116,7 @@ jobs:
       name: ${{ github.ref_name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup SSH
         uses: ./.github/actions/setup-ssh
         with:
@@ -192,7 +192,7 @@ jobs:
     if: needs.check-cache.outputs.admin-matched != 'true'
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Node and Common
         uses: ./.github/actions/setup-node-and-common
         with:
@@ -229,7 +229,7 @@ jobs:
     if: needs.check-cache.outputs.web-matched != 'true'
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Node and Common
         uses: ./.github/actions/setup-node-and-common
         with:
@@ -267,7 +267,7 @@ jobs:
     if: needs.check-cache.outputs.server-matched != 'true'
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Node and Common
         uses: ./.github/actions/setup-node-and-common
         with:
@@ -309,7 +309,7 @@ jobs:
       name: ${{ github.ref_name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup SSH
         uses: ./.github/actions/setup-ssh
         with:
@@ -348,7 +348,7 @@ jobs:
           ASSETS: ${{ needs.check-cache.outputs.assets-hash }}
           CWD: ${{ github.workspace }}
       - name: Save Cache
-        uses: actions/cache/save@v3
+        uses: actions/cache/save@v4
         with:
           path: .cache
           key: hashes-${{ github.ref_name }}-${{ needs.check-cache.outputs.checksum }}
