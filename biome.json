@@ -9,8 +9,7 @@
             "recommended": true,
             "suspicious": {
                 "noAssignInExpressions": "off",
-                "noExplicitAny": "off",
-                "noConfusingVoidType": "off"
+                "noExplicitAny": "off"
             },
             "style": {
                 "noInferrableTypes": "off"

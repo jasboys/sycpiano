@@ -1,9 +1,7 @@
 import { css } from '@emotion/react';
 import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
-import { navBarMarginTop } from 'src/styles/variables';
 import { LinkShape } from './types';
-import { lightBlue } from 'src/styles/colors';
 import React from 'react';
 
 export interface HighlightProps {

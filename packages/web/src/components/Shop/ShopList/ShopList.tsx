@@ -8,7 +8,7 @@ import { mqSelectors } from 'src/components/App/reducers';
 import { ShopItem } from 'src/components/Shop/ShopList/ShopItem';
 import { Product, ProductTypes } from 'src/components/Shop/ShopList/types';
 import { useAppSelector } from 'src/hooks';
-import { screenPortrait, screenXS } from 'src/screens.js';
+import { isHamburger, screenPortrait, screenXS } from 'src/screens.js';
 import { logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { pushed } from 'src/styles/mixins';
@@ -39,8 +39,8 @@ const CategoryTitle = styled.div<{ isHamburger: boolean }>(
         // background: `linear-gradient(white 0% 48%, ${logoBlue} 48% 52%, white 52%, rgba(255, 255, 255, 0))`,
         zIndex: 5,
         width: '100%',
-        maxWidth: isHamburger ? 'unset' : '750px',
-        margin: isHamburger ? 'unset' : '0 auto',
+        maxWidth: isHamburger ? 800 : 750,
+        margin: isHamburger ? '0 auto' : '0 auto',
     }),
 );
 
@@ -50,9 +50,19 @@ const CategoryTitleText = styled.div<{ isHamburger: boolean }>(latoFont(300), {
     padding: '2rem 0 0.5rem 0',
     whiteSpace: 'nowrap',
     [toMedia([screenXS, screenPortrait])]: {
-        paddingTop: '2.5rem',
+        // paddingTop: '2.5rem',
     },
 });
+
+const categoryListStyle = css({
+    display: 'flex',
+    flexWrap: 'wrap',
+    maxWidth: 650,
+    margin: 'auto',
+    [toMedia(isHamburger)]: {
+        maxWidth: 800
+    }
+})
 
 const CategoryToLabel: Record<typeof ProductTypes[number], string> = {
     arrangement: 'Arrangements',
@@ -91,9 +101,11 @@ const ShopList: React.FC<ShopListProps> = () => {
                             }
                         </CategoryTitleText>
                     </CategoryTitle>
+                    <div css={categoryListStyle}>
                     {items.map((item: Product) => (
                         <ShopItem item={item} key={item.id} />
                     ))}
+                    </div>
                 </Category>
             ))}
         </div>

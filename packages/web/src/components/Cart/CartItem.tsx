@@ -96,7 +96,7 @@ export const CartItem: React.FC<CartProps> = ({ item, error }) => {
                         css={{ flex: '0 0 auto', fontWeight: 300 }}
                         role="button"
                         tabIndex={0}
-                        // rome-ignore lint/a11y/useValidAnchor: <explanation>
+                        // biome-ignore lint/a11y/useValidAnchor: <explanation>
                         onClick={() => dispatch(removeItemFromCart(item.id))}
                     >
                         Remove

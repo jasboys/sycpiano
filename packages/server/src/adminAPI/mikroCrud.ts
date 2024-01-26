@@ -1,7 +1,12 @@
 import {
     EntityClass,
+    EntityData,
     EntityName,
     FilterQuery,
+    FindOptions,
+    FromEntityType,
+    IsSubset,
+    Loaded,
     Populate,
     Primary,
     wrap,
@@ -9,9 +14,9 @@ import {
 import orm from '../database.js';
 import { CrudActions, NotFoundError, SearchParams } from './types.js';
 
-interface CrudParams<R extends object, K extends keyof R & string> {
+interface CrudParams<R extends {}, K extends keyof R & string> {
     entity: EntityClass<R>;
-    populate?: string[];
+    populate?: FindOptions<R, any>['populate'];
     searchableFields?: K[];
 }
 
@@ -26,7 +31,7 @@ const mapSearchFields =
                 typeof entity === 'string'
                     ? entity
                     : (entity as EntityClass<R>).name;
-            const typeOfField = orm.em.getMetadata().get<R>(name).properties[
+            const typeOfField = orm.em.getMetadata().get(name).properties[
                 field
             ].type;
             if (typeOfField === 'string') {
@@ -45,7 +50,7 @@ const mapSearchFields =
 const mikroSearchFields = <R extends {}, K extends keyof R & string>(
     entity: EntityName<R>,
     searchableFields?: K[],
-    populate?: string[],
+    populate?: Populate<R, string>,
 ) => {
     const mappedFields =
         searchableFields && mapSearchFields(entity, searchableFields);
@@ -77,7 +82,7 @@ const mikroSearchFields = <R extends {}, K extends keyof R & string>(
         }
         const results = await orm.em.findAndCount(entity, where, {
             limit,
-            populate: populate as Populate<R>,
+            populate,
         });
 
         return { rows: results[0], count: results[1] };
@@ -95,6 +100,7 @@ export const mikroCrud = <
 }: CrudParams<R, K>): CrudActions<I, R> => {
     return {
         create: async (body) => {
+            console.log(body);
             const created = orm.em.create(entity, body);
             await orm.em.persist(created).flush();
             return created as R & { id: I };
@@ -103,7 +109,16 @@ export const mikroCrud = <
             const record = await orm.em.findOneOrFail(entity, { id } as R, {
                 failHandler: () => new NotFoundError(),
             });
-            wrap(record).assign(body, { mergeObjects: true });
+            wrap(record).assign(
+                body as R &
+                    IsSubset<
+                        EntityData<
+                            FromEntityType<Loaded<R, never, '*', never>>
+                        >,
+                        R
+                    >,
+                { mergeObjectProperties: true },
+            );
             await orm.em.flush();
             return record;
         },
@@ -112,7 +127,7 @@ export const mikroCrud = <
                 id: { $in: ids },
             } as R);
             for (const record of records) {
-                wrap(record).assign(body, { mergeObjects: true });
+                wrap(record).assign(body, { mergeObjectProperties: true });
                 // pojoRecords.push(wrap(record).toPOJO());
             }
             await orm.em.flush();
@@ -123,7 +138,7 @@ export const mikroCrud = <
         },
         getOne: async (id) => {
             const record = await orm.em.findOneOrFail(entity, id, {
-                populate: populate as Populate<R>,
+                populate,
                 failHandler: () => new NotFoundError(),
             });
             return record;
@@ -133,7 +148,7 @@ export const mikroCrud = <
                 limit,
                 offset,
                 orderBy: order,
-                populate: populate as Populate<R>,
+                populate,
             });
             return { rows, count };
         },

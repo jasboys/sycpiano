@@ -9,12 +9,13 @@ import {
     TextInput,
     useNotify,
     useRecordContext,
+    useRefresh,
     useUpdate,
 } from 'react-admin';
 import { useFormContext, useFormState } from 'react-hook-form';
 import { AdminError, MutateForm } from 'src/types.js';
 
-export const EditCalendarPiece: MutateForm = ({ setShowDialog, onRefresh }) => {
+export const EditCalendarPiece: MutateForm = ({ setShowDialog }) => {
     const [update, { isLoading }] = useUpdate<
         RaRecord<Identifier>,
         AdminError
@@ -23,15 +24,15 @@ export const EditCalendarPiece: MutateForm = ({ setShowDialog, onRefresh }) => {
     const { dirtyFields } = useFormState();
     const notify = useNotify();
     const record = useRecordContext();
+    const refresh = useRefresh();
 
     const onSubmit = async (values: Partial<RaRecord>) => {
-        const { order, calendarPieces } = values;
-        const id = calendarPieces[0].id;
+        const { order, id: pieceId, pivotId: id } = values;
         const data: Record<string, unknown> = {
-            order: order,
+            order,
+            pieceId
         };
         if (dirtyFields.composer || dirtyFields.piece) {
-            data.pieceId = values.id;
             data.composer = values.composer;
             data.pieceName = values.piece;
         }
@@ -42,14 +43,13 @@ export const EditCalendarPiece: MutateForm = ({ setShowDialog, onRefresh }) => {
                 data,
             },
             {
-                mutationMode: 'pessimistic',
                 onSuccess: () => {
                     setShowDialog(false);
-                    notify(`Successfully updated calendar-piece ${id}.`, {
+                    notify(`Successfully updated calendar-collaborator ${id}.`, {
                         type: 'success',
                         undoable: true,
                     });
-                    onRefresh();
+                    refresh();
                 },
                 onError: (error) => {
                     notify(error.message, { type: 'error' });
@@ -63,8 +63,8 @@ export const EditCalendarPiece: MutateForm = ({ setShowDialog, onRefresh }) => {
             <DialogContent>
                 <TextInput
                     label="Calendar-Piece Id"
-                    source="calendarPieces[0].id"
-                    defaultValue={record.calendarPieces[0].id}
+                    source="calendarPieceId"
+                    defaultValue={record.pivotId}
                     disabled
                     fullWidth
                 />
@@ -91,8 +91,7 @@ export const EditCalendarPiece: MutateForm = ({ setShowDialog, onRefresh }) => {
 };
 
 export const EditCalendarCollaborator: MutateForm = ({
-    setShowDialog,
-    onRefresh,
+    setShowDialog
 }) => {
     const [update, { isLoading }] = useUpdate<
         RaRecord<Identifier>,
@@ -102,12 +101,13 @@ export const EditCalendarCollaborator: MutateForm = ({
     const { dirtyFields } = useFormState();
     const notify = useNotify();
     const record = useRecordContext();
+    const refresh = useRefresh();
 
     const onSubmit = async (values: Partial<RaRecord>) => {
-        const { order, calendarCollaborators } = values;
-        const id = calendarCollaborators[0].id;
+        const { order, id: collaboratorId, pivotId: id } = values;
         const data: Record<string, unknown> = {
-            order: order,
+            order,
+            collaboratorId,
         };
         if (dirtyFields.name || dirtyFields.instrument) {
             data.collaboratorId = values.id;
@@ -121,7 +121,6 @@ export const EditCalendarCollaborator: MutateForm = ({
                 data,
             },
             {
-                mutationMode: 'pessimistic',
                 onSuccess: () => {
                     setShowDialog(false);
                     notify(
@@ -131,7 +130,7 @@ export const EditCalendarCollaborator: MutateForm = ({
                             undoable: true,
                         },
                     );
-                    onRefresh();
+                    refresh();
                 },
                 onError: (error) => {
                     notify(error.message, { type: 'error' });
@@ -145,8 +144,8 @@ export const EditCalendarCollaborator: MutateForm = ({
             <DialogContent>
                 <TextInput
                     label="Calendar-Collaborator Id"
-                    source="calendarCollaborators[0].id"
-                    defaultValue={record.calendarCollaborators[0].id}
+                    source="calendarCollaboratorId"
+                    defaultValue={record.pivotId}
                     disabled
                     fullWidth
                 />

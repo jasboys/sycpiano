@@ -1,5 +1,4 @@
 import { default as MUITextField } from '@mui/material/TextField';
-import * as React from 'react';
 import {
     ArrayField,
     BooleanInput,
@@ -11,7 +10,6 @@ import {
     TabbedForm,
     TextField,
     TextInput,
-    useRefresh,
 } from 'react-admin';
 import { toUTC } from 'src/utils.js';
 import {
@@ -30,11 +28,8 @@ import { EndDate } from './EndDate.jsx';
 import { AddReferenceButton, EditReferenceButton, Empty } from '../Shared.jsx';
 
 export const CalendarEdit = (props: EditProps) => {
-    const [pieceVersion] = React.useState(0);
-    const [collabVersion] = React.useState(0);
-    const refresh = useRefresh();
     return (
-        <Edit key={`${pieceVersion} ${collabVersion}`} {...props}>
+        <Edit {...props}>
             <TabbedForm>
                 <FormTab label="Event Info">
                     <TextInput source="name" fullWidth />
@@ -77,7 +72,6 @@ export const CalendarEdit = (props: EditProps) => {
                 <FormTab label="Pieces" path="pieces">
                     <ArrayField source="pieces" fieldKey="order">
                         <Datagrid
-                            key={pieceVersion}
                             empty={<Empty assoc="Pieces" />}
                             sx={{
                                 marginBottom: '1rem',
@@ -97,15 +91,13 @@ export const CalendarEdit = (props: EditProps) => {
                             <EditReferenceButton
                                 reference="calendar-pieces"
                                 Component={EditCalendarPiece}
-                                onRefresh={refresh}
                             />
-                            <DeleteCalendarPiece onRefresh={refresh} />
+                            <DeleteCalendarPiece />
                         </Datagrid>
                     </ArrayField>
                     <AddReferenceButton
                         reference="calendar-pieces"
                         Component={AddCalendarPieceForm}
-                        onRefresh={refresh}
                     />
                 </FormTab>
                 <FormTab label="Collaborators" path="collaborators">
@@ -130,15 +122,13 @@ export const CalendarEdit = (props: EditProps) => {
                             <EditReferenceButton
                                 reference="calendar-collaborators"
                                 Component={EditCalendarCollaborator}
-                                onRefresh={refresh}
                             />
-                            <DeleteCalendarCollaborator onRefresh={refresh} />
+                            <DeleteCalendarCollaborator />
                         </Datagrid>
                     </ArrayField>
                     <AddReferenceButton
                         reference="calendar-collaborators"
                         Component={AddCalendarCollaboratorForm}
-                        onRefresh={refresh}
                     />
                 </FormTab>
             </TabbedForm>

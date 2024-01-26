@@ -13,6 +13,8 @@ import {
 import { Product } from 'src/components/Shop/ShopList/types';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { staticImage } from 'src/imageUrls';
+import { toMedia } from 'src/mediaQuery.js';
+import { screenTouch } from 'src/screens.js';
 import { GlobalStateShape } from 'src/store';
 import { logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
@@ -53,18 +55,21 @@ const ThumbnailContainer = styled.div<{ isHamburger: boolean }>(
         }`,
         width: isHamburger ? '60vw' : '',
         height: isHamburger ? '80vw' : 280,
+        maxHeight: isHamburger ? 280 : 'unset',
+        maxWidth: isHamburger ? 210 : 'unset',
     }),
 );
 
 const Thumbnail = styled.div<{ imageUrl: string; isHamburger: boolean }>(
     {
         backgroundColor: '#fff',
-        backgroundPosition: 'center',
-        backgroundSize: 'cover',
+        backgroundPosition: 'center 10px',
+        backgroundSize: '92%',
+        backgroundRepeat: 'no-repeat',
         height: '100%',
     },
     (props) => {
-        const spread = props.isHamburger ? '1rem' : '0.5rem';
+        const spread = props.isHamburger ? '0.5rem' : '0.5rem';
         return {
             backgroundImage: `url(${props.imageUrl})`,
             boxShadow: `0 0 2px ${spread} rgba(255, 255, 255, 1) inset`,
@@ -81,7 +86,7 @@ const ContentContainer = styled.div<{ isHamburger: boolean }>(
         letterSpacing: '0.01rem',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-evenly',
+        justifyContent: 'space-between',
         alignItems: 'center',
     },
     ({ isHamburger }) =>
@@ -116,14 +121,14 @@ const CartButton = styled.button<{
         borderRadius: 8,
         transition: 'all 0.25s',
         userSelect: 'none',
+        [toMedia(screenTouch)]: {
+            boxShadow: '0 1px 5px -2px rgba(0, 0, 0, 0.4)',
+        },
     },
     noHighlight,
-    ({ isHamburger, isMouseDown }) =>
-        isHamburger
-            ? getHoverStyle(isMouseDown)
-            : {
-                  '&:hover': getHoverStyle(isMouseDown),
-              },
+    ({ isMouseDown }) => ({
+        '&:hover': getHoverStyle(isMouseDown),
+    }),
     ({ isItemInCart }) => {
         return isItemInCart ? baseItemInCart : baseItemNotInCart;
     },
@@ -137,11 +142,11 @@ const ShopItemContainer = styled.div<{ isHamburger: boolean }>(
         borderRadius: 4,
         margin: '2.5rem auto',
         flex: '0 1 auto',
-        maxWidth: 650,
         scrollMarginTop: '5rem',
     },
     ({ isHamburger }) =>
         isHamburger && {
+            flex: '0 0 300px',
             flexDirection: 'column',
             alignItems: 'center',
         },
@@ -150,14 +155,15 @@ const ShopItemContainer = styled.div<{ isHamburger: boolean }>(
 const ItemName = styled.div<{ isHamburger: boolean }>(({ isHamburger }) => ({
     margin: isHamburger ? '0.8rem 0' : 'unset',
     fontSize: '1.2rem',
-    textAlign: isHamburger ? 'center' : 'unset',
+    // textAlign: isHamburger ? 'center' : 'unset',
     fontWeight: 400,
+    flex: '0 0 auto',
 }));
 
 const ItemDescription = styled.div<{ isHamburger: boolean }>(
     ({ isHamburger }) => ({
         // margin: isHamburger ? '1rem 2rem' : '1rem 0',
-        paddingLeft: isHamburger ? 'unset' : '1rem',
+        paddingLeft: isHamburger ? '2rem' : '1rem',
     }),
 );
 
@@ -176,6 +182,7 @@ const DetailContainer = styled.div<{ isHamburger: boolean }>(
         justifyContent: 'space-between',
         alignItems: 'center',
         maxWidth: 500,
+        marginBottom: '1.5rem',
     },
     ({ isHamburger }) =>
         isHamburger && {
@@ -205,6 +212,7 @@ const leftHighlight = css({
     margin: '1rem 0',
     padding: '1rem 0',
     borderLeft: '3px solid var(--light-blue)',
+    flex: '1 1 auto',
 });
 
 const formatCentsToDollars = (price: number) => `$${(price / 100).toFixed(2)}`;
@@ -240,57 +248,60 @@ export const ShopItem: React.FC<ShopItemProps> = ({ item, className }) => {
                 />
             </ThumbnailContainer>
             <ContentContainer isHamburger={isHamburger}>
-                <div css={{ marginBottom: '24px' }}>
-                    <ItemName isHamburger={isHamburger}>{item.name}</ItemName>
-                    <div css={leftHighlight}>
-                        <ItemDescription isHamburger={isHamburger}>
-                            {item.description}
-                        </ItemDescription>
-                        {item.sample && (
-                            <SampleLink isHamburger={isHamburger}>
-                                <a
-                                    href={item.sample}
-                                    target="seanchenpiano_sample"
-                                >
-                                    Listen to the work here.
-                                </a>
-                            </SampleLink>
-                        )}
-                    </div>
+                <ItemName isHamburger={isHamburger}>{item.name}</ItemName>
+                <div css={leftHighlight}>
+                    <ItemDescription isHamburger={isHamburger}>
+                        {item.description}
+                    </ItemDescription>
+                    {item.sample && (
+                        <SampleLink isHamburger={isHamburger}>
+                            <a href={item.sample} target="seanchenpiano_sample">
+                                Listen to the work here.
+                            </a>
+                        </SampleLink>
+                    )}
+                </div>
+                <div>
                     <DetailContainer isHamburger={isHamburger}>
-                        <ItemDetails>{toUpper(item.format)} format</ItemDetails>
+                        <ItemDetails>
+                            {toUpper(item.format)}
+                            {isHamburger ? ' format' : ' format'}
+                        </ItemDetails>
                         <Separator>|</Separator>
-                        <ItemDetails>{item.pages} pages</ItemDetails>
+                        <ItemDetails>
+                            {item.pages}
+                            {isHamburger ? ' pp.' : ' pages'}
+                        </ItemDetails>
                         <Separator>|</Separator>
                         <ItemPrice>
                             {formatCentsToDollars(item.price)}
                         </ItemPrice>
                     </DetailContainer>
+                    <CartButton
+                        isHamburger={isHamburger}
+                        isMouseDown={isMouseDown}
+                        isItemInCart={isItemInCart}
+                        onTouchStart={() => {
+                            setIsMouseDown(true);
+                        }}
+                        onMouseDown={() => {
+                            setIsMouseDown(true);
+                        }}
+                        onTouchEnd={() => {
+                            setIsMouseDown(false);
+                        }}
+                        onMouseUp={() => {
+                            setIsMouseDown(false);
+                        }}
+                        onClick={() =>
+                            isItemInCart
+                                ? dispatch(removeItemFromCart(item.id))
+                                : dispatch(addToCartAction(item.id))
+                        }
+                    >
+                        {isItemInCart ? 'Remove from Cart' : 'Add to Cart'}
+                    </CartButton>
                 </div>
-                <CartButton
-                    isHamburger={isHamburger}
-                    isMouseDown={isMouseDown}
-                    isItemInCart={isItemInCart}
-                    onTouchStart={() => {
-                        setIsMouseDown(true);
-                    }}
-                    onMouseDown={() => {
-                        setIsMouseDown(true);
-                    }}
-                    onTouchEnd={() => {
-                        setIsMouseDown(false);
-                    }}
-                    onMouseUp={() => {
-                        setIsMouseDown(false);
-                    }}
-                    onClick={() =>
-                        isItemInCart
-                            ? dispatch(removeItemFromCart(item.id))
-                            : dispatch(addToCartAction(item.id))
-                    }
-                >
-                    {isItemInCart ? 'Remove from Cart' : 'Add to Cart'}
-                </CartButton>
             </ContentContainer>
         </ShopItemContainer>
     );

@@ -1,5 +1,6 @@
 import IconCancel from '@mui/icons-material/Cancel.js';
-import IconDelete from '@mui/icons-material/Delete';
+import IconDelete from '@mui/icons-material/Delete.js';
+import IconRestore from '@mui/icons-material/Restore.js';
 import {
     DialogActions,
     DialogContent,
@@ -16,6 +17,7 @@ import {
     EditProps,
     FileField,
     FileInput,
+    GetOneResult,
     Identifier,
     List,
     ListProps,
@@ -42,6 +44,8 @@ import {
 import { useFormContext, useWatch } from 'react-hook-form';
 import { AdminError, MutateForm } from 'src/types.js';
 import { AddReferenceButton, EditReferenceButton, Empty } from '../Shared.jsx';
+import { useAppDataProvider } from 'src/providers/restProvider.js';
+import { useMutation } from 'react-query';
 
 /*
 readonly id?: string;
@@ -120,12 +124,11 @@ export const MusicShow = (props: ShowProps) => (
     </Show>
 );
 
-const DeleteMusicFile: React.FC<{ onRefresh: () => void }> = ({
-    onRefresh,
-}) => {
+const DeleteMusicFile = () => {
     const record = useRecordContext();
     const [deleteOne] = useDelete<RaRecord<Identifier>, AdminError>();
     const notify = useNotify();
+    const refresh = useRefresh();
 
     const handleClick = () => {
         console.log(record);
@@ -135,7 +138,6 @@ const DeleteMusicFile: React.FC<{ onRefresh: () => void }> = ({
                 id: record.id,
             },
             {
-                mutationMode: 'pessimistic',
                 onError: (error) => {
                     notify(error.message, { type: 'error' });
                 },
@@ -143,7 +145,7 @@ const DeleteMusicFile: React.FC<{ onRefresh: () => void }> = ({
                     notify(
                         `Deleted music-file ${record.id}`,
                     );
-                    onRefresh();
+                    refresh();
                 },
             },
         );
@@ -156,7 +158,8 @@ const DeleteMusicFile: React.FC<{ onRefresh: () => void }> = ({
     );
 };
 
-export const EditMusicFile: MutateForm = ({ setShowDialog, onRefresh }) => {
+export const EditMusicFile: MutateForm = ({ setShowDialog }) => {
+    const refresh = useRefresh();
     const [update, { isLoading }] = useUpdate<
         RaRecord<Identifier>,
         AdminError
@@ -166,22 +169,20 @@ export const EditMusicFile: MutateForm = ({ setShowDialog, onRefresh }) => {
     const record = useRecordContext();
 
     const onSubmit = async (values: Partial<RaRecord>) => {
-        const { music, ...vals } = values;
         update(
             'music-files',
             {
-                id: values.id,
-                data: vals,
+                id: record.id,
+                data: values,
             },
             {
-                mutationMode: 'pessimistic',
                 onSuccess: () => {
                     setShowDialog(false);
-                    notify(`Successfully updated music-file ${values.id}.`, {
+                    notify(`Successfully updated music-file ${record.id}.`, {
                         type: 'success',
                         undoable: true,
                     });
-                    onRefresh();
+                    refresh();
                 },
                 onError: (error) => {
                     notify(error.message, { type: 'error' });
@@ -312,6 +313,38 @@ export const AddMusicFile: React.FC<{
     );
 };
 
+const RecalculateDuration = () => {
+    const record = useRecordContext();
+    const dataProvider = useAppDataProvider();
+    const notify = useNotify();
+    const refresh = useRefresh();
+    const { mutate, isLoading } = useMutation<GetOneResult, AdminError>(
+        () => dataProvider.recalculateDuration(
+            'music-files',
+            {
+                id: record.id,
+            },
+        ),
+        {
+            onError: (error) => {
+                notify(error.message, { type: 'error' });
+            },
+            onSuccess: () => {
+                notify(
+                    `Recalculated duration of music-file ${record.id}`,
+                );
+                refresh();
+            },
+        },
+    );
+
+    return (
+        <MuiButton onClick={() => mutate()} disabled={isLoading}>
+            <IconRestore />
+        </MuiButton>
+    );
+};
+
 export const MusicEdit = (props: EditProps) => {
     const refresh = useRefresh();
 
@@ -350,15 +383,14 @@ export const MusicEdit = (props: EditProps) => {
                         <EditReferenceButton
                             reference="music-files"
                             Component={EditMusicFile}
-                            onRefresh={refresh}
                         />
-                        <DeleteMusicFile onRefresh={refresh} />
+                        <RecalculateDuration />
+                        <DeleteMusicFile />
                     </Datagrid>
                 </ArrayField>
                 <AddReferenceButton
                     reference="music-files"
                     Component={AddMusicFile}
-                    onRefresh={refresh}
                 />
             </SimpleForm>
         </Edit>

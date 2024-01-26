@@ -3,7 +3,6 @@ import * as dotenv from 'dotenv';
 dotenv.config({ override: true });
 
 const smtpEnvVars = [
-    'DKIM_PRIVATE_KEY_FILE',
     'SMTP_HOST',
     'SMTP_PORT',
     'SMTP_USERNAME',

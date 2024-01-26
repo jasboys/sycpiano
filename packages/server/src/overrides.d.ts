@@ -1,6 +1,6 @@
 declare namespace Express {
     interface Request {
-        role: typeof UserRoles[number];
+        role: (typeof UserRoles)[number];
     }
 }
 
@@ -11,6 +11,7 @@ declare namespace NodeJS {
         SMTP_HOST: string;
         SMTP_USERNAME: string;
         SMTP_PASSWORD: string;
+        EMAIL_DOMAIN: string;
         DKIM_PRIVATE_KEY_FILE: string;
         IMAGE_ASSETS_DIR: string;
         MUSIC_ASSETS_DIR: string;

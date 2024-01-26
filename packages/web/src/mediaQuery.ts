@@ -62,7 +62,7 @@ const logicOperator = {
 
 // This code doesn't actually work for infinitely recursive, because media queries are strange
 // Good enough for depth of 2, as long as top level isn't and with multiple ors under it
-const obj2mq = (obj: MediaQueryObject, logic?: 'or' | 'and') => {
+export const obj2mq = (obj: MediaQueryObject, logic?: 'or' | 'and') => {
     if (Array.isArray(obj)) {
         const strings: string[] = obj.map((val) => obj2mq(val));
         return strings.length === 1

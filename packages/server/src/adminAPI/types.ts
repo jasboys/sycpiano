@@ -2,6 +2,8 @@ import {
     EntityDTO,
     EntityData,
     FilterQuery,
+    FromEntityType,
+    IsSubset,
     Loaded,
     Primary,
     QueryOrderMap,
@@ -55,14 +57,23 @@ export interface CrudActions<
     update:
         | (<ExtraParams extends Record<string, string>>(
               id: I,
-              body: Partial<EntityDTO<Loaded<R, never>>> & ExtraParams,
+              body: R &
+                  IsSubset<
+                      EntityData<FromEntityType<Loaded<R, never, '*', never>>>,
+                      R
+                  > &
+                  ExtraParams,
               opts: RequestResponse,
           ) => Promise<EntityData<R>>)
         | null;
     updateMany:
         | ((
               ids: I[],
-              body: Partial<EntityDTO<Loaded<R, never>>>,
+              body: R &
+                  IsSubset<
+                      EntityData<FromEntityType<Loaded<R, never, '*', never>>>,
+                      R
+                  >,
               opts: RequestResponse,
           ) => Promise<ListReturn<R>>)
         | null;

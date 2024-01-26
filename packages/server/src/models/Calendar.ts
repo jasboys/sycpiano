@@ -6,6 +6,7 @@ import {
     Entity,
     Index,
     ManyToMany,
+    OneToMany,
     OneToOne,
     PrimaryKey,
     Property,
@@ -201,6 +202,22 @@ export class Calendar {
 
     @Property({ columnType: 'text', nullable: true })
     imageUrl?: string;
+
+    @OneToMany({
+        entity: () => CalendarPiece,
+        mappedBy: (cp) => cp.calendar,
+        orphanRemoval: true,
+        orderBy: { order: 'ASC' },
+    })
+    calendarPieces = new Collection<CalendarPiece>(this);
+
+    @OneToMany({
+        entity: () => CalendarCollaborator,
+        mappedBy: (cp) => cp.calendar,
+        orphanRemoval: true,
+        orderBy: { order: 'ASC' },
+    })
+    calendarCollaborators = new Collection<CalendarCollaborator>(this);
 
     @ManyToMany({
         entity: () => Piece,

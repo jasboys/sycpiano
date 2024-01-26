@@ -178,9 +178,9 @@ export const ProductShow = (props: ShowProps) => (
             <NumberField source="pages" />
             <TextField source="sample" />
             <Thumbnails source="images" label="Images" addLabel={true} />
-            <TextField source="price" />
+            <TextField source="price" label="Price in cents" />
             <FunctionField
-                label="price"
+                label="Price in dollars"
                 render={(record?: RaRecord) =>
                     `$${(record?.price / 100).toFixed(2)}`
                 }
@@ -234,7 +234,7 @@ export const ProductEdit = (props: EditProps) => (
 );
 
 const CreateFields = () => {
-    const pdfFile = useWatch({ name: 'pdf ' });
+    const pdfFile = useWatch({ name: 'pdf' });
 
     return (
         <>

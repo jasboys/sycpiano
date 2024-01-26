@@ -1,7 +1,10 @@
+import IconMerge from '@mui/icons-material/Merge.js';
 import { Box } from '@mui/material';
 import { formatInTimeZone } from 'date-fns-tz';
 import {
     ArrayField,
+    BulkActionProps,
+    Button,
     Create,
     CreateButton,
     CreateProps,
@@ -11,12 +14,16 @@ import {
     EditProps,
     FilterButton,
     FunctionField,
+    GetOneResult,
+    Identifier,
     List,
+    ListButton,
     ListProps,
     NumberField,
     RaRecord,
     SearchInput,
     Show,
+    ShowButton,
     ShowProps,
     SimpleForm,
     Tab,
@@ -24,10 +31,49 @@ import {
     TextField,
     TextInput,
     TopToolbar,
+    useNotify,
+    useRecordContext,
+    useRefresh,
 } from 'react-admin';
+import { useMutation } from 'react-query';
+import { useAppDataProvider } from 'src/providers/restProvider.js';
+import { AdminError } from 'src/types.js';
 import { TrimButton } from '../Shared.jsx';
 
 const filters = [<SearchInput key="search" source="q" alwaysOn />];
+
+const MergeAction = ({
+    selectedIds,
+}: { selectedIds?: Identifier[] }) => {
+    const notify = useNotify();
+    const refresh = useRefresh();
+    const dataProvider = useAppDataProvider();
+    const { mutate, isLoading } = useMutation(
+        () =>
+            dataProvider.merge(
+                'pieces',
+                {
+                    ids: selectedIds ?? [],
+                },
+            ),
+        {
+            onSuccess: () => {
+                refresh();
+                notify('Merging of pieces succeeded.');
+            },
+            onError: (error) => notify(`Error: ${error}`, { type: 'warning' }),
+        },
+    );
+    return (
+        <Button
+            label={"Merge"}
+            onClick={() => mutate()}
+            disabled={isLoading}
+        >
+            <IconMerge />
+        </Button>
+    );
+};
 
 const ListActions = () => (
     <TopToolbar>
@@ -54,6 +100,7 @@ const ExpandPanel = () => {
                     rowClick={(_, __, record) =>
                         `/calendars/${record.id}/pieces`
                     }
+                    bulkActionButtons={false}
                 >
                     <TextField source="name" />
                     <FunctionField
@@ -73,16 +120,22 @@ const ExpandPanel = () => {
     );
 };
 
+const BulkActions = (props: BulkActionProps) => (
+    <>
+        <MergeAction {...props} />
+    </>
+)
+
 export const PieceList = (props: ListProps) => {
     return (
         <List
             {...props}
             perPage={25}
             filters={filters}
-            sort={{ field: 'composer,piece', order: 'ASC,ASC' }}
+            sort={{ field: 'composer,piece', order: 'ASC,ASC' as any }}
             actions={<ListActions />}
         >
-            <Datagrid rowClick="edit" expand={<ExpandPanel />}>
+            <Datagrid rowClick="edit" expand={<ExpandPanel />} bulkActionButtons={<BulkActions />}>
                 <TextField source="id" />
                 <TextField source="composer" />
                 <TextField source="piece" />
@@ -103,8 +156,50 @@ export const PieceShow = (props: ShowProps) => (
     </Show>
 );
 
+const MergeButton = () => {
+    const record = useRecordContext();
+    const dataProvider = useAppDataProvider();
+    const refresh = useRefresh();
+    const notify = useNotify();
+    const { mutate, isLoading } = useMutation<GetOneResult, AdminError>(
+        () =>
+            dataProvider.mergeInto('pieces', {
+                id: record.id,
+            }),
+        {
+            onError: (error) => {
+                notify(error.message, { type: 'error' });
+            },
+            onSuccess: () => {
+                notify(`Merged others into piece ${record.id}`);
+                refresh();
+            },
+        },
+    );
+
+    return (
+        <Button
+            label="Merge Others"
+            onClick={() => mutate()}
+            disabled={isLoading}
+        >
+            <IconMerge />
+        </Button>
+    );
+};
+
+const EditActions = () => {
+    return (
+        <TopToolbar>
+            <ShowButton />
+            <MergeButton />
+            <ListButton />
+        </TopToolbar>
+    );
+};
+
 export const PieceEdit = (props: EditProps) => (
-    <Edit {...props}>
+    <Edit actions={<EditActions />} {...props}>
         <SimpleForm>
             <TextInput source="id" fullWidth disabled />
             <TextInput source="composer" multiline={true} fullWidth={true} />

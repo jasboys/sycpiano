@@ -61,7 +61,7 @@ const ListActions = () => (
     </TopToolbar>
 );
 
-const PostBulkActionButtons = (props: BulkActionProps) => (
+const BulkActionButtons = (props: BulkActionProps) => (
     <>
         <PopulateImageFieldsButton {...props} />
     </>
@@ -95,7 +95,7 @@ export const CalendarList = (props: ListProps) => {
                 }}
                 style={{ tableLayout: 'fixed' }}
                 rowClick="edit"
-                bulkActionButtons={<PostBulkActionButtons />}
+                bulkActionButtons={<BulkActionButtons />}
             >
 				<TextField source="id" />
                 <TextField source="name" />

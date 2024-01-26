@@ -30,14 +30,18 @@ export const links: ReadonlyArray<LinkShape> = [
         ],
     },
     { name: 'contact', path: '/contact' },
-    {
-        name: 'shop',
-        path: '/shop',
-        subLinks: [
-            { name: 'scores', path: '/scores' },
-            { name: 'faqs', path: '/faqs' },
-        ],
-    },
+    ...(JSON.parse(ENABLE_SHOP) === true
+        ? [
+              {
+                  name: 'shop',
+                  path: '/shop',
+                  subLinks: [
+                      { name: 'scores', path: '/scores' },
+                      { name: 'faqs', path: '/faqs' },
+                  ],
+              },
+          ]
+        : []),
 ];
 
 export const findParent = (child: string) =>

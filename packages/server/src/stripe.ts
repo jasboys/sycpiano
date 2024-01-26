@@ -86,8 +86,8 @@ export const createCheckoutSession = async (
     try {
         const session = await stripe.checkout.sessions.create({
             mode: 'payment',
-            success_url: `https://${host}/shop/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `https://${host}/shop/scores`,
+            success_url: `${host}/shop/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${host}/shop/scores`,
             payment_method_types: ['card'],
             line_items: priceIDs.map((id) => ({
                 price: id,
@@ -156,6 +156,7 @@ export const constructEvent = (
 
 export const createProduct = async (attributes: Product): Promise<string[]> => {
     try {
+        console.log(attributes);
         const product = await stripe.products.create({
             name: attributes.name,
             description: attributes.description,
@@ -206,15 +207,25 @@ export const updateProduct = async (attributes: Product): Promise<string[]> => {
         if (attributes.priceId) {
             price = await stripe.prices.retrieve(attributes.priceId);
         }
-        if (price !== undefined && attributes.price !== price.unit_amount) {
-            await stripe.prices.update(price.id, { active: false });
-        }
+        let shouldArchiveOldPrice = false;
         if (price === undefined || attributes.price !== price.unit_amount) {
-            price = await stripe.prices.create({
-                currency: CURRENCY,
-                unit_amount: attributes.price,
-                product: attributes.id,
-            });
+            // look for price to see if we already have
+            price = (
+                await stripe.prices.list({
+                    product: attributes.id,
+                })
+            ).data.find((sp) => sp.unit_amount === attributes.price);
+            if (!price) {
+                // Else create new one
+                price = await stripe.prices.create({
+                    currency: CURRENCY,
+                    unit_amount: attributes.price,
+                    product: attributes.id,
+                });
+            } else {
+                price = await stripe.prices.update(price.id, { active: true });
+            }
+            shouldArchiveOldPrice = true;
         }
         const product = await stripe.products.update(attributes.id, {
             name: attributes.name,
@@ -232,6 +243,9 @@ export const updateProduct = async (attributes: Product): Promise<string[]> => {
                 [],
             default_price: price.id,
         });
+        if (shouldArchiveOldPrice) {
+            await stripe.prices.update(attributes.priceId, { active: false });
+        }
         return [product.id, price.id];
     } catch (e) {
         console.error(`Couldn't update product.`, e);

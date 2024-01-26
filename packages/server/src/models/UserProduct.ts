@@ -7,7 +7,6 @@ import { User } from './User.js';
 export class UserProduct {
     @ManyToOne({
         entity: () => User,
-        onDelete: 'cascade',
         primary: true,
         index: 'user_product_user_idx',
     })
@@ -15,7 +14,6 @@ export class UserProduct {
 
     @ManyToOne({
         entity: () => Product,
-        onDelete: 'cascade',
         primary: true,
         index: 'user_product_product_idx',
     })

@@ -1,28 +1,13 @@
-import root from 'app-root-path';
 import archiver from 'archiver';
 import { getYear } from 'date-fns';
 import { promises as fsAsync, readFileSync } from 'fs';
 import mustache from 'mustache';
 import * as nodemailer from 'nodemailer';
 import { Attachment } from 'nodemailer/lib/mailer';
+import SMTPTransport from 'nodemailer/lib/smtp-transport/index.js';
 import * as path from 'path';
 import orm from '../database.js';
 import { Product } from '../models/Product.js';
-
-type TransportOptions = {
-    host: string;
-    secure: boolean;
-    port: number;
-    auth: {
-        user: string;
-        pass: string;
-    };
-    dkim: {
-        domainName: string;
-        keySelector: string;
-        privateKey: string;
-    };
-};
 
 interface Mailer {
     duplicateEmailNotification: (username: string) => Promise<void>;
@@ -35,7 +20,7 @@ interface Mailer {
 }
 
 class ConnectedMailer implements Mailer {
-    private readonly transportOptions: TransportOptions;
+    private transporter: nodemailer.Transporter;
 
     constructor() {
         if (
@@ -43,15 +28,12 @@ class ConnectedMailer implements Mailer {
             process.env.SMTP_PASSWORD === undefined ||
             process.env.SMTP_PORT === undefined ||
             process.env.SMTP_USERNAME === undefined ||
-            process.env.SMTP_PASSWORD === undefined ||
-            process.env.DKIM_PRIVATE_KEY_FILE === undefined ||
             process.env.IMAGE_ASSETS_DIR === undefined ||
             process.env.PRODUCTS_DIR === undefined
         ) {
             throw new Error('Missing env vars');
         }
-
-        this.transportOptions = {
+        const transportOptions: SMTPTransport.Options = {
             host: process.env.SMTP_HOST,
             secure: parseInt(process.env.SMTP_PORT) === 465 ? true : false,
             port: parseInt(process.env.SMTP_PORT),
@@ -59,27 +41,29 @@ class ConnectedMailer implements Mailer {
                 user: process.env.SMTP_USERNAME,
                 pass: process.env.SMTP_PASSWORD,
             },
-            dkim: {
-                domainName: 'seanchenpiano.com',
+        };
+        if (process.env.DKIM_PRIVATE_KEY_FILE && process.env.EMAIL_DOMAIN) {
+            transportOptions.dkim = {
+                domainName: process.env.EMAIL_DOMAIN,
                 keySelector: 'email',
                 privateKey: readFileSync(
                     path.resolve(process.env.DKIM_PRIVATE_KEY_FILE),
                     'utf8',
                 ),
-            },
-        };
+            };
+        } else if (process.env.NODE_ENV === 'production') {
+            console.warn(
+                'Production env vars should include EMAIL_DOMAIN and DKIM_PRIVATE_KEY_FILE',
+            );
+        }
+        this.transporter = nodemailer.createTransport(transportOptions);
     }
 
     duplicateEmailNotification = async (username: string): Promise<void> => {
         if (process.env.IMAGE_ASSETS_DIR === undefined) {
             throw new Error('Missing env vars');
         }
-        const transport = nodemailer.createTransport(this.transportOptions);
-        const attachments: {
-            filename: string;
-            path: string;
-            cid?: string;
-        }[] = [
+        const attachments: Attachment[] = [
             {
                 filename: 'logo.png',
                 path: path.resolve(
@@ -91,11 +75,7 @@ class ConnectedMailer implements Mailer {
         ];
 
         const template = await fsAsync.readFile(
-            path.resolve(
-                root.toString(),
-                'web/partials',
-                'notificationEmail.html',
-            ),
+            path.resolve(process.env.PARTIALS_DIR, 'notificationEmail.html'),
             'utf8',
         );
 
@@ -114,7 +94,7 @@ class ConnectedMailer implements Mailer {
             attachments,
         };
 
-        const result = await transport.sendMail(message);
+        const result = await this.transporter.sendMail(message);
         if (process.env.NODE_ENV === 'development') {
             console.log(username);
             console.log(attachments);
@@ -126,12 +106,7 @@ class ConnectedMailer implements Mailer {
         if (process.env.IMAGE_ASSETS_DIR === undefined) {
             throw new Error('Missing env vars');
         }
-        const transport = nodemailer.createTransport(this.transportOptions);
-        const attachments: {
-            filename: string;
-            path: string;
-            cid?: string;
-        }[] = [
+        const attachments: Attachment[] = [
             {
                 filename: 'logo.png',
                 path: path.resolve(
@@ -143,11 +118,7 @@ class ConnectedMailer implements Mailer {
         ];
 
         const template = await fsAsync.readFile(
-            path.resolve(
-                root.toString(),
-                'web/partials',
-                'notificationEmail.html',
-            ),
+            path.resolve(process.env.PARTIALS_DIR, 'notificationEmail.html'),
             'utf8',
         );
 
@@ -167,7 +138,7 @@ class ConnectedMailer implements Mailer {
             attachments,
         };
 
-        const result = await transport.sendMail(message);
+        const result = await this.transporter.sendMail(message);
         if (process.env.NODE_ENV === 'development') {
             console.log(username);
             console.log(attachments);
@@ -187,7 +158,6 @@ class ConnectedMailer implements Mailer {
             ) {
                 throw new Error('Missing env vars');
             }
-            const transport = nodemailer.createTransport(this.transportOptions);
 
             const products = await orm.em.find(Product, {
                 id: {
@@ -255,11 +225,7 @@ class ConnectedMailer implements Mailer {
             }
 
             const template = await fsAsync.readFile(
-                path.resolve(
-                    root.toString(),
-                    'web/partials',
-                    'purchaseEmail.html',
-                ),
+                path.resolve(process.env.PARTIALS_DIR, 'purchaseEmail.html'),
                 'utf8',
             );
 
@@ -280,10 +246,33 @@ class ConnectedMailer implements Mailer {
                 attachments,
             };
 
-            const result = await transport.sendMail(message);
+            const result = await this.transporter.sendMail(message);
             if (process.env.NODE_ENV === 'development') {
                 console.log(email);
                 console.log(attachments);
+                console.log(result);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    errorEmailer = async (domain: string, error: string) => {
+        try {
+            const message: nodemailer.SendMailOptions = {
+                from: 'Sean Chen Piano <seanchen@seanchenpiano.com>',
+                replyTo: 'seanchen@seanchenpiano.com',
+                to: 'seanchen@seanchenpiano.com',
+                subject: `[Server Error]: ${domain}`,
+                text: `
+                On ${new Date()}, ${domain} received this error:
+                ${error}
+            `,
+            };
+
+            const result = await this.transporter.sendMail(message);
+            if (process.env.NODE_ENV === 'development') {
+                console.log('Sent error email');
                 console.log(result);
             }
         } catch (e) {

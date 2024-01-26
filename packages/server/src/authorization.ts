@@ -135,7 +135,11 @@ authRouter.post('/login', async (req, res) => {
             throw new Error('no user or pass');
         }
 
-        const user = await orm.em.findOneOrFail(User, { username });
+        const user = await orm.em.findOneOrFail(User, {
+            $and: [{ username }, { role: 'admin' }],
+        });
+
+        console.log(user);
 
         if (!user.passHash || !user.username) {
             throw new Error('password empty');

@@ -7,10 +7,9 @@ import { Transition } from 'react-transition-group';
 import { mqSelectors } from 'src/components/App/reducers';
 import { CartList } from 'src/components/Cart/CartList';
 import { initCartAction, syncLocalStorage } from 'src/components/Cart/reducers';
-import { LoadingInstance } from 'src/components/LoadingSVG';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { toMedia } from 'src/mediaQuery.js';
-import { hiDpx, isHamburger } from 'src/screens.js';
+import { hiDpx, screenS } from 'src/screens.js';
 import { navBarHeight } from 'src/styles/variables';
 
 const Arrow = styled.div({
@@ -23,26 +22,11 @@ const Arrow = styled.div({
     borderBottom: '15.5px solid rgba(255 255 255 / 0.4)',
 });
 
-const LoadingDiv = styled.div({
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 10,
-    fill: 'white',
-});
-
-const CartFilterGroup = styled.div<{ isCheckingOut: boolean }>(
+const CartFilterGroup = styled.div(
     {
         position: 'relative',
         height: '100%',
     },
-    ({ isCheckingOut }) =>
-        isCheckingOut && {
-            filter: 'brightness(0.75)',
-        },
 );
 const CartContainer = styled.div<{ top: number }>(
     {
@@ -52,7 +36,7 @@ const CartContainer = styled.div<{ top: number }>(
         visibility: 'hidden',
         opacity: 0,
         maxHeight: '100%',
-        [toMedia(isHamburger)]: {
+        [toMedia(screenS)]: {
             position: 'absolute',
             paddingTop: navBarHeight.lowDpx,
             zIndex: 4999,
@@ -91,10 +75,9 @@ const Cart: React.FC<CartProps> = ({
     arrow,
     update,
 }) => {
-    const isHamburger = useAppSelector(mqSelectors.isHamburger);
+    const screenS = useAppSelector(mqSelectors.screenS);
     const dispatch = useAppDispatch();
     const visible = useAppSelector(({ cart }) => cart.visible);
-    const isCheckingOut = useAppSelector(({ cart }) => cart.isCheckingOut);
     const cartLength = useAppSelector(({ cart }) => cart.items.length);
     const tl = React.useRef<gsap.core.Timeline>();
     const firstRun = React.useRef(true);
@@ -141,31 +124,26 @@ const Cart: React.FC<CartProps> = ({
         >
             <CartContainer
                 css={
-                    !isHamburger && {
+                    !screenS && {
                         left: position.x !== null ? position.x : '',
                         top: position.y !== null ? position.y : '',
                         position: strategy,
                     }
                 }
-                top={!isHamburger && position.y !== null ? position.y : 0}
+                top={!screenS && position.y !== null ? position.y : 0}
                 ref={
-                    isHamburger ? () => {} : floatingRef
+                    screenS ? () => {} : floatingRef
                 } /* eslint-disable-line @typescript-eslint/no-empty-function */
             >
-                {isCheckingOut && (
-                    <LoadingDiv>
-                        <LoadingInstance width={60} height={60} />
-                    </LoadingDiv>
-                )}
-                <CartFilterGroup isCheckingOut={isCheckingOut}>
-                    {!isHamburger && (
+                <CartFilterGroup>
+                    {!screenS && (
                         <Arrow
                             ref={
-                                isHamburger ? () => {} : arrowCallback
+                                screenS ? () => {} : arrowCallback
                             } /* eslint-disable-line @typescript-eslint/no-empty-function */
                             style={{
-                                left: arrow?.x !== undefined ? arrow?.x : '',
-                                top: arrow?.y !== undefined ? arrow?.y : '',
+                                left: arrow?.x !== undefined ? arrow.x - 2 : '',
+                                top: arrow?.y !== undefined ? arrow.y : '',
                             }}
                         />
                     )}

@@ -58,6 +58,13 @@ const callAudioWaveForm = (
     });
 };
 
+export const getAudioDuration = async (audioFile: string) => {
+    const { streams } = await getFileInfo(audioFile);
+    const { duration: durationString } = streams[0];
+    const duration = parseFloat(durationString);
+    return Math.round(duration);
+};
+
 export const genWaveformAndReturnDuration = async (audioFile: string) => {
     const { streams } = await getFileInfo(audioFile);
     const { sample_rate: sampleRateString, duration: durationString } =

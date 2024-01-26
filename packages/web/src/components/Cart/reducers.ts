@@ -99,13 +99,13 @@ export const checkoutAction = createAsyncThunk<
                 );
             }
             const response = await axios.post<
-                { email: string; productIDs: string[] },
+                { email: string; productIds: string[] },
                 AxiosResponse<{ sessionId: string }>
             >(
                 '/api/shop/checkout',
                 {
                     email,
-                    productIDs: thunkAPI.getState().cart.items,
+                    productIds: thunkAPI.getState().cart.items,
                 },
                 {
                     headers: {

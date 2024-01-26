@@ -15,12 +15,13 @@ import {
 } from 'src/components/Cart/reducers';
 import { Product } from 'src/components/Shop/ShopList/types';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
-import { isHamburger } from 'src/screens';
+import { screenS } from 'src/screens';
 import { lightBlue, logoBlue, theme } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { cartWidth } from 'src/styles/variables';
 import { formatPrice } from 'src/utils';
+import { LoadingInstance } from '../LoadingSVG.jsx';
 
 const ARROW_SIDE = 32;
 
@@ -35,7 +36,7 @@ const CartListDiv = styled.div(latoFont(300), {
     overflowY: 'auto',
     height: 'fit-content',
     maxHeight: 'calc(100% - 2rem)',
-    [toMedia(isHamburger)]: {
+    [toMedia(screenS)]: {
         width: '100vw',
         margin: 'unset',
         height: '100%',
@@ -210,6 +211,7 @@ const CheckoutForm: React.FC<{ cartLength: number }> = ({ cartLength }) => {
     const dispatch = useAppDispatch();
     const [isMouseDown, setIsMouseDown] = React.useState(false);
     const savedEmail = useAppSelector(({ cart }) => cart.email);
+    const isCheckingOut = useAppSelector(({ cart }) => cart.isCheckingOut);
     const [email, setEmail] = React.useState('');
     const [error, setError] = React.useState(false);
 
@@ -227,7 +229,7 @@ const CheckoutForm: React.FC<{ cartLength: number }> = ({ cartLength }) => {
             <StyledForm
                 onSubmit={(e) => {
                     e.preventDefault();
-                    if (error) {
+                    if (error || isCheckingOut) {
                         return;
                     }
                     if (email === '') {
@@ -271,14 +273,31 @@ const CheckoutForm: React.FC<{ cartLength: number }> = ({ cartLength }) => {
     );
 };
 
-const InnerBorderContainer = styled.div({
-    height: '100%',
+const LoadingDiv = styled.div({
+    position: 'absolute',
     width: '100%',
-    borderRadius: 4,
-    // overflowY: 'auto',
+    height: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+    fill: 'white',
 });
 
+const InnerBorderContainer = styled.div<{ isCheckingOut: boolean }>(
+    {
+        height: '100%',
+        width: '100%',
+        borderRadius: 4,
+    },
+    ({ isCheckingOut }) =>
+        isCheckingOut && {
+            filter: 'brightness(0.75)',
+        },
+);
+
 export const CartList: React.FC<Record<never, unknown>> = () => {
+    const isCheckingOut = useAppSelector(({ cart }) => cart.isCheckingOut);
     const shopItems = useAppSelector(({ shop }) => shop.items);
     const cart = useAppSelector(({ cart }) => cart.items);
     const checkoutError = useAppSelector(({ cart }) => cart.checkoutError);
@@ -295,7 +314,12 @@ export const CartList: React.FC<Record<never, unknown>> = () => {
 
     return (
         <CartListDiv>
-            <InnerBorderContainer>
+            {isCheckingOut && (
+                <LoadingDiv>
+                    <LoadingInstance width={60} height={60} />
+                </LoadingDiv>
+            )}
+            <InnerBorderContainer isCheckingOut={isCheckingOut}>
                 <Heading />
                 {cart.length !== 0 &&
                 shopItems &&

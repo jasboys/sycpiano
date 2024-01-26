@@ -1,4 +1,4 @@
-import { toMedia } from './mediaQuery';
+import { obj2mq } from './mediaQuery';
 
 // Screen widths for media queries
 const xs = 640;
@@ -11,7 +11,6 @@ const xl = 1920;
 const short = 800;
 
 // various media query selector defines
-// export const screenTouch = json2mq({ screen: true, hover: 'none', pointer: 'coarse' });
 export const screenTouch = { hover: 'none', pointer: 'coarse' };
 export const screenXS = { maxWidth: xs };
 export const screenS = { maxWidth: s };
@@ -31,8 +30,6 @@ export const isHamburger = {
     ],
 };
 
-//(hiDpx || screenPortrait || (screenL && screenLandscape))
-
 export const screenXL = { minWidth: xl };
 export const screenLandLandscape = { ...screenLandscape, ...screenL };
 export const screenXSandPortrait = { ...screenPortrait, ...screenXS };
@@ -43,15 +40,15 @@ export const hiDpx = [
     { and: [screenShort, screenPortrait] },
 ];
 export const GLOBAL_QUERIES = {
-    screenTouch,
-    screenXS,
-    screenS,
-    screenM,
-    screenL,
-    screenPortrait,
-    screenLandscape,
-    hiDpx: toMedia(hiDpx).substring(7),
-    isHamburger: toMedia(isHamburger).substring(7),
+    screenTouch: obj2mq(screenTouch),
+    screenXS: obj2mq(screenXS),
+    screenS: obj2mq(screenS),
+    screenM: obj2mq(screenM),
+    screenL: obj2mq(screenL),
+    screenPortrait: obj2mq(screenPortrait),
+    screenLandscape: obj2mq(screenLandscape),
+    hiDpx: obj2mq(hiDpx),
+    isHamburger: obj2mq(isHamburger),
 };
 
 // cutoffs for <picture> size queries

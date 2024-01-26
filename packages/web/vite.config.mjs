@@ -25,6 +25,7 @@ export default defineConfig({
         VIDEOS_PATH: JSON.stringify(`${staticPrefix}/videos`),
         GAPI_KEY: JSON.stringify(process.env.GAPI_KEY_APP),
         STRIPE_PUBLIC_KEY: JSON.stringify(process.env.STRIPE_PUBLIC_KEY),
+        ENABLE_SHOP: JSON.stringify(process.env.ENABLE_SHOP ?? false),
         preventAssignment: true,
     },
     plugins: [

@@ -3,3 +3,4 @@ declare let IMAGES_PATH: string;
 declare let MUSIC_PATH: string;
 declare let GAPI_KEY: string; // see webpack conf
 declare let STRIPE_PUBLIC_KEY: string;
+declare let ENABLE_SHOP: string;

@@ -22,25 +22,6 @@ class FixedPlatform extends PostgreSqlPlatform {
 
         return `to_tsvector('simple', :column:) @@ plainto_tsquery('simple', :query)`;
     }
-
-    // override getRegExpValue(val: RegExp): {
-    //     $re: string;
-    //     $flags?: string | undefined;
-    // } {
-    //     console.log('here', val);
-    //     return {
-    //         $re: val.source,
-    //         $flags: val.flags,
-    //     };
-    // }
-
-    // override getRegExpOperator(
-    //     val?: unknown,
-    //     flags?: string | undefined,
-    // ): string {
-    //     console.log('op', val, flags);
-    //     return '~*';
-    // }
 }
 
 export class FixedPostgresql extends PostgreSqlDriver {
@@ -52,7 +33,6 @@ const orm = await MikroORM.init<FixedPostgresql>({
     entitiesTs: ['packages/server/src/models'],
     metadataProvider: ReflectMetadataProvider,
     clientUrl: databaseUrl,
-    // debug: process.env.NODE_ENV === 'development',
     debug: true,
     driver: FixedPostgresql,
     loadStrategy: LoadStrategy.JOINED,

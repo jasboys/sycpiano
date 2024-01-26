@@ -6,7 +6,6 @@ import { omit, startCase, toLower } from 'lodash-es';
 import { parse, stringify } from 'qs';
 import * as React from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { useMedia } from 'react-media';
 import {
     Navigate,
     PathMatch,
@@ -64,6 +63,7 @@ import {
     titleStringBase,
 } from 'src/utils';
 import { setMatches } from './reducers';
+import { useMediaQueries } from '@react-hook/media-query';
 
 const register = extractModule(store);
 const Contact = () =>
@@ -143,6 +143,8 @@ const CheckoutSuccess = () =>
             /* webpackChunkName: 'checkoutSuccess' */ 'src/components/Shop/CheckoutSuccess'
         ),
     );
+
+const shopEnabled = JSON.parse(ENABLE_SHOP) === true;
 
 const RootContainer = styled.div<{ isHome: boolean }>({
     height: '100%',
@@ -268,8 +270,8 @@ const App: React.FC<Record<never, unknown>> = () => {
     );
     const arrowRef = React.useRef<HTMLDivElement | null>(null);
     const timerRef = React.useRef<ReturnType<typeof setTimeout>>();
-    const mediaMatches = useMedia({ queries: GLOBAL_QUERIES });
-    const { isHamburger, screenXS, screenM } = mediaMatches;
+    const { matches: mediaMatches } = useMediaQueries(GLOBAL_QUERIES);
+    const { isHamburger, screenXS, screenM, hiDpx } = mediaMatches;
     const navigate = useNavigate();
     // Make sure to adjust this match array when adding new pages, especially with subpaths
     const [routerMatch, transitionMatch] = useCustomMatch();
@@ -282,7 +284,11 @@ const App: React.FC<Record<never, unknown>> = () => {
         middlewareData,
         update,
     } = useFloating<HTMLDivElement>({
-        middleware: [offset(-12), shift(), arrow({ element: arrowRef })],
+        middleware: [
+            offset({ mainAxis: hiDpx ? -12 : -4 }),
+            shift(),
+            arrow({ element: arrowRef }),
+        ],
     });
 
     // Remove fbclid tracker
@@ -321,13 +327,20 @@ const App: React.FC<Record<never, unknown>> = () => {
         }
     }, [screenXS, screenM, navbarVisible, dispatch]);
 
+    const stableMediaArray = Object.entries(mediaMatches)
+        .sort(([ka, _], [kb, __]) => ka.localeCompare(kb))
+        .map(([_, v]) => v);
+
+    console.log(...stableMediaArray);
+
     React.useEffect(() => {
         dispatch(setMatches(mediaMatches));
-    }, [mediaMatches]);
+        console.log('setMedia');
+    }, [...stableMediaArray]);
 
     React.useEffect(() => {
         update();
-    }, [mediaMatches, menuOpen]);
+    }, [...stableMediaArray, menuOpen, update]);
 
     let currentPage = getMostSpecificRouteName(location.pathname);
     currentPage = currentPage ? startCase(currentPage) : 'Home';
@@ -498,48 +511,61 @@ const App: React.FC<Record<never, unknown>> = () => {
                                         element={<Navigate to="/not-found" />}
                                     />
                                 </Route>
-                                <Route path="shop/*" element={<Container />}>
+                                {shopEnabled && (
                                     <Route
-                                        path="scores/*"
-                                        element={
-                                            <AsyncComponent<ShopListProps>
-                                                moduleProvider={ShopList}
-                                            />
-                                        }
-                                    />
-                                    <Route
-                                        path="retrieve-purchased"
-                                        element={
-                                            <AsyncComponent<RetrievalFormProps>
-                                                moduleProvider={RetrievalForm}
-                                            />
-                                        }
-                                    />
-                                    <Route
-                                        path="faqs"
-                                        element={
-                                            <AsyncComponent<FAQsProps>
-                                                moduleProvider={FAQs}
-                                            />
-                                        }
-                                    />
-                                    <Route
-                                        path="checkout-success"
-                                        element={
-                                            <AsyncComponent<CheckoutSuccessProps>
-                                                moduleProvider={CheckoutSuccess}
-                                            />
-                                        }
-                                    />
-                                    <Route
-                                        index
-                                        element={<Navigate to="/shop/scores" />}
-                                    />
-                                    <Route
-                                        path="*"
-                                        element={<Navigate to="/not-found" />}
-                                    />
-                                </Route>
+                                        path="shop/*"
+                                        element={<Container />}
+                                    >
+                                        <Route
+                                            path="scores/*"
+                                            element={
+                                                <AsyncComponent<ShopListProps>
+                                                    moduleProvider={ShopList}
+                                                />
+                                            }
+                                        />
+                                        <Route
+                                            path="retrieve-purchased"
+                                            element={
+                                                <AsyncComponent<RetrievalFormProps>
+                                                    moduleProvider={
+                                                        RetrievalForm
+                                                    }
+                                                />
+                                            }
+                                        />
+                                        <Route
+                                            path="faqs"
+                                            element={
+                                                <AsyncComponent<FAQsProps>
+                                                    moduleProvider={FAQs}
+                                                />
+                                            }
+                                        />
+                                        <Route
+                                            path="checkout-success"
+                                            element={
+                                                <AsyncComponent<CheckoutSuccessProps>
+                                                    moduleProvider={
+                                                        CheckoutSuccess
+                                                    }
+                                                />
+                                            }
+                                        />
+                                        <Route
+                                            index
+                                            element={
+                                                <Navigate to="/shop/scores" />
+                                            }
+                                        />
+                                        <Route
+                                            path="*"
+                                            element={
+                                                <Navigate to="/not-found" />
+                                            }
+                                        />
+                                    </Route>
+                                )}
                                 <Route
                                     path="not-found"
                                     element={
@@ -568,16 +594,18 @@ const App: React.FC<Record<never, unknown>> = () => {
                         </FadingContainer>
                     </Transition>
                 </SwitchTransition>
-                <Cart
-                    floatingRef={
-                        floating as React.MutableRefObject<HTMLDivElement>
-                    }
-                    arrowRef={arrowRef}
-                    strategy={strategy}
-                    position={{ x, y }}
-                    arrow={middlewareData.arrow}
-                    update={update}
-                />
+                {shopEnabled && (
+                    <Cart
+                        floatingRef={
+                            floating as React.MutableRefObject<HTMLDivElement>
+                        }
+                        arrowRef={arrowRef}
+                        strategy={strategy}
+                        position={{ x, y }}
+                        arrow={middlewareData.arrow}
+                        update={update}
+                    />
+                )}
                 {(menuOpen || cartOpen) && (
                     <StyledClickDiv
                         isMobile={isMobile}

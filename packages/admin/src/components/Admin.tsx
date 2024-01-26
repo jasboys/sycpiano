@@ -35,7 +35,7 @@ import {
     ProductList,
     ProductShow,
 } from './Product';
-import { UserList, UserShow } from './User';
+import { UserEdit, UserList, UserShow } from './User';
 
 export const AdminPage = () => (
     <Admin
@@ -124,6 +124,11 @@ export const AdminPage = () => (
             edit={ProductEdit}
             create={ProductCreate}
         />
-        <Resource name="users" list={UserList} show={UserShow} />
+        <Resource
+            name="users"
+            list={UserList}
+            show={UserShow}
+            edit={UserEdit}
+        />
     </Admin>
 );

@@ -4,5 +4,4 @@ export interface AdminError {
 
 export type MutateForm = React.FC<{
     setShowDialog: (t: boolean) => void;
-    onRefresh: () => void;
 }>;

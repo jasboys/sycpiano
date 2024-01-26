@@ -137,10 +137,11 @@ export const DiscShow = (props: ShowProps) => (
     </Show>
 );
 
-const DeleteDiscLink: React.FC<{ onRefresh: () => void }> = ({ onRefresh }) => {
+const DeleteDiscLink = () => {
     const record = useRecordContext();
     const [deleteOne] = useDelete<RaRecord<Identifier>, AdminError>();
     const notify = useNotify();
+    const refresh = useRefresh();
 
     const handleClick = () => {
         console.log(record);
@@ -150,13 +151,12 @@ const DeleteDiscLink: React.FC<{ onRefresh: () => void }> = ({ onRefresh }) => {
                 id: record.id,
             },
             {
-                mutationMode: 'pessimistic',
                 onError: (error) => {
                     notify(error.message, { type: 'error' });
                 },
                 onSuccess: () => {
                     notify(`Deleted disc-link ${record.id}`);
-                    onRefresh();
+                    refresh();
                 },
             },
         );
@@ -169,7 +169,7 @@ const DeleteDiscLink: React.FC<{ onRefresh: () => void }> = ({ onRefresh }) => {
     );
 };
 
-const EditDiscLink: MutateForm = ({ setShowDialog, onRefresh }) => {
+const EditDiscLink: MutateForm = ({ setShowDialog }) => {
     const [update, { isLoading }] = useUpdate<
         RaRecord<Identifier>,
         AdminError
@@ -177,6 +177,7 @@ const EditDiscLink: MutateForm = ({ setShowDialog, onRefresh }) => {
     const { handleSubmit } = useFormContext();
     const notify = useNotify();
     const record = useRecordContext();
+    const refresh = useRefresh();
 
     const onSubmit = async (values: Partial<RaRecord>) => {
         const { disc, ...vals } = values;
@@ -187,14 +188,13 @@ const EditDiscLink: MutateForm = ({ setShowDialog, onRefresh }) => {
                 data: vals,
             },
             {
-                mutationMode: 'pessimistic',
                 onSuccess: () => {
                     setShowDialog(false);
                     notify(`Successfully updated disc-link ${values.id}.`, {
                         type: 'success',
                         undoable: true,
                     });
-                    onRefresh();
+                    refresh();
                 },
                 onError: (error) => {
                     notify(error.message, { type: 'error' });
@@ -315,8 +315,6 @@ const AddDiscLink: React.FC<{
 };
 
 export const DiscEdit = (props: EditProps) => {
-    const refresh = useRefresh();
-
     return (
         <Edit {...props}>
             <SimpleForm>
@@ -349,15 +347,13 @@ export const DiscEdit = (props: EditProps) => {
                         />
                         <EditReferenceButton
                             reference="disc-links"
-                            Component={EditDiscLink}
-                            onRefresh={refresh} />
-                        <DeleteDiscLink onRefresh={refresh}/>
+                            Component={EditDiscLink} />
+                        <DeleteDiscLink />
                     </Datagrid>
                 </ArrayField>
                 <AddReferenceButton
                     reference="disc-links"
                     Component={AddDiscLink}
-                    onRefresh={refresh}
                 />
             </SimpleForm>
         </Edit>

@@ -58,7 +58,7 @@ export const AddCalendarPieceForm: React.FC<{
             'calendar-pieces',
             {
                 data: {
-                    calendarId: values.id,
+                    calendarId: record.id,
                     order: values.order,
                     ...values.piece,
                 },
@@ -107,6 +107,7 @@ export const AddCalendarPieceForm: React.FC<{
                             shouldRenderSuggestions={(val: string) => {
                                 return val.trim().length > 2;
                             }}
+                            noOptionsText="No Results"
                         />
                         <ControlledInput
                             source="piece.composer"
@@ -157,7 +158,7 @@ export const AddCalendarCollaboratorForm: React.FC<{
             'calendar-collaborators',
             {
                 data: {
-                    calendarId: values.id,
+                    calendarId: record.id,
                     order: values.order,
                     ...values.collaborator,
                 },
@@ -210,6 +211,7 @@ export const AddCalendarCollaboratorForm: React.FC<{
                             shouldRenderSuggestions={(val: string) => {
                                 return val.trim().length > 2;
                             }}
+                            noOptionsText="No Results"
                         />
                         <ControlledInput
                             source="collaborator.name"

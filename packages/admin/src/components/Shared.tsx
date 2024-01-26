@@ -7,7 +7,7 @@ import {
     Typography,
 } from '@mui/material';
 import React from 'react';
-import { Button, Form, useNotify, useRefresh } from 'react-admin';
+import { Button, Form, Identifier, useNotify, useRefresh } from 'react-admin';
 import { useMutation } from 'react-query';
 import { useAppDataProvider } from 'src/providers/restProvider.js';
 import { MutateForm } from 'src/types.js';
@@ -21,9 +21,8 @@ export const Empty = ({ assoc, children }: React.PropsWithChildren<{ assoc: stri
 
 export const EditReferenceButton: React.FC<{
     reference: string;
-    Component: MutateForm;
-    onRefresh: () => void;
-}> = ({ reference, Component, onRefresh }) => {
+    Component: MutateForm
+}> = ({ reference, Component }) => {
     const [showDialog, setShowDialog] = React.useState(false);
     return (
         <>
@@ -39,7 +38,6 @@ export const EditReferenceButton: React.FC<{
                 <Form>
                     <Component
                         setShowDialog={setShowDialog}
-                        onRefresh={onRefresh}
                     />
                 </Form>
             </Dialog>
@@ -50,8 +48,8 @@ export const EditReferenceButton: React.FC<{
 export const AddReferenceButton: React.FC<{
     reference: string;
     Component: MutateForm;
-    onRefresh: () => void;
-}> = ({ reference, Component, onRefresh }) => {
+    parentId?: Identifier;
+}> = ({ reference, Component }) => {
     const [showDialog, setShowDialog] = React.useState(false);
 
     return (
@@ -75,7 +73,6 @@ export const AddReferenceButton: React.FC<{
                 <Form>
                     <Component
                         setShowDialog={setShowDialog}
-                        onRefresh={onRefresh}
                     />
                 </Form>
             </Dialog>
@@ -105,7 +102,7 @@ export const TrimButton = ({
     );
     return (
         <Button
-            label={`Trim ${resource} fields`}
+            label={"Trim fields"}
             onClick={() => mutate()}
             disabled={isLoading}
         />

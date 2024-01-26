@@ -22,7 +22,7 @@ async function main() {
             passHash,
             role: 'admin',
         });
-        em.persist(user).flush();
+        await em.persist(user).flush();
         console.log('Successfully created Admin user.');
     } catch (e) {
         console.log('Failed to create Admin user.');

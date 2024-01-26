@@ -28,7 +28,7 @@ shopRouter.post(
                 .send('Webhook Error: no stripe signature header.');
         }
 
-        let event;
+        let event: Stripe.Event;
         // console.log(req.body, sig);
 
         try {
@@ -50,7 +50,9 @@ shopRouter.post(
                 const email =
                     await stripeClient.getEmailFromCustomer(customerId);
                 // Add associations to local model
-                const user = await orm.em.findOne(User, { id: customerId });
+                const user = await orm.em.findOne(User, {
+                    $or: [{ id: customerId }, { username: email }],
+                });
                 if (user === null) {
                     throw new Error('no customer found');
                 }
@@ -111,24 +113,26 @@ shopRouter.get('/faqs', async (_, res) => {
 
 const getOrCreateLocalCustomer = async (email: string) => {
     try {
+        const stripeCustomer = await stripeClient.getOrCreateCustomer(email);
+
         const localCustomer = await orm.em.findOne(
             User,
-            { username: email },
+            { $and: [{ username: email }, { role: 'customer' }] },
             { populate: ['products'] },
         );
 
-        if (localCustomer === null) {
-            const stripeCustomer =
-                await stripeClient.getOrCreateCustomer(email);
+        if (!localCustomer) {
             const user = orm.em.create(User, {
                 id: stripeCustomer.id,
                 username: email,
                 role: 'customer',
             });
             await orm.em.persist(user).flush();
-        } else {
-            return localCustomer;
         }
+        return {
+            stripeId: stripeCustomer.id,
+            ...localCustomer,
+        };
     } catch (e) {
         console.log(e);
     }
@@ -178,19 +182,16 @@ shopRouter.post('/checkout', async (req, res) => {
 
         const previouslyPurchased = customer.products;
         const previouslyPurchasedIds = previouslyPurchased
-            .toArray()
-            .map((prod) => prod.id);
+            ? previouslyPurchased.toArray().map((prod) => prod.id)
+            : undefined;
 
-        const duplicates = productIds.reduce(
-            (acc, pID) => {
-                if (previouslyPurchasedIds.includes(pID)) {
-                    acc.push(pID);
-                    return acc;
-                }
+        const duplicates = productIds.reduce((acc, pID) => {
+            if (previouslyPurchasedIds?.includes(pID)) {
+                acc.push(pID);
                 return acc;
-            },
-            [] as string[],
-        );
+            }
+            return acc;
+        }, [] as string[]);
 
         if (duplicates.length !== 0) {
             res.status(422).json({
@@ -206,7 +207,7 @@ shopRouter.post('/checkout', async (req, res) => {
         const sessionId = await stripeClient.createCheckoutSession(
             productIds,
             priceIds,
-            customer.id,
+            customer.stripeId,
         );
         res.json({
             sessionId,
@@ -223,7 +224,7 @@ shopRouter.post('/get-purchased', async (req, res) => {
     try {
         const localCustomer = await orm.em.findOneOrFail(
             User,
-            { username: email },
+            { $and: [{ username: email }, { role: 'customer' }] },
             { populate: ['products'] },
         );
 
@@ -245,7 +246,7 @@ shopRouter.post('/resend-purchased', async (req, res) => {
     try {
         const localCustomer = await orm.em.findOneOrFail(
             User,
-            { username: email },
+            { $and: [{ username: email }, { role: 'customer' }] },
             { populate: ['products'] },
         );
         const lastSent = localCustomer.lastRequest;

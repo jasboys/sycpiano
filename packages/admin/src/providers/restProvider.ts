@@ -1,6 +1,7 @@
 import {
     DataProvider,
     GetListResult,
+    GetOneResult,
     HttpError,
     Identifier,
     RaRecord,
@@ -55,13 +56,25 @@ const egressParamTransformer = <
     resource: string,
     params: RecordType,
 ) => {
-    if (resource !== 'calendars') return params;
-    // console.log(toUTC(params.dateTimeInput, params.timezone));
-    return {
-        ...omit(params, ['collaborators', 'pieces', 'dateTimeInput']),
-        timezone: params.timezone || 'America/Chicago',
-        dateTime: toUTC(params.dateTimeInput, params.timezone),
-    };
+    if (resource === 'calendars') {
+        // console.log(toUTC(params.dateTimeInput, params.timezone));
+        return {
+            ...omit(params, ['collaborators', 'pieces', 'dateTimeInput']),
+            timezone: params.timezone || 'America/Chicago',
+            dateTime: toUTC(params.dateTimeInput, params.timezone),
+        };
+    }
+    if (resource === 'users') {
+        return {
+            ...omit(params, ['products']),
+        };
+    }
+    if (resource === 'pieces' || resource === 'collaborators') {
+        return {
+            ...omit(params, ['calendars']),
+        };
+    }
+    return params;
 };
 
 class TotalCountError extends HttpError {
@@ -160,6 +173,7 @@ const provider = (apiUrl: string): AdminProvider => {
         },
 
         update: async (resource, params) => {
+            console.log(params);
             const { data } = await axiosInstance.put(
                 `/${resource}/${params.id}`,
                 egressParamTransformer(resource, {
@@ -197,6 +211,8 @@ const provider = (apiUrl: string): AdminProvider => {
             };
         },
         create: async (resource, params) => {
+            console.log(params);
+
             const { data } = await axiosInstance.post(
                 `/${resource}`,
                 egressParamTransformer(resource, params.data),
@@ -340,6 +356,72 @@ const provider = (apiUrl: string): AdminProvider => {
                 total: parseInt(headers['x-total-count'], 10),
             };
         },
+
+        recalculateDuration: async (
+            resource: string,
+            params: { id: Identifier },
+        ) => {
+            if (resource !== 'music-files') {
+                return Promise.reject(
+                    'Called on a resource that is not music-files',
+                );
+            }
+            const { data } = await axiosInstance.post(
+                `/actions/music-files/recalculate-duration/${params.id}`,
+                {},
+                {
+                    headers: {
+                        'X-CSRF-TOKEN': 'admin',
+                    },
+                },
+            );
+            return {
+                data,
+            };
+        },
+
+        mergeInto: async (resource: string, params: { id: Identifier }) => {
+            if (resource !== 'pieces' && resource !== 'collaborators') {
+                return Promise.reject(
+                    'Called on a resource that is not pieces',
+                );
+            }
+            const { data } = await axiosInstance.post(
+                `/actions/${resource}/merge-into/${params.id}`,
+                {},
+                {
+                    headers: {
+                        'X-CSRF-TOKEN': 'admin',
+                    },
+                },
+            );
+            return {
+                data,
+            };
+        },
+
+        merge: async (resource: string, params: { ids: Identifier[] }) => {
+            if (resource !== 'pieces' && resource !== 'collaborators') {
+                return Promise.reject(
+                    'Called on a resource that is not pieces or collaborators',
+                );
+            }
+            console.log(params);
+            const { data } = await axiosInstance.post(
+                `/actions/${resource}/merge`,
+                {
+                    ids: params.ids,
+                },
+                {
+                    headers: {
+                        'X-CSRF-TOKEN': 'admin',
+                    },
+                },
+            );
+            return {
+                data,
+            };
+        },
     };
 };
 
@@ -361,6 +443,18 @@ export interface AdminProvider<ResourceType extends string = string>
         resource: string,
         params: unknown,
     ) => Promise<GetListResult<RecordType>>;
+    recalculateDuration: <RecordType extends RaRecord>(
+        resource: string,
+        params: { id: Identifier },
+    ) => Promise<GetOneResult<RecordType>>;
+    mergeInto: <RecordType extends RaRecord>(
+        resource: string,
+        params: { id: Identifier },
+    ) => Promise<GetOneResult<RecordType>>;
+    merge: <RecordType extends RaRecord>(
+        resource: string,
+        params: { ids: Identifier[] },
+    ) => Promise<GetOneResult<RecordType>>;
 }
 
 export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
@@ -368,59 +462,47 @@ export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
     [
         {
             resource: 'collaborators',
-            beforeUpdate: async (params) => {
-                const { calendars, ...restData } = params.data;
-                return {
-                    ...params,
-                    data: restData,
-                };
+            beforeSave: async (params) => {
+                const { calendars, ...restData } = params;
+                return restData;
             },
         },
         {
             resource: 'pieces',
-            beforeUpdate: async (params) => {
-                const { calendars, ...restData } = params.data;
-                return {
-                    ...params,
-                    data: restData,
-                };
+            beforeSave: async (params) => {
+                console.log(params);
+                const { calendars, ...restData } = params;
+                return restData;
             },
         },
         {
             resource: 'calendars',
-            beforeUpdate: async (params) => {
-                const { calendarTrgmMatview, ...restData } = params.data;
-                return {
-                    ...params,
-                    data: restData,
-                };
+            beforeSave: async (params) => {
+                const { calendarTrgmMatview, ...restData } = params;
+                return restData;
             },
         },
         {
             resource: 'discs',
-            beforeUpdate: async (params) => {
-                const { discLinks, ...restData } = params.data;
-                return {
-                    ...params,
-                    data: restData,
-                };
+            beforeSave: async (params) => {
+                const { discLinks, ...restData } = params;
+                return restData;
             },
         },
         {
             resource: 'musics',
-            beforeUpdate: async (params) => {
-                const { musicFiles, ...restData } = params.data;
-                return {
-                    ...params,
-                    data: restData,
-                };
+            beforeSave: async (params) => {
+                const { musicFiles, ...restData } = params;
+                return restData;
             },
         },
         {
             resource: 'music-files',
-            beforeCreate: async ({ data, ...rest }, _dataProvider) => {
-                console.log(data);
-                const { audioFileBlob } = data;
+            beforeSave: async (data, _dataProvider) => {
+                const { audioFileBlob, ...restData } = data;
+                if (!audioFileBlob) {
+                    return restData;
+                }
                 const audioFile: File = audioFileBlob.rawFile;
                 const { data: uploaded } = await axios.postForm<{
                     fileName: string;
@@ -438,21 +520,20 @@ export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
                     },
                 );
                 return {
-                    ...rest,
-                    data: {
-                        audioFile: uploaded.fileName,
-                        name: data.name,
-                        music: data.music,
-                        durationSeconds: uploaded.duration,
-                    },
+                    audioFile: uploaded.fileName,
+                    name: data.name,
+                    music: data.music,
+                    durationSeconds: uploaded.duration,
                 };
             },
         },
         {
             resource: 'photos',
-            beforeCreate: async ({ data, ...rest }, _dataProvider) => {
-                console.log(data);
-                const { photoBlob } = data;
+            beforeSave: async (data, _dataProvider) => {
+                const { photoBlob, ...restData } = data;
+                if (!photoBlob) {
+                    return restData;
+                }
                 const photo: File = photoBlob.rawFile;
                 const { data: uploaded } = await axios.postForm<{
                     fileName: string;
@@ -472,22 +553,19 @@ export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
                     },
                 );
                 return {
-                    ...rest,
-                    data: {
-                        file: uploaded.fileName,
-                        width: uploaded.original.width,
-                        height: uploaded.original.height,
-                        thumbnailWidth: uploaded.thumbnail.width,
-                        thumbnailHeight: uploaded.thumbnail.height,
-                        dateTaken: uploaded.dateTaken,
-                        credit: data.credit,
-                    },
+                    file: uploaded.fileName,
+                    width: uploaded.original.width,
+                    height: uploaded.original.height,
+                    thumbnailWidth: uploaded.thumbnail.width,
+                    thumbnailHeight: uploaded.thumbnail.height,
+                    dateTaken: uploaded.dateTaken,
+                    credit: data.credit,
                 };
             },
         },
         {
             resource: 'products',
-            beforeUpdate: async ({ data, ...restParams }, _dataProvider) => {
+            beforeSave: async (data, _dataProvider) => {
                 console.log(data);
                 const {
                     newImages,
@@ -499,13 +577,11 @@ export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
                 } = data;
                 if (!pdf && !newImages) {
                     return {
-                        ...restParams,
-                        data: {
-                            ...restData,
-                            images,
-                        },
+                        ...restData,
+                        images,
                     };
                 }
+                console.log(data);
                 const pdfRaw: File | undefined = pdf?.rawFile;
                 const sampleRaws: File[] | undefined = newImages?.map(
                     (img: { rawFile: File }) => img.rawFile,
@@ -527,15 +603,15 @@ export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
                         },
                     },
                 );
-                const mergedImages = [...images, ...(uploaded?.images ?? [])];
+                const mergedImages = [
+                    ...(images ?? []),
+                    ...(uploaded?.images ?? []),
+                ];
                 const file = uploaded?.pdf ?? data.file;
                 return {
-                    ...restParams,
-                    data: {
-                        ...restData,
-                        images: mergedImages,
-                        file,
-                    },
+                    ...restData,
+                    images: mergedImages,
+                    file,
                 };
             },
         },
