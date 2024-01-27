@@ -508,61 +508,49 @@ const App: React.FC<Record<never, unknown>> = () => {
                                         element={<Navigate to="/not-found" />}
                                     />
                                 </Route>
-                                {shopEnabled && (
+
+                                <Route path="shop/*" element={<Container />}>
                                     <Route
-                                        path="shop/*"
-                                        element={<Container />}
-                                    >
-                                        <Route
-                                            path="scores/*"
-                                            element={
-                                                <AsyncComponent<ShopListProps>
-                                                    moduleProvider={ShopList}
-                                                />
-                                            }
-                                        />
-                                        <Route
-                                            path="retrieve-purchased"
-                                            element={
-                                                <AsyncComponent<RetrievalFormProps>
-                                                    moduleProvider={
-                                                        RetrievalForm
-                                                    }
-                                                />
-                                            }
-                                        />
-                                        <Route
-                                            path="faqs"
-                                            element={
-                                                <AsyncComponent<FAQsProps>
-                                                    moduleProvider={FAQs}
-                                                />
-                                            }
-                                        />
-                                        <Route
-                                            path="checkout-success"
-                                            element={
-                                                <AsyncComponent<CheckoutSuccessProps>
-                                                    moduleProvider={
-                                                        CheckoutSuccess
-                                                    }
-                                                />
-                                            }
-                                        />
-                                        <Route
-                                            index
-                                            element={
-                                                <Navigate to="/shop/scores" />
-                                            }
-                                        />
-                                        <Route
-                                            path="*"
-                                            element={
-                                                <Navigate to="/not-found" />
-                                            }
-                                        />
-                                    </Route>
-                                )}
+                                        path="scores/*"
+                                        element={
+                                            <AsyncComponent<ShopListProps>
+                                                moduleProvider={ShopList}
+                                            />
+                                        }
+                                    />
+                                    <Route
+                                        path="retrieve-purchased"
+                                        element={
+                                            <AsyncComponent<RetrievalFormProps>
+                                                moduleProvider={RetrievalForm}
+                                            />
+                                        }
+                                    />
+                                    <Route
+                                        path="faqs"
+                                        element={
+                                            <AsyncComponent<FAQsProps>
+                                                moduleProvider={FAQs}
+                                            />
+                                        }
+                                    />
+                                    <Route
+                                        path="checkout-success"
+                                        element={
+                                            <AsyncComponent<CheckoutSuccessProps>
+                                                moduleProvider={CheckoutSuccess}
+                                            />
+                                        }
+                                    />
+                                    <Route
+                                        index
+                                        element={<Navigate to="/shop/scores" />}
+                                    />
+                                    <Route
+                                        path="*"
+                                        element={<Navigate to="/not-found" />}
+                                    />
+                                </Route>
                                 <Route
                                     path="not-found"
                                     element={
