@@ -22,6 +22,7 @@ import { noHighlight } from 'src/styles/mixins';
 import { cartWidth } from 'src/styles/variables';
 import { formatPrice } from 'src/utils';
 import { LoadingInstance } from '../LoadingSVG.jsx';
+import { Link } from 'react-router-dom';
 
 const ARROW_SIDE = 32;
 
@@ -296,6 +297,19 @@ const InnerBorderContainer = styled.div<{ isCheckingOut: boolean }>(
         },
 );
 
+const faqRedirectLink: React.FC<React.AnchorHTMLAttributes<HTMLAnchorElement>> =
+    ({ href }) => {
+        const dispatch = useAppDispatch();
+
+        return (
+            href && (
+                <Link to={href} onClick={() => dispatch(toggleCartList(false))}>
+                    FAQs
+                </Link>
+            )
+        );
+    };
+
 export const CartList: React.FC<Record<never, unknown>> = () => {
     const isCheckingOut = useAppSelector(({ cart }) => cart.isCheckingOut);
     const shopItems = useAppSelector(({ shop }) => shop.items);
@@ -327,7 +341,17 @@ export const CartList: React.FC<Record<never, unknown>> = () => {
                     <StyledItemList>
                         {checkoutError.message !== '' && (
                             <ErrorMessage>
-                                <Markdown>{checkoutError.message}</Markdown>
+                                <Markdown
+                                    options={{
+                                        overrides: {
+                                            a: {
+                                                component: faqRedirectLink,
+                                            },
+                                        },
+                                    }}
+                                >
+                                    {checkoutError.message}
+                                </Markdown>
                             </ErrorMessage>
                         )}
                         {cart.map((item: string) => {

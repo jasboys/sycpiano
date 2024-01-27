@@ -331,11 +331,8 @@ const App: React.FC<Record<never, unknown>> = () => {
         .sort(([ka, _], [kb, __]) => ka.localeCompare(kb))
         .map(([_, v]) => v);
 
-    console.log(...stableMediaArray);
-
     React.useEffect(() => {
         dispatch(setMatches(mediaMatches));
-        console.log('setMedia');
     }, [...stableMediaArray]);
 
     React.useEffect(() => {

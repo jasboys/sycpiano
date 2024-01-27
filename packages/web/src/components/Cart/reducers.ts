@@ -132,7 +132,7 @@ export const checkoutAction = createAsyncThunk<
                 const prevPurchasedData = axiosError.response.data.skus;
                 return thunkAPI.rejectWithValue({
                     message:
-                        'The items marked in red below have been previously purchased. Please remove them to continue with checkout.',
+                        'The items marked in red below have been previously purchased. Please remove them to continue with checkout. To request previously purchased scores, visit the [FAQs](/shop/faqs).',
                     data: prevPurchasedData,
                 });
             }
