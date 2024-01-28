@@ -1,4 +1,4 @@
-import { statSync } from 'fs';
+import { stat } from 'fs/promises';
 import { MusicFile } from '../models/MusicFile.js';
 import multer from 'multer';
 import { resolve } from 'path';
@@ -13,18 +13,13 @@ import { respondWithError } from './index.js';
 
 const musicStorage = multer.diskStorage({
     destination: resolve(process.env.MUSIC_ASSETS_DIR),
-    filename: (req, _file, cb) => {
+    filename: async (req, _file, cb) => {
         const fileName = req.body.fileName;
-        const exists = statSync(
-            resolve(process.env.MUSIC_ASSETS_DIR, fileName),
-            {
-                throwIfNoEntry: false,
-            },
-        );
-        if (exists === undefined) {
-            cb(null, req.body.fileName);
-        } else {
+        try {
+            await stat(resolve(process.env.MUSIC_ASSETS_DIR, fileName));
             cb(Error('File already exists'), '');
+        } catch (e) {
+            cb(null, req.body.fileName);
         }
     },
 });

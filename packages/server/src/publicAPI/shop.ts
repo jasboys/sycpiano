@@ -56,7 +56,18 @@ shopRouter.post(
                 if (user === null) {
                     throw new Error('no customer found');
                 }
+                let alreadyProcessed = false;
                 for (const id of productIds) {
+                    // check if userProduct exists
+                    const existing = await orm.em.findOne(UserProduct, {
+                        product: id,
+                        user: customerId,
+                    });
+                    if (existing) {
+                        alreadyProcessed = true;
+                        break;
+                    }
+
                     const items = orm.em.create(UserProduct, {
                         product: id,
                         user: customerId,
@@ -64,12 +75,13 @@ shopRouter.post(
                     orm.em.persist(items);
                 }
                 orm.em.flush();
-
-                await mailer.emailPDFs(
-                    productIds,
-                    email,
-                    session.client_reference_id ?? '',
-                );
+                if (!alreadyProcessed) {
+                    await mailer.emailPDFs(
+                        productIds,
+                        email,
+                        session.client_reference_id ?? '',
+                    );
+                }
             } catch (e) {
                 console.error('Failed to send email: ', e);
             }

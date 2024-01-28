@@ -1,4 +1,4 @@
-import { statSync } from 'fs';
+import { stat } from 'fs/promises';
 import { Photo } from '../models/Photo.js';
 import multer from 'multer';
 import { crud, setGetListHeaders } from './crud.js';
@@ -9,18 +9,15 @@ import orm from '../database.js';
 
 const photoStorage = multer.diskStorage({
     destination: resolve(process.env.IMAGE_ASSETS_DIR, 'gallery'),
-    filename: (req, _file, cb) => {
+    filename: async (req, _file, cb) => {
         const fileName = req.body.fileName;
-        const exists = statSync(
-            resolve(process.env.IMAGE_ASSETS_DIR, 'gallery', fileName),
-            {
-                throwIfNoEntry: false,
-            },
-        );
-        if (exists === undefined) {
-            cb(null, req.body.fileName);
-        } else {
+        try {
+            await stat(
+                resolve(process.env.IMAGE_ASSETS_DIR, 'gallery', fileName),
+            );
             cb(Error('File already exists'), '');
+        } catch (e) {
+            cb(null, req.body.fileName);
         }
     },
 });

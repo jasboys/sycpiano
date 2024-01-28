@@ -1,6 +1,6 @@
 import archiver from 'archiver';
 import { getYear } from 'date-fns';
-import { promises as fsAsync, readFileSync } from 'fs';
+import { readFile } from 'fs/promises';
 import mustache from 'mustache';
 import * as nodemailer from 'nodemailer';
 import { Attachment } from 'nodemailer/lib/mailer';
@@ -20,7 +20,7 @@ interface Mailer {
 }
 
 class ConnectedMailer implements Mailer {
-    private transporter: nodemailer.Transporter;
+    private transporter?: nodemailer.Transporter;
 
     constructor() {
         if (
@@ -33,6 +33,9 @@ class ConnectedMailer implements Mailer {
         ) {
             throw new Error('Missing env vars');
         }
+    }
+
+    initialize = async (): Promise<ConnectedMailer> => {
         const transportOptions: SMTPTransport.Options = {
             host: process.env.SMTP_HOST,
             secure: parseInt(process.env.SMTP_PORT) === 465 ? true : false,
@@ -43,13 +46,14 @@ class ConnectedMailer implements Mailer {
             },
         };
         if (process.env.DKIM_PRIVATE_KEY_FILE && process.env.EMAIL_DOMAIN) {
+            const privateKey = await readFile(
+                path.resolve(process.env.DKIM_PRIVATE_KEY_FILE),
+                'utf8',
+            );
             transportOptions.dkim = {
                 domainName: process.env.EMAIL_DOMAIN,
                 keySelector: 'email',
-                privateKey: readFileSync(
-                    path.resolve(process.env.DKIM_PRIVATE_KEY_FILE),
-                    'utf8',
-                ),
+                privateKey,
             };
         } else if (process.env.NODE_ENV === 'production') {
             console.warn(
@@ -57,7 +61,8 @@ class ConnectedMailer implements Mailer {
             );
         }
         this.transporter = nodemailer.createTransport(transportOptions);
-    }
+        return this;
+    };
 
     duplicateEmailNotification = async (username: string): Promise<void> => {
         if (process.env.IMAGE_ASSETS_DIR === undefined) {
@@ -74,7 +79,7 @@ class ConnectedMailer implements Mailer {
             },
         ];
 
-        const template = await fsAsync.readFile(
+        const template = await readFile(
             path.resolve(process.env.PARTIALS_DIR, 'notificationEmail.html'),
             'utf8',
         );
@@ -94,7 +99,7 @@ class ConnectedMailer implements Mailer {
             attachments,
         };
 
-        const result = await this.transporter.sendMail(message);
+        const result = await this.transporter?.sendMail(message);
         if (process.env.NODE_ENV === 'development') {
             console.log(username);
             console.log(attachments);
@@ -117,7 +122,7 @@ class ConnectedMailer implements Mailer {
             },
         ];
 
-        const template = await fsAsync.readFile(
+        const template = await readFile(
             path.resolve(process.env.PARTIALS_DIR, 'notificationEmail.html'),
             'utf8',
         );
@@ -138,7 +143,7 @@ class ConnectedMailer implements Mailer {
             attachments,
         };
 
-        const result = await this.transporter.sendMail(message);
+        const result = await this.transporter?.sendMail(message);
         if (process.env.NODE_ENV === 'development') {
             console.log(username);
             console.log(attachments);
@@ -224,7 +229,7 @@ class ConnectedMailer implements Mailer {
                 ];
             }
 
-            const template = await fsAsync.readFile(
+            const template = await readFile(
                 path.resolve(process.env.PARTIALS_DIR, 'purchaseEmail.html'),
                 'utf8',
             );
@@ -246,7 +251,7 @@ class ConnectedMailer implements Mailer {
                 attachments,
             };
 
-            const result = await this.transporter.sendMail(message);
+            const result = await this.transporter?.sendMail(message);
             if (process.env.NODE_ENV === 'development') {
                 console.log(email);
                 console.log(attachments);
@@ -270,7 +275,7 @@ class ConnectedMailer implements Mailer {
             `,
             };
 
-            const result = await this.transporter.sendMail(message);
+            const result = await this.transporter?.sendMail(message);
             if (process.env.NODE_ENV === 'development') {
                 console.log('Sent error email');
                 console.log(result);
@@ -299,4 +304,4 @@ class DummyMailer {
 export const mailer =
     process.env.USE_DUMMY_MAILER === 'true'
         ? new DummyMailer()
-        : new ConnectedMailer();
+        : await new ConnectedMailer().initialize();

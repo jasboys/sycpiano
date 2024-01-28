@@ -5,7 +5,7 @@ import { RequestContext } from '@mikro-orm/core';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { RequestHandler, json, urlencoded } from 'express';
-import { readFileSync } from 'fs';
+import { readFile } from 'fs/promises';
 import helmet from 'helmet';
 import mustacheExpress from 'mustache-express';
 import path from 'path';
@@ -331,13 +331,15 @@ const main = async () => {
         } else {
             const devPort = parseInt(process.env.DEV_HTTPS_PORT, 10);
             const https = await import('https');
+            const key = await readFile(
+                path.resolve(process.env.DEV_HTTPS_CERT_PATH, 'cert.key'),
+            );
+            const cert = await readFile(
+                path.resolve(process.env.DEV_HTTPS_CERT_PATH, 'cert.pem'),
+            );
             const httpsOptions = {
-                key: readFileSync(
-                    path.resolve(process.env.DEV_HTTPS_CERT_PATH, 'cert.key'),
-                ),
-                cert: readFileSync(
-                    path.resolve(process.env.DEV_HTTPS_CERT_PATH, 'cert.pem'),
-                ),
+                key,
+                cert,
             };
             const server = https.createServer(httpsOptions, app);
             server.listen(devPort, host, () =>

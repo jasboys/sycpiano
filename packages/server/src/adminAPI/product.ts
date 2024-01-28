@@ -1,7 +1,7 @@
 import orm from '../database.js';
 import { format } from 'date-fns';
 import express from 'express';
-import { statSync, renameSync } from 'fs';
+import { stat, rename } from 'fs/promises';
 import { Product, ProductTypes } from '../models/Product.js';
 import multer from 'multer';
 import { parse, resolve } from 'path';
@@ -27,15 +27,12 @@ const productStorage = multer.diskStorage({
     filename: async (req, file, cb) => {
         if (file.fieldname === 'pdf') {
             const { name, ext } = parse(req.body.fileName.replace(/ /g, '_'));
-            const exists = statSync(
-                resolve(process.env.PRODUCTS_DIR, `${name}${ext}`),
-                {
-                    throwIfNoEntry: false,
-                },
-            );
-            if (exists !== undefined) {
+            try {
+                const exists = await stat(
+                    resolve(process.env.PRODUCTS_DIR, `${name}${ext}`),
+                );
                 const oldDate = exists.ctime;
-                renameSync(
+                await rename(
                     resolve(process.env.PRODUCTS_DIR, `${name}${ext}`),
                     resolve(
                         process.env.PRODUCTS_DIR,
@@ -43,31 +40,34 @@ const productStorage = multer.diskStorage({
                         `${name}_${format(oldDate, 'yyyyMMdd')}${ext}`,
                     ),
                 );
+            } catch (e) {
+            } finally {
+                cb(null, `${name}${ext}`);
             }
-            cb(null, `${name}${ext}`);
         } else {
             let fileName = req.body.imageBaseNameWithExt.replace(/ /g, '_');
             const { name, ext } = parse(fileName);
             let count = 1;
-            while (
-                statSync(
-                    resolve(
-                        process.env.IMAGE_ASSETS_DIR,
-                        'products',
-                        'thumbnails',
-                        fileName,
-                    ),
-                    {
-                        throwIfNoEntry: false,
-                    },
-                )
-            ) {
-                fileName = `${name}${
-                    count ? `_${count.toString().padStart(2, '0')}` : ''
-                }${ext}`;
-                count++;
+            try {
+                while (
+                    await stat(
+                        resolve(
+                            process.env.IMAGE_ASSETS_DIR,
+                            'products',
+                            'thumbnails',
+                            fileName,
+                        ),
+                    )
+                ) {
+                    fileName = `${name}${
+                        count ? `_${count.toString().padStart(2, '0')}` : ''
+                    }${ext}`;
+                    count++;
+                }
+            } catch (e) {
+            } finally {
+                cb(null, fileName);
             }
-            cb(null, fileName);
         }
     },
 });

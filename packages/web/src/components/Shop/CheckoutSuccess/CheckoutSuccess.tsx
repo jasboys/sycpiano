@@ -71,6 +71,7 @@ interface CheckoutSuccessResponse {
 const CheckoutSuccess: React.FC<Record<never, unknown>> = () => {
     const [search, _setSearch] = useSearchParams();
     const dispatch = useAppDispatch();
+    const [isFetching, setFetching] = React.useState<boolean>();
     const [email, setEmail] = React.useState<string>();
     const [clientRef, setClientRef] = React.useState('');
     const [items, setItems] = React.useState<string[]>([]);
@@ -78,6 +79,7 @@ const CheckoutSuccess: React.FC<Record<never, unknown>> = () => {
     React.useEffect(() => {
         const fetchData = async () => {
             try {
+                setFetching(true);
                 const {
                     data: { session, lineItems },
                 }: { data: CheckoutSuccessResponse } = await axios.get(
@@ -91,6 +93,7 @@ const CheckoutSuccess: React.FC<Record<never, unknown>> = () => {
                 setClientRef(session.client_reference_id);
                 setItems(lineItems);
             } catch (e) {
+                setFetching(false);
                 console.error('Error trying to fetch checkout session ID.');
             }
         };
@@ -99,7 +102,11 @@ const CheckoutSuccess: React.FC<Record<never, unknown>> = () => {
     }, []);
 
     return !email ? (
-        <ErrorDiv>There was a problem with the request.</ErrorDiv>
+        <ErrorDiv>
+            {isFetching
+                ? 'Fetching your payment details...'
+                : 'There was a problem with the request.'}
+        </ErrorDiv>
     ) : (
         <Container>
             <Thanks>Thank you for your purchase!</Thanks>

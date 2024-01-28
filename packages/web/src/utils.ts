@@ -36,7 +36,7 @@ export const getAge = _getAge;
 export const metaDescriptions = descriptions;
 
 export const formatPrice = (price: number): string =>
-    `$${(price / 100).toFixed(2)}`;
+    `US$${(price / 100).toFixed(2)}`;
 
 export const validateEmail = (email: string): boolean => {
     return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$/.test(
@@ -64,7 +64,8 @@ export const fadeOnEnter =
     };
 
 export const fadeOnExit =
-    (delay = 0, duration = 0.25) => (element: HTMLElement): void => {
+    (delay = 0, duration = 0.25) =>
+    (element: HTMLElement): void => {
         if (element) {
             // console.log('exit', element);
             gsap.fromTo(
@@ -76,7 +77,8 @@ export const fadeOnExit =
     };
 
 export const slideOnEnter =
-    (delay = 0, duration = 0.25) => (element: HTMLElement): void => {
+    (delay = 0, duration = 0.25) =>
+    (element: HTMLElement): void => {
         if (element) {
             gsap.fromTo(
                 element,
@@ -93,7 +95,8 @@ export const slideOnEnter =
     };
 
 export const slideOnExit =
-    (delay = 0, duration = 0.25) => (element: HTMLElement): void => {
+    (delay = 0, duration = 0.25) =>
+    (element: HTMLElement): void => {
         if (element) {
             gsap.to(element, { y: '-100%', delay, duration, force3D: true });
         }

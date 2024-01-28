@@ -19,6 +19,7 @@ import { GlobalStateShape } from 'src/store';
 import { logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { getHoverStyle, noHighlight } from 'src/styles/mixins';
+import { formatPrice } from 'src/utils.js';
 
 interface ShopItemProps {
     item: Product;
@@ -215,8 +216,6 @@ const leftHighlight = css({
     flex: '1 1 auto',
 });
 
-const formatCentsToDollars = (price: number) => `$${(price / 100).toFixed(2)}`;
-
 const cartSelector = createSelector(
     (state: GlobalStateShape) => state.cart.items,
     (_: GlobalStateShape, itemId: string) => itemId,
@@ -274,7 +273,7 @@ export const ShopItem: React.FC<ShopItemProps> = ({ item, className }) => {
                         </ItemDetails>
                         <Separator>|</Separator>
                         <ItemPrice>
-                            {formatCentsToDollars(item.price)}
+                            {formatPrice(item.price)}
                         </ItemPrice>
                     </DetailContainer>
                     <CartButton
