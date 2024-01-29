@@ -9,7 +9,7 @@ const PLAYLIST_ID = 'PLzauXr_FKIlhzArviStMMK08Xc4iuS0n9';
 const YOUTUBE_BASE_URL = 'https://www.googleapis.com/youtube/v3';
 const PLAYLIST_ITEMS_URL = `${YOUTUBE_BASE_URL}/playlistItems`;
 const VIDEOS_URL = `${YOUTUBE_BASE_URL}/videos`;
-const MAX_PLAYLIST_ITEMS = 25;
+const MAX_PLAYLIST_ITEMS = 50;
 
 /* NOTE: We might want to consider moving all properties on the YouTube class
  ** that don't need to be exposed to other modules into variables local to module. */
