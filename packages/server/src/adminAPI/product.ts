@@ -48,6 +48,9 @@ const productStorage = multer.diskStorage({
             let fileName = req.body.imageBaseNameWithExt.replace(/ /g, '_');
             const { name, ext } = parse(fileName);
             let count = 1;
+            fileName = `${name}${
+                count ? `_${count.toString().padStart(2, '0')}` : ''
+            }${ext}`;
             try {
                 while (
                     await stat(
