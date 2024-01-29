@@ -252,7 +252,7 @@ const CreateFields = () => {
             <NumberInput source="pages" />
             <TextInput source="sample" fullWidth />
             <TextInput source="imageBaseNameWithExt" fullWidth />
-            <ImageInput source="newImages">
+            <ImageInput source="newImages" multiple>
                 <ImageField source="src" title="title" />
             </ImageInput>
             <NumberInput source="price" helperText="in cents" />
