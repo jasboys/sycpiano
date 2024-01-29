@@ -26,7 +26,9 @@ const productStorage = multer.diskStorage({
     },
     filename: async (req, file, cb) => {
         if (file.fieldname === 'pdf') {
-            const { name, ext } = parse(req.body.fileName.replace(/ /g, '_'));
+            const { name, ext } = parse(
+                req.body.fileName.replace(/ - /g, '-').replace(/ /g, '_'),
+            );
             try {
                 const exists = await stat(
                     resolve(process.env.PRODUCTS_DIR, `${name}${ext}`),
