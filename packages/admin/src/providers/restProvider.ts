@@ -585,6 +585,13 @@ export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
                 const sampleRaws: File[] | undefined = newImages?.map(
                     (img: { rawFile: File }) => img.rawFile,
                 );
+                if (sampleRaws) {
+                    if (!imageBaseNameWithExt) {
+                        throw new Error(
+                            'No image base name supplied with new image uploads',
+                        );
+                    }
+                }
                 const { data: uploaded } = await axios.postForm<{
                     images?: string[];
                     pdf?: string;
