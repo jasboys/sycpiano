@@ -264,7 +264,7 @@ export const ShopItem: React.FC<ShopItemProps> = ({ item, className }) => {
                     <DetailContainer isHamburger={isHamburger}>
                         <ItemDetails>
                             {toUpper(item.format)}
-                            {isHamburger ? ' format' : ' format'}
+                            {isHamburger ? '' : ' format'}
                         </ItemDetails>
                         <Separator>|</Separator>
                         <ItemDetails>

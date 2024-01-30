@@ -36,7 +36,7 @@ export const getAge = _getAge;
 export const metaDescriptions = descriptions;
 
 export const formatPrice = (price: number): string =>
-    `US$${(price / 100).toFixed(2)}`;
+    `$${(price / 100).toFixed(2)} USD`;
 
 export const validateEmail = (email: string): boolean => {
     return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$/.test(

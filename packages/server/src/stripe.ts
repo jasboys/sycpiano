@@ -78,13 +78,24 @@ export const getOrCreateCustomer = async (
     }
 };
 
+const COUPON20 = '5+';
+const COUPON10 = '2 <= count < 5';
+
 export const createCheckoutSession = async (
     productIDs: string[],
     priceIDs: string[],
     customerId: string,
 ): Promise<string> => {
     try {
-        const session = await stripe.checkout.sessions.create({
+        const coupons = await stripe.coupons.list();
+        const couponName =
+            productIDs.length >= 5
+                ? COUPON20
+                : productIDs.length >= 2
+                  ? COUPON10
+                  : undefined;
+        const couponID = coupons.data.find((c) => c.name === couponName)?.id;
+        const params: Stripe.Checkout.SessionCreateParams = {
             mode: 'payment',
             success_url: `${host}/shop/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${host}/shop/scores`,
@@ -104,7 +115,16 @@ export const createCheckoutSession = async (
                 ),
             },
             client_reference_id: uniqid.time(),
-        });
+        };
+        if (couponID !== undefined) {
+            params.discounts = [
+                {
+                    coupon: couponID,
+                },
+            ];
+        }
+
+        const session = await stripe.checkout.sessions.create(params);
         return session.id;
     } catch (e) {
         console.error('Checkout session creation failed.', e);

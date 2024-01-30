@@ -122,6 +122,17 @@ const ErrorMessage = styled.div({
     margin: '1rem',
 });
 
+const PromoMessage = styled.div<{ green: boolean }>(
+    {
+        fontSize: '0.8rem',
+        margin: '1rem',
+    },
+    ({ green }) =>
+        green && {
+            color: 'darkgreen',
+        },
+)
+
 const StyledForm = styled.form({
     display: 'flex',
     flexDirection: 'column',
@@ -339,6 +350,15 @@ export const CartList: React.FC<Record<never, unknown>> = () => {
                 shopItems &&
                 Object.keys(shopItems).length !== 0 ? (
                     <StyledItemList>
+                        <PromoMessage green={cart.length >= 2}>
+                            <div>{(cart.length >= 2 && cart.length < 5)
+                                  ? 'You are receiving 10% off your order!'
+                                  : (cart.length < 2 ? '2+ scores: 10% off' : '')}</div>
+                            <div>{cart.length >= 5
+                                ? 'You are receiving 20% off your order!'
+                                : '5+ scores: 20% off'}</div>
+                            <div>Discount applied at checkout.</div>
+                        </PromoMessage>
                         {checkoutError.message !== '' && (
                             <ErrorMessage>
                                 <Markdown
