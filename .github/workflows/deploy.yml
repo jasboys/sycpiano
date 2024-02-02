@@ -286,10 +286,13 @@ jobs:
         if: ${{ vars.BACKEND_DIR != '' }}
         run: |
           rsync --delete -rpivz --chown=deploy:www-data --chmod=Dg=rwx,Fg=rwx --files-from=$SYNC_FILE_LIST --exclude=.env $SRC server:$DEST
+          rsync -ivz --chown=deploy:www-data --chmod=Dg=rwx,Fg=rwx -p $HTML_SRC server:$HTML_DEST
         env:
           SYNC_FILE_LIST: ${{ format('{0}/rsync-server-list', github.workspace) }}
           SRC: ${{ github.workspace }}
           DEST: ${{ vars.BACKEND_DIR }}
+          HTML_SRC: ./partials/purchaseEmail.html
+          HTML_DEST: ${{ vars.HTML_DEST }}
       - name: Install Deps on Server
         run: |
           ssh server $COMMAND
