@@ -36,7 +36,7 @@ jobs:
         env:
           ADMIN: ${{ hashFiles('packages/admin/**', 'packages/common/**', 'yarn.lock', '.yarnrc.yml') }}
           WEB: ${{ hashFiles('packages/web/**', 'packages/common/**', 'yarn.lock', '.yarnrc.yml') }}
-          SERVER: ${{ hashFiles('packages/server/**', 'packages/common/**', 'yarn.lock', '.yarnrc.yml', 'ecosystem.config.cjs') }}
+          SERVER: ${{ hashFiles('packages/server/**', 'packages/common/**', 'partials/**', 'yarn.lock', '.yarnrc.yml', 'ecosystem.config.cjs') }}
           ASSETS: ${{ hashFiles('assets/**') }}
           CWD: ${{ github.workspace }}
       - name: Get Cached Hashes
