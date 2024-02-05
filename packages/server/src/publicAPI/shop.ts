@@ -189,7 +189,7 @@ shopRouter.post('/checkout', async (req, res) => {
     try {
         const customer = await getOrCreateLocalCustomer(email);
         if (customer === undefined) {
-            throw new Error('customer not found');
+            throw new Error(`customer not found: ${email}`);
         }
 
         const previouslyPurchased = customer.products;
