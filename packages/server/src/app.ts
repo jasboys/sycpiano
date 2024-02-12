@@ -143,7 +143,6 @@ const main = async () => {
     app.use(/\/api/, ormHandler, ApiRouter);
 
     let allowedOrigins = [
-        'https://analytics.seanchenpiano.com',
         /localhost:\d{4}$/,
         /https:\/\/\w*.googleapis\.com.*/,
     ];
