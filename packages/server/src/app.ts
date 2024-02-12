@@ -81,6 +81,7 @@ const main = async () => {
                         "'unsafe-eval'",
                         'http://localhost:5173',
                         'http://localhost:5174',
+                        'https://analytics.seanchenpiano.com',
                         'https://js.stripe.com',
                         'https://checkout.stripe.com',
                         'https://www.youtube.com/iframe_api',
