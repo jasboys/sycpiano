@@ -109,6 +109,7 @@ const main = async () => {
                         "'self'",
                         'ws://localhost:5173/',
                         'ws://localhost:5174/',
+                        'https://analytics.seanchenpiano.com',
                         'https://api.stripe.com',
                         'https://checkout.stripe.com',
                         'https://www.googleapis.com/youtube/v3/',
