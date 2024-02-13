@@ -4,7 +4,7 @@ import authProvider from '../providers/authProvider.js';
 import { providerWithLifecycleCallbacks } from '../providers/restProvider.js';
 
 // import { AcclaimList, AcclaimShow, AcclaimEdit, AcclaimCreate }
-import { ADMIN_URI, AUTH_URI } from '../uris.js';
+import { AUTH_URI } from '../uris.js';
 import {
     AcclaimCreate,
     AcclaimEdit,
@@ -41,6 +41,7 @@ export const AdminPage = () => (
     <Admin
         dataProvider={providerWithLifecycleCallbacks}
         authProvider={authProvider(AUTH_URI)}
+        requireAuth
     >
         <Resource
             name="acclaims"

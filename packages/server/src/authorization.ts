@@ -20,7 +20,7 @@ export const authorize = async (user: string) => {
         const key = await paseto.generateKey('local', { format: 'paserk' });
         const token = await paseto.encrypt({}, key, {
             subject: user,
-            expiresIn: '2h',
+            expiresIn: '24h',
             audience: 'seanchenpiano.com',
             issuer: 'seanchenpiano.com',
         });
