@@ -180,6 +180,9 @@ class ConnectedMailer implements Mailer {
                     cid: 'logo@seanchenpiano.com',
                 },
             ];
+            if (products.length === 0) {
+                throw new Error(`Could not find any of product: ${productIDs}`);
+            }
             if (products.length === 1) {
                 attachments = [
                     ...attachments,
@@ -256,9 +259,12 @@ class ConnectedMailer implements Mailer {
                 console.log(email);
                 console.log(attachments);
                 console.log(result);
+            } else {
+                console.log(`Successfully sent email to: ${email}`);
             }
         } catch (e) {
             console.error(e);
+            this.errorEmailer('Emailer', JSON.stringify(e));
         }
     };
 
