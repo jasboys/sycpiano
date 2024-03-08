@@ -1,4 +1,11 @@
-import { FilterQuery, Loaded, wrap } from '@mikro-orm/core';
+import {
+    EntityData,
+    FilterQuery,
+    Loaded,
+    QueryOrderMap,
+    RequiredEntityData,
+    wrap,
+} from '@mikro-orm/core';
 import express from 'express';
 import orm from '../database.js';
 import { getImageFromMetaTag } from '../gapi/calendar.js';
@@ -6,9 +13,51 @@ import { Calendar } from '../models/Calendar.js';
 import { crud, setGetListHeaders } from './crud.js';
 import { respondWithError } from './index.js';
 import { mikroCrud } from './mikroCrud.js';
+import { NotFoundError } from './types.js';
 
 const calendarRouter = crud('/calendars', {
     ...mikroCrud({ entity: Calendar }),
+    create: async (body) => {
+        console.log(body);
+        const { dateTimeInput, ...values } =
+            body as RequiredEntityData<Calendar>;
+        const created = orm.em.create(Calendar, values);
+        console.log(created);
+        if (dateTimeInput) {
+            wrap(created).assign({ dateTimeInput });
+        }
+        await orm.em.flush();
+        return created;
+    },
+    update: async (id, body) => {
+        const record = await orm.em.findOneOrFail(
+            Calendar,
+            { id },
+            {
+                failHandler: () => new NotFoundError(),
+            },
+        );
+        wrap(record).assign(body as EntityData<Calendar>, {
+            mergeObjectProperties: true,
+        });
+        console.log(record);
+        await orm.em.flush();
+        return record;
+    },
+    updateMany: async (ids, body) => {
+        const [records, count] = await orm.em.findAndCount(Calendar, {
+            id: { $in: ids },
+        });
+        for (const record of records) {
+            wrap(record).assign(body, { mergeObjectProperties: true });
+            console.log(record);
+        }
+        await orm.em.flush();
+        return {
+            count,
+            rows: records,
+        };
+    },
     getOne: async (id) => {
         const cal = await orm.em.findOneOrFail(
             Calendar,
@@ -45,19 +94,23 @@ const calendarRouter = crud('/calendars', {
         };
     },
     getList: async ({ filter, limit, offset, order }) => {
-        const cals = await orm.em.findAndCount(Calendar, filter, {
-            limit,
-            offset,
-            orderBy: order,
-            populate: [
-                'collaborators',
-                'pieces',
-                'calendarPieces',
-                'calendarPieces.piece',
-                'calendarCollaborators',
-                'calendarCollaborators.collaborator',
-            ],
-        });
+        const cals = await orm.em.findAndCount(
+            Calendar,
+            filter as FilterQuery<Calendar>,
+            {
+                limit,
+                offset,
+                orderBy: order as QueryOrderMap<Calendar>,
+                populate: [
+                    'collaborators',
+                    'pieces',
+                    'calendarPieces',
+                    'calendarPieces.piece',
+                    'calendarCollaborators',
+                    'calendarCollaborators.collaborator',
+                ],
+            },
+        );
 
         return {
             count: cals[1],

@@ -104,11 +104,11 @@ export const createCalendarEvent = async (
         end: endDate
             ? { date: format(endDate, 'yyyy-MM-dd') }
             : allDay
-            ? { date: format(add(startDatetime, { days: 1 }), 'yyyy-MM-dd') }
-            : {
-                  dateTime: add(startDatetime, { hours: 2 }).toISOString(),
-                  timeZone,
-              },
+              ? { date: format(add(startDatetime, { days: 1 }), 'yyyy-MM-dd') }
+              : {
+                      dateTime: add(startDatetime, { hours: 2 }).toISOString(),
+                      timeZone,
+                  },
     };
     return axios.post(url, eventResource, {
         headers: {
@@ -143,16 +143,18 @@ export const updateCalendar = async (
             end: endDate
                 ? { date: format(endDate, 'yyyy-MM-dd') }
                 : allDay
-                ? {
-                      date: format(
-                          add(startDatetime, { days: 1 }),
-                          'yyyy-MM-dd',
-                      ),
-                  }
-                : {
-                      dateTime: add(startDatetime, { hours: 2 }).toISOString(),
-                      timeZone,
-                  },
+                  ? {
+                          date: format(
+                              add(startDatetime, { days: 1 }),
+                              'yyyy-MM-dd',
+                          ),
+                      }
+                  : {
+                          dateTime: add(startDatetime, {
+                              hours: 2,
+                          }).toISOString(),
+                          timeZone,
+                      },
         };
         return axios.put(url, eventResource, {
             headers: {
@@ -229,7 +231,7 @@ export const getTimeZone = async (
         const response = await axios.get<TimezoneResponse>(url, {
             params: {
                 location: loc,
-                timestamp: getUnixTime(timestamp || new Date()),
+                timestamp: getUnixTime(timestamp ?? new Date()),
                 key: gapiKey,
             },
         });

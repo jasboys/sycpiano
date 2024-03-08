@@ -10,72 +10,8 @@ import {
 } from 'react-admin';
 import axios from 'axios';
 import { formatInTimeZone } from 'date-fns-tz';
-import { omit } from 'lodash-es';
 import { toUTC } from '../utils';
 import { ADMIN_URI } from 'src/uris.js';
-
-const ingestArrayTransformer = <
-    RecordType extends Omit<RaRecord, 'id'> = Omit<RaRecord, 'id'>,
->(
-    resource: string,
-    data: RecordType[],
-) => {
-    if (resource !== 'calendars') return data;
-    return data.map((v) => {
-        return {
-            ...v,
-            dateTimeInput: formatInTimeZone(
-                v.dateTime,
-                v.timezone || 'America/Chicago',
-                'yyyy-MM-dd HH:mm',
-            ),
-        };
-    });
-};
-
-const ingestTransformer = <
-    RecordType extends Omit<RaRecord, 'id'> = Omit<RaRecord, 'id'>,
->(
-    resource: string,
-    data: RecordType,
-) => {
-    if (resource !== 'calendars') return data;
-    return {
-        ...data,
-        dateTimeInput: formatInTimeZone(
-            data.dateTime,
-            data.timezone || 'America/Chicago',
-            'yyyy-MM-dd HH:mm',
-        ),
-    };
-};
-
-const egressParamTransformer = <
-    RecordType extends Omit<RaRecord, 'id'> = Omit<RaRecord, 'id'>,
->(
-    resource: string,
-    params: RecordType,
-) => {
-    if (resource === 'calendars') {
-        // console.log(toUTC(params.dateTimeInput, params.timezone));
-        return {
-            ...omit(params, ['collaborators', 'pieces', 'dateTimeInput']),
-            timezone: params.timezone || 'America/Chicago',
-            dateTime: toUTC(params.dateTimeInput, params.timezone),
-        };
-    }
-    if (resource === 'users') {
-        return {
-            ...omit(params, ['products']),
-        };
-    }
-    if (resource === 'pieces' || resource === 'collaborators') {
-        return {
-            ...omit(params, ['calendars']),
-        };
-    }
-    return params;
-};
 
 class TotalCountError extends HttpError {
     constructor() {
@@ -115,7 +51,7 @@ const provider = (apiUrl: string): AdminProvider => {
                 throw new TotalCountError();
             }
             return {
-                data: ingestArrayTransformer(resource, data),
+                data,
                 total: parseInt(headers['x-total-count'], 10),
             };
         },
@@ -124,7 +60,7 @@ const provider = (apiUrl: string): AdminProvider => {
                 `/${resource}/${params.id}`,
             );
             return {
-                data: ingestTransformer(resource, data),
+                data,
             };
         },
         getMany: async (resource, params) => {
@@ -136,7 +72,7 @@ const provider = (apiUrl: string): AdminProvider => {
                 },
             });
             return {
-                data: ingestArrayTransformer(resource, data),
+                data,
             };
         },
         getManyReference: async (resource, params) => {
@@ -167,7 +103,7 @@ const provider = (apiUrl: string): AdminProvider => {
                 throw new TotalCountError();
             }
             return {
-                data: ingestArrayTransformer(resource, data),
+                data,
                 total: parseInt(headers['x-total-count'], 10),
             };
         },
@@ -176,10 +112,10 @@ const provider = (apiUrl: string): AdminProvider => {
             console.log(params);
             const { data } = await axiosInstance.put(
                 `/${resource}/${params.id}`,
-                egressParamTransformer(resource, {
+                {
                     id: params.id,
                     ...params.data,
-                }),
+                },
                 {
                     headers: {
                         'X-CSRF-TOKEN': 'admin',
@@ -187,22 +123,18 @@ const provider = (apiUrl: string): AdminProvider => {
                 },
             );
             return {
-                data: ingestTransformer(resource, data),
+                data,
             };
         },
 
         updateMany: async (resource, params) => {
             const responses = await Promise.all(
                 params.ids.map((id) =>
-                    axiosInstance.put(
-                        `/${resource}/${id}`,
-                        egressParamTransformer(resource, params.data),
-                        {
-                            headers: {
-                                'X-CSRF-TOKEN': 'admin',
-                            },
+                    axiosInstance.put(`/${resource}/${id}`, params.data, {
+                        headers: {
+                            'X-CSRF-TOKEN': 'admin',
                         },
-                    ),
+                    }),
                 ),
             );
 
@@ -215,7 +147,7 @@ const provider = (apiUrl: string): AdminProvider => {
 
             const { data } = await axiosInstance.post(
                 `/${resource}`,
-                egressParamTransformer(resource, params.data),
+                params.data,
                 {
                     headers: {
                         'X-CSRF-TOKEN': 'admin',
@@ -224,7 +156,7 @@ const provider = (apiUrl: string): AdminProvider => {
             );
 
             return {
-                data: ingestTransformer(resource, data),
+                data,
             };
         },
 
@@ -239,7 +171,7 @@ const provider = (apiUrl: string): AdminProvider => {
                 },
             );
             return {
-                data: ingestTransformer(resource, data),
+                data,
             };
         },
 
@@ -277,7 +209,7 @@ const provider = (apiUrl: string): AdminProvider => {
                 throw new TotalCountError();
             }
             return {
-                data: ingestArrayTransformer(resource, data),
+                data,
                 total: parseInt(headers['x-total-count'], 10),
             };
         },
@@ -304,7 +236,7 @@ const provider = (apiUrl: string): AdminProvider => {
                 throw new TotalCountError();
             }
             return {
-                data: ingestArrayTransformer(resource, data),
+                data,
                 total: parseInt(headers['x-total-count'], 10),
             };
         },
@@ -328,7 +260,7 @@ const provider = (apiUrl: string): AdminProvider => {
                 throw new TotalCountError();
             }
             return {
-                data: ingestArrayTransformer(resource, data),
+                data,
                 total: parseInt(headers['x-total-count'], 10),
             };
         },
@@ -352,7 +284,7 @@ const provider = (apiUrl: string): AdminProvider => {
                 throw new TotalCountError();
             }
             return {
-                data: ingestArrayTransformer(resource, data),
+                data,
                 total: parseInt(headers['x-total-count'], 10),
             };
         },
@@ -478,8 +410,27 @@ export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
         {
             resource: 'calendars',
             beforeSave: async (params) => {
-                const { calendarTrgmMatview, ...restData } = params;
-                return restData;
+                const {
+                    calendarTrgmMatview,
+                    collaborators,
+                    pieces,
+                    ...restData
+                } = params;
+                return {
+                    ...restData,
+                    dateTime: toUTC(params.dateTimeInput, params.timezone),
+                    timezone: params.timezone,
+                };
+            },
+            afterRead: async (record, _dataProvider) => {
+                return {
+                    ...record,
+                    dateTimeInput: formatInTimeZone(
+                        record.dateTime,
+                        record.timezone || 'America/Chicago',
+                        'yyyy-MM-dd HH:mm',
+                    ),
+                };
             },
         },
         {
@@ -561,6 +512,13 @@ export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
                     dateTaken: uploaded.dateTaken,
                     credit: data.credit,
                 };
+            },
+        },
+        {
+            resource: 'users',
+            beforeSave: async (params) => {
+                const { products, ...restData } = params;
+                return restData;
             },
         },
         {
