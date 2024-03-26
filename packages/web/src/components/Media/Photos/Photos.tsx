@@ -2,7 +2,8 @@ import styled from '@emotion/styled';
 import * as React from 'react';
 import { TransitionGroup } from 'react-transition-group';
 
-import { toMedia } from 'src/mediaQuery';
+import { format, parseISO } from 'date-fns';
+import { readableColor } from 'polished';
 import { mqSelectors } from 'src/components/App/reducers';
 import PhotoFader from 'src/components/Media/Photos/PhotoFader';
 import PhotoList from 'src/components/Media/Photos/PhotoList';
@@ -11,14 +12,13 @@ import {
     selectFirstPhoto,
     selectPhoto,
 } from 'src/components/Media/Photos/reducers';
-import { PhotoItem } from 'src/components/Media/Photos/types';
+import type { PhotoItem } from 'src/components/Media/Photos/types';
 import { idFromItem } from 'src/components/Media/Photos/utils';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenXS } from 'src/screens';
 import { latoFont } from 'src/styles/fonts';
 import { pushed } from 'src/styles/mixins';
-import { format, parseISO } from 'date-fns';
-import { readableColor } from 'polished';
 
 const StyledPhotos = styled.div(pushed, {
     width: '100%',

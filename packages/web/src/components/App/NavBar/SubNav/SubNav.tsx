@@ -1,9 +1,9 @@
 import { css } from '@emotion/react';
 import * as React from 'react';
 
-import { toMedia } from 'src/mediaQuery';
 import SubNavLink from 'src/components/App/NavBar/SubNav/SubNavLink';
-import { LinkShape } from 'src/components/App/NavBar/types';
+import type { LinkShape } from 'src/components/App/NavBar/types';
+import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
 
 interface SubNavProps {

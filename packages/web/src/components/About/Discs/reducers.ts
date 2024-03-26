@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { Disc, DiscsStateShape } from 'src/components/About/Discs/types';
-import { ThunkAPIType } from 'src/types';
+import type { Disc, DiscsStateShape } from 'src/components/About/Discs/types';
+import type { ThunkAPIType } from 'src/types';
 
 const initialState: DiscsStateShape = {
     isFetching: false,

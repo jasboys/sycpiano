@@ -1,16 +1,16 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import * as React from 'react';
+import type * as React from 'react';
 import { SwitchTransition, Transition } from 'react-transition-group';
 
-import { toMedia } from 'src/mediaQuery';
 import { BackIconSVG } from 'src/components/Schedule/BackIconSVG';
 import EventList from 'src/components/Schedule/EventList';
 import { LocationIconSVG } from 'src/components/Schedule/LocationIconSVG';
 import { Search } from 'src/components/Schedule/Search';
 import { SearchIconSVG } from 'src/components/Schedule/SearchIconSVG';
 import { ShareIconSVG } from 'src/components/Schedule/ShareIconSVG';
-import { EventListName } from 'src/components/Schedule/types';
+import type { EventListName } from 'src/components/Schedule/types';
+import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenXS } from 'src/screens';
 import { container, pushed } from 'src/styles/mixins';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';

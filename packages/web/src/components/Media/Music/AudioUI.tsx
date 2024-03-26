@@ -4,7 +4,8 @@ import { gsap } from 'gsap';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
 
-import { toMedia } from 'src/mediaQuery';
+import { createSelector } from 'reselect';
+import { mqSelectors } from 'src/components/App/reducers.js';
 import { LoadingInstance } from 'src/components/LoadingSVG';
 import {
     HEIGHT_ADJUST_DESKTOP,
@@ -18,18 +19,17 @@ import {
     SkipButton,
 } from 'src/components/Media/Music/Buttons';
 import { cartesianToPolar } from 'src/components/Media/Music/utils';
+import { useAppDispatch, useAppSelector } from 'src/hooks.js';
+import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
+import type { GlobalStateShape } from 'src/store.js';
 import { lightBlue } from 'src/styles/colors';
 import { fadeOnEnter, fadeOnExit } from 'src/utils.js';
-import { useAppDispatch, useAppSelector } from 'src/hooks.js';
 import {
     hoverSeekringAction,
     isMouseMoveAction,
     updateAction,
 } from './reducers.js';
-import { mqSelectors } from 'src/components/App/reducers.js';
-import { createSelector } from 'reselect';
-import { GlobalStateShape } from 'src/store.js';
 
 const isMouseEvent = <E extends Element>(
     event: AggregateUIEvent<E>,

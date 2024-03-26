@@ -1,11 +1,11 @@
 import { css } from '@emotion/react';
-import React from 'react';
 import Markdown from 'markdown-to-jsx';
+import React from 'react';
 import { toMedia } from 'src/mediaQuery';
-import { isHamburger, screenM, screenXS, screenPortrait } from 'src/screens';
-import { offWhite, logoBlue } from 'src/styles/colors';
+import { isHamburger, screenM, screenPortrait, screenXS } from 'src/screens';
+import { logoBlue, offWhite } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
-import { Blurb } from './types';
+import type { Blurb } from './types';
 
 const bioTextStyles = {
     spacer: css({

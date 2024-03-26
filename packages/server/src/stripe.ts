@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv';
 import Stripe from 'stripe';
 import uniqid from 'uniqid';
-import { Product } from './models/Product.js';
+import type { Product } from './models/Product.js';
 
 dotenv.config({ override: true, path: '../../.env' });
 

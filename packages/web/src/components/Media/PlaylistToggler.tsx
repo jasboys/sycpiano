@@ -1,6 +1,6 @@
-import { SerializedStyles } from '@emotion/react';
+import type { SerializedStyles } from '@emotion/react';
 import styled from '@emotion/styled';
-import * as React from 'react';
+import type * as React from 'react';
 
 import { lightBlue, playlistBackground } from 'src/styles/colors';
 import { noHighlight } from 'src/styles/mixins';

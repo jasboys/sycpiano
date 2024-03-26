@@ -3,9 +3,9 @@ import { gsap } from 'gsap';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
 
-import { toMedia } from 'src/mediaQuery';
 import PlaylistToggler from 'src/components/Media/PlaylistToggler';
-import { PlaylistProps } from 'src/components/Media/types';
+import type { PlaylistProps } from 'src/components/Media/types';
+import { toMedia } from 'src/mediaQuery';
 import { screenM, screenPortrait, screenXS } from 'src/screens';
 import { playlistBackground } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';

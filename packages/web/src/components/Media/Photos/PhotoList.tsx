@@ -7,7 +7,7 @@ import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
 import { mqSelectors } from 'src/components/App/reducers';
 import DropboxButton from 'src/components/Media/Photos/DropboxButton';
 import PhotoListItem from 'src/components/Media/Photos/PhotoListItem';
-import { PhotoItem } from 'src/components/Media/Photos/types';
+import type { PhotoItem } from 'src/components/Media/Photos/types';
 import { idFromItem } from 'src/components/Media/Photos/utils';
 import Playlist from 'src/components/Media/Playlist';
 import { useAppDispatch, useAppSelector } from 'src/hooks';

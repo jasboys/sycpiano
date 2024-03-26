@@ -1,5 +1,5 @@
-import { Loaded } from '@mikro-orm/core';
-import { NextFunction, Request, Response } from 'express';
+import type { Loaded } from '@mikro-orm/core';
+import type { NextFunction, Request, Response } from 'express';
 import orm from '../database.js';
 import { getLastName } from '../hash.js';
 import { Music } from '../models/Music.js';

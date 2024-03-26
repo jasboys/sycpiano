@@ -6,12 +6,12 @@ import intervalToDuration from 'date-fns/intervalToDuration';
 import parseISO from 'date-fns/parseISO';
 import parseDuration from 'parse-iso-duration';
 import { lighten } from 'polished';
-import * as React from 'react';
+import type * as React from 'react';
 import ClampLines from 'react-clamp-lines';
 import { useNavigate } from 'react-router-dom';
 
+import type { VideoItemShape } from 'src/components/Media/Videos/types';
 import { toMedia } from 'src/mediaQuery.js';
-import { VideoItemShape } from 'src/components/Media/Videos/types';
 import { screenPortrait, screenXS } from 'src/screens.js';
 import { lightBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';

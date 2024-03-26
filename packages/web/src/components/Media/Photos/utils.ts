@@ -1,6 +1,6 @@
 import path from 'path-browserify';
 
-import { PhotoItem } from 'src/components/Media/Photos/types';
+import type { PhotoItem } from 'src/components/Media/Photos/types';
 
 export const idFromItem = (item?: PhotoItem): string | undefined =>
     item === undefined ? undefined : path.basename(item.file, '.jpg');

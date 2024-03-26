@@ -1,12 +1,12 @@
 import {
-    EntityData,
-    FilterQuery,
-    Loaded,
-    QueryOrderMap,
-    RequiredEntityData,
     wrap,
+    type EntityData,
+    type FilterQuery,
+    type Loaded,
+    type QueryOrderMap,
+    type RequiredEntityData,
 } from '@mikro-orm/core';
-import express from 'express';
+import type express from 'express';
 import orm from '../database.js';
 import { getImageFromMetaTag } from '../gapi/calendar.js';
 import { Calendar } from '../models/Calendar.js';

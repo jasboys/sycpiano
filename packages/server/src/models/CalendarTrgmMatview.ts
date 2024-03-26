@@ -1,13 +1,13 @@
+import type { Rel } from '@mikro-orm/core';
 import {
     Entity,
     Index,
     OneToOne,
-    Platform,
     PrimaryKey,
     Property,
     Type,
+    type Platform,
 } from '@mikro-orm/core';
-import type { Rel } from '@mikro-orm/core';
 import { Calendar } from './Calendar.js';
 
 export class RegexSearch extends Type<RegExp, RegExp> {

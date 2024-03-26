@@ -1,43 +1,43 @@
-import { BioStateShape } from 'src/components/About/Bio/types';
-import { DiscsStateShape } from 'src/components/About/Discs/types';
-import { AcclaimsListStateShape } from 'src/components/About/Press/types';
-import { NavBarStateShape } from 'src/components/App/NavBar/types';
-import { MusicStateShape } from 'src/components/Media/Music/types';
-import {
+import type { BioStateShape } from 'src/components/About/Bio/types';
+import type { DiscsStateShape } from 'src/components/About/Discs/types';
+import type { AcclaimsListStateShape } from 'src/components/About/Press/types';
+import type { NavBarStateShape } from 'src/components/App/NavBar/types';
+import type { MusicStateShape } from 'src/components/Media/Music/types';
+import type {
     PhotoListReducerShape,
     PhotoViewerReducerShape,
 } from 'src/components/Media/Photos/types';
-import {
+import type {
     VideoPlayerStateShape,
     VideoPlaylistStateShape,
 } from 'src/components/Media/Videos/types';
-import { ScheduleStateShape } from 'src/components/Schedule/types';
-import { ShopStateShape } from 'src/components/Shop/ShopList/types';
+import type { ScheduleStateShape } from 'src/components/Schedule/types';
+import type { ShopStateShape } from 'src/components/Shop/ShopList/types';
 
-import { bioReducer } from 'src/components/About/Bio/reducers';
-import { discsReducer } from 'src/components/About/Discs/reducers';
-import { acclaimsListReducer } from 'src/components/About/Press/reducers';
-import { musicPlayerReducer } from 'src/components/Media/Music/reducers';
-import {
+import type { bioReducer } from 'src/components/About/Bio/reducers';
+import type { discsReducer } from 'src/components/About/Discs/reducers';
+import type { acclaimsListReducer } from 'src/components/About/Press/reducers';
+import type { musicPlayerReducer } from 'src/components/Media/Music/reducers';
+import type {
     photoListReducer,
     photoViewerReducer,
 } from 'src/components/Media/Photos/reducers';
-import {
+import type {
     videoPlayerReducer,
     videoPlaylistReducer,
 } from 'src/components/Media/Videos/reducers';
-import { scheduleReducer } from 'src/components/Schedule/reducers';
-import { shopReducer } from 'src/components/Shop/ShopList/reducers';
+import type { scheduleReducer } from 'src/components/Schedule/reducers';
+import type { shopReducer } from 'src/components/Shop/ShopList/reducers';
 
-import { ComponentType } from 'react';
-import { Store } from 'redux';
-import { cartReducer } from 'src/components/Cart/reducers';
-import { CartStateShape } from 'src/components/Cart/types';
-import { GLOBAL_QUERIES } from 'src/screens';
-import { AppDispatch, GlobalStateShape } from 'src/store';
-import { colorVars } from 'src/styles/colors';
-import { CSSVariables } from 'src/styles/variables';
-import { mediaQueryReducer } from './components/App/reducers';
+import type { ComponentType } from 'react';
+import type { Store } from 'redux';
+import type { cartReducer } from 'src/components/Cart/reducers';
+import type { CartStateShape } from 'src/components/Cart/types';
+import type { GLOBAL_QUERIES } from 'src/screens';
+import type { AppDispatch, GlobalStateShape } from 'src/store';
+import type { colorVars } from 'src/styles/colors';
+import type { CSSVariables } from 'src/styles/variables';
+import type { mediaQueryReducer } from './components/App/reducers';
 
 export type MediaQueryStateShape = Record<keyof typeof GLOBAL_QUERIES, boolean>;
 

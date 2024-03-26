@@ -1,10 +1,10 @@
 import isPropValid from '@emotion/is-prop-valid';
 import styled from '@emotion/styled';
-import * as React from 'react';
+import type * as React from 'react';
 import { Link } from 'react-router-dom';
 
 import { removeItemFromCart } from 'src/components/Cart/reducers';
-import { Product } from 'src/components/Shop/ShopList/types';
+import type { Product } from 'src/components/Shop/ShopList/types';
 import { useAppDispatch } from 'src/hooks';
 import { staticImage } from 'src/imageUrls';
 import { latoFont } from 'src/styles/fonts.js';

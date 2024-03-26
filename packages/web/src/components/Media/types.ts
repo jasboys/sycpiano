@@ -1,4 +1,4 @@
-import { SerializedStyles } from '@emotion/react';
+import type { SerializedStyles } from '@emotion/react';
 
 export interface ChildRendererProps<T> {
     readonly key: number | string;

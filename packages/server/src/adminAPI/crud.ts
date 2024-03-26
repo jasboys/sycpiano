@@ -1,7 +1,11 @@
-import { QueryOrderMap, Primary, NotFoundError } from '@mikro-orm/core';
+import {
+    NotFoundError,
+    type Primary,
+    type QueryOrderMap,
+} from '@mikro-orm/core';
 import express from 'express';
-import QueryString from 'qs';
-import { CrudActions, FilterOptions } from './types.js';
+import type QueryString from 'qs';
+import type { CrudActions, FilterOptions } from './types.js';
 
 const orderArrayToObj = <R extends object, K extends keyof QueryOrderMap<R>>(
     arr: [K, string][],

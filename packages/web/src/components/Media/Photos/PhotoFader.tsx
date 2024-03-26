@@ -5,7 +5,7 @@ import * as React from 'react';
 import { Transition } from 'react-transition-group';
 
 import { LazyImage } from 'src/components/LazyImage';
-import { PhotoItem } from 'src/components/Media/Photos/types';
+import type { PhotoItem } from 'src/components/Media/Photos/types';
 import {
     idFromItem,
     resizedPathFromItem,

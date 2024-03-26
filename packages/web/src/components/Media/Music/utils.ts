@@ -1,5 +1,5 @@
 import path from 'path-browserify';
-import { MusicFileItem } from './types.js';
+import type { MusicFileItem } from './types.js';
 
 type PolarToCartesianShape = (
     radius: number,
@@ -53,11 +53,14 @@ export const getLastName = (name: string): string | undefined => {
 };
 
 export const normalizeString = (str: string): string => {
-    return str
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f":()',.-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/_$/, '');
+    return (
+        str
+            .normalize('NFD')
+            // biome-ignore lint/suspicious/noMisleadingCharacterClass: This works
+            .replace(/[\u0300-\u036f":()',.-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/_$/, '')
+    );
 };
 
 export const getSrc = (music: MusicFileItem): string =>

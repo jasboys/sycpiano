@@ -109,7 +109,7 @@ const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
     React.useEffect(() => {
         if (bgRef.current) {
             if (screenXS || screenPortrait) {
-                const height = parseInt(
+                const height = Number.parseInt(
                     window.getComputedStyle(bgRef.current).height,
                 );
                 const float = easeQuadOut(Math.max(1 - scrollTop / height, 0));
@@ -162,7 +162,7 @@ const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
                 isHamburger
                     ? (ev) => {
                           if (bgRef.current) {
-                              const height = parseInt(
+                              const height = Number.parseInt(
                                   window.getComputedStyle(bgRef.current).height,
                               );
                               scrollFn(

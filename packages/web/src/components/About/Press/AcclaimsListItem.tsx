@@ -1,9 +1,9 @@
 import { css } from '@emotion/react';
 import { parseISO } from 'date-fns';
-import * as React from 'react';
+import type * as React from 'react';
 
+import type { AcclaimItemShape } from 'src/components/About/Press/types';
 import { toMedia } from 'src/mediaQuery';
-import { AcclaimItemShape } from 'src/components/About/Press/types';
 import { screenPortrait, screenXS } from 'src/screens';
 import { latoFont } from 'src/styles/fonts';
 import { Author } from './Author';

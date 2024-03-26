@@ -1,4 +1,4 @@
-import express from 'express';
+import type express from 'express';
 
 // Simple CSRF mitigation
 export const csrfMiddleware: express.RequestHandler = async (

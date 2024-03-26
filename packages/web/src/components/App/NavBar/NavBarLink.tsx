@@ -2,13 +2,13 @@ import { css } from '@emotion/react';
 import { gsap } from 'gsap';
 import { mix } from 'polished';
 import * as React from 'react';
-import { Link, LinkProps } from 'react-router-dom';
+import { Link, type LinkProps } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
 
 import Highlight from 'src/components/App/NavBar/Highlight';
 import SubNav from 'src/components/App/NavBar/SubNav/SubNav';
 import { showSubNav, toggleExpanded } from 'src/components/App/NavBar/reducers';
-import { LinkShape } from 'src/components/App/NavBar/types';
+import type { LinkShape } from 'src/components/App/NavBar/types';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { lightBlue, logoBlue, navFontColor } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';

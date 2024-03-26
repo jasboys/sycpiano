@@ -1,5 +1,5 @@
 import { QueryOrder } from '@mikro-orm/core';
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
 import { getAge } from 'common';
 import orm from '../database.js';

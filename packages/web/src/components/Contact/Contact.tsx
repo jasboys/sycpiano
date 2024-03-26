@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import * as React from 'react';
+import type * as React from 'react';
 
 import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
 import { mqSelectors } from 'src/components/App/reducers';

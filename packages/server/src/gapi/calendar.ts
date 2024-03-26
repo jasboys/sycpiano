@@ -1,12 +1,12 @@
-import axios, { AxiosError, AxiosResponse } from 'axios';
+import axios, { type AxiosError, type AxiosResponse } from 'axios';
 import { add, format, getUnixTime } from 'date-fns';
 import { JSDOM } from 'jsdom';
 
 // import { Calendar } from '../models/orm/Calendar.js';
-import { GCalEvent } from '../types.js';
+import type { EntityManager } from '@mikro-orm/core';
+import type { Calendar } from '../models/Calendar.js';
+import type { GCalEvent } from '../types.js';
 import { getToken } from './oauth.js';
-import { EntityManager } from '@mikro-orm/core';
-import { Calendar } from '../models/Calendar.js';
 
 // From google api console; use general dev or server prod keys for respective environments.
 // Make sure it's set in .env

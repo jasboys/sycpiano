@@ -2,9 +2,9 @@ import styled from '@emotion/styled';
 import { gsap } from 'gsap';
 import * as React from 'react';
 
+import type { MusicPlayer } from './MusicPlayer.js';
 import { CIRCLE_SAMPLES, constantQ, firLoader } from './VisualizationUtils.js';
 import { nextPow2 } from './utils.js';
-import { MusicPlayer } from './MusicPlayer.js';
 
 const VisualizerContainer = styled.div({
     position: 'absolute',

@@ -2,24 +2,24 @@ import 'reflect-metadata';
 
 import { RequestContext } from '@mikro-orm/core';
 // import rootPath from 'app-root-path';
+import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import express, { RequestHandler, json, urlencoded } from 'express';
-import { readFile } from 'fs/promises';
+import express, { json, urlencoded, type RequestHandler } from 'express';
 import helmet from 'helmet';
 import mustacheExpress from 'mustache-express';
-import path from 'path';
-import compression from 'compression';
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 
-import { ApiRouter } from './publicAPI/index.js';
+import type { Options } from 'pino-http';
+import { AdminRest } from './adminAPI/index.js';
 import { AuthRouter, authAndGetRole, checkAdmin } from './authorization.js';
+import { csrfMiddleware } from './csrf.js';
 import orm from './database.js';
 import { getMetaFromPathAndSanitize } from './meta.js';
 import { precheck } from './precheck.js';
+import { ApiRouter } from './publicAPI/index.js';
 import { Resized } from './resized.js';
-import { AdminRest } from './adminAPI/index.js';
-import type { Options } from 'pino-http';
-import { csrfMiddleware } from './csrf.js';
 
 const main = async () => {
     await precheck();
@@ -29,7 +29,7 @@ const main = async () => {
     if (!process.env.PORT) {
         throw Error('No port number specified in environmental variables');
     }
-    const port = parseInt(process.env.PORT, 10);
+    const port = Number.parseInt(process.env.PORT, 10);
 
     const app = express();
     const logger = await (async () => {
@@ -331,8 +331,8 @@ const main = async () => {
                 'Necessary env paths not found for HTTPS; only using HTTP.',
             );
         } else {
-            const devPort = parseInt(process.env.DEV_HTTPS_PORT, 10);
-            const https = await import('https');
+            const devPort = Number.parseInt(process.env.DEV_HTTPS_PORT, 10);
+            const https = await import('node:https');
             const key = await readFile(
                 path.resolve(process.env.DEV_HTTPS_CERT_PATH, 'cert.key'),
             );

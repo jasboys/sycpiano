@@ -1,8 +1,8 @@
 import arp from 'app-root-path';
 import express from 'express';
-import * as util from 'util';
-import { stat } from 'fs/promises';
-import * as path from 'path';
+import * as util from 'node:util';
+import { stat } from 'node:fs/promises';
+import * as path from 'node:path';
 
 const root = arp.toString();
 
@@ -35,11 +35,11 @@ resized.get(
             const w =
                 req.query.width === undefined
                     ? undefined
-                    : parseInt(req.query.width, 10);
+                    : Number.parseInt(req.query.width, 10);
             const h =
                 req.query.height === undefined
                     ? undefined
-                    : parseInt(req.query.height, 10);
+                    : Number.parseInt(req.query.height, 10);
 
             const sendFileAsync = util.promisify<
                 string,

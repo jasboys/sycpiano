@@ -6,9 +6,9 @@ import { Link } from 'react-router-dom';
 import {
     categoryMap,
     isMusicItem,
-    MusicFileItem,
-    MusicItem as MusicItemType,
-    MusicListItem,
+    type MusicFileItem,
+    type MusicItem as MusicItemType,
+    type MusicListItem,
 } from 'src/components/Media/Music/types';
 import {
     formatTime,

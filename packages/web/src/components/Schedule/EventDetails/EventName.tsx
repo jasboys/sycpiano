@@ -1,6 +1,6 @@
 import { css } from '@emotion/react';
 
-import { EventType } from 'src/components/Schedule/types.js';
+import type { EventType } from 'src/components/Schedule/types.js';
 import { toMedia } from 'src/mediaQuery.js';
 import { screenXS } from 'src/screens.js';
 import { logoBlue } from 'src/styles/colors.js';

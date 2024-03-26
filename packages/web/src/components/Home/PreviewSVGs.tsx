@@ -1,5 +1,5 @@
 import svgToMiniDataURI from 'mini-svg-data-uri';
-import * as React from 'react';
+import type * as React from 'react';
 import ReactDOMServer from 'react-dom/server';
 
 import { css } from '@emotion/react';

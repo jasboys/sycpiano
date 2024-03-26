@@ -1,5 +1,5 @@
-import { CSSInterpolation } from '@emotion/css';
-import { CSSObject, css } from '@emotion/react';
+import type { CSSInterpolation } from '@emotion/css';
+import { type CSSObject, css } from '@emotion/react';
 import { toMedia } from 'src/mediaQuery';
 import { hiDpx, screenM } from 'src/screens';
 
@@ -12,7 +12,7 @@ import {
     navBarHeight,
     toPx,
 } from 'src/styles/variables';
-import { CSSVariableKeys } from 'src/types';
+import type { CSSVariableKeys } from 'src/types';
 
 const fontsFolder = '/static/fonts';
 

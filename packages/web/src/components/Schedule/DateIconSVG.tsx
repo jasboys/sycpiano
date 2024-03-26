@@ -4,7 +4,7 @@ import isSameDay from 'date-fns/isSameDay';
 import isSameMonth from 'date-fns/isSameMonth';
 import startOfMonth from 'date-fns/startOfMonth';
 import sub from 'date-fns/sub';
-import * as React from 'react';
+import type * as React from 'react';
 
 export const DateIconSVG: React.FC<Record<never, unknown>> = () => {
     return (

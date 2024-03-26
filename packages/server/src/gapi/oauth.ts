@@ -1,4 +1,4 @@
-import { EntityManager } from '@mikro-orm/core';
+import type { EntityManager } from '@mikro-orm/core';
 import { JWT } from 'google-auth-library';
 import { Token } from '../models/Token.js';
 

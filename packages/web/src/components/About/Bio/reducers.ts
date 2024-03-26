@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { BioStateShape, Blurb } from 'src/components/About/Bio/types';
-import { ThunkAPIType } from 'src/types';
+import type { BioStateShape, Blurb } from 'src/components/About/Bio/types';
+import type { ThunkAPIType } from 'src/types';
 
 const initialState: BioStateShape = {
     isFetching: false,

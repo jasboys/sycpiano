@@ -1,14 +1,14 @@
 import * as argon2 from 'argon2';
-import * as crypto from 'crypto';
 import * as express from 'express';
 import { upperCase } from 'lodash-es';
+import * as crypto from 'node:crypto';
 import { V3 as paseto } from 'paseto';
 import validator from 'validator';
 
 import orm from './database.js';
+import { mailer } from './emails/index.js';
 import { User } from './models/User.js';
 import * as stripeClient from './stripe.js';
-import { mailer } from './emails/index.js';
 
 const authRouter = express.Router();
 

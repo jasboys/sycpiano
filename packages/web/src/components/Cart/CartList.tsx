@@ -6,15 +6,16 @@ import { mix } from 'polished';
 import * as React from 'react';
 import isEmail from 'validator/es/lib/isEmail';
 
-import { toMedia } from 'src/mediaQuery';
+import { Link } from 'react-router-dom';
 import { CartItem } from 'src/components/Cart/CartItem';
 import {
     checkoutAction,
     clearErrors,
     toggleCartList,
 } from 'src/components/Cart/reducers';
-import { Product } from 'src/components/Shop/ShopList/types';
+import type { Product } from 'src/components/Shop/ShopList/types';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { toMedia } from 'src/mediaQuery';
 import { screenS } from 'src/screens';
 import { lightBlue, logoBlue, theme } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
@@ -22,7 +23,6 @@ import { noHighlight } from 'src/styles/mixins';
 import { cartWidth } from 'src/styles/variables';
 import { formatPrice } from 'src/utils';
 import { LoadingInstance } from '../LoadingSVG.jsx';
-import { Link } from 'react-router-dom';
 
 const ARROW_SIDE = 32;
 

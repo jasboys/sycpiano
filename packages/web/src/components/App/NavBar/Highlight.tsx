@@ -1,8 +1,8 @@
 import { css } from '@emotion/react';
+import React from 'react';
 import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
-import { LinkShape } from './types';
-import React from 'react';
+import type { LinkShape } from './types';
 
 export interface HighlightProps {
     readonly active: boolean;

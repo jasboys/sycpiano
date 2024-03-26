@@ -6,7 +6,6 @@ import { startCase } from 'lodash-es';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
 
-import { toMedia } from 'src/mediaQuery.js';
 import {
     EventCollaborators,
     EventDate,
@@ -16,14 +15,15 @@ import {
     EventTime,
     EventWebsiteButton,
 } from 'src/components/Schedule/EventDetails';
+import { staticImage } from 'src/imageUrls.js';
+import { toMedia } from 'src/mediaQuery.js';
 import { screenXS } from 'src/screens.js';
 import { lightBlue } from 'src/styles/colors.js';
 import { latoFont } from 'src/styles/fonts.js';
 import { cardShadow } from 'src/styles/mixins.js';
 import { fadeOnEnter, fadeOnExit, titleStringBase } from 'src/utils.js';
 import { ShareIconInstance } from './ShareIconSVG.jsx';
-import { EventItem as EventItemType, EventListName, EventType } from './types.js';
-import { staticImage } from 'src/imageUrls.js';
+import type { EventItem as EventItemType, EventListName, EventType } from './types.js';
 
 const eventPictureFallbackMap: Record<EventType, string> = {
     concerto: staticImage('/gallery/thumbnails/cip_5.jpg'),

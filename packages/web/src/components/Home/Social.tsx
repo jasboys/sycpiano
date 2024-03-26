@@ -4,9 +4,9 @@ import { Elastic, gsap } from 'gsap';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
 
-import { toMedia } from 'src/mediaQuery';
 import socials from 'src/components/Home/socials';
 import { staticImage } from 'src/imageUrls';
+import { toMedia } from 'src/mediaQuery';
 import { isHamburger, screenPortrait, screenXS } from 'src/screens';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';

@@ -68,7 +68,6 @@ const VenueSpan = styled.span({
 
 export const EventLocation: React.FC<EventLocationProps> = ({
     location,
-    isMobile,
 }) => {
     return (
         <a

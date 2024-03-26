@@ -1,10 +1,10 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
-import {
+import type {
     AcclaimItemShape,
     AcclaimsListStateShape,
 } from 'src/components/About/Press/types';
-import { ThunkAPIType } from 'src/types';
+import type { ThunkAPIType } from 'src/types';
 
 const initialState: AcclaimsListStateShape = {
     isFetching: false,

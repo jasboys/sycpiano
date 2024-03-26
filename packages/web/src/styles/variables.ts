@@ -1,7 +1,7 @@
 // Some styling defines
 
 import decamelize from 'decamelize';
-import { CSSVariableKeys } from 'src/types';
+import type { CSSVariableKeys } from 'src/types';
 
 export const camel2prop = (property: CSSVariableKeys) => {
     return `--${decamelize(property, { separator: '-' })}`;
@@ -51,7 +51,8 @@ export const CSSVariables = {
     playlistContainerWidth: desktopPlaylistWidth,
     // playlistContainerWidthMedium: '45vw',
     playlistTogglerWidth: 24,
-    playlistWidth: 'calc(var(--playlist-container-width) - var(--playlist-toggler-width))',
+    playlistWidth:
+        'calc(var(--playlist-container-width) - var(--playlist-toggler-width))',
     // playlistWidthMedium: `calc(${camel2var('playlistContainerWidthMedium')} - ${camel2var('playlistTogglerWidth')})`,
     playlistPadding,
     cartWidth,

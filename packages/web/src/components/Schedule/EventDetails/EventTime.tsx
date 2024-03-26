@@ -6,7 +6,7 @@ import { toMedia } from 'src/mediaQuery.js';
 import { ClockIconInstance } from 'src/components/Schedule/ClockIconSVG.jsx';
 import { screenXS } from 'src/screens.js';
 import { logoBlue } from 'src/styles/colors.js';
-import { EventDateTimeProps } from '../types.js';
+import type { EventDateTimeProps } from '../types.js';
 
 const eventTimeStyle = css({
     fontSize: '1rem',

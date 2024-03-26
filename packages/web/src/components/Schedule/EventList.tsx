@@ -15,14 +15,14 @@ import { mqSelectors } from 'src/components/App/reducers';
 import { LoadingInstance } from 'src/components/LoadingSVG.jsx';
 import { MonthEvents } from 'src/components/Schedule/EventMonth.jsx';
 import { fetchEvents, searchEvents } from 'src/components/Schedule/reducers';
-import {
+import type {
     EventListName,
     FetchEventsArguments
 } from 'src/components/Schedule/types';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenXS, screenXSandPortrait } from 'src/screens';
-import { GlobalStateShape } from 'src/store';
+import type { GlobalStateShape } from 'src/store';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { metaDescriptions, titleStringBase } from 'src/utils';

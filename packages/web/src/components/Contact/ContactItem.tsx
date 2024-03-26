@@ -1,11 +1,11 @@
-import { css, Interpolation, Theme } from '@emotion/react';
+import { css, type Interpolation, type Theme } from '@emotion/react';
 import styled from '@emotion/styled';
 import { gsap } from 'gsap';
 import * as React from 'react';
 
 import { ContactInfo } from 'src/components/Contact/ContactInfo';
 import { ContactSocialMedia } from 'src/components/Contact/ContactSocialMedia';
-import { ContactItemShape } from 'src/components/Contact/types';
+import type { ContactItemShape } from 'src/components/Contact/types';
 import { LazyImage } from 'src/components/LazyImage';
 import { useAppSelector } from 'src/hooks';
 import {

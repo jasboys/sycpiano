@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
-import * as React from 'react';
+import type * as React from 'react';
 
 import { toMedia } from 'src/mediaQuery';
-import { ContactSocialMediaShape } from 'src/components/Contact/types';
+import type { ContactSocialMediaShape } from 'src/components/Contact/types';
 import { staticImage } from 'src/imageUrls';
 import { minRes, webkitMinDPR } from 'src/screens';
 import { latoFont } from 'src/styles/fonts';

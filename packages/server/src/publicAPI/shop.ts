@@ -1,17 +1,17 @@
 import { add, isBefore } from 'date-fns';
 import * as express from 'express';
 import { pick } from 'lodash-es';
-import { Stripe } from 'stripe';
+import type { Stripe } from 'stripe';
 
+import { csrfMiddleware } from '../csrf.js';
 import orm from '../database.js';
-import { Faq } from '../models/Faq.js';
 import { mailer } from '../emails/index.js';
+import { Faq } from '../models/Faq.js';
 import { Product, ProductTypes } from '../models/Product.js';
 import { User } from '../models/User.js';
 import { UserProduct } from '../models/UserProduct.js';
 import * as stripeClient from '../stripe.js';
-import { ShopItem } from '../types.js';
-import { csrfMiddleware } from '../csrf.js';
+import type { ShopItem } from '../types.js';
 
 const shopRouter = express.Router();
 

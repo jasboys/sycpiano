@@ -1,4 +1,4 @@
-import * as React from 'react';
+import type * as React from 'react';
 
 export const SearchIconSVG: React.FC<Record<never, unknown>> = () => (
     <svg style={{ display: 'none' }}>

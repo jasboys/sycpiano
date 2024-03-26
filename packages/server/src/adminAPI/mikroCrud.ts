@@ -1,18 +1,18 @@
 import {
-    EntityClass,
-    EntityData,
-    EntityName,
-    FilterQuery,
-    FindOptions,
-    FromEntityType,
-    IsSubset,
-    Loaded,
-    Populate,
-    Primary,
     wrap,
+    type EntityClass,
+    type EntityData,
+    type EntityName,
+    type FilterQuery,
+    type FindOptions,
+    type FromEntityType,
+    type IsSubset,
+    type Loaded,
+    type Populate,
+    type Primary,
 } from '@mikro-orm/core';
 import orm from '../database.js';
-import { CrudActions, NotFoundError, SearchParams } from './types.js';
+import { NotFoundError, type CrudActions, type SearchParams } from './types.js';
 
 interface CrudParams<R extends {}, K extends keyof R & string> {
     entity: EntityClass<R>;

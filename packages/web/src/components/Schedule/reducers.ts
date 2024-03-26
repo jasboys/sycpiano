@@ -7,20 +7,20 @@ import {
 import axios from 'axios';
 
 import {
-    CachedEvent,
-    EventItem,
-    EventItemsStateShape,
-    EventListName,
-    FetchEventsAPIParams,
-    FetchEventsArguments,
-    ScheduleStateShape,
-    SearchEventsArguments,
     createMonthGroups,
     maxOfMonthGroups,
     minOfMonthGroups,
+    type CachedEvent,
+    type EventItem,
+    type EventItemsStateShape,
+    type EventListName,
+    type FetchEventsAPIParams,
+    type FetchEventsArguments,
+    type ScheduleStateShape,
+    type SearchEventsArguments,
 } from 'src/components/Schedule/types';
+import type { ThunkAPIType } from 'src/types';
 import { mergeMonthGroups } from './mergeMonthGroups';
-import { ThunkAPIType } from 'src/types';
 import { transformCachedEventsToListItems } from './utils';
 
 // addEvents(events: EventItem[]) {

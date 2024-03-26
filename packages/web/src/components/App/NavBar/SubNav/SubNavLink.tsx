@@ -3,7 +3,7 @@ import { darken, saturate } from 'polished';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 
-import { LinkShape } from 'src/components/App/NavBar/types';
+import type { LinkShape } from 'src/components/App/NavBar/types';
 import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
 import { lightBlue, navFontColor } from 'src/styles/colors';

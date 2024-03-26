@@ -1,8 +1,8 @@
 import styled from '@emotion/styled';
-import * as React from 'react';
+import type * as React from 'react';
 
-import { toMedia } from 'src/mediaQuery';
 import { staticImage } from 'src/imageUrls';
+import { toMedia } from 'src/mediaQuery';
 import { screenM, screenPortrait, screenXS } from 'src/screens';
 import { playlistWidth } from 'src/styles/variables';
 

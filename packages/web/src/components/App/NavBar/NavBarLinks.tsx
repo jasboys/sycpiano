@@ -1,13 +1,13 @@
 import * as React from 'react';
 
-import { toMedia } from 'src/mediaQuery';
+import { css } from '@emotion/react';
 import NavBarLink from 'src/components/App/NavBar/NavBarLink';
 import { links } from 'src/components/App/NavBar/links';
-import { LinkShape, NavBarLinksProps } from 'src/components/App/NavBar/types';
+import type { LinkShape, NavBarLinksProps } from 'src/components/App/NavBar/types';
+import { toMedia } from 'src/mediaQuery';
 import { hiDpx } from 'src/screens';
 import { noHighlight, pushedHelper } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
-import { css } from '@emotion/react';
 
 const getGradientStops = (
     startPos: number | string,

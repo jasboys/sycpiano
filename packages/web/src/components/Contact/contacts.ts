@@ -1,4 +1,4 @@
-import { ContactItemShape } from 'src/components/Contact/types';
+import type { ContactItemShape } from 'src/components/Contact/types';
 
 const contacts: Omit<ContactItemShape, 'isMobile'>[] = [
     {

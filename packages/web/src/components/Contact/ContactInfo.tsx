@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import * as React from 'react';
 
-import {
+import type {
     PersonalContactShape,
     PersonalInfoShape,
 } from 'src/components/Contact/types';

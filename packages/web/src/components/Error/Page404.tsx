@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import * as React from 'react';
+import type * as React from 'react';
 import { Helmet } from 'react-helmet-async';
 
 import { latoFont } from 'src/styles/fonts';

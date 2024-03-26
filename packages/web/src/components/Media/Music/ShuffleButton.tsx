@@ -1,4 +1,4 @@
-import { css, Interpolation, Theme } from '@emotion/react';
+import { css, type Interpolation, type Theme } from '@emotion/react';
 import * as React from 'react';
 
 import { useAppSelector } from 'src/hooks';

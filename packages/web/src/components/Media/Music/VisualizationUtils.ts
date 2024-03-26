@@ -2,10 +2,10 @@
 import axios from 'axios';
 import {
     DenseMatrixDependencies,
-    Matrix,
     SparseMatrixDependencies,
     create,
     multiplyDependencies,
+    type Matrix,
 } from 'mathjs';
 const { multiply, SparseMatrix, matrix } = create(
     {

@@ -1,17 +1,20 @@
 import {
-    AnyAction,
     createAction,
     createAsyncThunk,
     createSlice,
+    type UnknownAction,
 } from '@reduxjs/toolkit';
 import { loadStripe } from '@stripe/stripe-js';
-import axios, { AxiosError, AxiosResponse } from 'axios';
-import { ThunkAction } from 'redux-thunk';
+import axios, { type AxiosError, type AxiosResponse } from 'axios';
+import type { ThunkAction } from 'redux-thunk';
 
-import { CartStateShape, CheckoutErrorObject } from 'src/components/Cart/types';
+import type {
+    CartStateShape,
+    CheckoutErrorObject,
+} from 'src/components/Cart/types';
 import { storageAvailable } from 'src/localStorage';
-import { GlobalStateShape } from 'src/store';
-import { ThunkAPIType } from 'src/types';
+import type { GlobalStateShape } from 'src/store';
+import type { ThunkAPIType } from 'src/types';
 
 const LOCAL_STORAGE_KEY = 'seanchenpiano_cart';
 const apiKey = STRIPE_PUBLIC_KEY;
@@ -74,7 +77,7 @@ export const initCartAction = createAsyncThunk<
 );
 
 export const syncLocalStorage =
-    (): ThunkAction<void, GlobalStateShape, void, AnyAction> =>
+    (): ThunkAction<void, GlobalStateShape, void, UnknownAction> =>
     (_, getState) => {
         if (storageAvailable()) {
             window.localStorage.setItem(

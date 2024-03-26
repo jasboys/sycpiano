@@ -1,6 +1,6 @@
 import isValid from 'date-fns/isValid';
 import parseISO from 'date-fns/parseISO';
-import { CachedEvent, EventItem } from 'src/components/Schedule/types';
+import type { CachedEvent, EventItem } from 'src/components/Schedule/types';
 
 const GOOGLE_MAPS_SEARCH_URL = 'https://www.google.com/maps/search/?api=1';
 

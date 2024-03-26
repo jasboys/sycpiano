@@ -1,4 +1,4 @@
-import * as React from 'react';
+import type * as React from 'react';
 
 export const LoadingInstance: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">

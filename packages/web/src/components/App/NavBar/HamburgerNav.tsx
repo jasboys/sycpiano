@@ -6,7 +6,7 @@ import { Transition } from 'react-transition-group';
 import HamburgerMenu from 'src/components/App/NavBar/HamburgerMenu';
 import NavBarLinks from 'src/components/App/NavBar/NavBarLinks';
 import { toggleExpanded } from 'src/components/App/NavBar/reducers';
-import { NavBarLinksProps } from 'src/components/App/NavBar/types';
+import type { NavBarLinksProps } from 'src/components/App/NavBar/types';
 import { toggleCartList } from 'src/components/Cart/reducers';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { logoBlue } from 'src/styles/colors';

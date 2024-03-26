@@ -1,4 +1,4 @@
-import { EntityData } from '@mikro-orm/core';
+import type { EntityData } from '@mikro-orm/core';
 import orm from '../database.js';
 import { Calendar } from '../models/Calendar.js';
 import { CalendarPiece } from '../models/CalendarPiece.js';

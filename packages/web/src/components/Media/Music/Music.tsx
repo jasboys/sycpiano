@@ -3,21 +3,23 @@
 import isEmpty from 'lodash-es/isEmpty';
 import * as React from 'react';
 import {
-    NavigateFunction,
-    PathMatch,
     useMatch,
     useNavigate,
+    type NavigateFunction,
+    type PathMatch,
 } from 'react-router-dom';
 
-import { toMedia } from 'src/mediaQuery';
 import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
 import AudioInfo from 'src/components/Media/Music/AudioInfo';
 import AudioUI from 'src/components/Media/Music/AudioUI';
-import { AudioVisualizerType } from 'src/components/Media/Music/AudioVisualizerBase.jsx';
+import type { AudioVisualizerType } from 'src/components/Media/Music/AudioVisualizerBase.jsx';
 import MusicPlaylist from 'src/components/Media/Music/MusicPlaylist';
+import { toMedia } from 'src/mediaQuery';
 
+import { css } from '@emotion/react';
+import { createSelector, createStructuredSelector } from 'reselect';
+import { mqSelectors } from 'src/components/App/reducers.js';
 import {
-    FetchPlaylistThunkReturn,
     fetchPlaylistThunk,
     getNextTrack,
     isLoadingAction,
@@ -25,13 +27,15 @@ import {
     setTrackAction,
     updateAction,
     volumeAction,
+    type FetchPlaylistThunkReturn,
 } from 'src/components/Media/Music/reducers';
-import { MusicFileItem, MusicListItem } from 'src/components/Media/Music/types';
+import type { MusicFileItem, MusicListItem } from 'src/components/Media/Music/types';
 import {
     getRelativePermaLink,
     getSrc,
     getWaveformSrc,
 } from 'src/components/Media/Music/utils';
+import { useAppDispatch, useAppSelector } from 'src/hooks.js';
 import module from 'src/module';
 import {
     minRes,
@@ -40,14 +44,10 @@ import {
     screenShort,
     webkitMinDPR,
 } from 'src/screens';
-import store, { AppDispatch, GlobalStateShape } from 'src/store';
+import store, { type AppDispatch, type GlobalStateShape } from 'src/store';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight, playlistContainerWidth } from 'src/styles/variables';
-import { useAppDispatch, useAppSelector } from 'src/hooks.js';
-import { createSelector, createStructuredSelector } from 'reselect';
-import { mqSelectors } from 'src/components/App/reducers.js';
 import { MusicPlayer } from './MusicPlayer.js';
-import { css } from '@emotion/react';
 
 const detectWebGL = () => {
     const canvas = document.createElement('canvas');

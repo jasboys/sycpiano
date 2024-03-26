@@ -1,5 +1,5 @@
 import { QueryOrder } from '@mikro-orm/core';
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
 import orm from '../database.js';
 import { Acclaim } from '../models/Acclaim.js';
@@ -15,7 +15,9 @@ const getAcclaims = async (
     res: Response,
     _: NextFunction,
 ): Promise<void> => {
-    const limit = req.params.count ? parseInt(req.params.count) : undefined;
+    const limit = req.params.count
+        ? Number.parseInt(req.params.count)
+        : undefined;
     const acclaims = await orm.em.find(
         Acclaim,
         {},

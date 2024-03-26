@@ -1,10 +1,10 @@
 import { createAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import debounce from 'lodash-es/debounce';
-import { NavBarStateShape } from 'src/components/App/NavBar/types';
+import type { NavBarStateShape } from 'src/components/App/NavBar/types';
 
 import { findParent } from 'src/components/App/NavBar/links';
-import { AppDispatch } from 'src/store';
-import { ThunkAPIType } from 'src/types';
+import type { AppDispatch } from 'src/store';
+import type { ThunkAPIType } from 'src/types';
 
 const SCROLL_THRESHOLD = 10;
 
@@ -45,7 +45,7 @@ export const toggleNavBar = createAsyncThunk<void, boolean, ThunkAPIType>(
 
 export const toggleExpanded = createAsyncThunk<
     void,
-    boolean | void,
+    boolean | undefined,
     ThunkAPIType
 >('navbar/callExpand', (show, thunkAPI) => {
     const correctedShow =
@@ -64,7 +64,7 @@ export const toggleExpanded = createAsyncThunk<
 
 export const showSubNav = createAsyncThunk<
     void,
-    { sub?: string; isHamburger?: boolean } | void,
+    { sub?: string; isHamburger?: boolean } | undefined,
     ThunkAPIType
 >(
     'navbar/callSub',

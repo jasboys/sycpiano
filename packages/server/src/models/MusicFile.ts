@@ -7,7 +7,7 @@ import {
     Property,
 } from '@mikro-orm/core';
 import { Music } from './Music.js';
-import { parse } from 'path';
+import { parse } from 'node:path';
 
 @Entity()
 export class MusicFile {

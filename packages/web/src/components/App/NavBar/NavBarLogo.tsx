@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import * as React from 'react';
+import type * as React from 'react';
 import { Link } from 'react-router-dom';
 import { createStructuredSelector } from 'reselect';
 

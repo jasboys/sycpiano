@@ -1,4 +1,4 @@
-import { FilterQuery, Loaded, raw } from '@mikro-orm/core';
+import { raw, type FilterQuery, type Loaded } from '@mikro-orm/core';
 import { isBefore, isValid, parseISO, startOfDay } from 'date-fns';
 import * as express from 'express';
 
@@ -150,7 +150,8 @@ calendarRouter.get(
         res,
     ) => {
         const limit =
-            (!!req.query.limit && parseInt(req.query.limit)) || undefined;
+            (!!req.query.limit && Number.parseInt(req.query.limit)) ||
+            undefined;
         const date = !!req.query.date && parseISO(req.query.date);
         const before = !!req.query.before && parseISO(req.query.before);
         const after = !!req.query.after && parseISO(req.query.after);

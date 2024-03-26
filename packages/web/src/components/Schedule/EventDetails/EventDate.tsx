@@ -1,12 +1,12 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { format, parseISO } from 'date-fns';
-import * as React from 'react';
+import type * as React from 'react';
 
 import { toMedia } from 'src/mediaQuery.js';
 import { screenXS } from 'src/screens.js';
 import { interFont } from 'src/styles/fonts.js';
-import { EventDateTimeProps } from '../types.js';
+import type { EventDateTimeProps } from '../types.js';
 
 const Connector = styled.div({
     flex: '1 1 1rem',

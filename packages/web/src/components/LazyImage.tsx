@@ -2,7 +2,7 @@ import Blazy from 'blazy';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
 
-import { Interpolation, Theme, css } from '@emotion/react';
+import { css, type Interpolation, type Theme } from '@emotion/react';
 
 import { LoadingInstance } from 'src/components/LoadingSVG';
 import { lightBlue } from 'src/styles/colors';
@@ -62,7 +62,7 @@ export const LazyImage: React.FC<LazyImageProps> = (props) => {
     const activateBlazy = React.useCallback(() => {
         blazy.current = new Blazy({
             selector: `#${props.id}`,
-            offset: props.offset || Infinity,
+            offset: props.offset || Number.POSITIVE_INFINITY,
             container: props.container ? `#${props.container}` : 'window',
             loadInvisible: true,
             success: (el: Element | HTMLElement) => {

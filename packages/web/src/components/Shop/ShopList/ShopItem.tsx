@@ -10,12 +10,12 @@ import {
     addToCartAction,
     removeItemFromCart,
 } from 'src/components/Cart/reducers';
-import { Product } from 'src/components/Shop/ShopList/types';
+import type { Product } from 'src/components/Shop/ShopList/types';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { staticImage } from 'src/imageUrls';
 import { toMedia } from 'src/mediaQuery.js';
 import { screenTouch } from 'src/screens.js';
-import { GlobalStateShape } from 'src/store';
+import type { GlobalStateShape } from 'src/store';
 import { logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { getHoverStyle, noHighlight } from 'src/styles/mixins';

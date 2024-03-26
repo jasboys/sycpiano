@@ -5,7 +5,7 @@ import { startCase } from 'lodash-es';
 import { toMedia } from 'src/mediaQuery.js';
 import { screenXS } from 'src/screens.js';
 import { latoFont } from 'src/styles/fonts.js';
-import { Collaborator } from '../types.js';
+import type { Collaborator } from '../types.js';
 
 interface EventCollaboratorsProps {
     collaborators: Collaborator[];

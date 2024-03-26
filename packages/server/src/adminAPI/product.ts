@@ -1,10 +1,10 @@
-import orm from '../database.js';
 import { format } from 'date-fns';
-import express from 'express';
-import { stat, rename } from 'fs/promises';
-import { Product, ProductTypes } from '../models/Product.js';
+import type express from 'express';
 import multer from 'multer';
-import { parse, resolve } from 'path';
+import { rename, stat } from 'node:fs/promises';
+import { parse, resolve } from 'node:path';
+import orm from '../database.js';
+import { Product, type ProductTypes } from '../models/Product.js';
 import * as stripeClient from '../stripe.js';
 import { crud, setGetListHeaders } from './crud.js';
 import { respondWithError } from './index.js';
@@ -129,7 +129,7 @@ productRouter.post(
                     name,
                     description: description ?? '',
                     price: default_price.unit_amount ?? 0,
-                    pages: parseInt(pages),
+                    pages: Number.parseInt(pages),
                     file: file ?? '',
                     images:
                         images.length !== 0

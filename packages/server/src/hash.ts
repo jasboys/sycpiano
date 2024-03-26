@@ -1,15 +1,18 @@
-import { createHash } from 'crypto';
+import { createHash } from 'node:crypto';
 
 export const getLastName = (name: string) => {
     return /([^\s]+)\s?(?:\(.*\))?$/.exec(name)?.[1];
 };
 
 const normalizeString = (str: string) => {
-    return str
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f":()',.-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/_$/, '');
+    return (
+        str
+            .normalize('NFD')
+            // biome-ignore lint/suspicious/noMisleadingCharacterClass: This works.
+            .replace(/[\u0300-\u036f":()',.-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/_$/, '')
+    );
 };
 
 export const getHash = (

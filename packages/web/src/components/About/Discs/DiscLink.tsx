@@ -1,7 +1,7 @@
+import { css } from '@emotion/react';
+import type React from 'react';
 import { staticImage } from 'src/imageUrls';
 import { toMedia } from 'src/mediaQuery';
-import React from 'react';
-import { css } from '@emotion/react';
 import { hiDpx } from 'src/screens';
 
 const styles = {

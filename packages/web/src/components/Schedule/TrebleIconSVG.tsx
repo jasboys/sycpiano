@@ -1,4 +1,4 @@
-import * as React from 'react';
+import type * as React from 'react';
 
 export const TrebleIconSVG: React.FC<Record<never, unknown>> = () => (
     <svg style={{ display: 'none' }}>

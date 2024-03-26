@@ -2,19 +2,19 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import * as React from 'react';
 
-import { toMedia } from 'src/mediaQuery';
+import { createSelector } from 'reselect';
+import { mqSelectors } from 'src/components/App/reducers.js';
 import MusicPlaylistItem from 'src/components/Media/Music/MusicPlaylistItem';
 import ShuffleButton from 'src/components/Media/Music/ShuffleButton';
 import SpotifyButton from 'src/components/Media/Music/SpotifyButton';
 import Playlist from 'src/components/Media/Playlist';
 import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { toMedia } from 'src/mediaQuery';
 import { hiDpx, screenPortrait } from 'src/screens';
+import type { GlobalStateShape } from 'src/store.js';
 import { playlistBackground } from 'src/styles/colors';
-import { mqSelectors } from 'src/components/App/reducers.js';
 import { toggleShuffleAction } from './reducers.js';
-import { MusicFileItem } from './types.js';
-import { createSelector } from 'reselect';
-import { GlobalStateShape } from 'src/store.js';
+import type { MusicFileItem } from './types.js';
 
 interface MusicPlaylistOwnProps {
     readonly onClick: (item: MusicFileItem, fade?: boolean) => void;

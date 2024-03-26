@@ -1,11 +1,11 @@
 import { isSameMonth, parseISO } from 'date-fns';
 import {
-    MonthGroups,
-    MonthGroup,
     eventAscend,
     eventDescend,
     monthGroupAscend,
     monthGroupDescend,
+    type MonthGroup,
+    type MonthGroups,
 } from './types';
 
 export const mergeMonthGroups = (

@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import orm from '../database.js';
 import { Photo } from '../models/Photo.js';
 import { QueryOrder } from '@mikro-orm/core';

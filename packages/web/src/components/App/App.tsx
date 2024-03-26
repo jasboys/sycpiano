@@ -8,34 +8,35 @@ import * as React from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import {
     Navigate,
-    PathMatch,
     Route,
     Routes,
     useLocation,
     useMatch,
     useNavigate,
+    type PathMatch,
 } from 'react-router-dom';
 import { SwitchTransition, Transition } from 'react-transition-group';
 
 import Container from 'src/components/App/Container';
 
 // import { RequiredProps as AboutProps } from 'src/components/About/About';
-import { RequiredProps as ContactProps } from 'src/components/Contact/Contact';
-import { RequiredProps as HomeProps } from 'src/components/Home/Home';
+import type { RequiredProps as ContactProps } from 'src/components/Contact/Contact';
+import type { RequiredProps as HomeProps } from 'src/components/Home/Home';
 // import { RequiredProps as MediaProps } from 'src/components/Media/Media';
-import { RequiredProps as ScheduleProps } from 'src/components/Schedule/Schedule';
-import { RequiredProps as FAQsProps } from 'src/components/Shop/FAQs/FAQs';
-import { RequiredProps as RetrievalFormProps } from 'src/components/Shop/RetrievePurchases/RetrievePurchases';
-import { RequiredProps as ShopListProps } from 'src/components/Shop/ShopList/ShopList';
+import type { RequiredProps as ScheduleProps } from 'src/components/Schedule/Schedule';
+import type { RequiredProps as FAQsProps } from 'src/components/Shop/FAQs/FAQs';
+import type { RequiredProps as RetrievalFormProps } from 'src/components/Shop/RetrievePurchases/RetrievePurchases';
+import type { RequiredProps as ShopListProps } from 'src/components/Shop/ShopList/ShopList';
 // import { RequiredProps as AuthorizationProps } from 'src/components/Authorization/Authorization';
-import { RequiredProps as BioProps } from 'src/components/About/Bio/Bio';
-import { RequiredProps as DiscsProps } from 'src/components/About/Discs/Discs';
-import { RequiredProps as PressProps } from 'src/components/About/Press/Press';
-import { RequiredProps as MusicProps } from 'src/components/Media/Music/Music';
-import { RequiredProps as PhotosProps } from 'src/components/Media/Photos/Photos';
-import { RequiredProps as VideosProps } from 'src/components/Media/Videos/Videos';
-import { RequiredProps as CheckoutSuccessProps } from 'src/components/Shop/CheckoutSuccess/CheckoutSuccess';
+import type { RequiredProps as BioProps } from 'src/components/About/Bio/Bio';
+import type { RequiredProps as DiscsProps } from 'src/components/About/Discs/Discs';
+import type { RequiredProps as PressProps } from 'src/components/About/Press/Press';
+import type { RequiredProps as MusicProps } from 'src/components/Media/Music/Music';
+import type { RequiredProps as PhotosProps } from 'src/components/Media/Photos/Photos';
+import type { RequiredProps as VideosProps } from 'src/components/Media/Videos/Videos';
+import type { RequiredProps as CheckoutSuccessProps } from 'src/components/Shop/CheckoutSuccess/CheckoutSuccess';
 
+import { useMediaQueries } from '@react-hook/media-query';
 import NavBar from 'src/components/App/NavBar/NavBar';
 import {
     showSubNav,
@@ -63,7 +64,6 @@ import {
     titleStringBase,
 } from 'src/utils';
 import { setMatches } from './reducers';
-import { useMediaQueries } from '@react-hook/media-query';
 
 const register = extractModule(store);
 const Contact = () =>

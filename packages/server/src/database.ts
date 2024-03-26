@@ -1,9 +1,9 @@
 import {
-    EntityProperty,
     LoadStrategy,
     MikroORM,
     PopulateHint,
     ReflectMetadataProvider,
+    type EntityProperty,
 } from '@mikro-orm/core';
 import { PostgreSqlDriver, PostgreSqlPlatform } from '@mikro-orm/postgresql';
 

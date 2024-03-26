@@ -3,17 +3,17 @@ import { gsap } from 'gsap';
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
 
-import { toMedia } from 'src/mediaQuery';
+import { createSelector } from 'reselect';
+import { mqSelectors } from 'src/components/App/reducers.js';
 import { formatTime } from 'src/components/Media/Music/utils';
+import { useAppSelector } from 'src/hooks.js';
+import { staticImage } from 'src/imageUrls.js';
+import { toMedia } from 'src/mediaQuery';
 import { minRes, screenPortrait, webkitMinDPR } from 'src/screens';
+import type { GlobalStateShape } from 'src/store.js';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { metaDescriptions, titleStringBase } from 'src/utils';
-import { useAppSelector } from 'src/hooks.js';
-import { mqSelectors } from 'src/components/App/reducers.js';
-import { createSelector } from 'reselect';
-import { GlobalStateShape } from 'src/store.js';
-import { staticImage } from 'src/imageUrls.js';
 
 interface AudioInfoProps {
     matchParams: boolean;

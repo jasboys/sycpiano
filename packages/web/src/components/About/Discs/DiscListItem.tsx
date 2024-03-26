@@ -1,9 +1,9 @@
 import { css } from '@emotion/react';
-import * as React from 'react';
+import type * as React from 'react';
 
-import { toMedia } from 'src/mediaQuery';
 import iconMap from 'src/components/About/Discs/iconMap';
-import { Disc } from 'src/components/About/Discs/types';
+import type { Disc } from 'src/components/About/Discs/types';
+import { toMedia } from 'src/mediaQuery';
 import { isHamburger, screenXS } from 'src/screens';
 import { cardShadow } from 'src/styles/mixins';
 import { DiscLink } from './DiscLink';

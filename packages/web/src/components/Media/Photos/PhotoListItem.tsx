@@ -3,16 +3,16 @@ import styled from '@emotion/styled';
 import { gsap } from 'gsap';
 import * as React from 'react';
 
-import { toMedia } from 'src/mediaQuery';
 import { LazyImage } from 'src/components/LazyImage';
-import { PhotoItem } from 'src/components/Media/Photos/types';
+import type { PhotoItem } from 'src/components/Media/Photos/types';
 import {
     idFromItem,
     resizedPathFromItem,
     staticPathFromItem,
 } from 'src/components/Media/Photos/utils';
-import { ChildRendererProps } from 'src/components/Media/types';
+import type { ChildRendererProps } from 'src/components/Media/types';
 import { generateSrcsetWidths, resizedImage } from 'src/imageUrls';
+import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenWidths, screenXS } from 'src/screens';
 import { isImageElement } from 'src/utils';
 

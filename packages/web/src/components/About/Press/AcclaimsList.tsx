@@ -1,5 +1,5 @@
 import { css } from '@emotion/react';
-import * as React from 'react';
+import type * as React from 'react';
 
 import AcclaimsListItem from 'src/components/About/Press/AcclaimsListItem';
 import { mqSelectors } from 'src/components/App/reducers';

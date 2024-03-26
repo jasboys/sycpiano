@@ -4,13 +4,13 @@ import { formatInTimeZone } from 'date-fns-tz';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { toMedia } from 'src/mediaQuery.js';
 import { BackIconInstance } from 'src/components/Schedule/BackIconSVG.jsx';
 import EventItem from 'src/components/Schedule/EventItem.jsx';
-import {
+import type {
     EventListName,
     MonthGroup as MonthGroupType,
 } from 'src/components/Schedule/types.js';
+import { toMedia } from 'src/mediaQuery.js';
 import { screenXS } from 'src/screens.js';
 import { logoBlue } from 'src/styles/colors.js';
 import { latoFont } from 'src/styles/fonts.js';

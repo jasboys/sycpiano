@@ -1,5 +1,5 @@
-import { exec } from 'child_process';
-import { parse } from 'path';
+import { exec } from 'node:child_process';
+import { parse } from 'node:path';
 
 export const WAVEFORM_FOLDER = 'waveforms/';
 
@@ -61,7 +61,7 @@ const callAudioWaveForm = (
 export const getAudioDuration = async (audioFile: string) => {
     const { streams } = await getFileInfo(audioFile);
     const { duration: durationString } = streams[0];
-    const duration = parseFloat(durationString);
+    const duration = Number.parseFloat(durationString);
     return Math.round(duration);
 };
 
@@ -69,8 +69,8 @@ export const genWaveformAndReturnDuration = async (audioFile: string) => {
     const { streams } = await getFileInfo(audioFile);
     const { sample_rate: sampleRateString, duration: durationString } =
         streams[0];
-    const sampleRate = parseInt(sampleRateString, 10);
-    const duration = parseFloat(durationString);
+    const sampleRate = Number.parseInt(sampleRateString, 10);
+    const duration = Number.parseFloat(durationString);
     const samplesPerPixel = (sampleRate * duration) / TARGET_LENGTH;
     const waveformFile = parse(audioFile).name;
     await callAudioWaveForm(

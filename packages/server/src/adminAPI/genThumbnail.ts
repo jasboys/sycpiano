@@ -1,6 +1,6 @@
 import { parse } from 'date-fns';
 import ExifReader from 'exifreader';
-import { resolve } from 'path';
+import { resolve } from 'node:path';
 import Sharp from 'sharp';
 import smartcrop from 'smartcrop-sharp';
 

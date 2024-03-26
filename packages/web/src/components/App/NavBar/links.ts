@@ -1,4 +1,4 @@
-import { LinkShape } from 'src/components/App/NavBar/types';
+import type { LinkShape } from 'src/components/App/NavBar/types';
 
 export const links: ReadonlyArray<LinkShape> = [
     { name: 'home', path: '/' },

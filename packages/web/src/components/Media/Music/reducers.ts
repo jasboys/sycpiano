@@ -3,15 +3,15 @@ import axios from 'axios';
 import { compact, shuffle, sortBy } from 'lodash-es';
 
 import {
-    MusicCategories,
-    MusicFileItem,
-    MusicItem,
-    MusicListItem,
-    MusicResponse,
-    MusicStateShape,
+    type MusicCategories,
+    type MusicFileItem,
+    type MusicItem,
+    type MusicListItem,
+    type MusicResponse,
+    type MusicStateShape,
     isMusicItem,
 } from 'src/components/Media/Music/types';
-import { ThunkAPIType } from 'src/types';
+import type { ThunkAPIType } from 'src/types';
 import { getLastName, modulo, normalizeString } from './utils.js';
 
 const initialState: MusicStateShape = {

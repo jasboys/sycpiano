@@ -1,6 +1,6 @@
-import { ComponentType } from 'react';
+import type { ComponentType } from 'react';
 import { registerReducer } from 'src/store';
-import { AsyncModule, AsyncStore } from 'src/types';
+import type { AsyncModule, AsyncStore } from 'src/types';
 
 // Cache of already loaded modules
 const modules: {

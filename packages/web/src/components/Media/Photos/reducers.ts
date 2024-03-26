@@ -1,19 +1,19 @@
 import {
-    AnyAction,
-    ThunkAction,
     createAction,
     createAsyncThunk,
     createSlice,
+    type AnyAction,
+    type ThunkAction,
 } from '@reduxjs/toolkit';
 import axios from 'axios';
-import {
+import type {
     PhotoItem,
     PhotoListReducerShape,
     PhotoViewerReducerShape,
 } from 'src/components/Media/Photos/types';
 
-import { GlobalStateShape } from 'src/store';
-import { ThunkAPIType } from 'src/types';
+import type { GlobalStateShape } from 'src/store';
+import type { ThunkAPIType } from 'src/types';
 
 const initialListState: PhotoListReducerShape = {
     items: [],

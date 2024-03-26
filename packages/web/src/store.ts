@@ -8,7 +8,7 @@
  */
 
 import { configureStore } from '@reduxjs/toolkit';
-import { Reducer, combineReducers } from 'redux';
+import { type Reducer, combineReducers } from 'redux';
 import { thunk } from 'redux-thunk';
 
 import { navBarReducer } from 'src/components/App/NavBar/reducers';
@@ -16,7 +16,7 @@ import { mediaQueryReducer } from 'src/components/App/reducers';
 import { cartReducer } from 'src/components/Cart/reducers';
 import { shopReducer } from 'src/components/Shop/ShopList/reducers';
 
-import { AsyncStore, FullState, Reducers } from 'src/types';
+import type { AsyncStore, FullState, Reducers } from 'src/types';
 
 const staticReducers = {
     navbar: navBarReducer,

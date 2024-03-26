@@ -5,7 +5,6 @@ import * as React from 'react';
 import { Transition } from 'react-transition-group';
 import { createStructuredSelector } from 'reselect';
 
-import { toMedia } from 'src/mediaQuery';
 import {
     DesktopBackgroundPreview,
     MobileBackgroundPreview,
@@ -19,6 +18,7 @@ import {
     resizedImage,
     sycChairVertical,
 } from 'src/imageUrls';
+import { toMedia } from 'src/mediaQuery';
 import {
     isHamburger,
     screenLengths,

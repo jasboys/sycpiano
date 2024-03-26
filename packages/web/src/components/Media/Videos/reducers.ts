@@ -1,15 +1,15 @@
 import { createAction, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { AnyAction } from 'redux';
-import { ThunkAction } from 'redux-thunk';
+import type { UnknownAction } from 'redux';
+import type { ThunkAction } from 'redux-thunk';
 import youTube from 'src/services/YouTube';
 
-import {
+import type {
     VideoItemShape,
     VideoPlayerStateShape,
     VideoPlaylistStateShape,
 } from 'src/components/Media/Videos/types';
-import { GlobalStateShape } from 'src/store';
-import { ThunkAPIType } from 'src/types';
+import type { GlobalStateShape } from 'src/store';
+import type { ThunkAPIType } from 'src/types';
 
 const videoPlayerInitialState: VideoPlayerStateShape = {
     isPlayerReady: false,
@@ -52,42 +52,6 @@ const videoPlayerSlice = createSlice({
 
 export const videoPlayerReducer = videoPlayerSlice.reducer;
 
-// export const videoPlayerReducer: Reducer<VideoPlayerStateShape, ActionTypes> = (state = {
-//     isPlayerReady: false,
-//     videoId: '',
-//     isPreviewOverlay: false,
-//     isPlaying: false,
-// }, action) => {
-//     switch (action.type) {
-//         case VIDEO_ACTIONS.PLAYER_IS_READY:
-//             return {
-//                 ...state,
-//                 isPlayerReady: true,
-//                 isPreviewOverlay: true,
-//             };
-//         case VIDEO_ACTIONS.PLAY_ITEM:
-//             return {
-//                 ...state,
-//                 videoId: action.videoId,
-//                 isPlaying: true,
-//                 isPreviewOverlay: false,
-//             };
-//         case VIDEO_ACTIONS.FETCH_PLAYLIST_SUCCESS:
-//             return {
-//                 ...state,
-//                 videoId: action.videoId,
-//             };
-//         case VIDEO_ACTIONS.RESET_PLAYER:
-//             return {
-//                 ...state,
-//                 isPlayerReady: false,
-//                 videoId: '',
-//                 isPlaying: false,
-//                 isPreviewOverlay: false,
-//             };
-//         default: return state;
-//     }
-// };
 export const togglePlaylist = createAction<boolean | undefined>(
     'videoPlaylist/togglePlaylist',
 );
@@ -174,52 +138,11 @@ const videoPlaylistSlice = createSlice({
 
 export const videoPlaylistReducer = videoPlaylistSlice.reducer;
 
-// export const videoPlaylistReducer: Reducer<VideoPlaylistStateShape, ActionTypes> = (state = {
-//     items: [],
-//     isFetching: false,
-//     isShow: true,
-// }, action) => {
-//     switch (action.type) {
-//         case VIDEO_ACTIONS.FETCH_PLAYLIST_REQUEST:
-//             return {
-//                 ...state, isFetching: true,
-//             };
-//         case VIDEO_ACTIONS.FETCH_PLAYLIST_SUCCESS:
-//             return {
-//                 ...state,
-//                 isFetching: false,
-//                 items: action.videos,
-//                 isShow: true,
-//             };
-//         case VIDEO_ACTIONS.FETCH_PLAYLIST_ERROR:
-//             return {
-//                 ...state,
-//                 isFetching: false,
-//             };
-//         case VIDEO_ACTIONS.TOGGLE_PLAYLIST:
-//             return {
-//                 ...state,
-//                 isShow: action.isShow,
-//             };
-//         default: return state;
-//     }
-// };
-
-// export const initializeYoutubeElement = (el: HTMLElement, videoId?: string, isMobile?: boolean) => {
-//     youTube.initializePlayerOnElement(el);
-//     youTube.executeWhenPlayerReady(() => {
-//         dispatch({
-//             type: VIDEO_ACTIONS.PLAYER_IS_READY,
-//         });
-//         getState().videoPlaylist.items.length && videoId && dispatch(playVideo(isMobile, videoId));
-//     });
-// };
-
 export const playVideo =
     (
         isMobile = false,
         videoId?: string,
-    ): ThunkAction<void, GlobalStateShape, void, AnyAction> =>
+    ): ThunkAction<void, GlobalStateShape, void, UnknownAction> =>
     (dispatch, getState) => {
         const videoPlayerReducer = getState().videoPlayer;
         if (

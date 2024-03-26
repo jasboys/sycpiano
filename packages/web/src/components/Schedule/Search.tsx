@@ -12,15 +12,15 @@ import {
 import { Transition } from 'react-transition-group';
 import { createSelector } from 'reselect';
 
-import { toMedia } from 'src/mediaQuery';
 import { SearchIconInstance } from 'src/components/Schedule/SearchIconSVG';
+import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenXS, screenXSandPortrait } from 'src/screens';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 
 import { useAppSelector } from 'src/hooks';
-import { GlobalStateShape } from 'src/store';
+import type { GlobalStateShape } from 'src/store';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
 import { mqSelectors } from '../App/reducers';
 
