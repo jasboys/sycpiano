@@ -1,29 +1,22 @@
+import IconMerge from '@mui/icons-material/Merge.js';
 import { Box } from '@mui/material';
 import { formatInTimeZone } from 'date-fns-tz';
 import {
     ArrayField,
-    BulkActionProps,
     Button,
     Create,
     CreateButton,
-    CreateProps,
     Datagrid,
     DateField,
     Edit,
-    EditProps,
     FilterButton,
     FunctionField,
-    GetOneResult,
-    Identifier,
     List,
     ListButton,
-    ListProps,
     NumberField,
-    RaRecord,
     SearchInput,
     Show,
     ShowButton,
-    ShowProps,
     SimpleForm,
     Tab,
     TabbedShowLayout,
@@ -33,12 +26,19 @@ import {
     useNotify,
     useRecordContext,
     useRefresh,
+    type BulkActionProps,
+    type CreateProps,
+    type EditProps,
+    type GetOneResult,
+    type Identifier,
+    type ListProps,
+    type RaRecord,
+    type ShowProps,
 } from 'react-admin';
-import { TrimButton } from '../Shared.jsx';
 import { useMutation } from 'react-query';
 import { useAppDataProvider } from 'src/providers/restProvider.js';
-import { AdminError } from 'src/types.js';
-import IconMerge from '@mui/icons-material/Merge.js';
+import type { AdminError } from 'src/types.js';
+import { TrimButton } from '../Shared.jsx';
 
 const filters = [<SearchInput key="search" source="q" alwaysOn />];
 

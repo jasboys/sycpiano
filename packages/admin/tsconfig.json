@@ -3,13 +3,13 @@
     "compilerOptions": {
         "lib": [
             "dom",
-            "ESNext",
+            "ESNext"
         ],
         "paths": {
             "*": [
                 "node_modules/*",
                 "@types/*",
-                "node_modules/@types/*",
+                "node_modules/@types/*"
             ],
             "src/*": ["./src/*"]
         },
@@ -41,6 +41,6 @@
         "noErrorTruncation": true
     },
     "include": [
-        "src",
+        "src"
     ]
 }

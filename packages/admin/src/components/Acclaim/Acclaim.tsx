@@ -1,25 +1,25 @@
-import * as React from 'react';
+import type * as React from 'react';
 import {
     BooleanField,
     BooleanInput,
     Create,
-    CreateProps,
     Datagrid,
     DateField,
     DateInput,
     Edit,
-    EditProps,
     FunctionField,
-    Identifier,
     List,
-    ListProps,
-    RaRecord,
     Show,
-    ShowProps,
     SimpleForm,
     SimpleShowLayout,
     TextField,
     TextInput,
+    type CreateProps,
+    type EditProps,
+    type Identifier,
+    type ListProps,
+    type RaRecord,
+    type ShowProps,
 } from 'react-admin';
 
 const AcclaimsPanel: React.FC<{

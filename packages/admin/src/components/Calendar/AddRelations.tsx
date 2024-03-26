@@ -1,24 +1,24 @@
 import IconCancel from '@mui/icons-material/Cancel.js';
 import { DialogActions, DialogContent } from '@mui/material';
-import React from 'react';
+import type React from 'react';
 import {
     AutocompleteInput,
     Button,
-    Identifier,
     NumberInput,
-    RaRecord,
     ReferenceInput,
     SaveButton,
     TextInput,
-    TextInputProps,
     useChoicesContext,
     useCreate,
     useNotify,
     useRecordContext,
     useRefresh,
+    type Identifier,
+    type RaRecord,
+    type TextInputProps,
 } from 'react-admin';
 import { useFormContext } from 'react-hook-form';
-import { AdminError } from 'src/types.js';
+import type { AdminError } from 'src/types.js';
 
 interface ControllerInputProps extends TextInputProps {
     property: string;

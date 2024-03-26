@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { AuthProvider } from 'react-admin';
+import type { AuthProvider } from 'react-admin';
 
 const authProvider = (apiUrl: string): AuthProvider => {
     const axiosInstance = axios.create({

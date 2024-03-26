@@ -1,14 +1,14 @@
 import IconDelete from '@mui/icons-material/Delete.js';
 import { Button as MuiButton } from '@mui/material';
 import {
-    Identifier,
-    RaRecord,
     useDelete,
     useNotify,
     useRecordContext,
     useRefresh,
+    type Identifier,
+    type RaRecord,
 } from 'react-admin';
-import { AdminError } from 'src/types.js';
+import type { AdminError } from 'src/types.js';
 
 export const DeleteCalendarPiece = () => {
     const refresh = useRefresh();

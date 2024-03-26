@@ -49,6 +49,9 @@ export class Product {
     @Property({ columnType: 'text', nullable: true })
     permalink?: string;
 
+    @Property({})
+    purchasedCount!: number;
+
     @ManyToMany({ entity: () => User, mappedBy: (u) => u.products })
     users = new Collection<User>(this);
 

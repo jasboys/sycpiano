@@ -2,11 +2,11 @@ import { TextField as MUITextField } from '@mui/material';
 import {
     BooleanInput,
     Create,
-    CreateProps,
     FormDataConsumer,
     SimpleForm,
     TextInput,
     required,
+    type CreateProps,
 } from 'react-admin';
 import { toUTC } from '../../utils.js';
 import { EndDate } from './EndDate.jsx';

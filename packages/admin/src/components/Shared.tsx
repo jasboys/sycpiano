@@ -7,10 +7,10 @@ import {
     Typography,
 } from '@mui/material';
 import React from 'react';
-import { Button, Form, Identifier, useNotify, useRefresh } from 'react-admin';
+import { Button, Form, useNotify, useRefresh, type Identifier } from 'react-admin';
 import { useMutation } from 'react-query';
 import { useAppDataProvider } from 'src/providers/restProvider.js';
-import { MutateForm } from 'src/types.js';
+import type { MutateForm } from 'src/types.js';
 
 export const Empty = ({ assoc, children }: React.PropsWithChildren<{ assoc: string }>) => (
     <div>

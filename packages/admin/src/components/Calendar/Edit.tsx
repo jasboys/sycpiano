@@ -4,14 +4,15 @@ import {
     BooleanInput,
     Datagrid,
     Edit,
-    EditProps,
     FormDataConsumer,
     FormTab,
     TabbedForm,
     TextField,
     TextInput,
+    type EditProps,
 } from 'react-admin';
 import { toUTC } from 'src/utils.js';
+import { AddReferenceButton, EditReferenceButton, Empty } from '../Shared.jsx';
 import {
     AddCalendarCollaboratorForm,
     AddCalendarPieceForm,
@@ -25,7 +26,6 @@ import {
     EditCalendarPiece,
 } from './EditRelations.jsx';
 import { EndDate } from './EndDate.jsx';
-import { AddReferenceButton, EditReferenceButton, Empty } from '../Shared.jsx';
 
 export const CalendarEdit = (props: EditProps) => {
     return (

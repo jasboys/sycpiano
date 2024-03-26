@@ -4,41 +4,41 @@ import {
     Button,
     Create,
     CreateButton,
-    CreateProps,
     Datagrid,
     Edit,
-    EditProps,
     FileField,
     FileInput,
     FilterButton,
     FunctionField,
-    GetListResult,
     ImageField,
     ImageInput,
     List,
-    ListProps,
     NumberField,
     NumberInput,
-    RaRecord,
     SearchInput,
     SelectInput,
     Show,
-    ShowProps,
     SimpleForm,
     SimpleFormIterator,
     SimpleShowLayout,
     TextField,
     TextInput,
     TopToolbar,
-    UseRecordContextParams,
     useNotify,
     useRecordContext,
     useRefresh,
+    type CreateProps,
+    type EditProps,
+    type GetListResult,
+    type ListProps,
+    type RaRecord,
+    type ShowProps,
+    type UseRecordContextParams,
 } from 'react-admin';
 import { useWatch } from 'react-hook-form';
 import { useMutation } from 'react-query';
 import { useAppDataProvider } from 'src/providers/restProvider.js';
-import { AdminError } from 'src/types.js';
+import type { AdminError } from 'src/types.js';
 import { IMAGES_URI } from 'src/uris';
 
 export const ProductTypes = ['arrangement', 'cadenza', 'original'] as const;
@@ -59,6 +59,7 @@ export interface ProductAttributes {
     pages: number;
     price: number; // in cents
     priceID: string;
+    purchasedCount: number;
     type: typeof ProductTypes[number];
 }
 
@@ -116,6 +117,30 @@ const PullButton = () => {
     );
 };
 
+const PurchasedCountButton = () => {
+    const notify = useNotify();
+    const refresh = useRefresh();
+    const dataProvider = useAppDataProvider();
+    const { mutate, isLoading } = useMutation<GetListResult, AdminError>(
+        () => dataProvider.purchasedCount('products', {}),
+        {
+            onSuccess: () => {
+                refresh();
+                notify('Purchased Count Population Succeeded');
+            },
+            onError: (error) =>
+                notify(`Error: ${error.message}`, { type: 'warning' }),
+        },
+    );
+    return (
+        <Button
+            label="Populate Purchased"
+            onClick={() => mutate()}
+            disabled={isLoading}
+        />
+    );
+};
+
 const Empty = () => {
     return (
         <Box textAlign="center" m={1}>
@@ -126,6 +151,7 @@ const Empty = () => {
                 Create one or import from Stripe
             </Typography>
             <CreateButton />
+            <PurchasedCountButton />
             <PullButton />
         </Box>
     );
@@ -137,6 +163,7 @@ const ListActions = () => (
     <TopToolbar>
         <FilterButton />
         <CreateButton />
+        <PurchasedCountButton />
         <PullButton />
     </TopToolbar>
 );
@@ -150,6 +177,7 @@ export const ProductList = (props: ListProps) => (
         empty={<Empty />}
     >
         <Datagrid rowClick="edit">
+            <NumberField source="purchasedCount" />
             <TextField source="name" />
             <TextField source="file" />
             <TextField source="permalink" />
@@ -170,6 +198,7 @@ export const ProductList = (props: ListProps) => (
 export const ProductShow = (props: ShowProps) => (
     <Show {...props}>
         <SimpleShowLayout>
+            <NumberField source="purchasedCount" />
             <TextField source="id" />
             <TextField source="name" />
             <TextField source="file" />

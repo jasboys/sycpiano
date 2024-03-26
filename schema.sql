@@ -553,7 +553,8 @@ CREATE TABLE public.product (
     price integer NOT NULL,
     type text,
     price_id text NOT NULL,
-    permalink text
+    permalink text,
+    purchased_count integer DEFAULT 0
 );
 
 
@@ -1020,4 +1021,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20230705055529'),
     ('20230707020252'),
     ('20230707021812'),
-    ('20231101033621');
+    ('20231101033621'),
+    ('20240326040532');

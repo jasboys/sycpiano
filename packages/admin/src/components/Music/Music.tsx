@@ -6,29 +6,22 @@ import {
     DialogContent,
     Button as MuiButton,
 } from '@mui/material';
-import * as React from 'react';
+import type * as React from 'react';
 import {
     ArrayField,
     Button,
     Create,
-    CreateProps,
     Datagrid,
     Edit,
-    EditProps,
     FileField,
     FileInput,
-    GetOneResult,
-    Identifier,
     List,
-    ListProps,
     NumberField,
     NumberInput,
-    RaRecord,
     SaveButton,
     SearchInput,
     SelectInput,
     Show,
-    ShowProps,
     SimpleForm,
     SimpleShowLayout,
     TextField,
@@ -40,12 +33,19 @@ import {
     useRecordContext,
     useRefresh,
     useUpdate,
+    type CreateProps,
+    type EditProps,
+    type GetOneResult,
+    type Identifier,
+    type ListProps,
+    type RaRecord,
+    type ShowProps,
 } from 'react-admin';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { AdminError, MutateForm } from 'src/types.js';
-import { AddReferenceButton, EditReferenceButton, Empty } from '../Shared.jsx';
-import { useAppDataProvider } from 'src/providers/restProvider.js';
 import { useMutation } from 'react-query';
+import { useAppDataProvider } from 'src/providers/restProvider.js';
+import type { AdminError, MutateForm } from 'src/types.js';
+import { AddReferenceButton, EditReferenceButton, Empty } from '../Shared.jsx';
 
 /*
 readonly id?: string;
@@ -346,8 +346,6 @@ const RecalculateDuration = () => {
 };
 
 export const MusicEdit = (props: EditProps) => {
-    const refresh = useRefresh();
-
     return (
         <Edit {...props}>
             <SimpleForm>

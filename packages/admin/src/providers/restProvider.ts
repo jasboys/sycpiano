@@ -1,17 +1,17 @@
-import {
-    DataProvider,
-    GetListResult,
-    GetOneResult,
-    HttpError,
-    Identifier,
-    RaRecord,
-    useDataProvider,
-    withLifecycleCallbacks,
-} from 'react-admin';
 import axios from 'axios';
 import { formatInTimeZone } from 'date-fns-tz';
-import { toUTC } from '../utils';
+import {
+    HttpError,
+    useDataProvider,
+    withLifecycleCallbacks,
+    type DataProvider,
+    type GetListResult,
+    type GetOneResult,
+    type Identifier,
+    type RaRecord,
+} from 'react-admin';
 import { ADMIN_URI } from 'src/uris.js';
+import { toUTC } from '../utils';
 
 class TotalCountError extends HttpError {
     constructor() {
@@ -52,7 +52,7 @@ const provider = (apiUrl: string): AdminProvider => {
             }
             return {
                 data,
-                total: parseInt(headers['x-total-count'], 10),
+                total: Number.parseInt(headers['x-total-count'], 10),
             };
         },
         getOne: async (resource, params) => {
@@ -104,7 +104,7 @@ const provider = (apiUrl: string): AdminProvider => {
             }
             return {
                 data,
-                total: parseInt(headers['x-total-count'], 10),
+                total: Number.parseInt(headers['x-total-count'], 10),
             };
         },
 
@@ -210,7 +210,29 @@ const provider = (apiUrl: string): AdminProvider => {
             }
             return {
                 data,
-                total: parseInt(headers['x-total-count'], 10),
+                total: Number.parseInt(headers['x-total-count'], 10),
+            };
+        },
+
+        purchasedCount: async (resource: string, _params: unknown) => {
+            if (resource !== 'products') {
+                return Promise.reject('Pull called with incorrect resource.');
+            }
+            const { data, headers } = await axiosInstance.post(
+                '/actions/products/populate-purchase-count',
+                {},
+                {
+                    headers: {
+                        'X-CSRF-TOKEN': 'admin',
+                    },
+                },
+            );
+            if (!headers?.['x-total-count']) {
+                throw new TotalCountError();
+            }
+            return {
+                data,
+                total: Number.parseInt(headers['x-total-count'], 10),
             };
         },
 
@@ -237,7 +259,7 @@ const provider = (apiUrl: string): AdminProvider => {
             }
             return {
                 data,
-                total: parseInt(headers['x-total-count'], 10),
+                total: Number.parseInt(headers['x-total-count'], 10),
             };
         },
 
@@ -261,7 +283,7 @@ const provider = (apiUrl: string): AdminProvider => {
             }
             return {
                 data,
-                total: parseInt(headers['x-total-count'], 10),
+                total: Number.parseInt(headers['x-total-count'], 10),
             };
         },
 
@@ -285,7 +307,7 @@ const provider = (apiUrl: string): AdminProvider => {
             }
             return {
                 data,
-                total: parseInt(headers['x-total-count'], 10),
+                total: Number.parseInt(headers['x-total-count'], 10),
             };
         },
 
@@ -360,6 +382,10 @@ const provider = (apiUrl: string): AdminProvider => {
 export interface AdminProvider<ResourceType extends string = string>
     extends DataProvider<ResourceType> {
     pull: <RecordType extends RaRecord>(
+        resource: string,
+        params: unknown,
+    ) => Promise<GetListResult<RecordType>>;
+    purchasedCount: <RecordType extends RaRecord>(
         resource: string,
         params: unknown,
     ) => Promise<GetListResult<RecordType>>;

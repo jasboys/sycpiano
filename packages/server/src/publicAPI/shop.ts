@@ -73,6 +73,11 @@ shopRouter.post(
                         user: customerId,
                     });
                     orm.em.persist(items);
+
+                    const product = await orm.em.findOne(Product, id);
+                    if (product) {
+                        product.purchasedCount += 1;
+                    }
                 }
                 orm.em.flush();
                 if (!alreadyProcessed) {
@@ -98,7 +103,11 @@ const productSortPredicate = (a: ShopItem, b: ShopItem) => {
 };
 
 shopRouter.get('/items', async (_, res) => {
-    const products = await orm.em.find(Product, {});
+    const products = await orm.em.find(
+        Product,
+        {},
+        { exclude: ['purchasedCount'] },
+    );
     const storeItems = ProductTypes.reduce(
         (acc, type) => {
             const prods = products

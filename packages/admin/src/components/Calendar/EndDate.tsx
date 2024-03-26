@@ -1,7 +1,7 @@
-import { SxProps } from '@mui/material';
+import type { SxProps } from '@mui/material';
 import React from 'react';
 import { TextInput } from 'react-admin';
-import { useWatch, useFormContext } from 'react-hook-form';
+import { useFormContext, useWatch } from 'react-hook-form';
 
 export const EndDate = ({ sx }: { sx?: SxProps }) => {
     const allDay = useWatch({ name: 'allDay' });

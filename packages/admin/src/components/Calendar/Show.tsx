@@ -1,5 +1,5 @@
 import {
-    ShowProps,
+    type ShowProps,
     Show,
     TabbedShowLayout,
     Tab,
@@ -10,7 +10,7 @@ import {
     ArrayField,
     Datagrid,
     Empty,
-    UseRecordContextParams,
+    type UseRecordContextParams,
     useRecordContext,
 } from 'react-admin';
 

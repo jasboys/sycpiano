@@ -1,20 +1,19 @@
-import * as React from 'react';
 import {
     Create,
-    CreateProps,
     Edit,
-    EditProps,
     List,
-    ListProps,
     NumberField,
     NumberInput,
     Show,
-    ShowProps,
     SimpleForm,
     SimpleList,
     SimpleShowLayout,
     TextField,
     TextInput,
+    type CreateProps,
+    type EditProps,
+    type ListProps,
+    type ShowProps,
 } from 'react-admin';
 
 export const BioCreate = (props: CreateProps) => (

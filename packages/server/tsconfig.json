@@ -2,7 +2,7 @@
     "compileOnSave": false,
     "compilerOptions": {
         "lib": [
-            "esnext",
+            "esnext"
         ],
         "module": "NodeNext",
         "target": "ESNext",

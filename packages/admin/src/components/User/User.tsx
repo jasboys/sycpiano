@@ -1,20 +1,20 @@
-import * as React from 'react';
+import type * as React from 'react';
 import {
-    Datagrid,
-    Identifier,
-    List,
-    ListProps,
-    ShowProps,
-    RaRecord,
     ArrayField,
-    TextField,
-    Show,
-    SimpleShowLayout,
-    FunctionField,
-    TextInput,
+    Datagrid,
     Edit,
+    FunctionField,
+    List,
+    Show,
     SimpleForm,
-    EditProps,
+    SimpleShowLayout,
+    TextField,
+    TextInput,
+    type EditProps,
+    type Identifier,
+    type ListProps,
+    type RaRecord,
+    type ShowProps,
 } from 'react-admin';
 
 const ProductList: React.FC<{

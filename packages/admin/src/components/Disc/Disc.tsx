@@ -5,31 +5,24 @@ import {
     DialogContent,
     Button as MuiButton,
 } from '@mui/material';
-import * as React from 'react';
+import type * as React from 'react';
 import {
     ArrayField,
     Button,
     Create,
-    CreateProps,
     Datagrid,
     Edit,
-    EditProps,
-    Identifier,
     List,
-    ListProps,
     NumberField,
     NumberInput,
-    RaRecord,
     SaveButton,
     SearchInput,
     Show,
-    ShowProps,
     SimpleForm,
     SimpleShowLayout,
     TextField,
     TextInput,
     UrlField,
-    UseRecordContextParams,
     required,
     useCreate,
     useDelete,
@@ -37,9 +30,16 @@ import {
     useRecordContext,
     useRefresh,
     useUpdate,
+    type CreateProps,
+    type EditProps,
+    type Identifier,
+    type ListProps,
+    type RaRecord,
+    type ShowProps,
+    type UseRecordContextParams,
 } from 'react-admin';
 import { useFormContext } from 'react-hook-form';
-import { AdminError, MutateForm } from 'src/types.js';
+import type { AdminError, MutateForm } from 'src/types.js';
 import { DISC_THUMB_URI } from 'src/uris';
 import { AddReferenceButton, EditReferenceButton, Empty } from '../Shared.jsx';
 

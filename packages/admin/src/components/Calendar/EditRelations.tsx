@@ -2,18 +2,18 @@ import IconCancel from '@mui/icons-material/Cancel.js';
 import { DialogActions, DialogContent } from '@mui/material';
 import {
     Button,
-    Identifier,
     NumberInput,
-    RaRecord,
     SaveButton,
     TextInput,
     useNotify,
     useRecordContext,
     useRefresh,
     useUpdate,
+    type Identifier,
+    type RaRecord,
 } from 'react-admin';
 import { useFormContext, useFormState } from 'react-hook-form';
-import { AdminError, MutateForm } from 'src/types.js';
+import type { AdminError, MutateForm } from 'src/types.js';
 
 export const EditCalendarPiece: MutateForm = ({ setShowDialog }) => {
     const [update, { isLoading }] = useUpdate<
