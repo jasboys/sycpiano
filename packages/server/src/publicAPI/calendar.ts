@@ -1,9 +1,39 @@
-import { Loaded, raw } from '@mikro-orm/core';
+import { FilterQuery, Loaded, raw } from '@mikro-orm/core';
 import { isBefore, isValid, parseISO, startOfDay } from 'date-fns';
 import * as express from 'express';
 
 import orm from '../database.js';
 import { Calendar } from '../models/Calendar.js';
+
+export const mapSearchFields = (token: string) =>
+    [
+        'location',
+        'type',
+        'website',
+        'name',
+        'pieces.composer',
+        'pieces.piece',
+        'collaborators.name',
+        'collaborators.instrument',
+    ].map((field) => {
+        const split = field.split('.');
+        if (split.length === 1) {
+            return {
+                [field]: {
+                    $ilike: `%${token}%`,
+                },
+            };
+        }
+        return {
+            [split[0]]: {
+                $some: {
+                    [split[1]]: {
+                        $ilike: `%${token}%`,
+                    },
+                },
+            },
+        };
+    });
 
 function getEventsBefore(before: Date, limit?: number) {
     return orm.em.find(
@@ -86,37 +116,28 @@ calendarRouter.get(
         req: express.Request<unknown, object, unknown, CalendarQuery>,
         res,
     ) => {
-        const str = req.query.q;
-        if (str === undefined || str === '') {
+        const q = req.query.q;
+        if (q === undefined || q === '') {
             res.json([]);
             return;
         }
-
-        const ors = str.split(', ');
-        const regexPattern = ors
-            .map((andGroup) => {
-                return andGroup
-                    .split(/ +/g)
-                    .map((and) => {
-                        return `(?=.*${and})`;
-                    })
-                    .join('');
-            })
-            .join('|');
-
-        console.log(regexPattern);
-        const calendarResults = await orm.em.find(
-            Calendar,
-            {
-                calendarTrgmMatview: {
-                    doc: new RegExp(regexPattern, 'i'),
-                },
-            },
-            {
-                populate: ['collaborators', 'pieces'],
-                orderBy: [{ dateTime: 'DESC' }],
-            },
-        );
+        const tokens = q.trim().replaceAll(', ', '|').replaceAll(' ', '&');
+        const splitTokens = tokens.split('|').map((t) => t.split('&'));
+        const where: FilterQuery<Calendar> = {
+            $or: splitTokens.map((token) => {
+                return {
+                    $and: token.map((v) => {
+                        return {
+                            $or: mapSearchFields(v),
+                        };
+                    }),
+                };
+            }),
+        };
+        const calendarResults = await orm.em.find(Calendar, where, {
+            populate: ['collaborators', 'pieces'],
+            orderBy: [{ dateTime: 'DESC' }],
+        });
 
         res.json(calendarResults);
     },

@@ -15,6 +15,36 @@ import { respondWithError } from './index.js';
 import { mikroCrud } from './mikroCrud.js';
 import { NotFoundError } from './types.js';
 
+export const mapSearchFields = (token: string) =>
+    [
+        'location',
+        'type',
+        'website',
+        'name',
+        'pieces.composer',
+        'pieces.piece',
+        'collaborators.name',
+        'collaborators.instrument',
+    ].map((field) => {
+        const split = field.split('.');
+        if (split.length === 1) {
+            return {
+                [field]: {
+                    $ilike: `%${token}%`,
+                },
+            };
+        }
+        return {
+            [split[0]]: {
+                $some: {
+                    [split[1]]: {
+                        $ilike: `%${token}%`,
+                    },
+                },
+            },
+        };
+    });
+
 const calendarRouter = crud('/calendars', {
     ...mikroCrud({ entity: Calendar }),
     create: async (body) => {
@@ -147,22 +177,18 @@ const calendarRouter = crud('/calendars', {
                 },
             };
         } else {
-            const ors = q.trim().split(', ');
-            const regexPattern = ors
-                .map((andGroup) => {
-                    return andGroup
-                        .split(/ +/g)
-                        .map((and) => {
-                            return `(?=.*${and})`;
-                        })
-                        .join('');
-                })
-                .join('|');
-            const regExp = new RegExp(regexPattern, 'i');
+            const tokens = q.trim().replaceAll(', ', '|').replaceAll(' ', '&');
+            const splitTokens = tokens.split('|').map((t) => t.split('&'));
             where = {
-                calendarTrgmMatview: {
-                    doc: regExp,
-                },
+                $or: splitTokens.map((token) => {
+                    return {
+                        $and: token.map((v) => {
+                            return {
+                                $or: mapSearchFields(v),
+                            };
+                        }),
+                    };
+                }),
             };
         }
         const calendarResults = await orm.em.findAndCount(Calendar, where, {
