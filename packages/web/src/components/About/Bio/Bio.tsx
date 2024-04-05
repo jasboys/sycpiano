@@ -38,8 +38,6 @@ const bioStyles = {
         backgroundRepeat: 'no-repeat',
         backgroundColor: 'black',
         visibility: 'hidden',
-        '--bio-pic-min-height': pictureHeight,
-        '--bio-pic-height': 'min(50vw, 33vh)',
 
         [toMedia(screenM)]: {
             backgroundSize: 'cover',
@@ -75,6 +73,8 @@ const bioStyles = {
             backgroundColor: 'white',
             paddingTop: 'var(--nav-bar-height)',
         },
+        '--bio-pic-min-height': pictureHeight,
+        '--bio-pic-height': 'min(50vw, 33vh)',
     }),
     loader: css({
         visibility: 'hidden',

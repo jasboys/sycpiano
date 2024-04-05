@@ -9,7 +9,7 @@
     "watch": "cross-env NODE_ENV=development tsc --watch"
   },
   "devDependencies": {
-    "typescript": "^5.4.3"
+    "typescript": "^5.4.4"
   },
   "dependencies": {
     "cross-env": "^7.0.3",
