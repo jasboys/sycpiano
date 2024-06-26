@@ -143,6 +143,7 @@ const getOrCreateLocalCustomer = async (email: string) => {
         );
 
         if (!localCustomer) {
+            console.log(email);
             const user = orm.em.create(User, {
                 id: stripeCustomer.id,
                 username: email,
@@ -196,8 +197,11 @@ shopRouter.post('/checkout', async (req, res) => {
     } = req.body;
 
     try {
+        if (!email) {
+            throw new Error('No email supplied');
+        }
         const customer = await getOrCreateLocalCustomer(email);
-        if (customer === undefined) {
+        if (!customer) {
             throw new Error(`customer not found: ${email}`);
         }
 
