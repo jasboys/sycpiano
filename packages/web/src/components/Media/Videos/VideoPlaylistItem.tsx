@@ -1,9 +1,6 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import addMilliseconds from 'date-fns/addMilliseconds';
-import format from 'date-fns/format';
-import intervalToDuration from 'date-fns/intervalToDuration';
-import parseISO from 'date-fns/parseISO';
+import { addMilliseconds, format, intervalToDuration, parseISO } from 'date-fns';
 import parseDuration from 'parse-iso-duration';
 import { lighten } from 'polished';
 import type * as React from 'react';

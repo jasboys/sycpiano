@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import React from 'react';
 import { Button, Form, useNotify, useRefresh, type Identifier } from 'react-admin';
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useAppDataProvider } from 'src/providers/restProvider.js';
 import type { MutateForm } from 'src/types.js';
 
@@ -86,25 +86,24 @@ export const TrimButton = ({
     const notify = useNotify();
     const refresh = useRefresh();
     const dataProvider = useAppDataProvider();
-    const { mutate, isLoading } = useMutation(
-        () =>
+    const { mutate, isPending } = useMutation({
+        mutationFn: () =>
             dataProvider.trim(
                 resource,
                 {},
             ),
-        {
-            onSuccess: () => {
+        onSuccess: () => {
                 refresh();
                 notify(`Trimming of ${resource} fields succeeded.`);
             },
-            onError: (error) => notify(`Error: ${error}`, { type: 'warning' }),
-        },
-    );
+        onError: (error) => notify(`Error: ${error}`, { type: 'warning' }),
+
+    });
     return (
         <Button
             label={"Trim fields"}
             onClick={() => mutate()}
-            disabled={isLoading}
+            disabled={isPending}
         />
     );
 };

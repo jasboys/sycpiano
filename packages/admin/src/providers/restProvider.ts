@@ -26,23 +26,30 @@ const provider = (apiUrl: string): AdminProvider => {
 
     return {
         getList: async (resource, params) => {
-            const { page, perPage } = params.pagination;
-            const { field, order } = params.sort;
+            const { page, perPage } = params.pagination ?? {};
+            const { field, order } = params.sort ?? {};
 
-            const rangeStart = (page - 1) * perPage;
-            const rangeEnd = page * perPage - 1;
+            const rangeStart =
+                page && perPage ? (page - 1) * perPage : undefined;
+            const rangeEnd = page && perPage ? page * perPage - 1 : undefined;
 
             const url = `/${resource}`;
 
-            const fields = field.split(',');
-            const orders = order.split(',');
+            const fields = field?.split(',');
+            const orders = order?.split(',');
 
             const { data, headers } = await axiosInstance.get(url, {
                 params: {
-                    sort: JSON.stringify(
-                        fields.map((f, idx) => [f, orders[idx]]),
-                    ),
-                    range: JSON.stringify([rangeStart, rangeEnd]),
+                    sort:
+                        fields &&
+                        orders &&
+                        JSON.stringify(
+                            fields.map((f, idx) => [f, orders[idx]]),
+                        ),
+                    range:
+                        page &&
+                        perPage &&
+                        JSON.stringify([rangeStart, rangeEnd]),
                     filter: JSON.stringify(params.filter),
                 },
             });

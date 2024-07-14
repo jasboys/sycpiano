@@ -29,7 +29,10 @@ import {
     volumeAction,
     type FetchPlaylistThunkReturn,
 } from 'src/components/Media/Music/reducers';
-import type { MusicFileItem, MusicListItem } from 'src/components/Media/Music/types';
+import type {
+    MusicFileItem,
+    MusicListItem,
+} from 'src/components/Media/Music/types';
 import {
     getBufferSrc,
     getRelativePermaLink,
@@ -155,7 +158,7 @@ const mediaSelectors = createStructuredSelector({
     screenPortrait: mqSelectors.screenPortrait,
     screenM: mqSelectors.screenM,
     screenLandscape: mqSelectors.screenLandscape,
-    screenL: mqSelectors.screenL
+    screenL: mqSelectors.screenL,
 });
 
 const Music: React.FC = () => {
@@ -186,15 +189,21 @@ const Music: React.FC = () => {
     const buffers = React.useRef<{
         prev: HTMLAudioElement | null;
         next: HTMLAudioElement | null;
-    }>({prev: null, next: null});
+    }>({ prev: null, next: null });
     const shouldPlay = React.useRef<boolean>();
     const tracks = React.useRef<{
         prev: MusicFileItem | undefined;
         next: MusicFileItem | undefined;
     }>({ prev: undefined, next: undefined });
 
-    const { isHamburger, hiDpx, screenPortrait, screenM, screenL, screenLandscape } =
-        useAppSelector(mediaSelectors);
+    const {
+        isHamburger,
+        hiDpx,
+        screenPortrait,
+        screenM,
+        screenL,
+        screenLandscape,
+    } = useAppSelector(mediaSelectors);
 
     const musicPlayer = React.useRef<MusicPlayer>(
         new MusicPlayer({
@@ -206,15 +215,28 @@ const Music: React.FC = () => {
     );
 
     React.useEffect(() => {
-        const prev = tracks.current.prev = getNextTrack(flatItems, currentTrack, 'prev', true);
-        const next = tracks.current.next = getNextTrack(flatItems, currentTrack, 'next', true);
-        musicPlayer.current.queueBuffers(getBufferSrc(prev), getBufferSrc(next));
+        const prev = (tracks.current.prev = getNextTrack(
+            flatItems,
+            currentTrack,
+            'prev',
+            true,
+        ));
+        const next = (tracks.current.next = getNextTrack(
+            flatItems,
+            currentTrack,
+            'next',
+            true,
+        ));
+        musicPlayer.current.queueBuffers(
+            getBufferSrc(prev),
+            getBufferSrc(next),
+        );
     }, [currentTrack, flatItems, isShuffle]);
 
     React.useEffect(() => {
         musicPlayer.current.setPhaseRateMultiplier(isHamburger);
-        isHamburger ?
-            musicPlayer.current.disconnectPhasalizers()
+        isHamburger
+            ? musicPlayer.current.disconnectPhasalizers()
             : musicPlayer.current.reconnectPhasalizers();
     }, [isHamburger]);
 
@@ -270,6 +292,20 @@ const Music: React.FC = () => {
             const result = await dispatch(
                 fetchPlaylistThunk({ composer, piece, movement }),
             );
+            if (!result.payload) {
+                if (currentTrack) {
+                    return {
+                        first: currentTrack,
+                        prev: tracks.current.prev,
+                        next: tracks.current.next,
+                    };
+                }
+                return {
+                    first: flatItems[0],
+                    prev: flatItems[flatItems.length - 1],
+                    next: flatItems[1],
+                };
+            }
             return {
                 first: (result.payload as FetchPlaylistThunkReturn).firstTrack,
                 prev: (result.payload as FetchPlaylistThunkReturn).prevTrack,
@@ -279,7 +315,7 @@ const Music: React.FC = () => {
             console.error('Playlist init failed.', err);
             throw err;
         }
-    }, []);
+    }, [flatItems]);
 
     const importVisualizer = React.useCallback(async () => {
         const register = module(store);
@@ -322,7 +358,11 @@ const Music: React.FC = () => {
     React.useEffect(() => {
         const initialize = async () => {
             console.log(audio, buffers);
-            if (!audio.current || !buffers.current.prev || !buffers.current.next) {
+            if (
+                !audio.current ||
+                !buffers.current.prev ||
+                !buffers.current.next
+            ) {
                 throw new Error('audio elements refs not created');
             }
             const { first, prev, next } = await waitForPlaylist();
@@ -331,8 +371,12 @@ const Music: React.FC = () => {
                 buffers.current.prev,
                 buffers.current.next,
                 { src: getSrc(first), waveform: getWaveformSrc(first) },
-                prev ? { src: getSrc(prev), waveform: getWaveformSrc(prev) } : undefined,
-                next ? { src: getSrc(next), waveform: getWaveformSrc(next) } : undefined,
+                prev
+                    ? { src: getSrc(prev), waveform: getWaveformSrc(prev) }
+                    : undefined,
+                next
+                    ? { src: getSrc(next), waveform: getWaveformSrc(next) }
+                    : undefined,
             );
         };
         dispatch(isLoadingAction(true));
@@ -365,8 +409,7 @@ const Music: React.FC = () => {
     }, [playSubsequent]);
 
     const onDrag = React.useCallback((percent: number) => {
-        const position =
-            musicPlayer.current.audio.duration * percent;
+        const position = musicPlayer.current.audio.duration * percent;
         dispatch(
             updateAction({
                 playbackPosition: position,
@@ -496,7 +539,10 @@ const Music: React.FC = () => {
                         isPlaying={isPlaying}
                         duration={duration}
                         volume={volume}
-                        isMobile={(screenM && screenPortrait || screenL && screenLandscape)}
+                        isMobile={
+                            (screenM && screenPortrait) ||
+                            (screenL && screenLandscape)
+                        }
                         isHoverSeekring={isHoverSeekring}
                         hoverAngle={angle}
                         setRadii={updateRadii}

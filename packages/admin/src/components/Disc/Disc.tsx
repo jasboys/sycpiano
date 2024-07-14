@@ -49,7 +49,7 @@ const DiscPanel: React.FC<{
     resource: string;
 }> = () => {
     return (
-        <ArrayField source="discLinks" fieldKey="id" fullWidth>
+        <ArrayField source="discLinks">
             <Datagrid
                 isRowSelectable={() => false}
                 bulkActionButtons={false}
@@ -71,18 +71,7 @@ const filters = [<SearchInput key="search" source="q" alwaysOn />];
 
 export const DiscList = (props: ListProps) => (
     <List {...props} perPage={25} filters={filters}>
-        <Datagrid
-            rowClick="edit"
-            expand={(props) => <DiscPanel {...props} />}
-            sx={{
-                '& .RaDatagrid-expandedPanel': {
-                    th: {
-                        backgroundColor: '#f8f8f8',
-                    },
-                    backgroundColor: '#f8f8f8',
-                },
-            }}
-        >
+        <Datagrid rowClick="edit" expand={(props) => <DiscPanel {...props} />}>
             <TextField source="title" />
             <TextField source="description" />
             <TextField source="label" />
@@ -99,13 +88,15 @@ const ThumbnailField = (props: UseRecordContextParams) => {
     const { source } = props;
     const record = useRecordContext(props);
     return (
-        <div css={{ height: 200, width: 200, position: 'relative' }}>
-            <img
-                css={{ height: '100%', width: '100%', objectFit: 'fill' }}
-                src={`${DISC_THUMB_URI}/${record[source]}`}
-                alt="thumbnail"
-            />
-        </div>
+        record && (
+            <div css={{ height: 200, width: 200, position: 'relative' }}>
+                <img
+                    css={{ height: '100%', width: '100%', objectFit: 'fill' }}
+                    src={`${DISC_THUMB_URI}/${record[source]}`}
+                    alt="thumbnail"
+                />
+            </div>
+        )
     );
 };
 
@@ -122,7 +113,7 @@ export const DiscShow = (props: ShowProps) => (
             />
             <TextField source="thumbnailFile" />
             <ThumbnailField source="thumbnailFile" />
-            <ArrayField source="discLinks" fieldKey="id" fullWidth>
+            <ArrayField source="discLinks">
                 <Datagrid>
                     <TextField source="type" label="Distributor" />
                     <UrlField
@@ -145,21 +136,22 @@ const DeleteDiscLink = () => {
 
     const handleClick = () => {
         console.log(record);
-        deleteOne(
-            'disc-links',
-            {
-                id: record.id,
-            },
-            {
-                onError: (error) => {
-                    notify(error.message, { type: 'error' });
+        record &&
+            deleteOne(
+                'disc-links',
+                {
+                    id: record.id,
                 },
-                onSuccess: () => {
-                    notify(`Deleted disc-link ${record.id}`);
-                    refresh();
+                {
+                    onError: (error) => {
+                        notify(error.message, { type: 'error' });
+                    },
+                    onSuccess: () => {
+                        notify(`Deleted disc-link ${record.id}`);
+                        refresh();
+                    },
                 },
-            },
-        );
+            );
     };
 
     return (
@@ -204,52 +196,53 @@ const EditDiscLink: MutateForm = ({ setShowDialog }) => {
     };
 
     return (
-        <>
-            <DialogContent>
-                <TextInput
-                    source="id"
-                    defaultValue={record.id}
-                    fullWidth
-                    disabled
-                />
-                <TextInput
-                    source="disc"
-                    label="Disc ID"
-                    defaultValue={record.disc.id}
-                    fullWidth
-                    disabled
-                />
-                <TextInput
-                    source="type"
-                    validate={required()}
-                    defaultValue={record.type}
-                    fullWidth
-                />
-                <TextInput
-                    source="url"
-                    validate={required()}
-                    defaultValue={record.url}
-                    fullWidth
-                />
-            </DialogContent>
-            <DialogActions>
-                <Button
-                    label="ra.action.cancel"
-                    onClick={() => setShowDialog(false)}
-                    disabled={isLoading}
-                >
-                    <IconCancel />
-                </Button>
-                <SaveButton
-                    onClick={handleSubmit(onSubmit)}
-                    type="button"
-                    disabled={isLoading}
-                />
-            </DialogActions>
-        </>
+        record && (
+            <>
+                <DialogContent>
+                    <TextInput
+                        source="id"
+                        defaultValue={record.id}
+                        fullWidth
+                        disabled
+                    />
+                    <TextInput
+                        source="disc"
+                        label="Disc ID"
+                        defaultValue={record.disc.id}
+                        fullWidth
+                        disabled
+                    />
+                    <TextInput
+                        source="type"
+                        validate={required()}
+                        defaultValue={record.type}
+                        fullWidth
+                    />
+                    <TextInput
+                        source="url"
+                        validate={required()}
+                        defaultValue={record.url}
+                        fullWidth
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        label="ra.action.cancel"
+                        onClick={() => setShowDialog(false)}
+                        disabled={isLoading}
+                    >
+                        <IconCancel />
+                    </Button>
+                    <SaveButton
+                        onClick={handleSubmit(onSubmit)}
+                        type="button"
+                        disabled={isLoading}
+                    />
+                </DialogActions>
+            </>
+        )
     );
 };
-
 
 const AddDiscLink: React.FC<{
     setShowDialog: (t: boolean) => void;
@@ -267,7 +260,7 @@ const AddDiscLink: React.FC<{
         create(
             'disc-links',
             {
-                data: values
+                data: values,
             },
             {
                 onSuccess: () => {
@@ -284,33 +277,35 @@ const AddDiscLink: React.FC<{
         );
     };
     return (
-        <>
-            <DialogContent>
-                <TextInput
-                    source="disc"
-                    label="Disc ID"
-                    defaultValue={record.id}
-                    fullWidth
-                    disabled
-                />
-                <TextInput source="type" validate={required()} fullWidth />
-                <TextInput source="url" validate={required()} fullWidth />
-            </DialogContent>
-            <DialogActions>
-                <Button
-                    label="ra.action.cancel"
-                    onClick={() => setShowDialog(false)}
-                    disabled={isLoading}
-                >
-                    <IconCancel />
-                </Button>
-                <SaveButton
-                    onClick={handleSubmit(onSubmit)}
-                    type="button"
-                    disabled={isLoading}
-                />
-            </DialogActions>
-        </>
+        record && (
+            <>
+                <DialogContent>
+                    <TextInput
+                        source="disc"
+                        label="Disc ID"
+                        defaultValue={record.id}
+                        fullWidth
+                        disabled
+                    />
+                    <TextInput source="type" validate={required()} fullWidth />
+                    <TextInput source="url" validate={required()} fullWidth />
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        label="ra.action.cancel"
+                        onClick={() => setShowDialog(false)}
+                        disabled={isLoading}
+                    >
+                        <IconCancel />
+                    </Button>
+                    <SaveButton
+                        onClick={handleSubmit(onSubmit)}
+                        type="button"
+                        disabled={isLoading}
+                    />
+                </DialogActions>
+            </>
+        )
     );
 };
 
@@ -324,7 +319,7 @@ export const DiscEdit = (props: EditProps) => {
                 <TextInput source="label" />
                 <NumberInput source="releaseDate" />
                 <TextInput source="thumbnailFile" />
-                <ArrayField source="discLinks" fieldKey="id" fullWidth>
+                <ArrayField source="discLinks">
                     <Datagrid
                         empty={<Empty assoc="Disc Links" />}
                         sx={{
@@ -337,7 +332,8 @@ export const DiscEdit = (props: EditProps) => {
                                 paddingLeft: 0,
                                 paddingRight: '1rem',
                             },
-                        }}>
+                        }}
+                    >
                         <TextField source="type" label="Distributor" />
                         <UrlField
                             source="url"
@@ -347,7 +343,8 @@ export const DiscEdit = (props: EditProps) => {
                         />
                         <EditReferenceButton
                             reference="disc-links"
-                            Component={EditDiscLink} />
+                            Component={EditDiscLink}
+                        />
                         <DeleteDiscLink />
                     </Datagrid>
                 </ArrayField>

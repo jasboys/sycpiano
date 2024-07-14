@@ -1,6 +1,6 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import format from 'date-fns/format';
+import { format } from 'date-fns';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
 import { createStructuredSelector } from 'reselect';

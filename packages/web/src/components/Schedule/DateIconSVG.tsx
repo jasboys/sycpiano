@@ -1,9 +1,11 @@
-import add from 'date-fns/add';
-import getISODay from 'date-fns/getISODay';
-import isSameDay from 'date-fns/isSameDay';
-import isSameMonth from 'date-fns/isSameMonth';
-import startOfMonth from 'date-fns/startOfMonth';
-import sub from 'date-fns/sub';
+import {
+    add,
+    getISODay,
+    isSameDay,
+    isSameMonth,
+    startOfMonth,
+    sub,
+} from 'date-fns';
 import type * as React from 'react';
 
 export const DateIconSVG: React.FC<Record<never, unknown>> = () => {

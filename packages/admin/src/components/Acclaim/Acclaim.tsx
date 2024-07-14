@@ -54,7 +54,7 @@ export const AcclaimList = (props: ListProps) => {
                 <TextField source="id" />
                 <FunctionField
                     label="Quote"
-                    render={(record: RaRecord | undefined) =>
+                    render={(record: Record<string, any>) =>
                         record
                             ? record.short
                                 ? record.short
@@ -64,7 +64,7 @@ export const AcclaimList = (props: ListProps) => {
                 />
                 <FunctionField
                     label="Author"
-                    render={(record: RaRecord | undefined) =>
+                    render={(record: Record<string, any>) =>
                         record
                             ? record.short_author
                                 ? record.short_author

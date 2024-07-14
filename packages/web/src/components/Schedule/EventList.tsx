@@ -1,7 +1,6 @@
 import { css } from '@emotion/css';
 import styled from '@emotion/styled';
-import parseISO from 'date-fns/parseISO';
-import startOfDay from 'date-fns/startOfDay';
+import { parseISO, startOfDay } from 'date-fns';
 import { Back, gsap } from 'gsap';
 import debounce from 'lodash-es/debounce';
 import startCase from 'lodash-es/startCase';
@@ -155,10 +154,8 @@ export const EventList: React.FC<EventListProps> = (props) => {
     const isHamburger = useAppSelector(mqSelectors.isHamburger);
 
     const searchQ = params.get('q');
-    console.log(routeParams);
 
     const onMountOrUpdate = React.useCallback(() => {
-        console.log(searchQ);
         if (searchQ !== null) {
             if (searchQ === '') {
                 navigate('/schedule/upcoming');

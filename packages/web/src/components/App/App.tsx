@@ -1,7 +1,7 @@
 import { Global } from '@emotion/react';
 import styled from '@emotion/styled';
 import { arrow, offset, shift, useFloating } from '@floating-ui/react-dom';
-import format from 'date-fns/format';
+import { format } from 'date-fns';
 import { omit, startCase, toLower } from 'lodash-es';
 import { parse, stringify } from 'qs';
 import * as React from 'react';

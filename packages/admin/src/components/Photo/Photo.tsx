@@ -28,7 +28,7 @@ import {
     type UseRecordContextParams,
 } from 'react-admin';
 import { useWatch } from 'react-hook-form';
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useAppDataProvider } from 'src/providers/restProvider.js';
 import { IMAGES_URI } from 'src/uris.js';
 
@@ -36,12 +36,14 @@ const ThumbnailField = (props: UseRecordContextParams) => {
     const { source } = props;
     const record = useRecordContext(props);
     return (
-        <img
-            src={`${IMAGES_URI}/gallery/thumbnails/${record[source]}`}
-            alt="thumbnail"
-            height={record.thumbnailHeight / 2}
-            width={record.thumbnailWidth / 2}
-        />
+        record && (
+            <img
+                src={`${IMAGES_URI}/gallery/thumbnails/${record[source]}`}
+                alt="thumbnail"
+                height={record.thumbnailHeight / 2}
+                width={record.thumbnailWidth / 2}
+            />
+        )
     );
 };
 
@@ -49,12 +51,14 @@ const FullImageField = (props: UseRecordContextParams) => {
     const { source } = props;
     const record = useRecordContext(props);
     return (
-        <img
-            src={`${IMAGES_URI}/gallery/${record[source]}`}
-            alt="thumbnail"
-            height={record.height / 2}
-            width={record.width / 2}
-        />
+        record && (
+            <img
+                src={`${IMAGES_URI}/gallery/${record[source]}`}
+                alt="thumbnail"
+                height={record.height / 2}
+                width={record.width / 2}
+            />
+        )
     );
 };
 
@@ -62,21 +66,20 @@ export const DateTakenButton = () => {
     const notify = useNotify();
     const refresh = useRefresh();
     const dataProvider = useAppDataProvider();
-    const { mutate, isLoading } = useMutation(
-        () => dataProvider.populateDateTaken('photos', {}),
-        {
-            onSuccess: () => {
-                refresh();
-                notify('Populating date_taken from EXIF succeeded');
-            },
-            onError: (error) => notify(`Error: ${error}`, { type: 'warning' }),
+    const { mutate, isPending } = useMutation({
+        mutationFn: () => dataProvider.populateDateTaken('photos', {}),
+
+        onSuccess: () => {
+            refresh();
+            notify('Populating date_taken from EXIF succeeded');
         },
-    );
+        onError: (error) => notify(`Error: ${error}`, { type: 'warning' }),
+    });
     return (
         <Button
             label={'Populate Photo Dates'}
             onClick={() => mutate()}
-            disabled={isLoading}
+            disabled={isPending}
         />
     );
 };
@@ -96,20 +99,20 @@ export const PhotoList = (props: ListProps) => (
             <DateField source="dateTaken" />
             <FunctionField
                 label="omitFromGallery"
-                render={(record?: RaRecord) => {
+                render={(record?: Record<string, any>) => {
                     const omit = record?.omitFromGallery;
                     return typeof omit === 'boolean' ? omit.toString() : 'null';
                 }}
             />
             <FunctionField
                 label="dimensions"
-                render={(record?: RaRecord) =>
+                render={(record?: Record<string, any>) =>
                     `${record?.width}x${record?.height}`
                 }
             />
             <FunctionField
                 label="thumbnail dimensions"
-                render={(record?: RaRecord) =>
+                render={(record?: Record<string, any>) =>
                     `${record?.thumbnailWidth}x${record?.thumbnailHeight}`
                 }
             />
@@ -127,21 +130,21 @@ export const PhotoShow = (props: ShowProps) => (
             <DateField source="dateTaken" />
             <FunctionField
                 label="omitFromGallery"
-                render={(record?: RaRecord) => {
+                render={(record?: Record<string, any>) => {
                     const omit = record?.omitFromGallery;
                     return typeof omit === 'boolean' ? omit.toString() : 'null';
                 }}
             />
             <FunctionField
                 label="thumbnail dimensions"
-                render={(record?: RaRecord) =>
+                render={(record?: Record<string, any>) =>
                     `${record?.thumbnailWidth}x${record?.thumbnailHeight}`
                 }
             />
             <ThumbnailField source="file" />
             <FunctionField
                 label="dimensions"
-                render={(record?: RaRecord) =>
+                render={(record?: Record<string, any>) =>
                     `${record?.width}x${record?.height}`
                 }
             />
@@ -156,7 +159,7 @@ export const PhotoEdit = (props: EditProps) => (
             <TextInput source="id" fullWidth disabled />
             <TextInput source="file" fullWidth />
             <TextInput source="credit" />
-            <DateField source="dateTaken" disabled />
+            <DateField source="dateTaken" />
             <SelectInput
                 source="omitFromGallery"
                 choices={[
@@ -179,7 +182,10 @@ const PhotoFields = () => {
     return (
         <>
             <TextInput source="file" defaultValue={upload?.title} fullWidth />
-            <ImageInput accept="image/*" source="photoBlob">
+            <ImageInput
+                accept={{ 'image/*': ['.jpg', '.jpeg', '.png'] }}
+                source="photoBlob"
+            >
                 <ImageField source="src" title="title" />
             </ImageInput>
             <TextInput source="credit" />

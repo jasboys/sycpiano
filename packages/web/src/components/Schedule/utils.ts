@@ -1,5 +1,4 @@
-import isValid from 'date-fns/isValid';
-import parseISO from 'date-fns/parseISO';
+import { isValid, parseISO } from 'date-fns';
 import type { CachedEvent, EventItem } from 'src/components/Schedule/types';
 
 const GOOGLE_MAPS_SEARCH_URL = 'https://www.google.com/maps/search/?api=1';
@@ -20,13 +19,16 @@ export const transformCachedEventsToListItems = (
     events: CachedEvent[],
 ): EventItem[] => {
     const eventsList = events.map((event) => {
-        const parsedEndDate = parseISO(event.endDate);
-        const endDate = isValid(parsedEndDate) ? parsedEndDate : undefined;
+        if (event.endDate) {
+            const parsedEndDate = parseISO(event.endDate);
+            const endDate = isValid(parsedEndDate) ? parsedEndDate : undefined;
 
-        return {
-            ...event,
-            endDate: endDate?.toISOString(),
-        };
+            return {
+                ...event,
+                endDate: endDate?.toISOString(),
+            };
+        }
+        return event;
     });
 
     return eventsList;

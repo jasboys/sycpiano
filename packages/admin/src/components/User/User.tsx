@@ -23,7 +23,7 @@ const ProductList: React.FC<{
     resource: string;
 }> = () => {
     return (
-        <ArrayField source="products" fieldKey="id" fullWidth>
+        <ArrayField source="products" >
             <Datagrid
                 bulkActionButtons={false}
                 rowClick={(_, __, record) => `/products/${record.id}`}
@@ -60,7 +60,7 @@ export const UserShow = (props: ShowProps) => (
             <TextField source="resetToken" />
             <TextField source="session" />
             <TextField source="lastRequest" />
-            <ArrayField source="products" fieldKey="id">
+            <ArrayField source="products" >
                 <Datagrid
                     rowClick={(_, __, record) =>
                         `/products/${record.id}`
@@ -84,7 +84,7 @@ export const UserEdit = (props: EditProps) => (
             <TextField source="resetToken" />
             <TextField source="session" />
             <TextInput source="lastRequest" />
-            <ArrayField source="products" fieldKey="id">
+            <ArrayField source="products" >
                 <Datagrid
                     rowClick={(_, __, record) =>
                         `/products/${record.id}`

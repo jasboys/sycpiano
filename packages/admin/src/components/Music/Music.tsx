@@ -35,14 +35,13 @@ import {
     useUpdate,
     type CreateProps,
     type EditProps,
-    type GetOneResult,
     type Identifier,
     type ListProps,
     type RaRecord,
     type ShowProps,
 } from 'react-admin';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useAppDataProvider } from 'src/providers/restProvider.js';
 import type { AdminError, MutateForm } from 'src/types.js';
 import { AddReferenceButton, EditReferenceButton, Empty } from '../Shared.jsx';
@@ -64,7 +63,7 @@ const MusicPanel: React.FC<{
     resource: string;
 }> = () => {
     return (
-        <ArrayField source="musicFiles" fieldKey="id" fullWidth>
+        <ArrayField source="musicFiles">
             <Datagrid
                 sx={{ marginBottom: '1rem' }}
                 isRowSelectable={() => false}
@@ -85,14 +84,6 @@ export const MusicList = (props: ListProps) => (
         <Datagrid
             rowClick="edit"
             expand={(props) => <MusicPanel {...props} />}
-            sx={{
-                '& .RaDatagrid-expandedPanel': {
-                    th: {
-                        backgroundColor: '#f8f8f8',
-                    },
-                    backgroundColor: '#f8f8f8',
-                },
-            }}
         >
             <TextField source="composer" />
             <TextField source="piece" />
@@ -111,8 +102,11 @@ export const MusicShow = (props: ShowProps) => (
             <TextField source="contributors" />
             <TextField source="type" />
             <NumberField source="year" options={{ useGrouping: false }} />
-            <ArrayField source="musicFiles" fieldKey="id" fullWidth>
-                <Datagrid isRowSelectable={() => false} bulkActionButtons={false}>
+            <ArrayField source="musicFiles">
+                <Datagrid
+                    isRowSelectable={() => false}
+                    bulkActionButtons={false}
+                >
                     <TextField source="name" />
                     <TextField source="audioFile" label="audio" />
                     <TextField source="waveformFile" label="waveform" />
@@ -132,23 +126,22 @@ const DeleteMusicFile = () => {
 
     const handleClick = () => {
         console.log(record);
-        deleteOne(
-            'music-files',
-            {
-                id: record.id,
-            },
-            {
-                onError: (error) => {
-                    notify(error.message, { type: 'error' });
+        record &&
+            deleteOne(
+                'music-files',
+                {
+                    id: record.id,
                 },
-                onSuccess: () => {
-                    notify(
-                        `Deleted music-file ${record.id}`,
-                    );
-                    refresh();
+                {
+                    onError: (error) => {
+                        notify(error.message, { type: 'error' });
+                    },
+                    onSuccess: () => {
+                        notify(`Deleted music-file ${record.id}`);
+                        refresh();
+                    },
                 },
-            },
-        );
+            );
     };
 
     return (
@@ -169,77 +162,87 @@ export const EditMusicFile: MutateForm = ({ setShowDialog }) => {
     const record = useRecordContext();
 
     const onSubmit = async (values: Partial<RaRecord>) => {
-        update(
-            'music-files',
-            {
-                id: record.id,
-                data: values,
-            },
-            {
-                onSuccess: () => {
-                    setShowDialog(false);
-                    notify(`Successfully updated music-file ${record.id}.`, {
-                        type: 'success',
-                        undoable: true,
-                    });
-                    refresh();
+        record &&
+            update(
+                'music-files',
+                {
+                    id: record.id,
+                    data: values,
                 },
-                onError: (error) => {
-                    notify(error.message, { type: 'error' });
+                {
+                    onSuccess: () => {
+                        setShowDialog(false);
+                        notify(
+                            `Successfully updated music-file ${record.id}.`,
+                            {
+                                type: 'success',
+                                undoable: true,
+                            },
+                        );
+                        refresh();
+                    },
+                    onError: (error) => {
+                        notify(error.message, { type: 'error' });
+                    },
                 },
-            },
-        );
+            );
     };
 
     return (
-        <>
-            <DialogContent>
-                <TextInput
-                    source="id"
-                    defaultValue={record.id}
-                    fullWidth
-                    disabled
-                />
-                <TextInput
-                    source="music"
-                    label="Music ID"
-                    defaultValue={record.music.id}
-                    fullWidth
-                    disabled
-                />
-                <TextInput source="name" defaultValue={record.name} fullWidth />
-                <TextInput
-                    source="audioFile"
-                    defaultValue={record.audioFile}
-                    fullWidth
-                />
-                <TextInput
-                    source="waveformFile"
-                    defaultValue={record.waveformFile}
-                    fullWidth
-                />
-                <NumberInput
-                    source="durationSeconds"
-                    defaultValue={record.durationSeconds}
-                    fullWidth
-                    disabled
-                />
-            </DialogContent>
-            <DialogActions>
-                <Button
-                    label="ra.action.cancel"
-                    onClick={() => setShowDialog(false)}
-                    disabled={isLoading}
-                >
-                    <IconCancel />
-                </Button>
-                <SaveButton
-                    onClick={handleSubmit(onSubmit)}
-                    type="button"
-                    disabled={isLoading}
-                />
-            </DialogActions>
-        </>
+        record && (
+            <>
+                <DialogContent>
+                    <TextInput
+                        source="id"
+                        defaultValue={record.id}
+                        fullWidth
+                        disabled
+                    />
+                    <TextInput
+                        source="music"
+                        label="Music ID"
+                        defaultValue={record.music.id}
+                        fullWidth
+                        disabled
+                    />
+                    <TextInput
+                        source="name"
+                        defaultValue={record.name}
+                        fullWidth
+                    />
+                    <TextInput
+                        source="audioFile"
+                        defaultValue={record.audioFile}
+                        fullWidth
+                    />
+                    <TextInput
+                        source="waveformFile"
+                        defaultValue={record.waveformFile}
+                        fullWidth
+                    />
+                    <NumberInput
+                        source="durationSeconds"
+                        defaultValue={record.durationSeconds}
+                        fullWidth
+                        disabled
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        label="ra.action.cancel"
+                        onClick={() => setShowDialog(false)}
+                        disabled={isLoading}
+                    >
+                        <IconCancel />
+                    </Button>
+                    <SaveButton
+                        onClick={handleSubmit(onSubmit)}
+                        type="button"
+                        disabled={isLoading}
+                    />
+                </DialogActions>
+            </>
+        )
     );
 };
 
@@ -260,7 +263,7 @@ export const AddMusicFile: React.FC<{
         create(
             'music-files',
             {
-                data: values
+                data: values,
             },
             {
                 onSuccess: () => {
@@ -277,39 +280,54 @@ export const AddMusicFile: React.FC<{
         );
     };
     return (
-        <>
-            <DialogContent>
-                <TextInput
-                    source="music"
-                    label="Music ID"
-                    defaultValue={record.id}
-                    fullWidth
-                    disabled
-                />
-                <TextInput source="name" fullWidth />
-                <TextInput source="audioFile" defaultValue={upload?.title} fullWidth />
-                <FileInput
-                    accept="audio/*"
-                    source="audioFileBlob"
-                >
-                    <FileField source="src" title="title" />
-                </FileInput>
-            </DialogContent>
-            <DialogActions>
-                <Button
-                    label="ra.action.cancel"
-                    onClick={() => setShowDialog(false)}
-                    disabled={isLoading}
-                >
-                    <IconCancel />
-                </Button>
-                <SaveButton
-                    onClick={handleSubmit(onSubmit)}
-                    type="button"
-                    disabled={isLoading}
-                />
-            </DialogActions>
-        </>
+        record && (
+            <>
+                <DialogContent>
+                    <TextInput
+                        source="music"
+                        label="Music ID"
+                        defaultValue={record.id}
+                        fullWidth
+                        disabled
+                    />
+                    <TextInput source="name" fullWidth />
+                    <TextInput
+                        source="audioFile"
+                        defaultValue={upload?.title}
+                        fullWidth
+                    />
+                    <FileInput
+                        accept={{
+                            'audio/*': [
+                                '.mp3',
+                                '.wav',
+                                '.aac',
+                                '.flac',
+                                '.m4a',
+                                '.wma',
+                            ],
+                        }}
+                        source="audioFileBlob"
+                    >
+                        <FileField source="src" title="title" />
+                    </FileInput>
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        label="ra.action.cancel"
+                        onClick={() => setShowDialog(false)}
+                        disabled={isLoading}
+                    >
+                        <IconCancel />
+                    </Button>
+                    <SaveButton
+                        onClick={handleSubmit(onSubmit)}
+                        type="button"
+                        disabled={isLoading}
+                    />
+                </DialogActions>
+            </>
+        )
     );
 };
 
@@ -318,28 +336,27 @@ const RecalculateDuration = () => {
     const dataProvider = useAppDataProvider();
     const notify = useNotify();
     const refresh = useRefresh();
-    const { mutate, isLoading } = useMutation<GetOneResult, AdminError>(
-        () => dataProvider.recalculateDuration(
-            'music-files',
-            {
+    const { mutate, isPending } = useMutation({
+        mutationFn: () => {
+            if (!record) {
+                throw 'Record is undefined';
+            }
+            return dataProvider.recalculateDuration('music-files', {
                 id: record.id,
-            },
-        ),
-        {
-            onError: (error) => {
-                notify(error.message, { type: 'error' });
-            },
-            onSuccess: () => {
-                notify(
-                    `Recalculated duration of music-file ${record.id}`,
-                );
-                refresh();
-            },
+            });
         },
-    );
+
+        onError: (error) => {
+            notify(error.message, { type: 'error' });
+        },
+        onSuccess: () => {
+            notify(`Recalculated duration of music-file ${record?.id}`);
+            refresh();
+        },
+    });
 
     return (
-        <MuiButton onClick={() => mutate()} disabled={isLoading}>
+        <MuiButton onClick={() => mutate()} disabled={isPending}>
             <IconRestore />
         </MuiButton>
     );
@@ -355,7 +372,7 @@ export const MusicEdit = (props: EditProps) => {
                 <TextInput source="contributors" fullWidth />
                 <TextInput source="type" fullWidth />
                 <NumberInput source="year" />
-                <ArrayField source="musicFiles" fieldKey="id" fullWidth>
+                <ArrayField source="musicFiles">
                     <Datagrid
                         empty={<Empty assoc="Music Files" />}
                         sx={{

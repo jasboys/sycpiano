@@ -182,7 +182,7 @@ export class MusicPlayer {
         this.splitter.connect(this.analyzers.left, 0);
         this.splitter.connect(this.analyzers.right, 1);
 
-        this.queueAudio(first.src, first.waveform, false);
+        this.queueAudio(first.src, first.waveform, false, false);
         this.queueBuffers(prev, next);
 
         if (!this.audio.loaded) {
@@ -259,7 +259,12 @@ export class MusicPlayer {
         }
     };
 
-    queueAudio = async (src: string, waveform: string, fade: boolean) => {
+    queueAudio = async (
+        src: string,
+        waveform: string,
+        fade: boolean,
+        play = true,
+    ) => {
         if (fade) {
             await new Promise((resolve: (arg: unknown) => void) => {
                 gsap.fromTo(
@@ -308,13 +313,13 @@ export class MusicPlayer {
                         this.volumeCallback(this.audio.volume);
                     },
                     onComplete: () => {
-                        this.audio.play();
+                        play && this.audio.play();
                     },
                 },
             );
         } else {
             this.audio.volume = 1;
-            this.audio.play();
+            play && this.audio.play();
         }
     };
 

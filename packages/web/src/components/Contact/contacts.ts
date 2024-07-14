@@ -9,7 +9,7 @@ const contacts: Omit<ContactItemShape, 'isMobile'>[] = [
                 title: 'Pianist | Composer | Arranger',
             },
             {
-                title: 'Artist-in-Residence',
+                title: 'Jack Strandberg/Missouri Endowed Associate Professor of Piano',
                 organization: 'University of Missouri-Kansas City Conservatory',
             },
         ],

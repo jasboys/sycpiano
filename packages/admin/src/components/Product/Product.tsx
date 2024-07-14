@@ -31,12 +31,11 @@ import {
     type EditProps,
     type GetListResult,
     type ListProps,
-    type RaRecord,
     type ShowProps,
     type UseRecordContextParams,
 } from 'react-admin';
 import { useWatch } from 'react-hook-form';
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useAppDataProvider } from 'src/providers/restProvider.js';
 import type { AdminError } from 'src/types.js';
 import { IMAGES_URI } from 'src/uris';
@@ -60,7 +59,7 @@ export interface ProductAttributes {
     price: number; // in cents
     priceID: string;
     purchasedCount: number;
-    type: typeof ProductTypes[number];
+    type: (typeof ProductTypes)[number];
 }
 
 const ThumbnailField = ({ path }: { path: string }) => {
@@ -79,17 +78,19 @@ const Thumbnails = (props: UseRecordContextParams) => {
     const { source } = props;
     const record = useRecordContext(props);
     return (
-        <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-            {(record[source] as string[]).map((url: string, idx) => (
-                <li style={{ margin: '0.1em 0' }} key={url}>
-                    <TextField
-                        defaultValue={url}
-                        source={`${source}[${idx}]`}
-                    />
-                    <ThumbnailField path={url} />
-                </li>
-            ))}
-        </ul>
+        record && (
+            <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                {(record[source] as string[]).map((url: string, idx) => (
+                    <li style={{ margin: '0.1em 0' }} key={url}>
+                        <TextField
+                            defaultValue={url}
+                            source={`${source}[${idx}]`}
+                        />
+                        <ThumbnailField path={url} />
+                    </li>
+                ))}
+            </ul>
+        )
     );
 };
 
@@ -97,22 +98,21 @@ const PullButton = () => {
     const notify = useNotify();
     const refresh = useRefresh();
     const dataProvider = useAppDataProvider();
-    const { mutate, isLoading } = useMutation<GetListResult, AdminError>(
-        () => dataProvider.pull('products', {}),
-        {
-            onSuccess: () => {
-                refresh();
-                notify('Pull Succeeded');
-            },
-            onError: (error) =>
-                notify(`Error: ${error.message}`, { type: 'warning' }),
+    const { mutate, isPending } = useMutation<GetListResult, AdminError>({
+        mutationFn: () => dataProvider.pull('products', {}),
+
+        onSuccess: () => {
+            refresh();
+            notify('Pull Succeeded');
         },
-    );
+        onError: (error) =>
+            notify(`Error: ${error.message}`, { type: 'warning' }),
+    });
     return (
         <Button
             label="Pull From Stripe"
             onClick={() => mutate()}
-            disabled={isLoading}
+            disabled={isPending}
         />
     );
 };
@@ -121,22 +121,21 @@ const PurchasedCountButton = () => {
     const notify = useNotify();
     const refresh = useRefresh();
     const dataProvider = useAppDataProvider();
-    const { mutate, isLoading } = useMutation<GetListResult, AdminError>(
-        () => dataProvider.purchasedCount('products', {}),
-        {
-            onSuccess: () => {
-                refresh();
-                notify('Purchased Count Population Succeeded');
-            },
-            onError: (error) =>
-                notify(`Error: ${error.message}`, { type: 'warning' }),
+    const { mutate, isPending } = useMutation<GetListResult, AdminError>({
+        mutationFn: () => dataProvider.purchasedCount('products', {}),
+
+        onSuccess: () => {
+            refresh();
+            notify('Purchased Count Population Succeeded');
         },
-    );
+        onError: (error) =>
+            notify(`Error: ${error.message}`, { type: 'warning' }),
+    });
     return (
         <Button
             label="Populate Purchased"
             onClick={() => mutate()}
-            disabled={isLoading}
+            disabled={isPending}
         />
     );
 };
@@ -186,7 +185,7 @@ export const ProductList = (props: ListProps) => (
             <Thumbnails source="images" />
             <FunctionField
                 label="price"
-                render={(record?: RaRecord) =>
+                render={(record?: Record<string, any>) =>
                     `$${(record?.price / 100).toFixed(2)}`
                 }
             />
@@ -210,7 +209,7 @@ export const ProductShow = (props: ShowProps) => (
             <TextField source="price" label="Price in cents" />
             <FunctionField
                 label="Price in dollars"
-                render={(record?: RaRecord) =>
+                render={(record?: Record<string, any>) =>
                     `$${(record?.price / 100).toFixed(2)}`
                 }
             />

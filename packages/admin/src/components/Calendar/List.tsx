@@ -13,13 +13,11 @@ import {
     UrlField,
     useNotify,
     useRefresh,
-    type BulkActionProps,
     type Identifier,
     type ListProps,
-    type RaRecord,
 } from 'react-admin';
 
-import { useMutation } from 'react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useAppDataProvider } from '../../providers/restProvider.js';
 
 const filters = [<SearchInput key="search" source="q" alwaysOn />];
@@ -30,13 +28,13 @@ const PopulateImageFieldsButton = ({
     const notify = useNotify();
     const refresh = useRefresh();
     const dataProvider = useAppDataProvider();
-    const { mutate, isLoading } = useMutation(
-        () =>
+    const { mutate, isPending } = useMutation({
+        mutationFn: () =>
             dataProvider.populateImageFields(
                 'calendars',
                 selectedIds ? { ids: selectedIds } : {},
             ),
-        {
+
             onSuccess: () => {
                 refresh();
                 notify('Populating Succeeded');
@@ -48,7 +46,7 @@ const PopulateImageFieldsButton = ({
         <Button
             label="Populate Image Fields"
             onClick={() => mutate()}
-            disabled={isLoading}
+            disabled={isPending}
         />
     );
 };
@@ -61,9 +59,9 @@ const ListActions = () => (
     </TopToolbar>
 );
 
-const BulkActionButtons = (props: BulkActionProps) => (
+const BulkActionButtons = () => (
     <>
-        <PopulateImageFieldsButton {...props} />
+        <PopulateImageFieldsButton />
     </>
 );
 
@@ -101,7 +99,7 @@ export const CalendarList = (props: ListProps) => {
                 <TextField source="name" />
                 <FunctionField
                     label="Date Time"
-                    render={(record: RaRecord | undefined) =>
+                    render={(record: Record<string, any>) =>
                         formatInTimeZone(
                             record?.dateTime,
                             record?.timezone || 'America/Chicago',
@@ -122,7 +120,7 @@ export const CalendarList = (props: ListProps) => {
                 <BooleanField source="usePlacePhoto" />
                 <FunctionField
                     label="imageUrl"
-                    render={(record: RaRecord | undefined) =>
+                    render={(record: Record<string, any>) =>
                         record?.imageUrl === null ? 'null' : record?.imageUrl
                     }
                 />
