@@ -24,7 +24,6 @@
     },
     "sourceMaps": "inline",
     "module": {
-        "type": "es6",
-        "importInterop": "node"
+        "type": "es6"
     }
 }

@@ -1,6 +1,6 @@
 import { css } from '@emotion/react';
 import { parseISO } from 'date-fns';
-import { formatInTimeZone, utcToZonedTime } from 'date-fns-tz';
+import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
 
 import { toMedia } from 'src/mediaQuery.js';
 import { ClockIconInstance } from 'src/components/Schedule/ClockIconSVG.jsx';
@@ -48,7 +48,7 @@ export const EventTime: React.FC<Omit<EventDateTimeProps, 'rounded'>> = ({
         <div css={{ margin: '0 3px', display: 'flex' }}>
             <ClockIconInstance
                 css={clockStyle}
-                date={utcToZonedTime(dateTime, timezone)}
+                date={toZonedTime(dateTime, timezone)}
             />
         </div>
         <div css={timeStyle}>

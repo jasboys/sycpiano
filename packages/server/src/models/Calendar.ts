@@ -29,7 +29,7 @@ import { Collaborator } from './Collaborator.js';
 import { Piece } from './Piece.js';
 import { CalendarTrgmMatview } from './CalendarTrgmMatview.js';
 import { parse, startOfDay } from 'date-fns';
-import { zonedTimeToUtc } from 'date-fns-tz';
+import { fromZonedTime } from 'date-fns-tz';
 
 async function beforeCreateHook(args: EventArgs<Calendar>) {
     console.log('[Hook: BeforeCreate] Start');
@@ -80,7 +80,7 @@ async function beforeCreateHook(args: EventArgs<Calendar>) {
     /* eslint-disable require-atomic-updates */
     args.entity.timezone = timezone;
     if (dateTimeInput) {
-        args.entity.dateTime = zonedTimeToUtc(
+        args.entity.dateTime = fromZonedTime(
             parse(dateTimeInput, 'yyyy-MM-dd HH:mm', new Date()),
             timezone,
         );
@@ -136,7 +136,7 @@ async function beforeUpdateHook(args: EventArgs<Calendar>) {
 
     const newDateTime =
         dateTimeInput !== undefined
-            ? zonedTimeToUtc(
+            ? fromZonedTime(
                   parse(dateTimeInput, 'yyyy-MM-dd HH:mm', new Date()),
                   timezone,
               )

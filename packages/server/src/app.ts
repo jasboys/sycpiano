@@ -11,7 +11,7 @@ import mustacheExpress from 'mustache-express';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
-import type { Options } from 'pino-http';
+// import type { Options } from 'pino-http';
 import { AdminRest } from './adminAPI/index.js';
 import { AuthRouter, authAndGetRole, checkAdmin } from './authorization.js';
 import { csrfMiddleware } from './csrf.js';
@@ -43,7 +43,7 @@ const main = async () => {
                     res: pino.stdSerializers.res,
                     err: pino.stdSerializers.err,
                 },
-            } as Options);
+            });
         }
         const { default: morgan } = await import('morgan');
         return morgan('dev');

@@ -12,7 +12,7 @@ import {
     startOfMonth,
     subMonths,
 } from 'date-fns';
-import { utcToZonedTime } from 'date-fns-tz';
+import { toZonedTime } from 'date-fns-tz';
 
 export type EventType =
     | 'concerto'
@@ -145,13 +145,13 @@ export const createMonthGroups = (
     if (order === 'desc') {
         const sortedEvents = events.sort(eventDescend);
         const lastMonth = startOfMonth(
-            utcToZonedTime(
+            toZonedTime(
                 parseISO(sortedEvents[0].dateTime),
                 sortedEvents[0].timezone,
             ),
         );
         const firstMonth = startOfMonth(
-            utcToZonedTime(
+            toZonedTime(
                 parseISO(sortedEvents[events.length - 1].dateTime),
                 sortedEvents[events.length - 1].timezone,
             ),
@@ -192,13 +192,13 @@ export const createMonthGroups = (
     }
     const sortedEvents = events.sort(eventAscend);
     const firstMonth = endOfMonth(
-        utcToZonedTime(
+        toZonedTime(
             parseISO(sortedEvents[0].dateTime),
             sortedEvents[0].timezone,
         ),
     );
     const lastMonth = endOfMonth(
-        utcToZonedTime(
+        toZonedTime(
             parseISO(sortedEvents[events.length - 1].dateTime),
             sortedEvents[events.length - 1].timezone,
         ),
@@ -286,7 +286,7 @@ export const findDateInMonthGroups = (mgs: MonthGroups, d: Date) => {
         isSameMonth(parseISO(mg.dateTime), d),
     );
     return monthGroup?.events.find((ev) =>
-        isSameDay(utcToZonedTime(parseISO(ev.dateTime), ev.timezone), d),
+        isSameDay(toZonedTime(parseISO(ev.dateTime), ev.timezone), d),
     );
 };
 

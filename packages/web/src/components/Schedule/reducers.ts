@@ -27,7 +27,7 @@ import { transformCachedEventsToListItems } from './utils';
 //     const groupedByMonths = tidy(
 //         events,
 //         groupBy((event: EventItem) => {
-//             const zonedTime = utcToZonedTime(event.dateTime, event.timezone);
+//             const zonedTime = toZonedTime(event.dateTime, event.timezone);
 //             const month = getMonth(zonedTime);
 //             const year = getYear(zonedTime);
 //             return { month, year };

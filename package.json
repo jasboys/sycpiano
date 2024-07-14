@@ -19,17 +19,17 @@
         "watch": "nodemon --config nodemon.json packages/server/build/app.js",
         "migrate": "dbmate -d ./packages/server/migrations -s ./schema.sql"
     },
-    "packageManager": "yarn@4.1.1",
+    "packageManager": "yarn@4.3.1",
     "engines": {
         "node": ">=16.0.0"
     },
     "dependencies": {
         "cross-env": "^7.0.3",
-        "turbo": "^1.13.2",
-        "typescript": "^5.4.4"
+        "turbo": "^1.13.4",
+        "typescript": "^5.5.2"
     },
     "devDependencies": {
-        "@biomejs/biome": "1.6.4",
-        "nodemon": "^3.1.0"
+        "@biomejs/biome": "1.8.2",
+        "nodemon": "^3.1.4"
     }
 }
