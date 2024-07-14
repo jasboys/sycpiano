@@ -61,6 +61,8 @@ export interface FetchPlaylistThunkReturn {
     items: MusicListItem[];
     flatItems: MusicFileItem[];
     firstTrack: MusicFileItem;
+    prevTrack?: MusicFileItem;
+    nextTrack?: MusicFileItem;
 }
 
 interface FetchPlaylistThunkArgs {
@@ -144,6 +146,8 @@ export const fetchPlaylistThunk = createAsyncThunk<
                 items,
                 flatItems,
                 firstTrack,
+                prevTrack: getNextTrack(flatItems, firstTrack, 'prev', true),
+                nextTrack: getNextTrack(flatItems, firstTrack, 'next', true),
             };
         } catch (e) {
             console.log(e);

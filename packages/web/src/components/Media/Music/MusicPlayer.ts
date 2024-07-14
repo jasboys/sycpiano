@@ -1,8 +1,8 @@
+import gsap from 'gsap';
 import { MOBILE_MSPF } from './AudioVisualizerBase.jsx';
 import { ConstantQNode } from './ConstantQNode.js';
 import { WaveformLoader } from './VisualizationUtils.js';
-import { getAudioContext, nextPow2 } from './utils.js';
-import gsap from 'gsap';
+import { type BufferSrc, getAudioContext, nextPow2 } from './utils.js';
 
 class Audio {
     element: HTMLAudioElement | null = null;
@@ -91,28 +91,49 @@ interface MusicPlayerConstructorArgs {
 }
 
 export class MusicPlayer {
-    audios: Audio[] = [new Audio(), new Audio()];
-    waveforms: WaveformLoader[] = [new WaveformLoader(), new WaveformLoader()];
+    audio: Audio = new Audio();
+    waveform: WaveformLoader = new WaveformLoader();
+    buffers: {
+        prev: Audio;
+        next: Audio;
+    } = {
+        prev: new Audio(),
+        next: new Audio(),
+    };
+    waveforms: {
+        prev: WaveformLoader;
+        next: WaveformLoader;
+    } = {
+        prev: new WaveformLoader(),
+        next: new WaveformLoader(),
+    };
+
     context: AudioContext | null = null;
+
     analyzers: {
         left: ConstantQNode | null;
         right: ConstantQNode | null;
     } = { left: null, right: null };
+
     phasalyzers: {
         left: AnalyserNode | null;
         right: AnalyserNode | null;
     } = { left: null, right: null };
+
     phaseRateMultiplier: number = 0;
-    currentBuffer: 0 | 1 = 0;
+
     volumeCallback!: (volume: number) => void;
     loadingCallback!: () => void;
     loadedCallback!: () => void;
+    splitter: ChannelSplitterNode | null = null;
 
     async initialize(
-        audio0: HTMLAudioElement,
-        audio1: HTMLAudioElement,
-        firstTrack: string,
-        firstWaveForm: string,
+        audio: HTMLAudioElement,
+        prevAudio: HTMLAudioElement,
+        nextAudio: HTMLAudioElement,
+        first: BufferSrc,
+        prev?: BufferSrc,
+        next?: BufferSrc,
     ) {
         this.context = getAudioContext();
         this.context.onstatechange = () => {
@@ -138,48 +159,69 @@ export class MusicPlayer {
             fftSize: nextPow2(phaseSamples),
         });
 
-        this.audios[0].element = audio0;
-        this.audios[1].element = audio1;
+        this.audio.element = audio;
+        this.buffers.prev.element = prevAudio;
+        this.buffers.next.element = nextAudio;
 
         const gain = this.context.createGain();
 
-        for (const audio of this.audios) {
-            if (audio.element) {
-                audio.element.volume = 0;
-                const src = this.context?.createMediaElementSource(
-                    audio.element,
-                );
-                src?.connect(gain);
-            }
+        if (this.audio.element) {
+            this.audio.element.volume = 0;
+            const src = this.context?.createMediaElementSource(
+                this.audio.element,
+            );
+            src?.connect(gain);
         }
 
         gain.connect(this.context.destination);
-        const splitter = this.context.createChannelSplitter(2);
+        this.splitter = this.context.createChannelSplitter(2);
 
-        gain.connect(splitter);
-        splitter.connect(this.phasalyzers.left, 0);
-        splitter.connect(this.phasalyzers.right, 1);
-        splitter.connect(this.analyzers.left, 0);
-        splitter.connect(this.analyzers.right, 1);
+        gain.connect(this.splitter);
+        this.splitter.connect(this.phasalyzers.left, 0);
+        this.splitter.connect(this.phasalyzers.right, 1);
+        this.splitter.connect(this.analyzers.left, 0);
+        this.splitter.connect(this.analyzers.right, 1);
 
-        this.queueCurrentBuffer(firstTrack, firstWaveForm);
+        this.queueAudio(first.src, first.waveform, false);
+        this.queueBuffers(prev, next);
 
-        const currAudio = this.audios[this.currentBuffer];
-        if (!currAudio.loaded) {
+        if (!this.audio.loaded) {
             this.loadingCallback();
-            await currAudio.audioPromise;
+            await this.audio.audioPromise;
         }
         this.loadedCallback();
         gsap.fromTo(
-            currAudio,
+            this.audio,
             { duration: 0.3, volume: 0 },
             {
                 volume: 1,
                 onUpdate: () => {
-                    this.volumeCallback(currAudio.volume);
+                    this.volumeCallback(this.audio.volume);
                 },
             },
         );
+    }
+
+    disconnectPhasalizers() {
+        if (!this.splitter) {
+            return;
+        }
+
+        this.phasalyzers.left &&
+            this.splitter.disconnect(this.phasalyzers.left, 0);
+        this.phasalyzers.right &&
+            this.splitter.disconnect(this.phasalyzers.right, 1);
+    }
+
+    reconnectPhasalizers() {
+        if (!this.splitter) {
+            return;
+        }
+
+        this.phasalyzers.left &&
+            this.splitter.connect(this.phasalyzers.left, 0);
+        this.phasalyzers.right &&
+            this.splitter.connect(this.phasalyzers.right, 1);
     }
 
     get initialized() {
@@ -203,151 +245,109 @@ export class MusicPlayer {
             (isMobile ? MOBILE_MSPF : 1000.0 / 60.0) / 1000;
     };
 
-    setAudioElement = (buffer: 0 | 1, audio: HTMLAudioElement) => {
-        this.audios[buffer].element = audio;
-    };
+    queueBuffers = (prev?: BufferSrc, next?: BufferSrc) => {
+        if (prev) {
+            this.buffers.prev.src = prev.src;
+            this.buffers.prev.load();
+            this.waveforms.prev.loadWaveformFile(prev.waveform);
+        }
 
-    queueNextBuffer = (src: string, waveform: string) => {
-        const nextBuffer = this.currentBuffer ? 0 : 1;
-        if (this.audios[nextBuffer].rawSrc !== src) {
-            this.audios[nextBuffer].resetPromise();
-            this.audios[nextBuffer].src = src;
-            this.audios[nextBuffer].load();
-            this.waveforms[nextBuffer].loadWaveformFile(waveform);
+        if (next) {
+            this.buffers.next.src = next.src;
+            this.buffers.next.load();
+            this.waveforms.next.loadWaveformFile(next.waveform);
         }
     };
 
-    queueCurrentBuffer = (src: string, waveform: string) => {
-        this.audios[this.currentBuffer].resetPromise();
-        this.audios[this.currentBuffer].src = src;
-        this.audios[this.currentBuffer].load();
-        this.waveforms[this.currentBuffer].loadWaveformFile(waveform);
-    };
-
-    changeBuffers = async (fade: boolean) => {
-        const currBuff = this.currentBuffer;
-        const currAudio = this.audios[currBuff];
-        const nextBuff = this.currentBuffer ? 0 : 1;
-        const nextAudio = this.audios[nextBuff];
-
+    queueAudio = async (src: string, waveform: string, fade: boolean) => {
         if (fade) {
             await new Promise((resolve: (arg: unknown) => void) => {
                 gsap.fromTo(
-                    currAudio,
+                    this.audio,
                     {
-                        volume: currAudio.volume,
+                        volume: this.audio.volume,
                         duration: 0.3,
                     },
                     {
                         volume: 0,
                         onUpdate: () => {
-                            this.volumeCallback(currAudio.volume);
+                            this.volumeCallback(this.audio.volume);
                         },
                         onComplete: () => {
-                            currAudio.pause();
-                            currAudio.currentTime = 0;
+                            this.audio.pause();
+                            this.audio.currentTime = 0;
                             setTimeout(resolve, 100);
                         },
                     },
                 );
             });
         } else {
-            currAudio.promiseRejector();
-            currAudio.pause();
-            currAudio.currentTime = 0;
-            currAudio.volume = 0;
+            this.audio.promiseRejector();
+            this.audio.pause();
+            this.audio.currentTime = 0;
+            this.audio.volume = 0;
         }
-        if (!nextAudio.loaded) {
+
+        this.audio.resetPromise();
+        this.audio.src = src;
+        this.audio.load();
+        this.waveform.loadWaveformFile(waveform);
+
+        if (!this.audio.loaded) {
             this.loadingCallback();
-            await Promise.all([
-                nextAudio.audioPromise,
-                this.waveforms[nextBuff].loaded,
-            ]);
+            await Promise.all([this.audio.audioPromise, this.waveform.loaded]);
         }
         this.loadedCallback();
-        this.currentBuffer = nextBuff;
         if (fade) {
             gsap.fromTo(
-                nextAudio,
+                this.audio,
                 { duration: 0.3, volume: 0 },
                 {
                     volume: 1,
                     onUpdate: () => {
-                        this.volumeCallback(nextAudio.volume);
+                        this.volumeCallback(this.audio.volume);
                     },
                     onComplete: () => {
-                        nextAudio.play();
+                        this.audio.play();
                     },
                 },
             );
         } else {
-            nextAudio.volume = 1;
-            nextAudio.play();
+            this.audio.volume = 1;
+            this.audio.play();
         }
     };
 
-    audioOnLoad = (buff: 0 | 1) => () => {
-        this.audios[buff].promiseResolver();
-        this.audios[buff].loaded = true;
-    };
-
-    getCurrentAudio = () => {
-        return this.audios[this.currentBuffer];
-    };
-
-    getCurrentWaveform = () => {
-        return this.waveforms[this.currentBuffer];
+    audioOnLoad = () => {
+        this.audio.promiseResolver();
+        this.audio.loaded = true;
     };
 
     resetTrack = () => {
-        this.audios[this.currentBuffer].currentTime = 0;
+        this.audio.currentTime = 0;
     };
 
     play = async () => {
         if (this.context?.state === 'suspended') {
             this.context.resume();
         }
-        await Promise.all([
-            this.audios[this.currentBuffer].audioPromise,
-            this.waveforms[this.currentBuffer].loaded,
-        ]);
-        this.audios[this.currentBuffer].play();
+        await Promise.all([this.audio.audioPromise, this.waveform.loaded]);
+        this.audio.play();
     };
 
     pause = () => {
-        this.audios[this.currentBuffer].pause();
+        this.audio.pause();
     };
 
     get positionPercent() {
-        return this.audios[this.currentBuffer].positionPercent;
+        return this.audio.positionPercent;
     }
 
     set positionPercent(percent: number) {
-        this.audios[this.currentBuffer].positionPercent = percent;
+        this.audio.positionPercent = percent;
     }
 
-    audioCallback = (
-        buff: 0 | 1,
-        nextSrc: () => string,
-        nextWaveForm: () => string,
-        callback: (currentTime: number, duration: number) => void,
-    ) => {
-        if (buff === this.currentBuffer) {
-            const audio = this.audios[buff];
-            if (
-                audio.currentTime &&
-                audio.duration &&
-                audio.currentTime >= audio.duration - 10 &&
-                audio.currentTime < audio.duration - 9
-            ) {
-                this.queueNextBuffer(nextSrc(), nextWaveForm());
-            }
-            callback(audio.currentTime, audio.duration);
-        }
-    };
-
     setTrack = (src: string, waveform: string, fade: boolean = true) => {
-        this.queueNextBuffer(src, waveform);
-        this.changeBuffers(fade);
+        this.queueAudio(src, waveform, fade);
     };
 }

@@ -360,8 +360,8 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
     };
 
     drawWaveForm = (centerAxis: number, color: Float32Array): void => {
-        const waveform = this.props.musicPlayer.getCurrentWaveform().waveform;
-        const angles = this.props.musicPlayer.getCurrentWaveform().angles;
+        const waveform = this.props.musicPlayer.waveform.waveform;
+        const angles = this.props.musicPlayer.waveform.angles;
         if (!waveform || waveform.length === 0 || !this.renderingContext) {
             return;
         }

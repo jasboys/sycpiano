@@ -31,6 +31,7 @@ import {
 } from 'src/components/Media/Music/reducers';
 import type { MusicFileItem, MusicListItem } from 'src/components/Media/Music/types';
 import {
+    getBufferSrc,
     getRelativePermaLink,
     getSrc,
     getWaveformSrc,
@@ -181,11 +182,16 @@ const Music: React.FC = () => {
     } = useAppSelector(musicSelector);
     const navBarShow = useAppSelector(({ navbar }) => navbar.isVisible);
 
-    const audios = React.useRef<
-        [HTMLAudioElement | null, HTMLAudioElement | null]
-    >([null, null]);
+    const audio = React.useRef<HTMLAudioElement | null>(null);
+    const buffers = React.useRef<{
+        prev: HTMLAudioElement | null;
+        next: HTMLAudioElement | null;
+    }>({prev: null, next: null});
     const shouldPlay = React.useRef<boolean>();
-    const nextTrack = React.useRef<MusicFileItem>();
+    const tracks = React.useRef<{
+        prev: MusicFileItem | undefined;
+        next: MusicFileItem | undefined;
+    }>({ prev: undefined, next: undefined });
 
     const { isHamburger, hiDpx, screenPortrait, screenM, screenL, screenLandscape } =
         useAppSelector(mediaSelectors);
@@ -200,15 +206,20 @@ const Music: React.FC = () => {
     );
 
     React.useEffect(() => {
-        nextTrack.current = getNextTrack(flatItems, currentTrack, 'next', true);
-    }, [currentTrack, flatItems]);
+        const prev = tracks.current.prev = getNextTrack(flatItems, currentTrack, 'prev', true);
+        const next = tracks.current.next = getNextTrack(flatItems, currentTrack, 'next', true);
+        musicPlayer.current.queueBuffers(getBufferSrc(prev), getBufferSrc(next));
+    }, [currentTrack, flatItems, isShuffle]);
 
     React.useEffect(() => {
         musicPlayer.current.setPhaseRateMultiplier(isHamburger);
+        isHamburger ?
+            musicPlayer.current.disconnectPhasalizers()
+            : musicPlayer.current.reconnectPhasalizers();
     }, [isHamburger]);
 
     const togglePlay = React.useCallback(() => {
-        if (isPlaying && musicPlayer.current.getCurrentAudio().isPlaying) {
+        if (isPlaying && musicPlayer.current.audio.isPlaying) {
             musicPlayer.current.pause();
         } else {
             musicPlayer.current.play();
@@ -217,7 +228,7 @@ const Music: React.FC = () => {
 
     const playSubsequent = React.useCallback(
         (which: 'prev' | 'next', fade = true) => {
-            const audio = musicPlayer.current.getCurrentAudio();
+            const audio = musicPlayer.current.audio;
             if (
                 which === 'prev' &&
                 audio?.currentTime &&
@@ -227,12 +238,7 @@ const Music: React.FC = () => {
                 return;
             }
 
-            const subsequent = getNextTrack(
-                flatItems,
-                currentTrack,
-                which,
-                true,
-            );
+            const subsequent = tracks.current[which];
             if (subsequent) {
                 navigate(
                     getRelativePermaLink(
@@ -264,13 +270,11 @@ const Music: React.FC = () => {
             const result = await dispatch(
                 fetchPlaylistThunk({ composer, piece, movement }),
             );
-            if (
-                result.type === fetchPlaylistThunk.rejected.type &&
-                currentTrack
-            ) {
-                return currentTrack;
-            }
-            return (result.payload as FetchPlaylistThunkReturn).firstTrack;
+            return {
+                first: (result.payload as FetchPlaylistThunkReturn).firstTrack,
+                prev: (result.payload as FetchPlaylistThunkReturn).prevTrack,
+                next: (result.payload as FetchPlaylistThunkReturn).nextTrack,
+            };
         } catch (err) {
             console.error('Playlist init failed.', err);
             throw err;
@@ -315,17 +319,20 @@ const Music: React.FC = () => {
         }
     }, []);
 
-    React.useLayoutEffect(() => {
+    React.useEffect(() => {
         const initialize = async () => {
-            if (!audios.current[0] || !audios.current[1]) {
-                throw new Error('audio element ref not created');
+            console.log(audio, buffers);
+            if (!audio.current || !buffers.current.prev || !buffers.current.next) {
+                throw new Error('audio elements refs not created');
             }
-            const firstTrack = await waitForPlaylist();
+            const { first, prev, next } = await waitForPlaylist();
             musicPlayer.current.initialize(
-                audios.current[0],
-                audios.current[1],
-                getSrc(firstTrack),
-                getWaveformSrc(firstTrack),
+                audio.current,
+                buffers.current.prev,
+                buffers.current.next,
+                { src: getSrc(first), waveform: getWaveformSrc(first) },
+                prev ? { src: getSrc(prev), waveform: getWaveformSrc(prev) } : undefined,
+                next ? { src: getSrc(next), waveform: getWaveformSrc(next) } : undefined,
             );
         };
         dispatch(isLoadingAction(true));
@@ -353,38 +360,13 @@ const Music: React.FC = () => {
         }
     }, [togglePlay, playSubsequent]);
 
-    React.useEffect(() => {
-        const audio = musicPlayer.current.getCurrentAudio();
-        if (audio.currentTime > audio.duration - 9 && nextTrack.current) {
-            musicPlayer.current.queueNextBuffer(
-                getSrc(nextTrack.current),
-                getWaveformSrc(nextTrack.current),
-            );
-        }
-    }, [isShuffle]);
-
     const onEnded = React.useCallback(() => {
-        const next = nextTrack.current;
-        if (next) {
-            musicPlayer.current.setTrack(
-                getSrc(next),
-                getWaveformSrc(next),
-                false,
-            );
-            dispatch(setTrackAction(next));
-            navigate(
-                getRelativePermaLink(
-                    next.composer ?? '',
-                    next.piece ?? '',
-                    next.name,
-                ),
-            );
-        }
-    }, []);
+        playSubsequent('next', false);
+    }, [playSubsequent]);
 
     const onDrag = React.useCallback((percent: number) => {
         const position =
-            musicPlayer.current.getCurrentAudio().duration * percent;
+            musicPlayer.current.audio.duration * percent;
         dispatch(
             updateAction({
                 playbackPosition: position,
@@ -393,7 +375,7 @@ const Music: React.FC = () => {
     }, []);
 
     const onStartDrag = React.useCallback((percent: number) => {
-        const audio = musicPlayer.current.getCurrentAudio();
+        const audio = musicPlayer.current.audio;
 
         shouldPlay.current = audio.isPlaying;
         audio.pause();
@@ -403,16 +385,10 @@ const Music: React.FC = () => {
 
     const seekAudio = React.useCallback((percent: number) => {
         onDrag(percent);
-        const audio = musicPlayer.current.getCurrentAudio();
+        const audio = musicPlayer.current.audio;
         audio.positionPercent = percent;
         if (shouldPlay.current) {
             audio.play();
-        }
-        if (audio.currentTime > audio.duration - 9 && nextTrack.current) {
-            musicPlayer.current.queueNextBuffer(
-                getSrc(nextTrack.current),
-                getWaveformSrc(nextTrack.current),
-            );
         }
     }, []);
 
@@ -421,32 +397,18 @@ const Music: React.FC = () => {
     };
 
     const audioCallback = React.useCallback(
-        (buff: 0 | 1, play?: boolean) => () => {
+        (play?: boolean) => () => {
             if (currentTrack) {
-                musicPlayer.current.audioCallback(
-                    buff,
-                    () => {
-                        return nextTrack.current
-                            ? getSrc(nextTrack.current)
-                            : '';
-                    },
-                    () => {
-                        return nextTrack.current
-                            ? getWaveformSrc(nextTrack.current)
-                            : '';
-                    },
-                    (currentTime, duration) => {
-                        dispatch(
-                            updateAction({
-                                playing:
-                                    play !== undefined && isPlaying !== play
-                                        ? play
-                                        : undefined,
-                                playbackPosition: currentTime,
-                                duration: duration,
-                            }),
-                        );
-                    },
+                const audio = musicPlayer.current.audio;
+                dispatch(
+                    updateAction({
+                        playing:
+                            play !== undefined && isPlaying !== play
+                                ? play
+                                : undefined,
+                        playbackPosition: audio.currentTime,
+                        duration: audio.duration,
+                    }),
                 );
             }
         },
@@ -489,29 +451,28 @@ const Music: React.FC = () => {
         >
             {screenPortrait && <div css={styles.spacer} />}
             <audio
-                id="audio0"
+                id="main"
                 crossOrigin="anonymous"
-                ref={(el) => (audios.current[0] = el)}
-                onLoadedData={musicPlayer.current.audioOnLoad(0)}
-                onCanPlayThrough={musicPlayer.current.audioOnLoad(0)}
-                onPlay={audioCallback(0, true)}
-                onTimeUpdate={audioCallback(0)}
-                onDurationChange={audioCallback(0)}
-                onPause={audioCallback(0, false)}
+                ref={audio}
+                onLoadedData={musicPlayer.current.audioOnLoad}
+                onCanPlayThrough={musicPlayer.current.audioOnLoad}
+                onPlay={audioCallback(true)}
+                onTimeUpdate={audioCallback()}
+                onDurationChange={audioCallback()}
+                onPause={audioCallback(false)}
                 onEnded={onEnded}
                 preload="auto"
             />
             <audio
-                id="audio1"
+                id="prev"
                 crossOrigin="anonymous"
-                ref={(el) => (audios.current[1] = el)}
-                onLoadedData={musicPlayer.current.audioOnLoad(1)}
-                onCanPlayThrough={musicPlayer.current.audioOnLoad(1)}
-                onPlay={audioCallback(1, true)}
-                onTimeUpdate={audioCallback(1)}
-                onDurationChange={audioCallback(1)}
-                onPause={audioCallback(1, false)}
-                onEnded={onEnded}
+                ref={(el) => (buffers.current.prev = el)}
+                preload="auto"
+            />
+            <audio
+                id="next"
+                crossOrigin="anonymous"
+                ref={(el) => (buffers.current.next = el)}
                 preload="auto"
             />
             <div

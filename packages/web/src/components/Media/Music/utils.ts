@@ -63,11 +63,24 @@ export const normalizeString = (str: string): string => {
     );
 };
 
+export interface BufferSrc {
+    src: string;
+    waveform: string;
+}
+
 export const getSrc = (music: MusicFileItem): string =>
     `${MUSIC_PATH}/${music.audioFile}`;
 
 export const getWaveformSrc = (music: MusicFileItem): string =>
     `${MUSIC_PATH}/waveforms/${music.waveformFile}`;
+
+export const getBufferSrc = (music?: MusicFileItem): BufferSrc | undefined =>
+    music
+        ? {
+              src: getSrc(music),
+              waveform: getWaveformSrc(music),
+          }
+        : undefined;
 
 export const getPermaLink = (
     base: string,

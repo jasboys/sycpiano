@@ -96,8 +96,8 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
     };
 
     drawWaveForm = (centerAxis: number, color: string): void => {
-        const waveform = this.props.musicPlayer.getCurrentWaveform().waveform;
-        const angles = this.props.musicPlayer.getCurrentWaveform().angles;
+        const waveform = this.props.musicPlayer.waveform.waveform;
+        const angles = this.props.musicPlayer.waveform.angles;
         if (!waveform || waveform.length === 0 || !this.renderingContext) {
             return;
         }
