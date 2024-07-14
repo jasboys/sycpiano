@@ -1,17 +1,17 @@
 # The official web page of pianist Sean Chen.
 
-This is a monorepo of all the parts that make up sycpiano. Uses [turborepo](https://turbo.build/) for task management.\
-This website backend is an [express](http://expressjs.com/) app with a PostgreSQL database. Migration is done by [dbmate](https://github.com/amacneil/dbmate).\
-The frontend is built with [react](https://facebook.github.io/react/) and built with [vite](https://vitejs.dev/).\
-The admin panel uses [react-admin](https://marmelab.com/react-admin/) and built with [vite](https://vitejs.dev/).\
-Development is streamlined by [vite](https://vitejs.dev/).\
-Use modern [yarn](https://yarnpkg.com/en/) for package management.\
-Code is in [typescript](https://www.typescriptlang.org/) and styling is done in [emotion](https://github.com/emotion-js/emotion).\
-Deployment uses github actions.\
-Service is persisted with PM2.\
+This is a monorepo of all the parts that make up sycpiano. Uses [turborepo](https://turbo.build/) for task management. 
+This website backend is an [express](http://expressjs.com/) app with a PostgreSQL database. Migration is done by [dbmate](https://github.com/amacneil/dbmate). 
+The frontend is built with [react](https://facebook.github.io/react/) and built with [vite](https://vitejs.dev/). 
+The admin panel uses [react-admin](https://marmelab.com/react-admin/) and built with [vite](https://vitejs.dev/). 
+Development is streamlined by [vite](https://vitejs.dev/). 
+Use modern [yarn](https://yarnpkg.com/en/) for package management. 
+Code is in [typescript](https://www.typescriptlang.org/) and styling is done in [emotion](https://github.com/emotion-js/emotion). 
+Deployment uses github actions. 
+Service is persisted with PM2.
 
 ## Getting Started
-Make sure at least version 16 of Node.js is installed.
+Make sure at least version 20 of Node.js is installed.
 
 ### Env file
 
@@ -48,9 +48,18 @@ GAPI_PRIVATE_KEY=<service account private key generated from google api console,
 GAPI_CLIENT_EMAIL=<service account email associted with above key>
 ```
 
+## Migrations
+
+DBmate for migrations
+```
+$ yarn migrate -- [up|down|status]
+```
+Read DBmate README for more info.
+
+
 ## Development
 
-clone, run:
+clone, run migration as written below, and then run:
 ```
 $ yarn
 ```
@@ -90,11 +99,3 @@ postgres=# create database sycpiano with owner <database_username>;
 ## Admin
 
 Admin is accessible by http://host.tld/admin. It is located in `packages/admin`.
-
-## Migrations
-
-DBmate for migrations
-```
-$ yarn migrate -- [up|down|status]
-```
-Read DBmate README for more info.
