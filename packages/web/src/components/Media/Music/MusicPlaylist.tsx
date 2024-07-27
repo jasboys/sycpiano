@@ -2,19 +2,16 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import * as React from 'react';
 
-import { createSelector } from 'reselect';
-import { mqSelectors } from 'src/components/App/reducers.js';
 import MusicPlaylistItem from 'src/components/Media/Music/MusicPlaylistItem';
 import ShuffleButton from 'src/components/Media/Music/ShuffleButton';
 import SpotifyButton from 'src/components/Media/Music/SpotifyButton';
 import Playlist from 'src/components/Media/Playlist';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { toMedia } from 'src/mediaQuery';
 import { hiDpx, screenPortrait } from 'src/screens';
-import type { GlobalStateShape } from 'src/store.js';
 import { playlistBackground } from 'src/styles/colors';
-import { toggleShuffleAction } from './reducers.js';
+import { musicStore } from './store.js';
 import type { MusicFileItem } from './types.js';
+import { useStore } from 'src/store.js';
 
 interface MusicPlaylistOwnProps {
     readonly onClick: (item: MusicFileItem, fade?: boolean) => void;
@@ -56,20 +53,10 @@ const PlaylistContainer = styled.div({
     },
 });
 
-const selector = createSelector(
-    (state: GlobalStateShape) => state.musicPlayer,
-    ({ currentTrack, isShuffle, items }) => ({
-        currentTrack,
-        isShuffle,
-        items,
-    }),
-);
-
 const MusicPlaylist: React.FC<MusicPlaylistProps> = ({ onClick }) => {
     const didRun = React.useRef<boolean>(false);
-    const { currentTrack, isShuffle, items } = useAppSelector(selector);
-    const isHamburger = useAppSelector(mqSelectors.isHamburger);
-    const dispatch = useAppDispatch();
+    const { currentTrack, isShuffle, items } = musicStore.useTrackedStore();
+    const isHamburger = useStore().mediaQueries.isHamburger();
 
     const currentTrackId = currentTrack?.id;
 
@@ -101,7 +88,7 @@ const MusicPlaylist: React.FC<MusicPlaylistProps> = ({ onClick }) => {
             </Playlist>
             <SpotifyButton />
             <ShuffleButton
-                onClick={() => dispatch(toggleShuffleAction())}
+                onClick={() => musicStore.set.toggleShuffle()}
                 on={isShuffle}
             />
         </PlaylistContainer>

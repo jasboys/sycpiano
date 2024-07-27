@@ -11,13 +11,12 @@ import {
     resizedPathFromItem,
     staticPathFromItem,
 } from 'src/components/Media/Photos/utils';
-import { useAppDispatch } from 'src/hooks.js';
 import { generateSrcsetWidths } from 'src/imageUrls';
 import { screenWidths } from 'src/screens';
 import { fadeOnEnter, fadeOnExit, isImageElement } from 'src/utils';
-import { setBackground } from './reducers.js';
 import { lightBlue } from 'src/styles/colors.js';
 import { LoadingInstance } from 'src/components/LoadingSVG.jsx';
+import { photoStore } from './store.js';
 
 interface PhotoFaderProps {
     readonly item: PhotoItem;
@@ -59,12 +58,11 @@ const PhotoFader: React.FC<PhotoFaderProps> = ({
 }) => {
     const urlWebP = resizedPathFromItem(item, { gallery: true, webp: true });
     const urlJpg = resizedPathFromItem(item, { gallery: true });
-    const dispatch = useAppDispatch();
 
     const successCb = React.useCallback(
         (el: HTMLImageElement | HTMLElement | Element | undefined) => {
             if (el && isImageElement(el)) {
-                dispatch(setBackground(fitGradient(el)));
+                photoStore.set.background(fitGradient(el));
                 gsap.to(el, { autoAlpha: 1, duration: 0.2 });
             }
         },

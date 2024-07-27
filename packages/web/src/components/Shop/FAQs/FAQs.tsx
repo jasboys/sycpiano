@@ -1,13 +1,14 @@
 import styled from '@emotion/styled';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import Markdown from 'markdown-to-jsx';
-import * as React from 'react';
+import type * as React from 'react';
 import { Link } from 'react-router-dom';
 
-import { useAppSelector } from 'src/hooks.js';
 import { logoBlue } from 'src/styles/colors.js';
 import { latoFont } from 'src/styles/fonts';
 import { pushed } from 'src/styles/mixins';
+import { useStore } from 'src/store.js';
 
 const Container = styled.div(latoFont(300), pushed, {
     display: 'flex',
@@ -26,19 +27,17 @@ const Answer = styled.div({
     padding: '1rem 0 1rem 1rem',
 });
 
-const Anchor: React.FC<{ href: string; children: React.ReactNode }> = (props) =>
+const Anchor: React.FC<{ href: string; children: React.ReactNode }> = (
+    props,
+) =>
     props.href.match('mailto') ? (
-        <a
-            css={{ textDecoration: 'underline' }}
-            href={props.href}
-            children={props.children}
-        />
+        <a css={{ textDecoration: 'underline' }} href={props.href}>
+            {props.children}
+        </a>
     ) : (
-        <Link
-            css={{ textDecoration: 'underline' }}
-            to={props.href}
-            children={props.children}
-        />
+        <Link css={{ textDecoration: 'underline' }} to={props.href}>
+            {props.children}
+        </Link>
     );
 
 const Title = styled.div(latoFont(400), {
@@ -57,24 +56,15 @@ interface FAQ {
 }
 
 const FAQs: React.FC<Record<never, unknown>> = () => {
-    const isHamburger = useAppSelector((state) => state.mediaQuery.isHamburger);
-    const [faqs, setFaqs] = React.useState<FAQ[]>([]);
+    const isHamburger = useStore().mediaQueries.isHamburger();
 
-    React.useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const { data }: { data: FAQ[] } = await axios.get(
-                    '/api/shop/faqs',
-                );
-
-                setFaqs(data);
-            } catch (e) {
-                console.error('Could not fetch faqs.');
-            }
-        };
-
-        fetchData();
-    }, []);
+    const { data: faqs } = useQuery({
+        queryKey: ['faqs'],
+        queryFn: async () => {
+            const { data } = await axios.get<FAQ[]>('/api/shop/faqs');
+            return data;
+        },
+    });
 
     return (
         faqs && (

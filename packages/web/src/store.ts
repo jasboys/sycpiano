@@ -1,57 +1,23 @@
-/*
- * This is the global async redux store.
- *
- * Everytime registerReducer is called, it will replace the global store with
- * a new one that includes the reducer from the new async component.
- *
- * We make sure to namespace the states by their corresponding reducers.
- */
+import { mapValuesKey } from 'zustand-x';
+import { cartStore } from './components/Cart/store.js';
+import { navBarStore } from './components/App/NavBar/store.js';
+import { shopStore } from './components/Shop/ShopList/store.js';
+import { mediaQueriesStore } from './components/App/store.js';
 
-import { configureStore } from '@reduxjs/toolkit';
-import { type Reducer, combineReducers } from 'redux';
-import { thunk } from 'redux-thunk';
-
-import { navBarReducer } from 'src/components/App/NavBar/reducers';
-import { mediaQueryReducer } from 'src/components/App/reducers';
-import { cartReducer } from 'src/components/Cart/reducers';
-import { shopReducer } from 'src/components/Shop/ShopList/reducers';
-
-import type { AsyncStore, FullState, Reducers } from 'src/types';
-
-const staticReducers = {
-    navbar: navBarReducer,
-    cart: cartReducer,
-    shop: shopReducer,
-    mediaQuery: mediaQueryReducer,
+export const rootStore = {
+    cart: cartStore,
+    navBar: navBarStore,
+    shop: shopStore,
+    mediaQueries: mediaQueriesStore,
 };
 
-const createReducer = (reducers: Partial<Reducers>) => {
-    return combineReducers({
-        ...staticReducers,
-        ...reducers,
-    }) as any as Reducer<FullState>;
-};
+export const useStore = () => mapValuesKey('use', rootStore);
 
-const store = (() => {
-    const store = configureStore({
-        reducer: createReducer({}),
-        middleware: (getDefaultMiddleware) =>
-            getDefaultMiddleware().concat(thunk),
-    });
-    (store as AsyncStore).async = {};
-    return store;
-})();
+// Global tracked hook selectors
+export const useTrackedStore = () => mapValuesKey('useTracked', rootStore);
 
-export const registerReducer = (
-    store: AsyncStore,
-    reducers: Partial<Reducers>,
-): void => {
-    store.async = { ...store.async, ...reducers };
-    if (store.async !== undefined) {
-        store.replaceReducer(createReducer(store.async));
-    }
-};
+// Global getter selectors
+export const store = mapValuesKey('get', rootStore);
 
-export type AppDispatch = typeof store.dispatch;
-export type GlobalStateShape = ReturnType<typeof store.getState>;
-export default store;
+// Global actions
+export const actions = mapValuesKey('set', rootStore);

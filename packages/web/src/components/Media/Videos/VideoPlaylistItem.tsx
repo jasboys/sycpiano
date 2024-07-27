@@ -43,8 +43,7 @@ function publishedDateToDisplay(publishedAt: string) {
 type VideoPlaylistItemProps = {
     readonly item: VideoItemShape;
     readonly currentItemId: number | string;
-    readonly onClick: (isMobile: boolean, id: string) => void;
-    readonly isMobile: boolean;
+    readonly onClick: (id: string) => void;
 };
 
 const padding = 10;
@@ -164,7 +163,6 @@ const VideoPlaylistItem: React.FC<VideoPlaylistItemProps> = ({
     item,
     currentItemId,
     onClick,
-    isMobile,
 }) => {
     const navigate = useNavigate();
     const thumbnailUrl =
@@ -183,7 +181,7 @@ const VideoPlaylistItem: React.FC<VideoPlaylistItemProps> = ({
             onClick={() => {
                 navigate(`/media/videos/${item.id}`);
                 if (item.id !== undefined) {
-                    onClick(isMobile, item.id);
+                    onClick(item.id);
                 }
             }}
         >

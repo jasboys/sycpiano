@@ -3,7 +3,6 @@ import styled from '@emotion/styled';
 import { format } from 'date-fns';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
-import { createStructuredSelector } from 'reselect';
 
 import {
     DesktopBackgroundPreview,
@@ -11,7 +10,6 @@ import {
 } from 'src/components/Home/PreviewSVGs';
 import Social from 'src/components/Home/Social';
 import { LazyImage } from 'src/components/LazyImage';
-import { useAppSelector } from 'src/hooks';
 import {
     generateSrcsetWidths,
     homeBackground,
@@ -29,7 +27,7 @@ import { interFont, latoFont } from 'src/styles/fonts';
 import { container, noHighlight } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
-import { mqSelectors } from '../App/reducers';
+import { rootStore, useStore } from 'src/store.js';
 
 const textShadowColor = 'rgba(0 0 0 / 0.75)';
 
@@ -208,16 +206,11 @@ const Content: React.FC = () => (
     </React.Fragment>
 );
 
-const selectors = createStructuredSelector({
-    isHamburger: mqSelectors.isHamburger,
-    hiDpx: mqSelectors.hiDpx,
-    screenPortrait: mqSelectors.screenPortrait,
-});
-
 const Home: React.FC<Record<never, unknown>> = () => {
-    const { isHamburger, hiDpx, screenPortrait } = useAppSelector(selectors);
-    const menuExpanded = useAppSelector(({ navbar }) => navbar.isExpanded);
-    const cartExpanded = useAppSelector(({ cart }) => cart.visible);
+    const { isHamburger, hiDpx, screenPortrait } =
+        rootStore.mediaQueries.useTrackedStore();
+    const menuExpanded = useStore().navBar.isExpanded();
+    const cartExpanded = useStore().cart.visible();
 
     return (
         <HomeContainer>

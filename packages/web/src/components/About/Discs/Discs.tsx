@@ -1,15 +1,12 @@
 import { css } from '@emotion/react';
-import * as React from 'react';
+import type * as React from 'react';
 
 import { toMedia } from 'src/mediaQuery';
 import DiscList from 'src/components/About/Discs/DiscList';
-import { fetchDiscs } from 'src/components/About/Discs/reducers';
-import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
-import { mqSelectors } from 'src/components/App/reducers';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { isHamburger } from 'src/screens';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
+import { rootStore } from 'src/store.js';
 
 const containerStyle = css(pushed, {
     width: '100%',
@@ -24,27 +21,14 @@ const containerStyle = css(pushed, {
 type DiscsProps = Record<never, unknown>;
 
 const Discs: React.FC<DiscsProps> = () => {
-    const isHamburger = useAppSelector(mqSelectors.isHamburger);
-    const hiDpx = useAppSelector(mqSelectors.hiDpx);
-    const dispatch = useAppDispatch();
-
-    React.useEffect(() => {
-        dispatch(fetchDiscs());
-    }, []);
-
-    const onScrollDispatch = React.useCallback(
-        (triggerHeight: number, scrollTop: number) => {
-            dispatch(onScroll({ triggerHeight, scrollTop }));
-        },
-        [],
-    );
+    const { isHamburger, hiDpx } = rootStore.mediaQueries.useTrackedStore()
 
     return (
         <div
             css={containerStyle}
             onScroll={
                 isHamburger
-                    ? scrollFn(navBarHeight.get(hiDpx), onScrollDispatch)
+                    ? rootStore.navBar.set.onScroll(navBarHeight.get(hiDpx))
                     : undefined
             }
         >

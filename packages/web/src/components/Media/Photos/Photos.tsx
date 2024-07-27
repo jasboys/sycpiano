@@ -4,21 +4,18 @@ import { TransitionGroup } from 'react-transition-group';
 
 import { format, parseISO } from 'date-fns';
 import { readableColor } from 'polished';
-import { mqSelectors } from 'src/components/App/reducers';
 import PhotoFader from 'src/components/Media/Photos/PhotoFader';
 import PhotoList from 'src/components/Media/Photos/PhotoList';
-import {
-    fetchPhotos,
-    selectFirstPhoto,
-    selectPhoto,
-} from 'src/components/Media/Photos/reducers';
+import { photoStore } from 'src/components/Media/Photos/store';
 import type { PhotoItem } from 'src/components/Media/Photos/types';
 import { idFromItem } from 'src/components/Media/Photos/utils';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenXS } from 'src/screens';
 import { latoFont } from 'src/styles/fonts';
 import { pushed } from 'src/styles/mixins';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import { useStore } from 'src/store.js';
 
 const StyledPhotos = styled.div(pushed, {
     width: '100%',
@@ -55,26 +52,26 @@ const StyledCredit = styled.div(latoFont(200), {
 });
 
 const Photos: React.FC<Record<never, unknown>> = () => {
-    const screenXS = useAppSelector(mqSelectors.screenXS);
-    const dispatch = useAppDispatch();
-    const currentItem = useAppSelector(
-        ({ photoViewer }) => photoViewer.currentItem,
-    );
-    const items = useAppSelector(({ photoList }) => photoList.items);
-    const background = useAppSelector(({ photoList }) => photoList.background);
+    const screenXS = useStore().mediaQueries.screenXS();
+    const currentItem = photoStore.use.currentItem?.();
+    const background = photoStore.use.background();
+
+    const { data: photos } = useQuery({
+        queryKey: ['photos'],
+        queryFn: async () => {
+            const { data } = await axios.get<PhotoItem[]>('/api/photos');
+            return data;
+        },
+    });
 
     React.useEffect(() => {
-        async function callDispatch() {
-            await dispatch(fetchPhotos());
-            dispatch(selectFirstPhoto());
+        if (photos?.length) {
+            photoStore.set.currentItem?.(photos[0]);
         }
-
-        callDispatch();
-        // dispatch(fetchPhotos());
-    }, []);
+    }, [photos]);
 
     const selectPhotoCallback = React.useCallback((photo: PhotoItem) => {
-        dispatch(selectPhoto(photo));
+        photoStore.set.currentItem?.(photo);
     }, []);
 
     const isCurrentItem = React.useCallback(
@@ -92,7 +89,7 @@ const Photos: React.FC<Record<never, unknown>> = () => {
             {!screenXS && (
                 <StyledPhotoViewer>
                     <TransitionGroup component={null}>
-                        {items.map((item, idx) => {
+                        {photos?.map((item, idx) => {
                             const isCurrent = isCurrentItem(item);
                             return (
                                 <PhotoFader
@@ -106,7 +103,9 @@ const Photos: React.FC<Record<never, unknown>> = () => {
                         })}
                     </TransitionGroup>
                     {(currentItem?.credit || currentItem?.dateTaken) && (
-                        <StyledCredit style={{ color: readableColor(lastColor) }}>{`${
+                        <StyledCredit
+                            style={{ color: readableColor(lastColor) }}
+                        >{`${
                             currentItem.credit
                                 ? `credit: ${currentItem.credit}`
                                 : ''
@@ -125,11 +124,13 @@ const Photos: React.FC<Record<never, unknown>> = () => {
                     )}
                 </StyledPhotoViewer>
             )}
-            <PhotoList
-                items={items}
-                currentItem={currentItem}
-                selectPhoto={selectPhotoCallback}
-            />
+            {photos && (
+                <PhotoList
+                    items={photos}
+                    currentItem={currentItem}
+                    selectPhoto={selectPhotoCallback}
+                />
+            )}
         </StyledPhotos>
     );
 };

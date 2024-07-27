@@ -1,15 +1,13 @@
 import styled from '@emotion/styled';
 import type * as React from 'react';
 
-import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
-import { mqSelectors } from 'src/components/App/reducers';
 import ContactItem from 'src/components/Contact/ContactItem';
 import contacts from 'src/components/Contact/contacts';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { toMedia } from 'src/mediaQuery';
 import { minRes, webkitMinDPR } from 'src/screens';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
+import { rootStore } from 'src/store.js';
 
 type ContactProps = Record<never, unknown>;
 
@@ -33,19 +31,13 @@ const ContactContainer = styled.div(pushed, {
 });
 
 const Contact: React.FC<ContactProps> = () => {
-    const isHamburger = useAppSelector(mqSelectors.isHamburger);
-    const hiDpx = useAppSelector(mqSelectors.hiDpx);
-    const dispatch = useAppDispatch();
-
-    const onScrollDispatch = (triggerHeight: number, scrollTop: number) => {
-        dispatch(onScroll({ triggerHeight, scrollTop }));
-    };
+    const { isHamburger, hiDpx } = rootStore.mediaQueries.useTrackedStore();
 
     return (
         <ContactContainer
             onScroll={
                 isHamburger
-                    ? scrollFn(navBarHeight.get(hiDpx), onScrollDispatch)
+                    ? rootStore.navBar.set.onScroll(navBarHeight.get(hiDpx))
                     : undefined
             }
         >

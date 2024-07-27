@@ -5,13 +5,10 @@ import CartButton from 'src/components/App/NavBar/CartButton';
 import HamburgerNav from 'src/components/App/NavBar/HamburgerNav';
 import NavBarLinks from 'src/components/App/NavBar/NavBarLinks';
 import NavBarLogo from 'src/components/App/NavBar/NavBarLogo';
-import {
-    setSpecificRouteNameAction,
-    toggleExpanded,
-} from 'src/components/App/NavBar/reducers';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { navBarHeight } from 'src/styles/variables';
-import { mqSelectors } from '../reducers';
+import { navBarStore } from './store.js';
+import { cartStore } from 'src/components/Cart/store.js';
+import { rootStore } from 'src/store.js';
 
 const shopEnabled = JSON.parse(ENABLE_SHOP) === true;
 
@@ -86,20 +83,17 @@ menu: (portrait || dppx > 2 || (max-width: 1280 and orientation: landscape)) ? h
 
 const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(
     ({ currentBasePath, specificRouteName, delayedRouteBase }, ref) => {
-        const isExpanded = useAppSelector(({ navbar }) => navbar.isExpanded);
-        const cartIsOpen = useAppSelector(({ cart }) => cart.visible);
-        const isHamburger = useAppSelector(mqSelectors.isHamburger);
-        const hiDpx = useAppSelector(mqSelectors.hiDpx);
-
-        const dispatch = useAppDispatch();
+        const isExpanded = navBarStore.use.isExpanded();
+        const cartIsOpen = cartStore.use.visible();
+        const { isHamburger, hiDpx } = rootStore.mediaQueries.useTrackedStore();
 
         React.useEffect(() => {
-            dispatch(setSpecificRouteNameAction(specificRouteName ?? ''));
+            navBarStore.set.specificRouteName(specificRouteName ?? '');
         }, [specificRouteName]);
 
         React.useEffect(() => {
             if (!isHamburger) {
-                dispatch(toggleExpanded(false));
+                navBarStore.set.toggleExpanded(false);
             }
         }, [isHamburger]);
 

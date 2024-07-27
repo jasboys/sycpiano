@@ -121,14 +121,16 @@ export class WaveformLoader {
     header?: WaveformHeader;
     waveform?: Float32Array;
     angles?: Array<{ x: number; y: number }>;
-    loaded?: Promise<void>;
+    promise?: Promise<void>;
+    loaded = false;
     resolver?: () => void;
 
     reset = (): void => {
         this.header = undefined;
         this.waveform = undefined;
         this.angles = undefined;
-        this.loaded = undefined;
+        this.promise = undefined;
+        this.loaded = false;
     };
 
     private loadFile = async (filename: string): Promise<void> => {
@@ -173,12 +175,14 @@ export class WaveformLoader {
         this.header = header as WaveformHeader;
         const length = this.waveform.length / 2;
         this.angles = getCirclePoints(length, Math.PI / length);
+        this.loaded = true;
     };
 
     loadWaveformFile = (filename: string): void => {
         this.header = undefined;
         this.waveform = undefined;
-        this.loaded = this.loadFile(filename);
+        this.loaded = false;
+        this.promise = this.loadFile(filename);
     };
 }
 
@@ -220,7 +224,6 @@ class FIRLoader {
                 },
             },
         );
-        console.log('bufferSize', buffer.byteLength);
 
         const dataView = new DataView(buffer);
         const header: Partial<FIRHeader> = {};
@@ -243,8 +246,6 @@ class FIRLoader {
         this.samplesPerCrossing = header.samplesPerCrossing;
         this.halfCrossings = (this.numCrossings - 1) / 2;
         this.filterSize = this.samplesPerCrossing * (this.numCrossings - 1) - 1;
-        console.log(header);
-        console.log(this.filterSize);
         this.coeffs = new Float32Array(buffer, offset, this.filterSize);
         offset += Float32Array.BYTES_PER_ELEMENT * this.filterSize;
         this.deltas = new Float32Array(buffer, offset, this.filterSize);
@@ -351,7 +352,6 @@ class ConstantQ {
             CIRCLE_SAMPLES,
             Math.PI * (invCqBins + 1),
         );
-        console.log(header);
     };
 
     apply(input: Float32Array, output: Float32Array): void {

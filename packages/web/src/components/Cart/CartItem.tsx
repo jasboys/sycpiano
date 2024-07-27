@@ -3,12 +3,11 @@ import styled from '@emotion/styled';
 import type * as React from 'react';
 import { Link } from 'react-router-dom';
 
-import { removeItemFromCart } from 'src/components/Cart/reducers';
 import type { Product } from 'src/components/Shop/ShopList/types';
-import { useAppDispatch } from 'src/hooks';
 import { staticImage } from 'src/imageUrls';
 import { latoFont } from 'src/styles/fonts.js';
 import { formatPrice } from 'src/utils';
+import { cartStore } from './store.js';
 
 const ItemContainer = styled.div({
     display: 'flex',
@@ -74,8 +73,6 @@ interface CartProps {
 }
 
 export const CartItem: React.FC<CartProps> = ({ item, error }) => {
-    const dispatch = useAppDispatch();
-
     return (
         <ItemContainer>
             <ItemThumbnail>
@@ -97,7 +94,7 @@ export const CartItem: React.FC<CartProps> = ({ item, error }) => {
                         role="button"
                         tabIndex={0}
                         // biome-ignore lint/a11y/useValidAnchor: <explanation>
-                        onClick={() => dispatch(removeItemFromCart(item.id))}
+                        onClick={() => cartStore.set.removeItem(item.id)}
                     >
                         Remove
                     </a>

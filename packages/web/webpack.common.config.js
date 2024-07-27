@@ -1,8 +1,7 @@
 /* eslint-disable no-var, strict, prefer-arrow-callback */
-'use strict';
 
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const path = require('path');
+const path = require('node:path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 require('dotenv').config({ override: true, path: '../../.env' });

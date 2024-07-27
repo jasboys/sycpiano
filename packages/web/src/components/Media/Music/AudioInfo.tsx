@@ -3,17 +3,16 @@ import { gsap } from 'gsap';
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
 
-import { createSelector } from 'reselect';
-import { mqSelectors } from 'src/components/App/reducers.js';
 import { formatTime } from 'src/components/Media/Music/utils';
-import { useAppSelector } from 'src/hooks.js';
 import { staticImage } from 'src/imageUrls.js';
 import { toMedia } from 'src/mediaQuery';
 import { minRes, screenPortrait, webkitMinDPR } from 'src/screens';
-import type { GlobalStateShape } from 'src/store.js';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { metaDescriptions, titleStringBase } from 'src/utils';
+import { musicStore } from './store.js';
+import { shallow } from 'zustand/shallow';
+import { useStore } from 'src/store.js';
 
 interface AudioInfoProps {
     matchParams: boolean;
@@ -79,17 +78,6 @@ const ContributingOrDuration = styled.div({
     },
 });
 
-const selector = createSelector(
-    (state: GlobalStateShape) => state.musicPlayer,
-    ({ playbackPosition, currentTrack, duration, isPlaying }) => ({
-        playbackPosition,
-        playbackTimeString: formatTime(playbackPosition),
-        currentTrack,
-        duration,
-        isPlaying,
-    }),
-);
-
 const AudioInfo: React.FC<AudioInfoProps> = ({ matchParams }) => {
     const timeline = React.useRef<GSAPTimeline>();
     const titleDiv = React.useRef<HTMLDivElement>(null);
@@ -97,7 +85,7 @@ const AudioInfo: React.FC<AudioInfoProps> = ({ matchParams }) => {
     const secondSpan = React.useRef<HTMLSpanElement>(null);
 
     const [forceUpdate, setForceUpdate] = React.useState<number>(0);
-    const isHamburger = useAppSelector(mqSelectors.isHamburger);
+    const isHamburger = useStore().mediaQueries.isHamburger();
 
     const {
         isPlaying,
@@ -105,7 +93,16 @@ const AudioInfo: React.FC<AudioInfoProps> = ({ matchParams }) => {
         playbackTimeString,
         currentTrack,
         duration,
-    } = useAppSelector(selector);
+    } = musicStore.useStore(
+        (state) => ({
+            isPlaying: state.isPlaying,
+            playbackPosition: state.playbackPosition,
+            playbackTimeString: formatTime(state.playbackPosition),
+            currentTrack: state.currentTrack,
+            duration: state.duration,
+        }),
+        shallow,
+    );
     const currentTrackId = currentTrack?.id;
 
     React.useLayoutEffect(() => {

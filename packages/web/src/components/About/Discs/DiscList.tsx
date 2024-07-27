@@ -1,14 +1,16 @@
 import { css } from '@emotion/react';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import type * as React from 'react';
 
 import DiscListItem from 'src/components/About/Discs/DiscListItem';
-import { mqSelectors } from 'src/components/App/reducers';
-import { useAppSelector } from 'src/hooks';
 import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
 import { logoBlue } from 'src/styles/colors.js';
 import { latoFont } from 'src/styles/fonts';
 import { camel2var } from 'src/styles/variables';
+import type { Disc } from './types.js';
+import { useStore } from 'src/store.js';
 
 type DiscListProps = Record<never, unknown>;
 
@@ -34,10 +36,17 @@ const styles = {
 };
 
 const DiscList: React.FunctionComponent<DiscListProps> = () => {
-    const isHamburger = useAppSelector(mqSelectors.isHamburger);
-    const items = useAppSelector(({ discs }) => discs.discs);
+    const isHamburger = useStore().mediaQueries.isHamburger();
+    const { data: items } = useQuery({
+        queryKey: ['discs'],
+        queryFn: async () => {
+            const { data: discs }: { data: Disc[] } = await axios.get('/api/discs');
+            // sort by date descending
+            return discs.sort((a, b) => b.releaseDate - a.releaseDate);
+        }
+    })
 
-    return (
+    return items && (
         <div>
             <ul css={styles.ul}>
                 {!isHamburger && <li css={styles.li}>Discography</li>}

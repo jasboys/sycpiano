@@ -9,7 +9,6 @@ import {
     type PathMatch,
 } from 'react-router-dom';
 
-import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
 import AudioInfo from 'src/components/Media/Music/AudioInfo';
 import AudioUI from 'src/components/Media/Music/AudioUI';
 import type { AudioVisualizerType } from 'src/components/Media/Music/AudioVisualizerBase.jsx';
@@ -17,18 +16,12 @@ import MusicPlaylist from 'src/components/Media/Music/MusicPlaylist';
 import { toMedia } from 'src/mediaQuery';
 
 import { css } from '@emotion/react';
-import { createSelector, createStructuredSelector } from 'reselect';
-import { mqSelectors } from 'src/components/App/reducers.js';
+import { useQuery } from '@tanstack/react-query';
 import {
-    fetchPlaylistThunk,
-    getNextTrack,
-    isLoadingAction,
-    setRadiiAction,
-    setTrackAction,
-    updateAction,
-    volumeAction,
-    type FetchPlaylistThunkReturn,
-} from 'src/components/Media/Music/reducers';
+    fetchPlaylistFn,
+    itemsToFlatItems,
+    musicStore,
+} from 'src/components/Media/Music/store.js';
 import type {
     MusicFileItem,
     MusicListItem,
@@ -39,8 +32,7 @@ import {
     getSrc,
     getWaveformSrc,
 } from 'src/components/Media/Music/utils';
-import { useAppDispatch, useAppSelector } from 'src/hooks.js';
-import module from 'src/module';
+import extractModule from 'src/module';
 import {
     minRes,
     screenM,
@@ -48,10 +40,10 @@ import {
     screenShort,
     webkitMinDPR,
 } from 'src/screens';
-import store, { type AppDispatch, type GlobalStateShape } from 'src/store';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight, playlistContainerWidth } from 'src/styles/variables';
 import { MusicPlayer } from './MusicPlayer.js';
+import { rootStore, useStore } from 'src/store.js';
 
 const detectWebGL = () => {
     const canvas = document.createElement('canvas');
@@ -69,17 +61,13 @@ interface MusicStateToProps {
     readonly isHamburger: boolean;
 }
 
-interface MusicDispatchToProps {
-    dispatch: AppDispatch;
-}
-
 type PathMatchResult =
     | PathMatch<'composer' | 'piece'>
     | PathMatch<'composer' | 'piece' | 'movement'>
     | null;
 
 type MusicProps = MusicStateToProps &
-    MusicDispatchToProps & {
+    {
         matches: PathMatchResult;
         navigate: NavigateFunction;
     };
@@ -136,54 +124,42 @@ const styles = {
     }),
 };
 
-const musicSelector = createSelector(
-    (state: GlobalStateShape) => state.musicPlayer,
-    (state) => ({
-        isPlaying: state.isPlaying,
-        flatItems: state.flatItems,
-        currentTrack: state.currentTrack,
-        playbackPosition: state.playbackPosition,
-        duration: state.duration,
-        volume: state.volume,
-        isHoverSeekring: state.isHoverSeekring,
-        angle: state.angle,
-        isLoading: state.isLoading,
-        isShuffle: state.isShuffle,
-    }),
-);
-
-const mediaSelectors = createStructuredSelector({
-    hiDpx: mqSelectors.hiDpx,
-    isHamburger: mqSelectors.isHamburger,
-    screenPortrait: mqSelectors.screenPortrait,
-    screenM: mqSelectors.screenM,
-    screenLandscape: mqSelectors.screenLandscape,
-    screenL: mqSelectors.screenL,
-});
-
 const Music: React.FC = () => {
+    const { data: items, isSuccess } = useQuery({
+        queryKey: ['musicPlaylist'],
+        queryFn: async () => await fetchPlaylistFn(),
+    });
+
+    React.useEffect(() => {
+        isSuccess && items && musicStore.set.items(items);
+        isSuccess && items && musicStore.set.flatItems(itemsToFlatItems(items));
+    }, [isSuccess, items]);
+
     const matches: PathMatchResult = [
         useMatch('media/music/:composer/:piece'),
-        useMatch('media/music/:composer/:piece/:movement'),
+        useMatch('media/music/:composer/:piece/:movement')
     ].reduce((prev, curr) => prev ?? curr, null);
+
     const navigate = useNavigate();
 
     const Visualizer = React.useRef<AudioVisualizerType>();
+
     const [visualizerLoaded, setVisualizerLoaded] =
         React.useState<boolean>(false);
-    const dispatch = useAppDispatch();
+
+    const [initialized, setInitialized] = React.useState<boolean>(false);
+
     const {
         isPlaying,
         flatItems,
         currentTrack,
-        playbackPosition,
+        isShuffle,
+        isHoverSeekring,
         duration,
         volume,
-        isHoverSeekring,
         angle,
-        isShuffle,
-    } = useAppSelector(musicSelector);
-    const navBarShow = useAppSelector(({ navbar }) => navbar.isVisible);
+    } = musicStore.useTrackedStore();
+    const navBarShow = useStore().navBar.isVisible();
 
     const audio = React.useRef<HTMLAudioElement | null>(null);
     const buffers = React.useRef<{
@@ -203,26 +179,24 @@ const Music: React.FC = () => {
         screenM,
         screenL,
         screenLandscape,
-    } = useAppSelector(mediaSelectors);
+    } = rootStore.mediaQueries.useTrackedStore();
 
     const musicPlayer = React.useRef<MusicPlayer>(
         new MusicPlayer({
             isMobile: isHamburger,
-            volumeCallback: (volume: number) => dispatch(volumeAction(volume)),
-            loadingCallback: () => dispatch(isLoadingAction(true)),
-            loadedCallback: () => dispatch(isLoadingAction(false)),
+            volumeCallback: (volume: number) => musicStore.set.volume(volume),
+            loadingCallback: () => musicStore.set.isLoading(true),
+            loadedCallback: () => musicStore.set.isLoading(false),
         }),
     );
 
     React.useEffect(() => {
-        const prev = (tracks.current.prev = getNextTrack(
-            flatItems,
+        const prev = (tracks.current.prev = musicStore.get.getNextTrack(
             currentTrack,
             'prev',
             true,
         ));
-        const next = (tracks.current.next = getNextTrack(
-            flatItems,
+        const next = (tracks.current.next = musicStore.get.getNextTrack(
             currentTrack,
             'next',
             true,
@@ -269,7 +243,7 @@ const Music: React.FC = () => {
                         subsequent.name,
                     ),
                 );
-                dispatch(setTrackAction(subsequent));
+                musicStore.set.currentTrack?.(subsequent);
                 musicPlayer.current.setTrack(
                     getSrc(subsequent),
                     getWaveformSrc(subsequent),
@@ -280,45 +254,8 @@ const Music: React.FC = () => {
         [flatItems, currentTrack],
     );
 
-    const waitForPlaylist = React.useCallback(async () => {
-        try {
-            const { composer, piece, movement } = {
-                composer: undefined,
-                piece: undefined,
-                movement: undefined,
-                ...matches?.params,
-            };
-
-            const result = await dispatch(
-                fetchPlaylistThunk({ composer, piece, movement }),
-            );
-            if (!result.payload) {
-                if (currentTrack) {
-                    return {
-                        first: currentTrack,
-                        prev: tracks.current.prev,
-                        next: tracks.current.next,
-                    };
-                }
-                return {
-                    first: flatItems[0],
-                    prev: flatItems[flatItems.length - 1],
-                    next: flatItems[1],
-                };
-            }
-            return {
-                first: (result.payload as FetchPlaylistThunkReturn).firstTrack,
-                prev: (result.payload as FetchPlaylistThunkReturn).prevTrack,
-                next: (result.payload as FetchPlaylistThunkReturn).nextTrack,
-            };
-        } catch (err) {
-            console.error('Playlist init failed.', err);
-            throw err;
-        }
-    }, [flatItems]);
-
     const importVisualizer = React.useCallback(async () => {
-        const register = module(store);
+        const register = extractModule();
         const gl = detectWebGL();
         if (gl) {
             if (gl instanceof WebGL2RenderingContext) {
@@ -356,36 +293,44 @@ const Music: React.FC = () => {
     }, []);
 
     React.useEffect(() => {
-        const initialize = async () => {
-            console.log(audio, buffers);
-            if (
-                !audio.current ||
-                !buffers.current.prev ||
-                !buffers.current.next
-            ) {
-                throw new Error('audio elements refs not created');
-            }
-            const { first, prev, next } = await waitForPlaylist();
-            musicPlayer.current.initialize(
-                audio.current,
-                buffers.current.prev,
-                buffers.current.next,
-                { src: getSrc(first), waveform: getWaveformSrc(first) },
-                prev
-                    ? { src: getSrc(prev), waveform: getWaveformSrc(prev) }
-                    : undefined,
-                next
-                    ? { src: getSrc(next), waveform: getWaveformSrc(next) }
-                    : undefined,
-            );
-        };
-        dispatch(isLoadingAction(true));
-        importVisualizer();
-        initialize();
-        return () => {
-            musicPlayer.current.pause();
-        };
-    }, []);
+        if (isSuccess && flatItems.length && !initialized) {
+            const initialize = async () => {
+                if (
+                    !audio.current ||
+                    !buffers.current.prev ||
+                    !buffers.current.next
+                ) {
+                    throw new Error('audio elements refs not created');
+                }
+
+                const { composer, piece, movement } = {
+                    movement: undefined,
+                    ...matches?.params,
+                };
+
+                const first = musicStore.get.getFirstTrack({
+                    composer,
+                    piece,
+                    movement,
+                });
+
+                musicStore.set.currentTrack?.(first);
+                await musicPlayer.current.initialize(
+                    audio.current,
+                    buffers.current.prev,
+                    buffers.current.next,
+                    { src: getSrc(first), waveform: getWaveformSrc(first) },
+                );
+                setInitialized(true);
+            };
+            musicStore.set.isLoading(true);
+            importVisualizer();
+            initialize();
+            return () => {
+                musicPlayer.current.pause();
+            };
+        }
+    }, [isSuccess, flatItems, initialized, matches]);
 
     React.useEffect(() => {
         if ('mediaSession' in navigator) {
@@ -410,11 +355,9 @@ const Music: React.FC = () => {
 
     const onDrag = React.useCallback((percent: number) => {
         const position = musicPlayer.current.audio.duration * percent;
-        dispatch(
-            updateAction({
-                playbackPosition: position,
-            }),
-        );
+
+        musicStore.set.playbackPosition(position);
+        musicPlayer.current.audio.currentTime = position;
     }, []);
 
     const onStartDrag = React.useCallback((percent: number) => {
@@ -435,24 +378,18 @@ const Music: React.FC = () => {
         }
     }, []);
 
-    const onScrollDispatch = (triggerHeight: number, scrollTop: number) => {
-        dispatch(onScroll({ triggerHeight, scrollTop }));
-    };
-
     const audioCallback = React.useCallback(
         (play?: boolean) => () => {
             if (currentTrack) {
                 const audio = musicPlayer.current.audio;
-                dispatch(
-                    updateAction({
-                        playing:
-                            play !== undefined && isPlaying !== play
-                                ? play
-                                : undefined,
-                        playbackPosition: audio.currentTime,
-                        duration: audio.duration,
-                    }),
-                );
+                musicStore.set.callbackAction({
+                    playing:
+                        play !== undefined && isPlaying !== play
+                            ? play
+                            : undefined,
+                    playbackPosition: audio.currentTime,
+                    duration: audio.duration,
+                });
             }
         },
         [currentTrack, isPlaying],
@@ -464,8 +401,7 @@ const Music: React.FC = () => {
                 await musicPlayer.current.context.resume();
             }
             if (musicFile.id !== currentTrack?.id) {
-                dispatch(isLoadingAction(true));
-                dispatch(setTrackAction(musicFile));
+                musicStore.set.currentTrack?.(musicFile);
                 musicPlayer.current.setTrack(
                     getSrc(musicFile),
                     getWaveformSrc(musicFile),
@@ -476,19 +412,12 @@ const Music: React.FC = () => {
         [currentTrack],
     );
 
-    const updateRadii = React.useCallback(
-        (inner: number, outer: number, base: number) => {
-            dispatch(setRadiiAction({ inner, outer, base }));
-        },
-        [],
-    );
-
     return (
         <div
             css={styles.music}
             onScroll={
                 isHamburger
-                    ? scrollFn(navBarHeight.get(hiDpx), onScrollDispatch)
+                    ? rootStore.navBar.set.onScroll(navBarHeight.get(hiDpx))
                     : undefined
             }
         >
@@ -534,7 +463,6 @@ const Music: React.FC = () => {
                 <AudioInfo matchParams={!isEmpty(matches?.params)} />
                 {visualizerLoaded && Visualizer.current && (
                     <Visualizer.current
-                        currentPosition={playbackPosition}
                         musicPlayer={musicPlayer.current}
                         isPlaying={isPlaying}
                         duration={duration}
@@ -545,7 +473,7 @@ const Music: React.FC = () => {
                         }
                         isHoverSeekring={isHoverSeekring}
                         hoverAngle={angle}
-                        setRadii={updateRadii}
+                        setRadii={musicStore.set.radii}
                     />
                 )}
             </div>

@@ -5,6 +5,8 @@ import * as React from 'react';
 import type { MusicPlayer } from './MusicPlayer.js';
 import { CIRCLE_SAMPLES, constantQ, firLoader } from './VisualizationUtils.js';
 import { nextPow2 } from './utils.js';
+import type { Radii } from './types.js';
+import { musicStore } from './store.js';
 
 const VisualizerContainer = styled.div({
     position: 'absolute',
@@ -32,14 +34,14 @@ export const MOBILE_MSPF = 1000 / 30;
 
 export interface AudioVisualizerProps {
     readonly musicPlayer: MusicPlayer;
-    readonly currentPosition: number;
+    // readonly currentPosition: number;
     readonly duration: number;
     readonly isPlaying: boolean;
     readonly volume: number;
     readonly isMobile: boolean;
     readonly isHoverSeekring: boolean;
     readonly hoverAngle?: number;
-    readonly setRadii: (inner: number, outer: number, base: number) => void;
+    readonly setRadii: ({ inner, outer, base }: Radii) => void;
 }
 
 type ColorType<C> = C extends WebGL2RenderingContext | WebGLRenderingContext
@@ -106,17 +108,9 @@ export abstract class AudioVisualizerBase<
         maxRad: number,
         color: ColorType<C>,
     ) => void;
-    abstract drawSeekArea: (
-        radius: number,
-        color: ColorType<C>,
-        timestamp: number,
-    ) => void;
+    abstract drawSeekArea: (radius: number, color: ColorType<C>) => void;
     abstract drawPhase: (radius: number, color: ColorType<C>) => void;
-    abstract drawVisualization: (
-        lowFreq: number,
-        lightness: number,
-        timestamp: number,
-    ) => void;
+    abstract drawVisualization: (lowFreq: number, lightness: number) => void;
     abstract onResize: () => void;
     abstract initializeVisualizer: () => Promise<void>;
 
@@ -207,19 +201,20 @@ export abstract class AudioVisualizerBase<
             }
         }
 
-        if (!this.props.isPlaying) {
+        if (!musicStore.get.isPlaying()) {
             // reset idleStart time if either hover, hoverangle, or currPos changes
             if (
-                this.lastIsHover !== this.props.isHoverSeekring ||
-                this.lastCurrentPosition !== this.props.currentPosition ||
-                this.lastHover !== this.props.hoverAngle
+                this.lastIsHover !== musicStore.get.isHoverSeekring() ||
+                this.lastCurrentPosition !==
+                    musicStore.get.playbackPosition() ||
+                this.lastHover !== musicStore.get.angle?.()
             ) {
                 this.idleStart = timestamp;
             }
             // update hover, hoverangle, currPos (no effect obviously if no change)
-            this.lastIsHover = this.props.isHoverSeekring;
-            this.lastHover = this.props.hoverAngle;
-            this.lastCurrentPosition = this.props.currentPosition;
+            this.lastIsHover = musicStore.get.isHoverSeekring();
+            this.lastHover = musicStore.get.angle?.();
+            this.lastCurrentPosition = musicStore.get.playbackPosition();
             // if has been idle for over 3.5 seconds, cancel animation
             if (this.idleStart !== 0 && timestamp - this.idleStart > 3500) {
                 gsap.ticker.remove(this.onAnalyze);
@@ -248,7 +243,7 @@ export abstract class AudioVisualizerBase<
         const lowFreq = (leftLow + rightLow) / 2;
         highFreq = HIGH_FREQ_SCALE * highFreq;
 
-        this.drawVisualization(lowFreq, highFreq, timestamp);
+        this.drawVisualization(lowFreq, highFreq);
     };
 
     onVisibilityChange = (): void => {
@@ -289,17 +284,17 @@ export abstract class AudioVisualizerBase<
     componentDidUpdate(prevProps: AudioVisualizerProps): void {
         if (
             prevProps.isMobile !== this.props.isMobile ||
-            prevProps.currentPosition !== this.props.currentPosition ||
+            // prevProps.currentPosition !== this.props.currentPosition ||
             prevProps.isPlaying !== this.props.isPlaying ||
             prevProps.isHoverSeekring !== this.props.isHoverSeekring ||
             prevProps.hoverAngle !== this.props.hoverAngle
         ) {
-            if (
-                prevProps.currentPosition !== this.props.currentPosition ||
-                this.props.isPlaying
-            ) {
-                this.lastPositionUpdateTimestamp = performance.now();
-            }
+            // if (
+            //     prevProps.currentPosition !== this.props.currentPosition ||
+            //     this.props.isPlaying
+            // ) {
+            //     this.lastPositionUpdateTimestamp = performance.now();
+            // }
             if (prevProps.isMobile !== this.props.isMobile) {
                 this.onResize();
             }

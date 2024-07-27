@@ -8,13 +8,7 @@ import isEmail from 'validator/es/lib/isEmail';
 
 import { Link } from 'react-router-dom';
 import { CartItem } from 'src/components/Cart/CartItem';
-import {
-    checkoutAction,
-    clearErrors,
-    toggleCartList,
-} from 'src/components/Cart/reducers';
 import type { Product } from 'src/components/Shop/ShopList/types';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { toMedia } from 'src/mediaQuery';
 import { screenS } from 'src/screens';
 import { lightBlue, logoBlue, theme } from 'src/styles/colors';
@@ -23,6 +17,9 @@ import { noHighlight } from 'src/styles/mixins';
 import { cartWidth } from 'src/styles/variables';
 import { formatPrice } from 'src/utils';
 import { LoadingInstance } from '../LoadingSVG.jsx';
+import { cartStore, checkoutFn } from './store.js';
+import { useTrackedStore } from 'src/store.js';
+import { useMutation } from '@tanstack/react-query';
 
 const ARROW_SIDE = 32;
 
@@ -131,7 +128,7 @@ const PromoMessage = styled.div<{ green: boolean }>(
         green && {
             color: 'darkgreen',
         },
-)
+);
 
 const StyledForm = styled.form({
     display: 'flex',
@@ -189,7 +186,6 @@ const StripeLink = styled.a({
 });
 
 const Heading: React.FC<Record<never, unknown>> = () => {
-    const dispatch = useAppDispatch();
 
     return (
         <StyledHeading>
@@ -207,7 +203,7 @@ const Heading: React.FC<Record<never, unknown>> = () => {
                 viewBox="0 0 120 120"
                 height="42"
                 width="42"
-                onClick={() => dispatch(toggleCartList(false))}
+                onClick={() => cartStore.set.toggleCartVisible(false)}
             >
                 <path
                     d="M40 40L80 80M40 80L80 40"
@@ -220,16 +216,22 @@ const Heading: React.FC<Record<never, unknown>> = () => {
 };
 
 const CheckoutForm: React.FC<{ cartLength: number }> = ({ cartLength }) => {
-    const dispatch = useAppDispatch();
     const [isMouseDown, setIsMouseDown] = React.useState(false);
-    const savedEmail = useAppSelector(({ cart }) => cart.email);
-    const isCheckingOut = useAppSelector(({ cart }) => cart.isCheckingOut);
+    const savedEmail = cartStore.use.email();
     const [email, setEmail] = React.useState('');
     const [error, setError] = React.useState(false);
+
+    const { mutate, isPending } = useMutation({
+        mutationFn: checkoutFn,
+    })
 
     React.useEffect(() => {
         setEmail(savedEmail);
     }, [savedEmail]);
+
+    React.useEffect(() => {
+        cartStore.set.isCheckingOut(isPending);
+    }, [isPending])
 
     const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setEmail(event.target.value);
@@ -241,14 +243,14 @@ const CheckoutForm: React.FC<{ cartLength: number }> = ({ cartLength }) => {
             <StyledForm
                 onSubmit={(e) => {
                     e.preventDefault();
-                    if (error || isCheckingOut) {
+                    if (error || isPending) {
                         return;
                     }
                     if (email === '') {
                         setError(true);
                         return;
                     }
-                    dispatch(checkoutAction(email));
+                    mutate(email);
                 }}
             >
                 <StyledTextField
@@ -308,33 +310,39 @@ const InnerBorderContainer = styled.div<{ isCheckingOut: boolean }>(
         },
 );
 
-const faqRedirectLink: React.FC<React.AnchorHTMLAttributes<HTMLAnchorElement>> =
-    ({ href }) => {
-        const dispatch = useAppDispatch();
+const faqRedirectLink: React.FC<
+    React.AnchorHTMLAttributes<HTMLAnchorElement>
+> = ({ href }) => {
 
-        return (
-            href && (
-                <Link to={href} onClick={() => dispatch(toggleCartList(false))}>
-                    FAQs
-                </Link>
-            )
-        );
-    };
+    return (
+        href && (
+            <Link to={href} onClick={() => cartStore.set.toggleCartVisible(false)}>
+                FAQs
+            </Link>
+        )
+    );
+};
 
 export const CartList: React.FC<Record<never, unknown>> = () => {
-    const isCheckingOut = useAppSelector(({ cart }) => cart.isCheckingOut);
-    const shopItems = useAppSelector(({ shop }) => shop.items);
-    const cart = useAppSelector(({ cart }) => cart.items);
-    const checkoutError = useAppSelector(({ cart }) => cart.checkoutError);
-
-    const dispatch = useAppDispatch();
+    // const isCheckingOut = useAppSelector(({ cart }) => cart.isCheckingOut);
+    // const shopItems = useAppSelector(({ shop }) => shop.items);
+    // const cart = useAppSelector(({ cart }) => cart.items);
+    // const checkoutError = useAppSelector(({ cart }) => cart.checkoutError);
+    const { isCheckingOut, cartItems, checkoutError } = cartStore.useStore(
+        (state) => ({
+            isCheckingOut: state.isCheckingOut,
+            cartItems: state.items,
+            checkoutError: state.checkoutError,
+        }),
+    );
+    const shopItems = useTrackedStore().shop.items?.();
 
     let subtotal = 0;
     const clearError =
         checkoutError.message !== '' &&
-        cart.every((val) => !checkoutError.data?.includes(val));
+        cartItems.every((val) => !checkoutError.data?.includes(val));
     if (clearError) {
-        dispatch(clearErrors());
+        cartStore.set.clearErrors();
     }
 
     return (
@@ -346,17 +354,23 @@ export const CartList: React.FC<Record<never, unknown>> = () => {
             )}
             <InnerBorderContainer isCheckingOut={isCheckingOut}>
                 <Heading />
-                {cart.length !== 0 &&
+                {cartItems.length !== 0 &&
                 shopItems &&
                 Object.keys(shopItems).length !== 0 ? (
                     <StyledItemList>
-                        <PromoMessage green={cart.length >= 2}>
-                            <div>{(cart.length >= 2 && cart.length < 5)
-                                  ? 'You are receiving 10% off your order!'
-                                  : (cart.length < 2 ? '2+ scores: 10% off' : '')}</div>
-                            <div>{cart.length >= 5
-                                ? 'You are receiving 20% off your order!'
-                                : '5+ scores: 20% off'}</div>
+                        <PromoMessage green={cartItems.length >= 2}>
+                            <div>
+                                {cartItems.length >= 2 && cartItems.length < 5
+                                    ? 'You are receiving 10% off your order!'
+                                    : cartItems.length < 2
+                                      ? '2+ scores: 10% off'
+                                      : ''}
+                            </div>
+                            <div>
+                                {cartItems.length >= 5
+                                    ? 'You are receiving 20% off your order!'
+                                    : '5+ scores: 20% off'}
+                            </div>
                             <div>Discount applied at checkout.</div>
                         </PromoMessage>
                         {checkoutError.message !== '' && (
@@ -374,7 +388,7 @@ export const CartList: React.FC<Record<never, unknown>> = () => {
                                 </Markdown>
                             </ErrorMessage>
                         )}
-                        {cart.map((item: string) => {
+                        {cartItems.map((item: string) => {
                             // item = cart item
                             // reduce over all categories of shop items { arrangement: Product[]; cadenza: Product[]; original: Product[] },
                             // accumulate starting with undefined
@@ -411,7 +425,7 @@ export const CartList: React.FC<Record<never, unknown>> = () => {
                     <div>Subtotal:</div>
                     <div>{formatPrice(subtotal)}</div>
                 </Subtotal>
-                <CheckoutForm cartLength={cart.length} />
+                <CheckoutForm cartLength={cartItems.length} />
                 <StripeDiv>
                     <StripeLink
                         href="https://stripe.com"

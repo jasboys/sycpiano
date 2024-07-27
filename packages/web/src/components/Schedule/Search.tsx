@@ -10,19 +10,17 @@ import {
     useSearchParams,
 } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
-import { createSelector } from 'reselect';
 
 import { SearchIconInstance } from 'src/components/Schedule/SearchIconSVG';
 import { toMedia } from 'src/mediaQuery';
-import { screenPortrait, screenXS, screenXSandPortrait } from 'src/screens';
+import { screenXSandPortrait } from 'src/screens';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 
-import { useAppSelector } from 'src/hooks';
-import type { GlobalStateShape } from 'src/store';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
-import { mqSelectors } from '../App/reducers';
+import { scheduleStore } from './store.js';
+import { useStore } from 'src/store.js';
 
 const unfocusedGray = rgba(180, 180, 180, 0.4);
 
@@ -48,7 +46,7 @@ const ResultsContainer = styled.div(latoFont(200), {
     color: logoBlue,
     boxShadow: '0 1px 5px -2px rgba(0 0 0 / 0.4)',
     flexDirection: 'column',
-    [toMedia([screenXS, screenPortrait])]: {
+    [toMedia(screenXSandPortrait)]: {
         left: 0,
         maxWidth: 'calc(min(90%, 25rem) - 50px)',
         margin: '0.8rem auto 0',
@@ -198,21 +196,11 @@ const SubmitButton = styled.button<{ dirty: boolean; expanded: boolean }>(
     }),
 );
 
-const selector = createSelector(
-    (state: GlobalStateShape) => state.scheduleEventItems?.search.items,
-    (state: GlobalStateShape) => state.scheduleEventItems?.search.lastQuery,
-    (state: GlobalStateShape) =>
-        state.scheduleEventItems?.search.isFetchingList,
-    (items, lastQuery, isFetching) => ({
-        itemsLength: items?.length,
-        lastQuery,
-        isFetching,
-    }),
-);
-
 export const Search: React.FC<SearchProps> = () => {
-    const { itemsLength, lastQuery, isFetching } = useAppSelector(selector);
-    const screenXS = useAppSelector(mqSelectors.screenXS);
+    const { lastQuery } = scheduleStore.useTracked.search();
+    const isFetching = scheduleStore.use.isFetching();
+    const itemsLength = scheduleStore.use.itemsLength('search');
+    const screenXS = useStore().mediaQueries.screenXS();
     const [searchParams] = useSearchParams();
     const [focused, setFocused] = React.useState(false);
     const match = useMatch('/schedule/search');
@@ -260,6 +248,8 @@ export const Search: React.FC<SearchProps> = () => {
             // if (data.search === '') {
             //     navigate('/schedule/upcoming');
             // }
+            scheduleStore.set.isFetching(true);
+            scheduleStore.set.clearList('search');
             navigate(
                 `/schedule/search?${createSearchParams({ q: data.search })}`,
                 {

@@ -1,11 +1,6 @@
-export interface PhotoListReducerShape {
-    items: PhotoItem[];
-    isFetching: boolean;
-    background: string;
-}
-
-export interface PhotoViewerReducerShape {
+export interface PhotoStoreShape {
     currentItem?: PhotoItem;
+    background: string;
 }
 
 export interface PhotoItem {

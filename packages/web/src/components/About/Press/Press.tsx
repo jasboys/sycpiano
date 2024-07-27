@@ -1,15 +1,12 @@
 import { css } from '@emotion/react';
-import * as React from 'react';
+import type * as React from 'react';
 
 import { toMedia } from 'src/mediaQuery';
 import AcclaimsList from 'src/components/About/Press/AcclaimsList';
-import { fetchAcclaims } from 'src/components/About/Press/reducers';
-import { onScroll, scrollFn } from 'src/components/App/NavBar/reducers';
-import { mqSelectors } from 'src/components/App/reducers';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { screenPortrait, screenXS } from 'src/screens';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
+import { rootStore } from 'src/store.js';
 
 interface PressProps {
     className?: string;
@@ -27,27 +24,14 @@ const containerStyle = css(pushed, {
 });
 
 const Press: React.FC<PressProps> = () => {
-    const isHamburger = useAppSelector(mqSelectors.isHamburger);
-    const hiDpx = useAppSelector(mqSelectors.hiDpx);
-    const dispatch = useAppDispatch();
-
-    React.useEffect(() => {
-        dispatch(fetchAcclaims());
-    });
-
-    const onScrollDispatch = React.useCallback(
-        (triggerHeight: number, scrollTop: number) => {
-            dispatch(onScroll({ triggerHeight, scrollTop }));
-        },
-        [],
-    );
+    const { isHamburger, hiDpx } = rootStore.mediaQueries.useTrackedStore();
 
     return (
         <div
             css={containerStyle}
             onScroll={
                 isHamburger
-                    ? scrollFn(navBarHeight.get(hiDpx), onScrollDispatch)
+                    ? rootStore.navBar.set.onScroll(navBarHeight.get(hiDpx))
                     : undefined
             }
         >

@@ -107,3 +107,7 @@ export const isImageElement = (
 ): el is HTMLImageElement => {
     return (el as HTMLImageElement).currentSrc !== undefined;
 };
+
+export const zustandMiddlewareOptions = {
+    persist: { enabled: false },
+};

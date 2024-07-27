@@ -3,14 +3,13 @@ import { gsap } from 'gsap';
 import { mix } from 'polished';
 import * as React from 'react';
 
-import { toggleExpanded } from 'src/components/App/NavBar/reducers';
-import { toggleCartList } from 'src/components/Cart/reducers';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { isHamburger } from 'src/screens';
 import { toMedia } from 'src/mediaQuery';
+import { cartStore } from 'src/components/Cart/store.js';
+import { navBarStore } from './store.js';
 
 const cartStyles = {
     base: css(latoFont(400), {
@@ -98,19 +97,17 @@ interface CartButtonProps {
 
 const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(
     ({ isHome }, ref) => {
-        const cartCount = useAppSelector(({ cart }) => cart.items.length);
-        const cartIsInit = useAppSelector(({ cart }) => cart.isInit);
-        const cartOpened = useAppSelector(({ cart }) => cart.visible);
-        const menuOpened = useAppSelector(({ navbar }) => navbar.isExpanded);
+
+        const cart = cartStore.useTrackedStore()
+        const menuOpened = navBarStore.use.isExpanded();
         const cartRef = React.useRef<HTMLDivElement | null>(null);
-        const dispatch = useAppDispatch();
 
         React.useEffect(() => {
             const el = cartRef.current;
-            if (el && cartIsInit) {
+            if (el && cart.isInit) {
                 scaleUp(el);
             }
-        }, [cartCount]);
+        }, [cart.items.length]);
 
         const makeRef = React.useCallback((el: HTMLDivElement) => {
             cartRef.current = el;
@@ -122,8 +119,8 @@ const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(
         }, []);
 
         const onClick = React.useCallback(() => {
-            dispatch(toggleCartList());
-            menuOpened && dispatch(toggleExpanded(false));
+            cartStore.set.toggleCartVisible();
+            menuOpened && navBarStore.set.toggleExpanded(false);
         }, [menuOpened]);
 
         return (
@@ -131,7 +128,7 @@ const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(
                 css={[
                     cartStyles.base,
                     isHome && cartStyles.isHome,
-                    cartOpened && !isHome && cartStyles.isOpen,
+                    cart.visible && !isHome && cartStyles.isOpen,
                 ]}
                 onClick={onClick}
                 onKeyUp={onClick}
@@ -148,7 +145,7 @@ const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(
                         strokeWidth="0"
                         d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 3c0 .55.45 1 1 1h1l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h11c.55 0 1-.45 1-1s-.45-1-1-1H7l1.1-2h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.37-.66-.11-1.48-.87-1.48H5.21l-.67-1.43c-.16-.35-.52-.57-.9-.57H2c-.55 0-1 .45-1 1zm16 15c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"
                     />
-                    {cartCount !== 0 && (
+                    {cart.items.length !== 0 && (
                         <>
                             <circle
                                 cx="23"
@@ -163,7 +160,7 @@ const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(
                                 dominantBaseline="middle"
                                 fontSize="0.6rem"
                             >
-                                {cartCount}
+                                {cart.items.length}
                             </text>
                         </>
                     )}

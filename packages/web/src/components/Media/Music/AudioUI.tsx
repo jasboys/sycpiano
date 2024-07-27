@@ -4,8 +4,6 @@ import { gsap } from 'gsap';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
 
-import { createSelector } from 'reselect';
-import { mqSelectors } from 'src/components/App/reducers.js';
 import { LoadingInstance } from 'src/components/LoadingSVG';
 import {
     HEIGHT_ADJUST_DESKTOP,
@@ -19,17 +17,12 @@ import {
     SkipButton,
 } from 'src/components/Media/Music/Buttons';
 import { cartesianToPolar } from 'src/components/Media/Music/utils';
-import { useAppDispatch, useAppSelector } from 'src/hooks.js';
 import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
-import type { GlobalStateShape } from 'src/store.js';
 import { lightBlue } from 'src/styles/colors';
 import { fadeOnEnter, fadeOnExit } from 'src/utils.js';
-import {
-    hoverSeekringAction,
-    isMouseMoveAction,
-    updateAction,
-} from './reducers.js';
+import { musicStore } from './store.js';
+import { rootStore } from 'src/store.js';
 
 const isMouseEvent = <E extends Element>(
     event: AggregateUIEvent<E>,
@@ -112,18 +105,6 @@ type AggregateUIEvent<E> =
     | React.TouchEvent<E>
     | TouchEvent;
 
-const selector = createSelector(
-    (state: GlobalStateShape) => state.musicPlayer,
-    ({ isPlaying, isMouseMove, isLoading, radii: { inner, outer, base } }) => ({
-        isPlaying,
-        isMouseMove,
-        isLoading,
-        inner,
-        outer,
-        base,
-    }),
-);
-
 const AudioUI: React.FC<AudioUIProps> = ({
     seekAudio,
     onStartDrag,
@@ -165,11 +146,15 @@ const AudioUI: React.FC<AudioUIProps> = ({
     const seekRing = React.useRef<HTMLCanvasElement | null>(null);
     const visualizationCtx = React.useRef<CanvasRenderingContext2D | null>();
 
-    const { isLoading, isMouseMove, isPlaying, inner, outer, base } =
-        useAppSelector(selector);
-    const isHamburger = useAppSelector(mqSelectors.isHamburger);
+    const {
+        isLoading,
+        isMouseMove,
+        isPlaying,
+        radii: { inner, outer, base },
+    } = musicStore.useTrackedStore();
+    const isHamburger = rootStore.mediaQueries.use.isHamburger();
 
-    const dispatch = useAppDispatch();
+    // const dispatch = useAppDispatch();
 
     const togglePlaying = <E extends Element>(
         event:
@@ -177,12 +162,12 @@ const AudioUI: React.FC<AudioUIProps> = ({
             | React.MouseEvent<E>
             | KeyboardEvent
             | MouseEvent,
-    ): void => {
+    ) => {
         if (
             (event as React.KeyboardEvent<E> | KeyboardEvent).key === ' ' ||
             (event as React.MouseEvent<E> | MouseEvent).button === 0
         ) {
-            dispatch(updateAction({ playing: !isPlaying }));
+            musicStore.set.toggleShuffle();
             event.preventDefault();
         }
     };
@@ -208,7 +193,7 @@ const AudioUI: React.FC<AudioUIProps> = ({
             onResize();
             visualizationCtx.current = seekRing.current.getContext('2d');
             isDragging.current = false;
-            dispatch(isMouseMoveAction(false));
+            musicStore.set.isMouseMove(false);
             setState((prev) => ({ ...prev, isHoverPlaypause: false }));
         }
     };
@@ -310,41 +295,33 @@ const AudioUI: React.FC<AudioUIProps> = ({
                 seekRing.current.style.cursor = isMouseEvent(event)
                     ? 'pointer'
                     : 'default';
-                dispatch(isMouseMoveAction(false));
+                musicStore.set.isMouseMove(false);
                 if (!passive) {
                     event.preventDefault();
                 }
             } else {
                 if (isEventInSeekRing(event) && !isHamburger) {
                     seekRing.current.style.cursor = 'pointer';
-                    dispatch(
-                        hoverSeekringAction({
-                            isHoverSeekring: true,
-                            angle: mousePositionToAngle(event),
-                        }),
-                    );
+                    musicStore.set.isHoverSeekring(true);
+                    musicStore.set.angle?.(mousePositionToAngle(event));
                     if (!prevMoving) {
-                        dispatch(isMouseMoveAction(false));
+                        musicStore.set.isMouseMove(false);
                     } else {
                         if (timerId.current) {
                             clearTimeout(timerId.current);
                         }
                         timerId.current = setTimeout(
-                            () => dispatch(isMouseMoveAction(false)),
+                            () => musicStore.set.isMouseMove(false),
                             3000,
                         );
                     }
                 } else {
                     seekRing.current.style.cursor = 'default';
-                    dispatch(
-                        hoverSeekringAction({
-                            isHoverSeekring: false,
-                        }),
-                    );
+                    musicStore.set.isHoverSeekring(false);
                     if (timerId.current) {
                         clearTimeout(timerId.current);
                     }
-                    dispatch(isMouseMoveAction(true));
+                    musicStore.set.isMouseMove(true);
                     if (
                         Object.values(buttonRefs.current).includes(
                             event.currentTarget as HTMLDivElement,
@@ -353,7 +330,7 @@ const AudioUI: React.FC<AudioUIProps> = ({
                         event.stopPropagation();
                     } else {
                         timerId.current = setTimeout(
-                            () => dispatch(isMouseMoveAction(false)),
+                            () => musicStore.set.isMouseMove(false),
                             3000,
                         );
                     }
@@ -378,13 +355,13 @@ const AudioUI: React.FC<AudioUIProps> = ({
                 seekAudio(prevPercentage.current);
                 isDragging.current = false;
                 if (!prevMoving) {
-                    dispatch(isMouseMoveAction(false));
+                    musicStore.set.isMouseMove(false);
                 } else {
                     if (timerId.current) {
                         clearTimeout(timerId.current);
                     }
                     timerId.current = setTimeout(
-                        () => dispatch(isMouseMoveAction(false)),
+                        () => musicStore.set.isMouseMove(false),
                         3000,
                     );
                 }

@@ -1,24 +1,24 @@
 import { createRoot } from 'react-dom/client';
 import 'vite/modulepreload-polyfill';
 
-import { Provider } from 'react-redux';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
-import store from 'src/store.js';
-
 import App from 'src/components/App/App';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
 
 function main() {
     const container = document.getElementById('app') as HTMLElement;
     const root = createRoot(container);
     root.render(
-        <Provider store={store}>
+        <QueryClientProvider client={queryClient}>
             <BrowserRouter>
                 <Routes>
-                    <Route path='*' element={<App />} />
+                    <Route path="*" element={<App />} />
                 </Routes>
             </BrowserRouter>
-        </Provider>,
+        </QueryClientProvider>,
     );
 }
 

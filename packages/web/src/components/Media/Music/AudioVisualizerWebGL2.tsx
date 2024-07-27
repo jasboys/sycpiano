@@ -20,6 +20,7 @@ import {
     lineVert,
     phaseVert,
 } from './shadersGL2.js';
+import { musicStore } from './store.js';
 
 interface ShaderProgram {
     shader: WebGLShader;
@@ -308,7 +309,7 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
                     (firLoader.coeffs[i] +
                         fractionalPart * firLoader.deltas[i]);
             }
-            const result = radius + this.props.volume * sum * this.SCALE;
+            const result = radius + musicStore.get.volume() * sum * this.SCALE;
             let { x, y } = constantQ.angles[currentSample];
             x *= result;
             y *= result;
@@ -367,7 +368,8 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
         }
 
         const waveformLength = waveform.length / 2;
-        const volumeHeightScale = this.props.volume * this.WAVEFORM_HALF_HEIGHT;
+        const volumeHeightScale =
+            musicStore.get.volume() * this.WAVEFORM_HALF_HEIGHT;
         if (
             !this.waveformVertices ||
             this.waveformVertices.length !== waveformLength * 4
@@ -455,52 +457,30 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
         gl.bindVertexArray(null);
     };
 
-    drawSeekArea = (
-        radius: number,
-        color: Float32Array,
-        timestamp: number,
-    ): void => {
-        if (!this.renderingContext) return;
+    drawSeekArea = (radius: number, color: Float32Array): void => {
         const WAVEFORM_CENTER_AXIS = radius - this.WAVEFORM_HALF_HEIGHT;
         this.drawWaveForm(WAVEFORM_CENTER_AXIS, color);
-
+        const currentPosition = this.props.musicPlayer.audio.currentTime;
         // interpolate playbackhead position with timestamp difference if audio object hasn't updated current position
-        let playbackHead = this.props.currentPosition;
-        if (
-            this.props.currentPosition &&
-            this.props.currentPosition === this.lastPlayheadPosition &&
-            this.props.isPlaying
-        ) {
-            playbackHead =
-                this.props.currentPosition +
-                (timestamp - this.lastPositionUpdateTimestamp) / 1000;
-        } else {
-            this.lastPlayheadPosition = this.props.currentPosition;
-        }
 
+        const duration = this.props.musicPlayer.audio.duration;
         const angle =
-            playbackHead && this.props.duration
-                ? Math.min(
-                      TWO_PI,
-                      (TWO_PI * playbackHead) / this.props.duration,
-                  )
+            currentPosition && duration
+                ? Math.min((TWO_PI * currentPosition) / duration)
                 : 0;
-
+        const volume = musicStore.get.volume();
         this.drawPlaybackHead(
             angle,
-            WAVEFORM_CENTER_AXIS -
-                this.props.volume * this.WAVEFORM_HALF_HEIGHT,
-            WAVEFORM_CENTER_AXIS +
-                this.props.volume * this.WAVEFORM_HALF_HEIGHT,
+            WAVEFORM_CENTER_AXIS - volume * this.WAVEFORM_HALF_HEIGHT,
+            WAVEFORM_CENTER_AXIS + volume * this.WAVEFORM_HALF_HEIGHT,
             this.white,
         );
-        if (this.props.isHoverSeekring && this.props.hoverAngle !== undefined) {
+        const hoverAngle = musicStore.get.angle?.();
+        if (musicStore.get.isHoverSeekring() && hoverAngle !== undefined) {
             this.drawPlaybackHead(
-                this.props.hoverAngle,
-                WAVEFORM_CENTER_AXIS -
-                    this.props.volume * this.WAVEFORM_HALF_HEIGHT,
-                WAVEFORM_CENTER_AXIS +
-                    this.props.volume * this.WAVEFORM_HALF_HEIGHT,
+                hoverAngle,
+                WAVEFORM_CENTER_AXIS - volume * this.WAVEFORM_HALF_HEIGHT,
+                WAVEFORM_CENTER_AXIS + volume * this.WAVEFORM_HALF_HEIGHT,
                 this.gray,
             );
         }
@@ -567,11 +547,7 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
         }
     };
 
-    drawVisualization = (
-        lowFreq: number,
-        lightness: number,
-        timestamp: number,
-    ): void => {
+    drawVisualization = (lowFreq: number, lightness: number): void => {
         if (!this.visualization.current || !this.renderingContext) {
             return;
         }
@@ -592,11 +568,11 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
 
         // adjust large radius to change with the average of all values
         const radius = this.RADIUS_BASE + lowFreq * this.RADIUS_SCALE;
-        this.props.setRadii(
-            radius - 2 * this.WAVEFORM_HALF_HEIGHT,
-            radius,
-            this.RADIUS_BASE,
-        );
+        this.props.setRadii({
+            inner: radius - 2 * this.WAVEFORM_HALF_HEIGHT,
+            outer: radius,
+            base: this.RADIUS_BASE,
+        });
 
         const gl = this.renderingContext;
 
@@ -610,7 +586,7 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
         gl.clear(gl.COLOR_BUFFER_BIT);
 
         this.drawConstantQBins(radius, this.colorArray);
-        this.drawSeekArea(radius, this.colorArray, timestamp);
+        this.drawSeekArea(radius, this.colorArray);
         !this.props.isMobile &&
             this.drawPhase(this.RADIUS_BASE, this.colorArray);
     };

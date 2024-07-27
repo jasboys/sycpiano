@@ -1,6 +1,7 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import type * as React from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { SwitchTransition, Transition } from 'react-transition-group';
 
 import { BackIconSVG } from 'src/components/Schedule/BackIconSVG';
@@ -41,6 +42,9 @@ const Fading = styled.div(
 interface ScheduleProps { type: EventListName; }
 
 const Schedule: React.FC<ScheduleProps> = ({ type }) => {
+    const [params, _setParams] = useSearchParams();
+
+    const searchQ = params.get('q') ?? undefined;
     return (
         <ScheduleContainer>
             <Search />
@@ -50,13 +54,14 @@ const Schedule: React.FC<ScheduleProps> = ({ type }) => {
                         timeout={800}
                         onEntering={fadeOnEnter(0.2)}
                         onExiting={fadeOnExit(0.5)}
-                        key={`${type} ${location.search}`}
+                        key={`${type}`}
                         appear={true}
                     >
                         <Fading>
                             <EventList
                                 key={type}
                                 type={type}
+                                searchQ={searchQ}
                             />
                         </Fading>
                     </Transition>

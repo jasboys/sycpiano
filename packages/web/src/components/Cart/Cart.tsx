@@ -1,16 +1,16 @@
 import styled from '@emotion/styled';
+import { useQuery } from '@tanstack/react-query';
 import { gsap } from 'gsap';
 import * as React from 'react';
 import isEqual from 'react-fast-compare';
 import { Transition } from 'react-transition-group';
 
-import { mqSelectors } from 'src/components/App/reducers';
 import { CartList } from 'src/components/Cart/CartList';
-import { initCartAction, syncLocalStorage } from 'src/components/Cart/reducers';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { toMedia } from 'src/mediaQuery.js';
 import { hiDpx, screenS } from 'src/screens.js';
 import { navBarHeight } from 'src/styles/variables';
+import { cartStore, initCartFn } from './store.js';
+import { useStore } from 'src/store.js';
 
 const Arrow = styled.div({
     position: 'absolute',
@@ -75,22 +75,28 @@ const Cart: React.FC<CartProps> = ({
     arrow,
     update,
 }) => {
-    const screenS = useAppSelector(mqSelectors.screenS);
-    const dispatch = useAppDispatch();
-    const visible = useAppSelector(({ cart }) => cart.visible);
-    const cartLength = useAppSelector(({ cart }) => cart.items.length);
+    const screenS = useStore().mediaQueries.screenS();
+    const visible = cartStore.use.visible();
+    const cartLength = cartStore.use.items().length;
     const tl = React.useRef<gsap.core.Timeline>();
-    const firstRun = React.useRef(true);
+
+    const {
+        data: { items, email } = { items: [], email: '' },
+        isSuccess,
+    } = useQuery({
+        queryKey: ['localStorageCart'],
+        queryFn: initCartFn,
+    });
 
     React.useEffect(() => {
-        dispatch(initCartAction());
-        firstRun.current = false;
-    }, []);
-
-    React.useEffect(() => {
-        if (!firstRun.current) {
-            dispatch(syncLocalStorage());
+        if (isSuccess) {
+            cartStore.set.items(items);
+            cartStore.set.email(email);
         }
+    }, [items, email, isSuccess])
+
+    React.useEffect(() => {
+        cartStore.set.syncStorage();
     }, [cartLength]);
 
     const arrowCallback = React.useCallback(

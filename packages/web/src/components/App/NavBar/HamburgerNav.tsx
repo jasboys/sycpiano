@@ -5,11 +5,10 @@ import { Transition } from 'react-transition-group';
 
 import HamburgerMenu from 'src/components/App/NavBar/HamburgerMenu';
 import NavBarLinks from 'src/components/App/NavBar/NavBarLinks';
-import { toggleExpanded } from 'src/components/App/NavBar/reducers';
 import type { NavBarLinksProps } from 'src/components/App/NavBar/types';
-import { toggleCartList } from 'src/components/Cart/reducers';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { logoBlue } from 'src/styles/colors';
+import { navBarStore } from './store.js';
+import { cartStore } from 'src/components/Cart/store.js';
 
 const MenuContainer = styled.div({
     margin: 'auto 0',
@@ -19,9 +18,8 @@ const HamburgerNav: React.FC<Omit<NavBarLinksProps, 'isHamburger'>> = ({
     currentBasePath,
     specificPath,
 }) => {
-    const isExpanded = useAppSelector(({ navbar }) => navbar.isExpanded);
-    const cartOpen = useAppSelector(({ cart }) => cart.visible);
-    const dispatch = useAppDispatch();
+    const isExpanded = navBarStore.use.isExpanded();
+    const cartOpen = cartStore.use.visible();
     const enterTimeline = React.useRef<GSAPTimeline>();
     const exitTimeline = React.useRef<GSAPTimeline>();
     const el = React.useRef<HTMLDivElement>(null);
@@ -65,8 +63,8 @@ const HamburgerNav: React.FC<Omit<NavBarLinksProps, 'isHamburger'>> = ({
             <HamburgerMenu
                 isExpanded={isExpanded}
                 onClick={() => {
-                    dispatch(toggleExpanded());
-                    cartOpen && dispatch(toggleCartList(false));
+                    navBarStore.set.toggleExpanded();
+                    cartOpen && cartStore.set.visible(false);
                 }}
                 layerColor={specificPath === '' ? 'white' : logoBlue}
             />

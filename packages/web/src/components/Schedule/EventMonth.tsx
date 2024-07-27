@@ -30,7 +30,7 @@ const MonthBar = styled.div<{ isMobile: boolean }>(
     {
         fontSize: 'min(10vw, 2rem)',
         position: 'sticky',
-        top: 0,
+        top: -0.5,  // just in case stuff peaks out because of rounding?
         zIndex: 4,
         width: '86vw',
         display: 'flex',

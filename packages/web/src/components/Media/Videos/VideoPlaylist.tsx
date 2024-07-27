@@ -3,16 +3,13 @@ import styled from '@emotion/styled';
 import * as React from 'react';
 
 import { toMedia } from 'src/mediaQuery';
-import { mqSelectors } from 'src/components/App/reducers';
 import Playlist from 'src/components/Media/Playlist';
 import VideoPlaylistItem from 'src/components/Media/Videos/VideoPlaylistItem';
-import {
-    playVideo,
-    togglePlaylist,
-} from 'src/components/Media/Videos/reducers';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
+import { videoStore } from 'src/components/Media/Videos/store.js';
 import { screenPortrait, screenXS } from 'src/screens';
 import { latoFont } from 'src/styles/fonts.js';
+import type { VideoItemShape } from './types.js';
+import { rootStore } from 'src/store.js';
 
 const StyledPlaylistContainer = styled.div`
     width: fit-content;
@@ -46,23 +43,21 @@ const videoULStyle = css({
     },
 });
 
-const VideoPlaylist: React.FC<Record<never, unknown>> = () => {
-    const isHamburger = useAppSelector(mqSelectors.isHamburger);
-    const screenLandscape = useAppSelector(mqSelectors.screenLandscape)
-    const isShow = useAppSelector(({ videoPlaylist }) => videoPlaylist.isShow);
-    const videos = useAppSelector(({ videoPlaylist }) => videoPlaylist.items);
-    const videoId = useAppSelector(({ videoPlayer }) => videoPlayer.videoId);
-    const dispatch = useAppDispatch();
+const VideoPlaylist: React.FC<{ videos?: VideoItemShape[] }> = ({ videos }) => {
+    const { screenLandscape, screenPortrait } =
+        rootStore.mediaQueries.useTrackedStore();
+    const playlistVisible = videoStore.use.playlistVisible();
+    const videoId = videoStore.use.videoId();
 
-    const toggleDispatch = React.useCallback((show?: boolean) => {
-        dispatch(togglePlaylist(show));
+    const toggleAction = React.useCallback((show?: boolean) => {
+        videoStore.set.togglePlaylist(show);
     }, []);
 
-    const playDispatch = React.useCallback(
-        (isMobile: boolean, videoId: string) => {
-            dispatch(playVideo(isMobile, videoId));
+    const playAction = React.useCallback(
+        (videoId: string) => {
+            videoStore.set.playVideo(videoId, screenPortrait);
         },
-        [],
+        [screenPortrait],
     );
 
     return (
@@ -73,18 +68,17 @@ const VideoPlaylist: React.FC<Record<never, unknown>> = () => {
                     ul: videoULStyle,
                     toggler: videoULStyle,
                 }}
-                isShow={isShow}
+                isShow={playlistVisible}
                 hasToggler={screenLandscape}
-                togglePlaylist={toggleDispatch}
+                togglePlaylist={toggleAction}
                 shouldAppear={false}
             >
-                {videos.map((video) => (
+                {videos?.map((video) => (
                     <VideoPlaylistItem
                         key={video.id}
                         item={video}
                         currentItemId={videoId}
-                        onClick={playDispatch}
-                        isMobile={isHamburger}
+                        onClick={playAction}
                     />
                 ))}
             </Playlist>

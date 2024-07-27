@@ -13,6 +13,7 @@ import {
     drawCircleMask,
     firLoader,
 } from 'src/components/Media/Music/VisualizationUtils';
+import { musicStore } from './store.js';
 
 declare global {
     interface CanvasRenderingContext2D {
@@ -70,7 +71,7 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
                     (firLoader.coeffs[i] +
                         fractionalPart * firLoader.deltas[i]);
             }
-            const result = radius + this.props.volume * sum * this.SCALE;
+            const result = radius + musicStore.get.volume() * sum * this.SCALE;
             let { x, y } = constantQ.angles[currentSample];
             x *= result;
             y *= result;
@@ -103,7 +104,7 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         }
 
         const waveformLength = waveform.length / 2;
-        const volumeHeightScale = this.props.volume * this.WAVEFORM_HALF_HEIGHT;
+        const volumeHeightScale = musicStore.get.volume() * this.WAVEFORM_HALF_HEIGHT;
         this.renderingContext.save();
         this.renderingContext.beginPath();
         // going through mins from start to end
@@ -152,42 +153,32 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         this.renderingContext.restore();
     };
 
-    drawSeekArea = (radius: number, color: string, timestamp: number): void => {
+    drawSeekArea = (radius: number, color: string): void => {
         const WAVEFORM_CENTER_AXIS = radius - this.WAVEFORM_HALF_HEIGHT;
         this.drawWaveForm(WAVEFORM_CENTER_AXIS, color);
-
-        // interpolate playbackhead position with timestamp difference if audio object hasn't updated current position
-        let playbackHead = this.props.currentPosition;
-        if (
-            this.props.currentPosition &&
-            this.props.currentPosition === this.lastPlayheadPosition &&
-            this.props.isPlaying
-        ) {
-            playbackHead =
-                this.props.currentPosition +
-                (timestamp - this.lastPositionUpdateTimestamp) / 1000;
-        } else {
-            this.lastPlayheadPosition = this.props.currentPosition;
-        }
+        const currentPosition = this.props.musicPlayer.audio.currentTime;
+        const duration = this.props.musicPlayer.audio.duration;
         const angle =
-            this.props.currentPosition && this.props.duration
-                ? Math.min((TWO_PI * playbackHead) / this.props.duration)
+            currentPosition && duration
+                ? Math.min((TWO_PI * currentPosition) / duration)
                 : 0;
+        const volume = musicStore.get.volume();
         this.drawPlaybackHead(
             angle,
             WAVEFORM_CENTER_AXIS -
-                this.props.volume * this.WAVEFORM_HALF_HEIGHT,
+                volume * this.WAVEFORM_HALF_HEIGHT,
             WAVEFORM_CENTER_AXIS +
-                this.props.volume * this.WAVEFORM_HALF_HEIGHT,
+                volume * this.WAVEFORM_HALF_HEIGHT,
             '#FFF',
         );
-        if (this.props.isHoverSeekring && this.props.hoverAngle !== undefined) {
+        const hoverAngle = musicStore.get.angle?.();
+        if (musicStore.get.isHoverSeekring() && hoverAngle !== undefined) {
             this.drawPlaybackHead(
-                this.props.hoverAngle,
+                hoverAngle,
                 WAVEFORM_CENTER_AXIS -
-                    this.props.volume * this.WAVEFORM_HALF_HEIGHT,
+                    volume * this.WAVEFORM_HALF_HEIGHT,
                 WAVEFORM_CENTER_AXIS +
-                    this.props.volume * this.WAVEFORM_HALF_HEIGHT,
+                    volume * this.WAVEFORM_HALF_HEIGHT,
                 '#888',
             );
         }
@@ -238,7 +229,6 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
     drawVisualization = (
         lowFreq: number,
         lightness: number,
-        timestamp: number,
     ): void => {
         if (!this.renderingContext) return;
         // beware! we are rotating the whole thing by -half_pi so, we need to swap width and height values
@@ -256,18 +246,18 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         );
         // adjust large radius to change with the average of all values
         const radius = this.RADIUS_BASE + lowFreq * this.RADIUS_SCALE;
-        this.props.setRadii(
-            radius - 2 * this.WAVEFORM_HALF_HEIGHT,
-            radius,
-            this.RADIUS_BASE,
-        );
+        this.props.setRadii({
+            inner: radius - 2 * this.WAVEFORM_HALF_HEIGHT,
+            outer: radius,
+            base: this.RADIUS_BASE,
+        });
 
         this.drawConstantQBins(radius, color);
         drawCircleMask(this.renderingContext, radius + 0.25, [
             this.width,
             this.height,
         ]);
-        this.drawSeekArea(radius, color, timestamp);
+        this.drawSeekArea(radius, color);
         this.props.isMobile &&
             this.drawPhase(this.RADIUS_BASE, opacify(0.5)(color));
     };

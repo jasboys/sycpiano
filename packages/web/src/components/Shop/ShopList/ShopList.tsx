@@ -3,15 +3,18 @@ import styled from '@emotion/styled';
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
 
-import { mqSelectors } from 'src/components/App/reducers';
 import { ShopItem } from 'src/components/Shop/ShopList/ShopItem';
-import type { Product, ProductTypes } from 'src/components/Shop/ShopList/types';
-import { useAppSelector } from 'src/hooks';
+import type {
+    Product,
+    ProductTypes,
+} from 'src/components/Shop/ShopList/types';
 import { toMedia } from 'src/mediaQuery.js';
 import { isHamburger, screenPortrait, screenXS } from 'src/screens.js';
 import { logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { pushed } from 'src/styles/mixins';
+import { shopStore } from './store.js';
+import { useStore } from 'src/store.js';
 
 type ShopListProps = Record<never, unknown>;
 
@@ -60,55 +63,53 @@ const categoryListStyle = css({
     maxWidth: 650,
     margin: 'auto',
     [toMedia(isHamburger)]: {
-        maxWidth: 800
-    }
-})
+        maxWidth: 800,
+    },
+});
 
-const CategoryToLabel: Record<typeof ProductTypes[number], string> = {
+const CategoryToLabel: Record<(typeof ProductTypes)[number], string> = {
     arrangement: 'Arrangements',
     cadenza: 'Cadenzas',
     original: 'Original Compositions',
 };
 
 const ShopList: React.FC<ShopListProps> = () => {
-    const isHamburger = useAppSelector(mqSelectors.isHamburger);
+    const isHamburger = useStore().mediaQueries.isHamburger();
     const { product } = useParams();
-    const categorizedItems = useAppSelector(({ shop }) => shop.items);
+    const shopItems = shopStore.use.items?.();
 
     React.useEffect(() => {
-        if (
-            categorizedItems &&
-            Object.keys(categorizedItems).length &&
-            product
-        ) {
+        if (shopItems && Object.keys(shopItems).length && product) {
             const el = document.getElementById(product);
             if (el) {
                 el.scrollIntoView();
             }
         }
-    }, [categorizedItems, product]);
+    }, [shopItems, product]);
 
-    return categorizedItems === undefined ? null : (
-        <div css={listStyle}>
-            {Object.entries(categorizedItems).map(([key, items]) => (
-                <Category isHamburger={isHamburger} key={key}>
-                    <CategoryTitle isHamburger={isHamburger}>
-                        <CategoryTitleText isHamburger={isHamburger}>
-                            {
-                                CategoryToLabel[
-                                    key as typeof ProductTypes[number]
-                                ]
-                            }
-                        </CategoryTitleText>
-                    </CategoryTitle>
-                    <div css={categoryListStyle}>
-                    {items.map((item: Product) => (
-                        <ShopItem item={item} key={item.id} />
-                    ))}
-                    </div>
-                </Category>
-            ))}
-        </div>
+    return (
+        shopItems && (
+            <div css={listStyle}>
+                {Object.entries(shopItems).map(([key, items]) => (
+                    <Category isHamburger={isHamburger} key={key}>
+                        <CategoryTitle isHamburger={isHamburger}>
+                            <CategoryTitleText isHamburger={isHamburger}>
+                                {
+                                    CategoryToLabel[
+                                        key as (typeof ProductTypes)[number]
+                                    ]
+                                }
+                            </CategoryTitleText>
+                        </CategoryTitle>
+                        <div css={categoryListStyle}>
+                            {items.map((item: Product) => (
+                                <ShopItem item={item} key={item.id} />
+                            ))}
+                        </div>
+                    </Category>
+                ))}
+            </div>
+        )
     );
 };
 

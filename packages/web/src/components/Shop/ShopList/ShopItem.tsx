@@ -1,25 +1,18 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import { createSelector } from '@reduxjs/toolkit';
 import toUpper from 'lodash-es/toUpper';
 import { mix } from 'polished';
 import * as React from 'react';
 
-import { mqSelectors } from 'src/components/App/reducers';
-import {
-    addToCartAction,
-    removeItemFromCart,
-} from 'src/components/Cart/reducers';
 import type { Product } from 'src/components/Shop/ShopList/types';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { staticImage } from 'src/imageUrls';
 import { toMedia } from 'src/mediaQuery.js';
 import { screenTouch } from 'src/screens.js';
-import type { GlobalStateShape } from 'src/store';
 import { logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { getHoverStyle, noHighlight } from 'src/styles/mixins';
 import { formatPrice } from 'src/utils.js';
+import { rootStore, useStore } from 'src/store.js';
 
 interface ShopItemProps {
     item: Product;
@@ -216,20 +209,12 @@ const leftHighlight = css({
     flex: '1 1 auto',
 });
 
-const cartSelector = createSelector(
-    (state: GlobalStateShape) => state.cart.items,
-    (_: GlobalStateShape, itemId: string) => itemId,
-    (items, itemId) => items.includes(itemId),
-);
-
 export const ShopItem: React.FC<ShopItemProps> = ({ item, className }) => {
-    const isHamburger = useAppSelector(mqSelectors.isHamburger);
-    const isItemInCart = useAppSelector((state) =>
-        cartSelector(state, item.id),
+    const isHamburger = useStore().mediaQueries.isHamburger();
+    const isItemInCart = rootStore.cart.useStore((state) =>
+        state.items.includes(item.id),
     );
     const [isMouseDown, setIsMouseDown] = React.useState(false);
-
-    const dispatch = useAppDispatch();
 
     return (
         <ShopItemContainer
@@ -272,9 +257,7 @@ export const ShopItem: React.FC<ShopItemProps> = ({ item, className }) => {
                             {isHamburger ? ' pp.' : ' pages'}
                         </ItemDetails>
                         <Separator>|</Separator>
-                        <ItemPrice>
-                            {formatPrice(item.price)}
-                        </ItemPrice>
+                        <ItemPrice>{formatPrice(item.price)}</ItemPrice>
                     </DetailContainer>
                     <CartButton
                         isHamburger={isHamburger}
@@ -294,8 +277,8 @@ export const ShopItem: React.FC<ShopItemProps> = ({ item, className }) => {
                         }}
                         onClick={() =>
                             isItemInCart
-                                ? dispatch(removeItemFromCart(item.id))
-                                : dispatch(addToCartAction(item.id))
+                                ? rootStore.cart.set.removeItem(item.id)
+                                : rootStore.cart.set.addItem(item.id)
                         }
                     >
                         {isItemInCart ? 'Remove from Cart' : 'Add to Cart'}

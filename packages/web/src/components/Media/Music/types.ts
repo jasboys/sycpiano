@@ -31,7 +31,7 @@ export const musicCategories = [
     'videogame',
 ] as const;
 
-export type MusicCategories = typeof musicCategories[number];
+export type MusicCategories = (typeof musicCategories)[number];
 
 export const categoryMap = {
     concerto: 'Concerti',
@@ -62,6 +62,12 @@ export const isMusicItem = (item: MusicListItem): item is MusicItem => {
     );
 };
 
+export interface Radii {
+    readonly inner: number;
+    readonly outer: number;
+    readonly base: number;
+}
+
 export interface MusicStateShape {
     readonly isFetching: boolean;
     readonly items: MusicListItem[];
@@ -78,9 +84,5 @@ export interface MusicStateShape {
     readonly isHoverSeekring: boolean;
     readonly isMouseMove: boolean;
     readonly angle?: number;
-    readonly radii: {
-        readonly inner: number;
-        readonly outer: number;
-        readonly base: number;
-    };
+    readonly radii: Radii;
 }

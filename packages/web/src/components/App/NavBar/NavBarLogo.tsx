@@ -1,16 +1,14 @@
 import styled from '@emotion/styled';
 import type * as React from 'react';
 import { Link } from 'react-router-dom';
-import { createStructuredSelector } from 'reselect';
 
 import { SycLogo, sycLogoSize } from 'src/components/App/NavBar/SycLogo';
-import { toggleExpanded } from 'src/components/App/NavBar/reducers';
-import { mqSelectors } from 'src/components/App/reducers';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
+import { navBarStore } from './store.js';
+import { rootStore } from 'src/store.js';
 
 const navBarFontSizeREM = 2.5;
 const letterSpacing = 0.05;
@@ -95,18 +93,10 @@ const routeNameMapping: Record<string, string | string[]> = {
     checkout: 'shop',
 };
 
-const selector = createStructuredSelector({
-    hiDpx: mqSelectors.hiDpx,
-    screenS: mqSelectors.screenS,
-    screenXS: mqSelectors.screenXS,
-    isHamburger: mqSelectors.isHamburger,
-});
-
 const NavBarLogo: React.FC<
     React.HTMLAttributes<HTMLDivElement> & NavBarLogoProps
 > = ({ isHome, isExpanded, specificRouteName }) => {
-    const dispatch = useAppDispatch();
-    const { hiDpx, screenS, screenXS, isHamburger } = useAppSelector(selector);
+    const { hiDpx, screenS, screenXS, isHamburger } = rootStore.mediaQueries.useTrackedStore();
     const mapped =
         specificRouteName &&
         (routeNameMapping[specificRouteName] ?? specificRouteName);
@@ -127,14 +117,14 @@ const NavBarLogo: React.FC<
             isHome={isHome}
             isExpanded={isExpanded}
             onClick={() => {
-                dispatch(toggleExpanded(false));
+                navBarStore.set.toggleExpanded(false);
             }}
         >
             <SycLogo />
             <LogoText hiDpx={hiDpx}>
                 {!isHome && !screenS && (
                     <SeanChenText>
-                        {`SEAN CHEN${(isHamburger ? ' |' : '')}`}
+                        {`SEAN CHEN${isHamburger ? ' |' : ''}`}
                     </SeanChenText>
                 )}
                 {displayName && !isHome && isHamburger && (

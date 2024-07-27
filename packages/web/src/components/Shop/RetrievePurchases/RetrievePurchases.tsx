@@ -1,16 +1,17 @@
 import styled from '@emotion/styled';
 import TextField from '@mui/material/TextField';
 import { ThemeProvider } from '@mui/system';
+import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { mix } from 'polished';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
 
-import { useAppSelector } from 'src/hooks.js';
 import { lightBlue, logoBlue, theme } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight, pushed } from 'src/styles/mixins';
 import { validateEmail } from 'src/utils';
+import { useStore } from 'src/store.js';
 
 const Container = styled.div(latoFont(300), pushed, {
     display: 'flex',
@@ -98,43 +99,27 @@ const Title = styled.div(latoFont(400), {
     marginBottom: '2rem',
 });
 
-enum SubmitState {
-    initial = 0,
-    submitting = 1,
-    success = 2,
-}
-
 const RetrievalForm: React.FC<Record<never, unknown>> = () => {
-    const isHamburger = useAppSelector((state) => state.mediaQuery.isHamburger);
+    const isHamburger = useStore().mediaQueries.isHamburger();
     const [isMouseDown, setIsMouseDown] = React.useState(false);
     const [email, setEmail] = React.useState('');
     const [error, setError] = React.useState(false);
-    const [state, setState] = React.useState<SubmitState>(SubmitState.initial);
 
-    const submitRetrieval = () => {
-        const sendRequest = async () => {
-            try {
-                setState(SubmitState.submitting);
-                await axios.post(
-                    '/api/shop/resend-purchased',
-                    {
-                        email,
+    const { mutate, isPending, isSuccess } = useMutation({
+        mutationFn: async (email: string) => {
+            return await axios.post(
+                '/api/shop/resend-purchased',
+                {
+                    email,
+                },
+                {
+                    headers: {
+                        'X-CSRF-TOKEN': 'sycpiano',
                     },
-                    {
-                        headers: {
-                            'X-CSRF-TOKEN': 'sycpiano',
-                        },
-                    },
-                );
-                setState(SubmitState.success);
-            } catch (e) {
-                // Return success, because even if email is not found, cannot reveal information to client for security.
-                setState(SubmitState.success);
-            }
-        };
-
-        sendRequest();
-    };
+                },
+            );
+        },
+    });
 
     return (
         <Container>
@@ -158,7 +143,7 @@ const RetrievalForm: React.FC<Record<never, unknown>> = () => {
                             setError(true);
                             return;
                         }
-                        submitRetrieval();
+                        mutate(email);
                     }}
                 >
                     <StyledTextField
@@ -183,9 +168,9 @@ const RetrievalForm: React.FC<Record<never, unknown>> = () => {
                     />
                     <StyledSubmitButton
                         type="submit"
-                        disabled={email === '' || state !== SubmitState.initial}
+                        disabled={email === '' || isPending || isSuccess}
                         isMouseDown={isMouseDown}
-                        isSuccess={state === SubmitState.success}
+                        isSuccess={isSuccess}
                         onTouchStart={() => {
                             setIsMouseDown(true);
                         }}
@@ -199,15 +184,15 @@ const RetrievalForm: React.FC<Record<never, unknown>> = () => {
                             setIsMouseDown(false);
                         }}
                     >
-                        {state === SubmitState.submitting
+                        {isPending
                             ? 'Submitting...'
-                            : state === SubmitState.success
+                            : isSuccess
                               ? 'Submitted'
                               : 'Submit'}
                     </StyledSubmitButton>
                 </StyledForm>
             </ThemeProvider>
-            {state === SubmitState.success && (
+            {isSuccess && (
                 <div css={{ fontWeight: 'bold' }}>
                     <Link to="/shop/scores">🠔 Go back to the shop</Link>
                 </div>

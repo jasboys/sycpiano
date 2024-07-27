@@ -65,7 +65,7 @@ const ItemContainer = styled.div({
 });
 
 const Left = styled.div({
-    flex: '0 0 max(calc(50% - 200px), 60px)',
+    flex: '0 0 max(calc(50% - 180px), 80px)',
     display: 'flex',
     justifyContent: 'end',
     backgroundColor: lightBlue,

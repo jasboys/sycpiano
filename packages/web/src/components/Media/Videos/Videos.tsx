@@ -1,27 +1,23 @@
 import styled from '@emotion/styled';
+import { useQuery } from '@tanstack/react-query';
 import { gsap } from 'gsap';
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useMatch } from 'react-router-dom';
+import { useMatch, useNavigate } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
 
-import { mqSelectors } from 'src/components/App/reducers';
 import { LoadingInstance } from 'src/components/LoadingSVG';
 import PreviewOverlay from 'src/components/Media/Videos/PreviewOverlay';
-import {
-    fetchVideoPlaylist,
-    playerIsReady,
-    playVideo,
-    resetPlayer,
-} from 'src/components/Media/Videos/reducers';
+import { videoStore } from 'src/components/Media/Videos/store.js';
 import VideoPlaylist from 'src/components/Media/Videos/VideoPlaylist';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { toMedia } from 'src/mediaQuery';
 import { minRes, screenPortrait, screenXS, webkitMinDPR } from 'src/screens';
 import youTube from 'src/services/YouTube';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 import { titleStringBase } from 'src/utils';
+import { useStore } from 'src/store.js';
+import type { VideoItemShape } from './types.js';
 
 type VideosProps = Record<never, unknown>;
 
@@ -89,40 +85,80 @@ const LoadingInstanceContainer = styled.div({
     },
 });
 
+const fetchVideos = async (): Promise<VideoItemShape[]> => {
+    const playlistResponse = await youTube.getPlaylistItems();
+    const videoItems: (Youtube.PlaylistItem & Youtube.Video)[] =
+        playlistResponse.data.items.filter((item: Youtube.PlaylistItem) => {
+            return (
+                item?.snippet?.thumbnails &&
+                Object.keys(item.snippet.thumbnails).length !== 0
+            );
+        });
+    const videoIds = videoItems.reduce(
+        (prev: string[], item: Youtube.PlaylistItem) => {
+            if (item?.snippet?.resourceId?.videoId !== undefined) {
+                prev.push(item.snippet.resourceId.videoId);
+                return prev;
+            }
+            return prev;
+        },
+        [],
+    );
+    const videosResponse = await youTube.getVideos(videoIds);
+    for (const item of videosResponse.data.items) {
+        const idx = videoItems.findIndex(
+            (vi) => vi.snippet?.resourceId?.videoId === item.id,
+        );
+        if (idx >= 0) {
+            videoItems[idx] = { ...videoItems[idx], ...item };
+        }
+    }
+    return videoItems;
+};
+
 const Videos: React.FC<VideosProps> = () => {
-    const isHamburger = useAppSelector(mqSelectors.isHamburger);
+    const isHamburger = useStore().mediaQueries.isHamburger();
+    const isPlayerReady = videoStore.use.isPlayerReady();
     const match = useMatch('media/videos/:videoId');
     const domElement = React.useRef<HTMLDivElement>(null);
-    // const initialized = React.useRef<boolean>(false);
-    const dispatch = useAppDispatch();
-    const videos = useAppSelector(({ videoPlaylist }) => videoPlaylist.items);
-    const isPlayerReady = useAppSelector(
-        ({ videoPlayer }) => videoPlayer.isPlayerReady,
-    );
+    const navigate = useNavigate();
+
+    const { data: videos } = useQuery({
+        queryKey: ['videoPlaylist'],
+        queryFn: fetchVideos,
+    });
 
     React.useEffect(() => {
-        async function callDispatch() {
+        async function loadYoutubeElement() {
             if (domElement.current) {
-                await Promise.all([
-                    dispatch(fetchVideoPlaylist()),
-                    youTube.initializePlayerOnElement(domElement.current),
-                ]);
-                dispatch(playerIsReady());
-                if (match?.params.videoId !== undefined) {
-                    dispatch(playVideo(isHamburger, match.params.videoId));
-                }
+                await youTube.initializePlayerOnElement(domElement.current);
+                videoStore.set.playerIsReady();
             }
         }
 
-        callDispatch();
+        loadYoutubeElement();
         return function cleanup() {
-            dispatch(resetPlayer());
+            videoStore.set.resetPlayer();
         };
     }, []);
 
+    React.useEffect(() => {
+        if (videos?.length && isPlayerReady) {
+            if (
+                match?.params.videoId !== undefined &&
+                videos.find((i) => i.id === videoId)
+            ) {
+                videoStore.set.videoId(match.params.videoId);
+            } else {
+                videoStore.set.videoId(videos[0].id);
+                navigate(`/media/videos/${videos[0].id}`);
+            }
+        }
+    }, [videos, isPlayerReady]);
+
     const videoId = match?.params.videoId;
     const video =
-        videoId !== undefined
+        videos && videoId !== undefined
             ? videos.find((item) => item.id === videoId)
             : undefined;
     const description = video?.snippet?.description;
@@ -156,7 +192,7 @@ const Videos: React.FC<VideosProps> = () => {
                         </LoadingInstanceContainer>
                     </LoadingOverlayDiv>
                 </Transition>
-                <VideoPlaylist />
+                <VideoPlaylist videos={videos} />
             </StyledVideos>
         </>
     );

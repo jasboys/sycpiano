@@ -23,7 +23,6 @@ import {
     type CreateProps,
     type EditProps,
     type ListProps,
-    type RaRecord,
     type ShowProps,
     type UseRecordContextParams,
 } from 'react-admin';

@@ -1,6 +1,9 @@
 import { Global } from '@emotion/react';
 import styled from '@emotion/styled';
 import { arrow, offset, shift, useFloating } from '@floating-ui/react-dom';
+import { useMediaQueries } from '@react-hook/media-query';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import { format } from 'date-fns';
 import { omit, startCase, toLower } from 'lodash-es';
 import { parse, stringify } from 'qs';
@@ -19,41 +22,29 @@ import { SwitchTransition, Transition } from 'react-transition-group';
 
 import Container from 'src/components/App/Container';
 
-// import { RequiredProps as AboutProps } from 'src/components/About/About';
-import type { RequiredProps as ContactProps } from 'src/components/Contact/Contact';
-import type { RequiredProps as HomeProps } from 'src/components/Home/Home';
-// import { RequiredProps as MediaProps } from 'src/components/Media/Media';
-import type { RequiredProps as ScheduleProps } from 'src/components/Schedule/Schedule';
-import type { RequiredProps as FAQsProps } from 'src/components/Shop/FAQs/FAQs';
-import type { RequiredProps as RetrievalFormProps } from 'src/components/Shop/RetrievePurchases/RetrievePurchases';
-import type { RequiredProps as ShopListProps } from 'src/components/Shop/ShopList/ShopList';
-// import { RequiredProps as AuthorizationProps } from 'src/components/Authorization/Authorization';
 import type { RequiredProps as BioProps } from 'src/components/About/Bio/Bio';
 import type { RequiredProps as DiscsProps } from 'src/components/About/Discs/Discs';
 import type { RequiredProps as PressProps } from 'src/components/About/Press/Press';
+import type { RequiredProps as ContactProps } from 'src/components/Contact/Contact';
+import type { RequiredProps as HomeProps } from 'src/components/Home/Home';
 import type { RequiredProps as MusicProps } from 'src/components/Media/Music/Music';
 import type { RequiredProps as PhotosProps } from 'src/components/Media/Photos/Photos';
 import type { RequiredProps as VideosProps } from 'src/components/Media/Videos/Videos';
+import type { RequiredProps as ScheduleProps } from 'src/components/Schedule/Schedule';
 import type { RequiredProps as CheckoutSuccessProps } from 'src/components/Shop/CheckoutSuccess/CheckoutSuccess';
+import type { RequiredProps as FAQsProps } from 'src/components/Shop/FAQs/FAQs';
+import type { RequiredProps as RetrievalFormProps } from 'src/components/Shop/RetrievePurchases/RetrievePurchases';
+import type { RequiredProps as ShopListProps } from 'src/components/Shop/ShopList/ShopList';
 
-import { useMediaQueries } from '@react-hook/media-query';
 import NavBar from 'src/components/App/NavBar/NavBar';
-import {
-    showSubNav,
-    toggleExpanded,
-    toggleNavBar,
-} from 'src/components/App/NavBar/reducers';
 import AsyncComponent from 'src/components/AsyncComponent';
 import Cart from 'src/components/Cart/Cart';
-import { toggleCartList } from 'src/components/Cart/reducers';
 import { ClickListenerOverlay } from 'src/components/ClickListenerOverlay';
 import { LogoSVG } from 'src/components/LogoSVG';
 import { eventListNamesArr } from 'src/components/Schedule/types';
-import { fetchShopItems } from 'src/components/Shop/ShopList/reducers';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
 import extractModule from 'src/module';
 import { GLOBAL_QUERIES } from 'src/screens';
-import store from 'src/store';
+import { rootStore } from 'src/store.js';
 import { globalCss } from 'src/styles/global';
 import {
     fadeOnEnter,
@@ -63,9 +54,10 @@ import {
     slideOnExit,
     titleStringBase,
 } from 'src/utils';
-import { setMatches } from './reducers';
+import type { ProductMap } from '../Shop/ShopList/types.js';
+import { mediaQueriesStore } from './store';
 
-const register = extractModule(store);
+const register = extractModule();
 const Contact = () =>
     register(
         'contact',
@@ -159,7 +151,6 @@ const FadingContainer = styled.div({
     transition: 'all 0.25s',
     overflow: 'hidden',
     position: 'absolute',
-    // filter: 'url(#main-blur)',
 });
 
 const getRouteBase = (pathname: string) => {
@@ -257,24 +248,42 @@ const StyledClickDiv = styled(ClickListenerOverlay)<{
 
 const App: React.FC<Record<never, unknown>> = () => {
     const location = useLocation();
-    const dispatch = useAppDispatch();
-    const navbarVisible = useAppSelector(({ navbar }) => navbar.isVisible);
-    const menuOpen = useAppSelector(({ navbar }) => navbar.isExpanded);
-    const cartOpen = useAppSelector(({ cart }) => cart.visible);
-    const showSubs = useAppSelector(({ navbar }) => navbar.showSubs);
+    const { visible: cartVisible } = rootStore.cart.useTrackedStore();
+    const { isVisible: navBarVisible, isExpanded: navBarExpanded, showSubs } = rootStore.navBar.useTrackedStore();
+
     const [delayedRouteBase, setDelayedRouteBase] = React.useState(
         getRouteBase(location.pathname),
     );
+
     const [delayedSpecific, setDelayedSpecific] = React.useState(
         getMostSpecificRouteName(location.pathname),
     );
+
     const arrowRef = React.useRef<HTMLDivElement | null>(null);
     const timerRef = React.useRef<ReturnType<typeof setTimeout>>();
+
     const { matches: mediaMatches } = useMediaQueries(GLOBAL_QUERIES);
     const { isHamburger, screenXS, screenM, hiDpx } = mediaMatches;
+
     const navigate = useNavigate();
+
     // Make sure to adjust this match array when adding new pages, especially with subpaths
     const [routerMatch, transitionMatch] = useCustomMatch();
+
+    const { data: shopItems, isSuccess } = useQuery({
+        queryKey: ['shop'],
+        queryFn: async () => {
+            const { data: items } =
+                await axios.get<ProductMap>('/api/shop/items');
+            return items;
+        },
+    });
+
+    React.useEffect(() => {
+        if (isSuccess) {
+            rootStore.shop.set.items?.(shopItems);
+        }
+    }, [shopItems, isSuccess]);
 
     const {
         x,
@@ -316,28 +325,24 @@ const App: React.FC<Record<never, unknown>> = () => {
     }, [location]);
 
     React.useEffect(() => {
-        dispatch(fetchShopItems());
-    }, []);
-
-    React.useEffect(() => {
         if (!isHamburger) {
-            if (!navbarVisible) {
-                dispatch(toggleNavBar(true));
+            if (!navBarVisible) {
+                rootStore.navBar.set.toggleNavBar(true);
             }
         }
-    }, [screenXS, screenM, navbarVisible, dispatch]);
+    }, [screenXS, screenM, navBarVisible]);
 
     const stableMediaArray = Object.entries(mediaMatches)
         .sort(([ka, _], [kb, __]) => ka.localeCompare(kb))
         .map(([_, v]) => v);
 
     React.useEffect(() => {
-        dispatch(setMatches(mediaMatches));
+        mediaQueriesStore.set.matches(mediaMatches);
     }, [...stableMediaArray]);
 
     React.useEffect(() => {
         update();
-    }, [...stableMediaArray, menuOpen, update]);
+    }, [...stableMediaArray, navBarExpanded, update]);
 
     let currentPage = getMostSpecificRouteName(location.pathname);
     currentPage = currentPage ? startCase(currentPage) : 'Home';
@@ -369,7 +374,7 @@ const App: React.FC<Record<never, unknown>> = () => {
             <RootContainer isHome={location.pathname === '/'}>
                 <LogoSVG />
                 <Transition<undefined>
-                    in={navbarVisible || !isMobile}
+                    in={navBarVisible || !isMobile}
                     onEntering={(el, isAppearing) => {
                         if (isAppearing) {
                             fadeOnEnter0(el, isAppearing);
@@ -591,20 +596,20 @@ const App: React.FC<Record<never, unknown>> = () => {
                         update={update}
                     />
                 )}
-                {(menuOpen || cartOpen) && (
+                {(navBarExpanded || cartVisible) && (
                     <StyledClickDiv
                         isMobile={isMobile}
-                        cartOpen={cartOpen}
+                        cartOpen={cartVisible}
                         onClick={() => {
-                            cartOpen && dispatch(toggleCartList(false));
-                            menuOpen && dispatch(toggleExpanded(false));
+                            cartVisible &&
+                                rootStore.cart.set.toggleCartVisible(false);
+                            navBarExpanded &&
+                                rootStore.navBar.set.toggleExpanded(false);
                             showSubs.length &&
-                                dispatch(
-                                    showSubNav({
-                                        sub: '',
-                                        isHamburger: isMobile,
-                                    }),
-                                );
+                                rootStore.navBar.set.callSub({
+                                    sub: '',
+                                    isHamburger: isMobile,
+                                });
                         }}
                     />
                 )}

@@ -14,10 +14,9 @@ import {
     formatTime,
     getRelativePermaLink,
 } from 'src/components/Media/Music/utils';
-import { useAppDispatch, useAppSelector } from 'src/hooks.js';
 import { lightBlue, playlistBackground } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts.js';
-import { updateAction } from './reducers.js';
+import { musicStore } from './store.js';
 
 interface MusicPlaylistItemProps {
     readonly item: MusicListItem;
@@ -120,10 +119,7 @@ interface MusicItemProps extends MusicPlaylistItemProps {
 }
 
 const MusicItem: React.FC<MusicItemProps> = ({ item, onClick }) => {
-    const currentTrack = useAppSelector(
-        ({ musicPlayer }) => musicPlayer.currentTrack,
-    );
-    const dispatch = useAppDispatch();
+    const currentTrack = musicStore.use.currentTrack?.();
 
     const musicFile = item.musicFiles[0];
     return (
@@ -138,7 +134,7 @@ const MusicItem: React.FC<MusicItemProps> = ({ item, onClick }) => {
                     // dispatch(updateAction({ playing: true }));
                     try {
                         onClick(musicFile);
-                        dispatch(updateAction({ playing: true }));
+                        musicStore.set.isPlaying(true);
                     } catch (e) {
                         // already loading track;
                     }
@@ -166,10 +162,7 @@ const MusicItem: React.FC<MusicItemProps> = ({ item, onClick }) => {
 const MusicCollectionItem: React.FC<
     MusicItemProps & { index: number; musicFile: MusicFileItem }
 > = ({ item, onClick, index, musicFile }) => {
-    const currentTrack = useAppSelector(
-        ({ musicPlayer }) => musicPlayer.currentTrack,
-    );
-    const dispatch = useAppDispatch();
+    const currentTrack = musicStore.use.currentTrack?.();
 
     return (
         <StyledCollectionItem key={index} id={musicFile.id}>
@@ -182,7 +175,7 @@ const MusicCollectionItem: React.FC<
                 onClick={async () => {
                     try {
                         onClick(musicFile);
-                        dispatch(updateAction({ playing: true }));
+                        musicStore.set.isPlaying(true);
                     } catch (e) {
                         // already loading track;
                     }

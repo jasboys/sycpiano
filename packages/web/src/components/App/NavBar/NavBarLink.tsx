@@ -7,12 +7,11 @@ import { Transition } from 'react-transition-group';
 
 import Highlight from 'src/components/App/NavBar/Highlight';
 import SubNav from 'src/components/App/NavBar/SubNav/SubNav';
-import { showSubNav, toggleExpanded } from 'src/components/App/NavBar/reducers';
 import type { LinkShape } from 'src/components/App/NavBar/types';
-import { useAppDispatch, useAppSelector } from 'src/hooks';
 import { lightBlue, logoBlue, navFontColor } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
+import { navBarStore } from './store.js';
 
 interface NavBarLinkProps {
     readonly active: boolean;
@@ -117,8 +116,7 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
     subNavLinks,
     currentSpecificPath,
 }) => {
-    const showSubs = useAppSelector(({ navbar }) => navbar.showSubs);
-    const dispatch = useAppDispatch();
+    const showSubs = navBarStore.use.showSubs();
     const enterTimeline = React.useRef<GSAPTimeline>();
     const exitTimeline = React.useRef<GSAPTimeline>();
     const el = React.useRef<HTMLDivElement>(null);
@@ -138,13 +136,13 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
         attr.href = link.path;
     } else if (subNavLinks) {
         attr.onClick = () => {
-            dispatch(showSubNav({ sub: link.name, isHamburger }));
+            navBarStore.set.callSub({ sub: link.name, isHamburger });
         };
     } else {
         attr.to = link.path;
         attr.onClick = () => {
-            (!isHamburger || !subNavLinks) && dispatch(showSubNav());
-            isHamburger && dispatch(toggleExpanded(false));
+            (!isHamburger || !subNavLinks) && navBarStore.set.callSub({});
+            isHamburger && navBarStore.set.toggleExpanded(false);
         };
     }
 
@@ -252,8 +250,8 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
                             links={subNavLinks}
                             currentSpecificPath={currentSpecificPath}
                             onClick={() => {
-                                !isHamburger && dispatch(showSubNav());
-                                isHamburger && dispatch(toggleExpanded(false));
+                                !isHamburger && navBarStore.set.callSub({});
+                                isHamburger && navBarStore.set.toggleExpanded(false);
                             }}
                             isHome={isHome}
                         />

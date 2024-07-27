@@ -132,8 +132,6 @@ export class MusicPlayer {
         prevAudio: HTMLAudioElement,
         nextAudio: HTMLAudioElement,
         first: BufferSrc,
-        prev?: BufferSrc,
-        next?: BufferSrc,
     ) {
         this.context = getAudioContext();
         this.context.onstatechange = () => {
@@ -182,24 +180,23 @@ export class MusicPlayer {
         this.splitter.connect(this.analyzers.left, 0);
         this.splitter.connect(this.analyzers.right, 1);
 
-        this.queueAudio(first.src, first.waveform, false, false);
-        this.queueBuffers(prev, next);
+        this.queueAudio(first.src, first.waveform, true, false);
 
-        if (!this.audio.loaded) {
-            this.loadingCallback();
-            await this.audio.audioPromise;
-        }
-        this.loadedCallback();
-        gsap.fromTo(
-            this.audio,
-            { duration: 0.3, volume: 0 },
-            {
-                volume: 1,
-                onUpdate: () => {
-                    this.volumeCallback(this.audio.volume);
-                },
-            },
-        );
+        // if (!this.audio.loaded) {
+        //     this.loadingCallback();
+        //     await this.audio.audioPromise;
+        // }
+        // this.loadedCallback();
+        // gsap.fromTo(
+        //     this.audio,
+        //     { duration: 0.3, volume: 0 },
+        //     {
+        //         volume: 1,
+        //         onUpdate: () => {
+        //             this.volumeCallback(this.audio.volume);
+        //         },
+        //     },
+        // );
     }
 
     disconnectPhasalizers() {
@@ -298,7 +295,7 @@ export class MusicPlayer {
         this.audio.load();
         this.waveform.loadWaveformFile(waveform);
 
-        if (!this.audio.loaded) {
+        if (!this.audio.loaded || !this.waveform.loaded) {
             this.loadingCallback();
             await Promise.all([this.audio.audioPromise, this.waveform.loaded]);
         }

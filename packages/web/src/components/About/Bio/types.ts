@@ -4,6 +4,5 @@ export interface Blurb {
 }
 
 export interface BioStateShape {
-    isFetching: boolean;
     bio: Blurb[];
 }

@@ -1,9 +1,9 @@
 import { css, type Interpolation, type Theme } from '@emotion/react';
 import * as React from 'react';
 
-import { useAppSelector } from 'src/hooks';
 import { toMedia } from 'src/mediaQuery';
 import { screenM, screenPortrait, screenXS } from 'src/screens';
+import { useStore } from 'src/store.js';
 import { lightBlue } from 'src/styles/colors';
 import { playlistWidth } from 'src/styles/variables';
 
@@ -51,9 +51,7 @@ const baseClass = (on?: boolean) =>
 const ShuffleButton: React.FC<ShuffleButtonProps> = ({ on, onClick }) => {
     const [extraClass, setExtraClass] =
         React.useState<Interpolation<Theme>>(null);
-    const screenTouch = useAppSelector(
-        ({ mediaQuery }) => mediaQuery.screenTouch,
-    );
+    const screenTouch = useStore().mediaQueries.screenTouch();
 
     return (
         <div

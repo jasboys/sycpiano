@@ -5,10 +5,5 @@ export interface VideoPlayerStateShape {
     readonly videoId: string;
     readonly isPreviewOverlay: boolean;
     readonly isPlaying: boolean;
-}
-
-export interface VideoPlaylistStateShape {
-    readonly items: VideoItemShape[];
-    readonly isFetching: boolean;
-    readonly isShow: boolean;
+    readonly playlistVisible: boolean;
 }

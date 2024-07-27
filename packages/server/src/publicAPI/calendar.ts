@@ -1,4 +1,4 @@
-import { raw, type FilterQuery, type Loaded } from '@mikro-orm/core';
+import type { FilterQuery, Loaded } from '@mikro-orm/core';
 import { isBefore, isValid, parseISO, startOfDay } from 'date-fns';
 import * as express from 'express';
 
@@ -39,7 +39,7 @@ function getEventsBefore(before: Date, limit?: number) {
     return orm.em.find(
         Calendar,
         {
-            [raw('date_time::date')]: { $lt: before },
+            dateTime: { $lt: before },
         },
         {
             limit,
@@ -54,7 +54,7 @@ function getEventsAfter(after: Date, limit?: number) {
     return orm.em.find(
         Calendar,
         {
-            [raw('date_time::date')]: { $gte: after },
+            dateTime: { $gte: after },
         },
         {
             limit,
@@ -69,10 +69,7 @@ function getEventsBetween(start: Date, end: Date, order: 'ASC' | 'DESC') {
     return orm.em.find(
         Calendar,
         {
-            $and: [
-                { [raw('date_time::date')]: { $gte: start } },
-                { [raw('date_time::date')]: { $lt: end } },
-            ],
+            $and: [{ dateTime: { $gte: start } }, { dateTime: { $lt: end } }],
         },
         {
             populate: ['collaborators', 'pieces'],
@@ -84,7 +81,7 @@ function getEventsBetween(start: Date, end: Date, order: 'ASC' | 'DESC') {
 function getEventAt(at: Date) {
     return orm.em.findOneOrFail(
         Calendar,
-        { [raw('date_time::date')]: at },
+        { dateTime: at },
         {
             populate: ['collaborators', 'pieces'],
         },
