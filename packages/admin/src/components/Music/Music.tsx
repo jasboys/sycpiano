@@ -386,6 +386,7 @@ export const MusicEdit = (props: EditProps) => {
                                 paddingRight: '1rem',
                             },
                         }}
+                        rowClick={false}
                     >
                         <TextField source="name" />
                         <TextField source="audioFile" label="audio" />

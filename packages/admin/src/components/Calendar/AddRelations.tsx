@@ -31,7 +31,7 @@ const ControlledInput = ({
 }: ControllerInputProps) => {
     const { selectedChoices } = useChoicesContext();
 
-    return (
+    return selectedChoices && (
         <TextInput
             source={source}
             disabled={!!selectedChoices[0]}
@@ -54,7 +54,7 @@ export const AddCalendarPieceForm: React.FC<{
     const refresh = useRefresh();
 
     const onSubmit = async (values: Partial<RaRecord>) => {
-        create(
+        record && create(
             'calendar-pieces',
             {
                 data: {
@@ -78,7 +78,7 @@ export const AddCalendarPieceForm: React.FC<{
         );
     };
 
-    return (
+    return record && (
         <>
             <DialogContent>
                 <TextInput
@@ -154,7 +154,7 @@ export const AddCalendarCollaboratorForm: React.FC<{
     const refresh = useRefresh();
 
     const onSubmit = async (values: Partial<RaRecord>) => {
-        create(
+        record && create(
             'calendar-collaborators',
             {
                 data: {
@@ -179,7 +179,7 @@ export const AddCalendarCollaboratorForm: React.FC<{
         );
     };
 
-    return (
+    return record && (
         <>
             <DialogContent>
                 <TextInput

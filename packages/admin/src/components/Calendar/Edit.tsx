@@ -70,7 +70,7 @@ export const CalendarEdit = (props: EditProps) => {
                     <TextInput source="placeId" disabled />
                 </FormTab>
                 <FormTab label="Pieces" path="pieces">
-                    <ArrayField source="pieces" fieldKey="order">
+                    <ArrayField source="pieces">
                         <Datagrid
                             empty={<Empty assoc="Pieces" />}
                             sx={{
@@ -84,6 +84,7 @@ export const CalendarEdit = (props: EditProps) => {
                                     paddingRight: '1rem',
                                 },
                             }}
+                            rowClick={false}
                         >
                             <TextField source="order" />
                             <TextField source="composer" />
@@ -101,7 +102,7 @@ export const CalendarEdit = (props: EditProps) => {
                     />
                 </FormTab>
                 <FormTab label="Collaborators" path="collaborators">
-                    <ArrayField source="collaborators" fieldKey="order">
+                    <ArrayField source="collaborators">
                         <Datagrid
                             empty={<Empty assoc="Collaborators" />}
                             sx={{
@@ -115,6 +116,7 @@ export const CalendarEdit = (props: EditProps) => {
                                     paddingRight: '1rem',
                                 },
                             }}
+                            rowClick={false}
                         >
                             <TextField source="order" />
                             <TextField source="name" />

@@ -23,7 +23,7 @@ const PlacePhotoField = (props: UseRecordContextParams) => {
     const { source } = props;
     const record = useRecordContext(props);
     return (
-        record[source] && (
+        record?.[source] && (
             <div style={{ height: 200, width: 200, position: 'relative' }}>
                 <img
                     src={getGooglePlacePhoto(record[source], 200)}
@@ -63,7 +63,7 @@ export const CalendarShow = (props: ShowProps) => (
                 <PlacePhotoField source="photoReference" />
             </Tab>
             <Tab label="Pieces">
-                <ArrayField source="pieces" fieldKey="order" fullWidth>
+                <ArrayField source="pieces">
                     <Datagrid empty={<Empty />}>
                         <TextField source="order" />
                         <TextField source="composer" />
@@ -72,7 +72,7 @@ export const CalendarShow = (props: ShowProps) => (
                 </ArrayField>
             </Tab>
             <Tab label="Collaborators">
-                <ArrayField source="collaborators" fieldKey="order" fullWidth>
+                <ArrayField source="collaborators">
                     <Datagrid empty={<Empty />}>
                         <TextField source="order" />
                         <TextField source="name" />

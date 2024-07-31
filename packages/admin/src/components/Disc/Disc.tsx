@@ -333,6 +333,7 @@ export const DiscEdit = (props: EditProps) => {
                                 paddingRight: '1rem',
                             },
                         }}
+                        rowClick={false}
                     >
                         <TextField source="type" label="Distributor" />
                         <UrlField

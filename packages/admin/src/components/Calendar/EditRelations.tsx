@@ -25,6 +25,7 @@ export const EditCalendarPiece: MutateForm = ({ setShowDialog }) => {
     const notify = useNotify();
     const record = useRecordContext();
     const refresh = useRefresh();
+    console.log(record);
 
     const onSubmit = async (values: Partial<RaRecord>) => {
         const { order, id: pieceId, pivotId: id } = values;
@@ -58,7 +59,7 @@ export const EditCalendarPiece: MutateForm = ({ setShowDialog }) => {
         );
     };
 
-    return (
+    return record && (
         <>
             <DialogContent>
                 <TextInput
@@ -139,7 +140,7 @@ export const EditCalendarCollaborator: MutateForm = ({
         );
     };
 
-    return (
+    return record && (
         <>
             <DialogContent>
                 <TextInput
