@@ -183,7 +183,6 @@ const EventItem: React.FC<EventItemProps> = ({
     permaLink,
     timezone,
     imageUrl,
-    usePlacePhoto,
 }) => {
     const arrowRef = React.useRef<HTMLDivElement | null>(null);
     const [shared, setShared] = React.useState<
@@ -234,7 +233,7 @@ const EventItem: React.FC<EventItemProps> = ({
         [permaLink],
     );
 
-    const src = (!usePlacePhoto && imageUrl) ? imageUrl : eventPictureFallbackMap[type];
+    const src = imageUrl || eventPictureFallbackMap[type];
 
     const DateChildren = (
         <EventDate

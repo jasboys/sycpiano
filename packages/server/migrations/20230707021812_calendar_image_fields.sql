@@ -8,3 +8,8 @@ ALTER TABLE calendar
 
 -- migrate:down
 
+ALTER TABLE calendar
+    DROP COLUMN IF EXISTS image_url,
+    DROP COLUMN IF EXISTS photo_reference,
+    DROP COLUMN IF EXISTS place_id,
+    DROP COLUMN IF EXISTS use_place_photo;

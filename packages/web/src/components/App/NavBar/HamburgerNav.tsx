@@ -58,14 +58,16 @@ const HamburgerNav: React.FC<Omit<NavBarLinksProps, 'isHamburger'>> = ({
         }
     }, []);
 
+    const onClick = React.useCallback(() => {
+        navBarStore.set.toggleExpanded();
+        cartOpen && cartStore.set.visible(false);
+    }, [cartOpen]);
+
     return (
         <MenuContainer>
             <HamburgerMenu
                 isExpanded={isExpanded}
-                onClick={() => {
-                    navBarStore.set.toggleExpanded();
-                    cartOpen && cartStore.set.visible(false);
-                }}
+                onClick={onClick}
                 layerColor={specificPath === '' ? 'white' : logoBlue}
             />
             <Transition<HTMLDivElement>

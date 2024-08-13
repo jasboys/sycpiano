@@ -44,9 +44,6 @@ export interface EventItem extends HasDate {
     readonly website?: string;
     readonly timezone: string;
     readonly imageUrl?: string;
-    readonly placeId?: string;
-    readonly photoReference?: string;
-    readonly usePlacePhoto: boolean;
 }
 
 export interface EventItemResponse extends EventItem {

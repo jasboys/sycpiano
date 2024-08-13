@@ -87,6 +87,15 @@ const main = async () => {
                         'https://www.youtube.com/iframe_api',
                         'https://www.youtube.com/s/player/',
                     ],
+                    'script-src-elem': [
+                        "'self'",
+                        "'unsafe-inline'",
+                        "'unsafe-eval'",
+                        'https://m.stripe.network',
+                        'http://localhost:5173',
+                        'http://localhost:5174',
+                        'https://js.stripe.com',
+                    ],
                     'default-src': [
                         "'self'",
                         'https://js.stripe.com/v3/',

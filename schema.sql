@@ -68,11 +68,7 @@ CREATE TABLE public.calendar (
     type text NOT NULL,
     website text,
     all_day boolean DEFAULT false NOT NULL,
-    end_date date,
-    image_url text,
-    photo_reference text,
-    place_id text,
-    use_place_photo boolean DEFAULT true
+    end_date date
 );
 
 
@@ -163,15 +159,6 @@ $$;
 
 
 --
--- Name: immutable_concat_ws(text, text[]); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.immutable_concat_ws(text, VARIADIC text[]) RETURNS text
-    LANGUAGE sql IMMUTABLE PARALLEL SAFE
-    AS $_$SELECT array_to_string($2, $1)$_$;
-
-
---
 -- Name: music_file_update_hash(); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -231,20 +218,6 @@ BEGIN
     RETURN temp;
 END;
 $_$;
-
-
---
--- Name: refresh_search_matview(); Type: FUNCTION; Schema: public; Owner: -
---
-
-CREATE FUNCTION public.refresh_search_matview() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-    REFRESH MATERIALIZED VIEW CONCURRENTLY calendar_trgm_matview;
-    RETURN NULL;
-END;
-$$;
 
 
 --
@@ -415,38 +388,6 @@ CREATE TABLE public.collaborator (
 
 
 --
--- Name: piece; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.piece (
-    id uuid DEFAULT gen_random_uuid() NOT NULL,
-    piece text,
-    composer text
-);
-
-
---
--- Name: calendar_trgm_matview; Type: MATERIALIZED VIEW; Schema: public; Owner: -
---
-
-CREATE MATERIALIZED VIEW public.calendar_trgm_matview AS
- SELECT cal.id,
-    public.immutable_concat_ws(' '::text, VARIADIC ARRAY[cal.name, cal.location, cal.type, ccj.doc, cpj.doc]) AS doc
-   FROM ((public.calendar cal
-     LEFT JOIN ( SELECT cc.calendar_id AS id,
-            string_agg(public.immutable_concat_ws(' '::text, VARIADIC ARRAY[coll.name, coll.instrument]), ' '::text) AS doc
-           FROM (public.calendar_collaborator cc
-             JOIN public.collaborator coll ON ((cc.collaborator_id = coll.id)))
-          GROUP BY cc.calendar_id) ccj USING (id))
-     LEFT JOIN ( SELECT cp.calendar_id AS id,
-            string_agg(public.immutable_concat_ws(' '::text, VARIADIC ARRAY[p.composer, p.piece]), ' '::text) AS doc
-           FROM (public.calendar_piece cp
-             JOIN public.piece p ON ((cp.piece_id = p.id)))
-          GROUP BY cp.calendar_id) cpj USING (id))
-  WITH NO DATA;
-
-
---
 -- Name: disc; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -481,15 +422,6 @@ CREATE TABLE public.faq (
     question text,
     answer text,
     "order" integer
-);
-
-
---
--- Name: migrations; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.migrations (
-    name character varying(255) NOT NULL
 );
 
 
@@ -539,6 +471,17 @@ CREATE TABLE public.photo (
 
 
 --
+-- Name: piece; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.piece (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    piece text,
+    composer text
+);
+
+
+--
 -- Name: product; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -564,15 +507,6 @@ CREATE TABLE public.product (
 
 CREATE TABLE public.schema_migrations (
     version character varying(128) NOT NULL
-);
-
-
---
--- Name: seeders; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.seeders (
-    name character varying(255) NOT NULL
 );
 
 
@@ -637,27 +571,11 @@ ALTER TABLE ONLY public.acclaim
 
 
 --
--- Name: calendar_collaborator calendar_collaborator_id_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.calendar_collaborator
-    ADD CONSTRAINT calendar_collaborator_id_key UNIQUE (id);
-
-
---
 -- Name: calendar_collaborator calendar_collaborator_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.calendar_collaborator
     ADD CONSTRAINT calendar_collaborator_pkey PRIMARY KEY (id);
-
-
---
--- Name: calendar_piece calendar_piece_id_key; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.calendar_piece
-    ADD CONSTRAINT calendar_piece_id_key UNIQUE (id);
 
 
 --
@@ -685,14 +603,6 @@ ALTER TABLE ONLY public.collaborator
 
 
 --
--- Name: user customer_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public."user"
-    ADD CONSTRAINT customer_pkey PRIMARY KEY (id);
-
-
---
 -- Name: disc_link disc_link_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -714,14 +624,6 @@ ALTER TABLE ONLY public.disc
 
 ALTER TABLE ONLY public.faq
     ADD CONSTRAINT faq_pkey PRIMARY KEY (id);
-
-
---
--- Name: migrations migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.migrations
-    ADD CONSTRAINT migrations_pkey PRIMARY KEY (name);
 
 
 --
@@ -773,19 +675,19 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
--- Name: seeders seeders_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.seeders
-    ADD CONSTRAINT seeders_pkey PRIMARY KEY (name);
-
-
---
 -- Name: token token_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.token
     ADD CONSTRAINT token_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user user_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."user"
+    ADD CONSTRAINT user_pkey PRIMARY KEY (id);
 
 
 --
@@ -832,27 +734,6 @@ CREATE INDEX calendar_time ON public.calendar USING btree (date_time);
 
 
 --
--- Name: calendar_trgm_gist_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX calendar_trgm_gist_idx ON public.calendar_trgm_matview USING gist (doc public.gist_trgm_ops);
-
-
---
--- Name: calendar_trgm_matview_id_idx; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX calendar_trgm_matview_id_idx ON public.calendar_trgm_matview USING btree (id);
-
-
---
--- Name: collaborator_trgm; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX collaborator_trgm ON public.collaborator USING gist (public.immutable_concat_ws(' '::text, VARIADIC ARRAY[name, instrument]) public.gist_trgm_ops);
-
-
---
 -- Name: disc_link_disc_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -864,13 +745,6 @@ CREATE INDEX disc_link_disc_idx ON public.disc_link USING btree (disc_id);
 --
 
 CREATE INDEX music_file_music_idx ON public.music_file USING btree (music_id);
-
-
---
--- Name: piece_trgm; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX piece_trgm ON public.piece USING gist (public.immutable_concat_ws(' '::text, VARIADIC ARRAY[composer, piece]) public.gist_trgm_ops);
 
 
 --
@@ -895,34 +769,6 @@ CREATE INDEX user_username_idx ON public."user" USING btree (username);
 
 
 --
--- Name: calendar cal_refresh; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER cal_refresh AFTER INSERT OR DELETE OR UPDATE ON public.calendar FOR EACH STATEMENT EXECUTE FUNCTION public.refresh_search_matview();
-
-
---
--- Name: calendar_collaborator calcollab_refresh; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER calcollab_refresh AFTER INSERT OR DELETE ON public.calendar_collaborator FOR EACH STATEMENT EXECUTE FUNCTION public.refresh_search_matview();
-
-
---
--- Name: calendar_piece calpiece_refresh; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER calpiece_refresh AFTER INSERT OR DELETE ON public.calendar_piece FOR EACH STATEMENT EXECUTE FUNCTION public.refresh_search_matview();
-
-
---
--- Name: collaborator collab_refresh; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER collab_refresh AFTER UPDATE ON public.collaborator FOR EACH STATEMENT EXECUTE FUNCTION public.refresh_search_matview();
-
-
---
 -- Name: music_file music_file_trigger; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -934,13 +780,6 @@ CREATE TRIGGER music_file_trigger BEFORE INSERT OR UPDATE ON public.music_file F
 --
 
 CREATE TRIGGER music_trigger AFTER INSERT OR UPDATE ON public.music FOR EACH ROW EXECUTE FUNCTION public.music_update_propagate_hash();
-
-
---
--- Name: piece piece_refresh; Type: TRIGGER; Schema: public; Owner: -
---
-
-CREATE TRIGGER piece_refresh AFTER UPDATE ON public.piece FOR EACH STATEMENT EXECUTE FUNCTION public.refresh_search_matview();
 
 
 --
@@ -1022,4 +861,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20230707020252'),
     ('20230707021812'),
     ('20231101033621'),
-    ('20240326040532');
+    ('20240326040532'),
+    ('20240813051412');

@@ -8,7 +8,6 @@ import {
     Index,
     ManyToMany,
     OneToMany,
-    OneToOne,
     PrimaryKey,
     Property,
 } from '@mikro-orm/core';
@@ -27,7 +26,6 @@ import { CalendarCollaborator } from './CalendarCollaborator.js';
 import { CalendarPiece } from './CalendarPiece.js';
 import { Collaborator } from './Collaborator.js';
 import { Piece } from './Piece.js';
-import { CalendarTrgmMatview } from './CalendarTrgmMatview.js';
 import { parse, startOfDay } from 'date-fns';
 import { fromZonedTime } from 'date-fns-tz';
 
@@ -263,13 +261,6 @@ export class Calendar {
         fixedOrderColumn: 'order',
     })
     collaborators = new Collection<Collaborator>(this);
-
-    @OneToOne({
-        entity: () => CalendarTrgmMatview,
-        joinColumn: 'id',
-        nullable: true,
-    })
-    calendarTrgmMatview?: CalendarTrgmMatview;
 
     @BeforeCreate()
     async beforeCreate(args: EventArgs<Calendar>) {

@@ -25,7 +25,12 @@ import { metaDescriptions, titleStringBase } from 'src/utils';
 import { shallow } from 'zustand/shallow';
 import { transparentize } from 'polished';
 import { useStore } from 'src/store.js';
-import { FETCH_LIMIT, fetchEvents, getInitFetchParams, getScrollFetchParams } from './queryFunctions.js';
+import {
+    FETCH_LIMIT,
+    fetchEvents,
+    getInitFetchParams,
+    getScrollFetchParams,
+} from './queryFunctions.js';
 
 interface EventListProps {
     readonly type: EventListName;
@@ -124,7 +129,6 @@ const loadingOnExit = (el: HTMLElement) => {
     );
 };
 
-
 export const EventList: React.FC<EventListProps> = (props) => {
     const {
         eventItems,
@@ -152,19 +156,18 @@ export const EventList: React.FC<EventListProps> = (props) => {
     const searchQ = props.searchQ;
 
     const checkRedirects = React.useCallback(() => {
-        if (searchQ !== undefined) {
-            if (searchQ === '') {
-                navigate('/schedule/upcoming');
-                return;
-            }
-        } else if (props.type === 'event') {
-            if (!date) {
-                navigate('/schedule/upcoming');
-                return;
-            }
-        } else {
+        if (
+            props.type === 'search' &&
+            (searchQ === undefined || searchQ === '')
+        ) {
+            navigate('/schedule/upcoming');
             return;
         }
+        if (props.type === 'event' && !date) {
+            navigate('/schedule/upcoming');
+            return;
+        }
+        return;
     }, [searchQ, date, props.type]);
 
     React.useEffect(() => {

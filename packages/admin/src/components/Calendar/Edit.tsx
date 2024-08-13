@@ -64,10 +64,7 @@ export const CalendarEdit = (props: EditProps) => {
                     <TextInput source="location" fullWidth />
                     <TextInput source="type" fullWidth />
                     <TextInput source="website" fullWidth />
-                    <BooleanInput source="usePlacePhoto" />
                     <TextInput source="imageUrl" fullWidth />
-                    <TextInput source="photoReference" fullWidth />
-                    <TextInput source="placeId" disabled />
                 </FormTab>
                 <FormTab label="Pieces" path="pieces">
                     <ArrayField source="pieces">

@@ -443,12 +443,7 @@ export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
         {
             resource: 'calendars',
             beforeSave: async (params) => {
-                const {
-                    calendarTrgmMatview,
-                    collaborators,
-                    pieces,
-                    ...restData
-                } = params;
+                const { collaborators, pieces, ...restData } = params;
                 return {
                     ...restData,
                     dateTime: toUTC(params.dateTimeInput, params.timezone),

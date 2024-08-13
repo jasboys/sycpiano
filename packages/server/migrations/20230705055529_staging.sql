@@ -2,15 +2,15 @@
 
 CREATE TABLE IF NOT EXISTS product (
     id              text PRIMARY KEY,
-    name            text,
-    file            text,
+    name            text NOT NULL,
+    file            text NOT NULL,
     description     text,
     sample          text,
-    images          text[],
+    images          text[] DEFAULT '{}',
     pages           integer,
-    price           integer,
-    type            text,
-    price_id        text,
+    price           integer NOT NULL,
+    "type"          text,
+    price_id        text NOT NULL,
     permalink       text
 );
 
@@ -38,10 +38,7 @@ CREATE TABLE IF NOT EXISTS faq (
     "order"         integer
 );
 
-CREATE INDEX IF NOT EXISTS calendar_piece_calendar_idx ON calendar_piece(calendar_id);
-CREATE INDEX IF NOT EXISTS calendar_piece_piece_idx ON calendar_piece(piece_id);
-CREATE INDEX IF NOT EXISTS calendar_collaborator_calendar_idx ON calendar_collaborator(calendar_id);
-CREATE INDEX IF NOT EXISTS calendar_collaborator_collaborator_idx ON calendar_collaborator(collaborator_id);
+CREATE INDEX IF NOT EXISTS user_username_idx ON "user" (username);
 
 CREATE INDEX IF NOT EXISTS user_product_user_idx ON user_product(user_id);
 CREATE INDEX IF NOT EXISTS user_product_product_idx ON user_product(product_id);
@@ -50,3 +47,16 @@ CREATE INDEX IF NOT EXISTS disc_link_disc_idx ON disc_link(disc_id);
 CREATE INDEX IF NOT EXISTS music_file_music_idx ON music_file(music_id);
 
 -- migrate:down
+
+DROP INDEX IF EXISTS music_file_music_idx;
+DROP INDEX IF EXISTS disc_link_disc_idx;
+
+DROP INDEX IF EXISTS user_product_product_idx;
+DROP INDEX IF EXISTS user_product_user_idx;
+
+DROP INDEX IF EXISTS user_username_idx;
+
+DROP TABLE IF EXISTS faq;
+DROP TABLE IF EXISTS user_product;
+DROP TABLE IF EXISTS "user";
+DROP TABLE IF EXISTS product;

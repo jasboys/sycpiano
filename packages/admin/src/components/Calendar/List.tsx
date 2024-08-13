@@ -117,15 +117,12 @@ export const CalendarList = (props: ListProps) => {
                     target="_blank"
                     rel="noopener noreferrer"
                 />
-                <BooleanField source="usePlacePhoto" />
                 <FunctionField
                     label="imageUrl"
                     render={(record: Record<string, any>) =>
                         record?.imageUrl === null ? 'null' : record?.imageUrl
                     }
                 />
-                <TextField source="photoReference" />
-                <TextField source="placeId" />
             </Datagrid>
         </List>
     );
