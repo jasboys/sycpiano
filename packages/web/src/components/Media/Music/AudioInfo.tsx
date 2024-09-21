@@ -169,7 +169,7 @@ const AudioInfo: React.FC<AudioInfoProps> = ({ matchParams }) => {
     const composerTitle = `${composer} ${piece}${year ? ` (${year})` : ''}`;
     const composerTitleWithMovement =
         composerTitle + (movement ? ` - ${movement}` : '');
-    const metaTitle = ` | Music | ${composerTitleWithMovement}`;
+    const metaTitle = `Music | ${composerTitleWithMovement}`;
     const marqueeText = composerTitleWithMovement;
 
     React.useEffect(() => {

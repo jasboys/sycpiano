@@ -238,7 +238,7 @@ export const EventList: React.FC<EventListProps> = (props) => {
         [onScroll],
     );
 
-    const title = `${titleStringBase}Schedule | ${props.type === 'archive' ? 'Archived' : startCase(props.type)}Events${searchQ ?? `: ${searchQ}`}`;
+    const title = `${titleStringBase}Schedule | ${props.type === 'archive' ? 'Archived' : startCase(props.type)} Events${searchQ ? '' : `: ${searchQ}`}`;
 
     const description = metaDescriptions[props.type] as string;
 

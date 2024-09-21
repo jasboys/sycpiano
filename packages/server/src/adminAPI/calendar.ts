@@ -235,8 +235,10 @@ const populateImages = async (entity: Calendar) => {
         const { website } = entity;
         if (website) {
             const fetchedImageUrl = await getImageFromMetaTag(website);
-            if (fetchedImageUrl) {
+            if (fetchedImageUrl !== '') {
                 entity.imageUrl = fetchedImageUrl;
+            } else {
+                entity.imageUrl = undefined;
             }
         }
     } catch (e) {
