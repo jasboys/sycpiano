@@ -19,7 +19,7 @@
         "watch": "nodemon --config nodemon.json packages/server/build/app.js",
         "migrate": "dbmate -d ./packages/server/migrations -s ./schema.sql"
     },
-    "packageManager": "yarn@4.3.1",
+    "packageManager": "yarn@4.5.0",
     "engines": {
         "node": ">=16.0.0"
     },

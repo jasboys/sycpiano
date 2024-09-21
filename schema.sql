@@ -68,7 +68,8 @@ CREATE TABLE public.calendar (
     type text NOT NULL,
     website text,
     all_day boolean DEFAULT false NOT NULL,
-    end_date date
+    end_date date,
+    image_url text
 );
 
 
@@ -862,4 +863,5 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20230707021812'),
     ('20231101033621'),
     ('20240326040532'),
-    ('20240813051412');
+    ('20240813051412'),
+    ('20240920030006');
