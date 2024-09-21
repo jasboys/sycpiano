@@ -297,6 +297,7 @@ export const getImageFromMetaTag = async (website: string) => {
         }
     } catch (e) {
         console.log('JSOM error or Image does not exist');
+        image = '';
     }
 
     return image;
