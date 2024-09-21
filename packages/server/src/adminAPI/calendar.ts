@@ -232,30 +232,11 @@ const calendarRouter = crud('/calendars', {
 
 const populateImages = async (entity: Calendar) => {
     try {
-        const { website, imageUrl, location } = entity;
+        const { website } = entity;
         if (website) {
-            if (imageUrl === null) {
-                const fetchedImageUrl = await getImageFromMetaTag(website);
-                if (fetchedImageUrl !== '') {
-                    entity.imageUrl = fetchedImageUrl;
-                }
-            }
-        }
-
-        if (location) {
-            try {
-                const otherCal = await orm.em.findOne(Calendar, {
-                    $and: [
-                        { location },
-                        { imageUrl: { $ne: null } },
-                        { imageUrl: { $ne: '' } },
-                    ],
-                });
-                if (otherCal) {
-                    entity.imageUrl = otherCal.imageUrl;
-                }
-            } catch (e) {
-                console.log('No images to populate');
+            const fetchedImageUrl = await getImageFromMetaTag(website);
+            if (fetchedImageUrl) {
+                entity.imageUrl = fetchedImageUrl;
             }
         }
     } catch (e) {

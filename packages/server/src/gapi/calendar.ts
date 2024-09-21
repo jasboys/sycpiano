@@ -106,9 +106,9 @@ export const createCalendarEvent = async (
             : allDay
               ? { date: format(add(startDatetime, { days: 1 }), 'yyyy-MM-dd') }
               : {
-                      dateTime: add(startDatetime, { hours: 2 }).toISOString(),
-                      timeZone,
-                  },
+                    dateTime: add(startDatetime, { hours: 2 }).toISOString(),
+                    timeZone,
+                },
     };
     return axios.post(url, eventResource, {
         headers: {
@@ -144,17 +144,17 @@ export const updateCalendar = async (
                 ? { date: format(endDate, 'yyyy-MM-dd') }
                 : allDay
                   ? {
-                          date: format(
-                              add(startDatetime, { days: 1 }),
-                              'yyyy-MM-dd',
-                          ),
-                      }
+                        date: format(
+                            add(startDatetime, { days: 1 }),
+                            'yyyy-MM-dd',
+                        ),
+                    }
                   : {
-                          dateTime: add(startDatetime, {
-                              hours: 2,
-                          }).toISOString(),
-                          timeZone,
-                      },
+                        dateTime: add(startDatetime, {
+                            hours: 2,
+                        }).toISOString(),
+                        timeZone,
+                    },
         };
         return axios.put(url, eventResource, {
             headers: {
@@ -273,39 +273,31 @@ export const transformModelToGoogle = (c: Calendar) => {
 };
 
 export const getImageFromMetaTag = async (website: string) => {
+    let image: string = '';
+    let page: string | undefined;
     try {
-        const page = await axios.get<string>(website);
-        const { document } = new JSDOM(page.data).window;
-        return (
+        page = (await axios.get<string>(website)).data;
+    } catch (e) {
+        const err = e as AxiosError<string>;
+        page = err.response?.data;
+    }
+
+    try {
+        const { document } = new JSDOM(page).window;
+        image =
             document
                 .querySelector('meta[name="twitter:image"]')
                 ?.getAttribute('content') ??
             document
                 .querySelector('meta[property="og:image"]')
                 ?.getAttribute('content') ??
-            ''
-        );
-    } catch (e) {
-        // console.log(e);
-        try {
-            // Even if url doesn't exist anymore
-            // Response could contain usable images.
-            const err = e as AxiosError<string>;
-            const page = err.response?.data;
-            const { document } = new JSDOM(page).window;
-            return (
-                document
-                    .querySelector('meta[name="twitter:image"]')
-                    ?.getAttribute('content') ??
-                document
-                    .querySelector('meta[property="og:image"]')
-                    ?.getAttribute('content') ??
-                ''
-            );
-        } catch (ee) {
-            // Really can't use it.
-            console.log(ee);
-            return '';
+            '';
+        if (image) {
+            await axios.get(image);
         }
+    } catch (e) {
+        console.log('JSOM error or Image does not exist');
     }
+
+    return image;
 };
