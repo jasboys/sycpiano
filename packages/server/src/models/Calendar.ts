@@ -227,7 +227,7 @@ export class Calendar {
     endDate?: string;
 
     @Property({ columnType: 'text', nullable: true })
-    imageUrl?: string;
+    imageUrl?: string | null;
 
     @Property({ persist: false })
     dateTimeInput?: string;

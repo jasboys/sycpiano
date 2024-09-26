@@ -238,7 +238,7 @@ const populateImages = async (entity: Calendar) => {
             if (fetchedImageUrl !== '') {
                 entity.imageUrl = fetchedImageUrl;
             } else {
-                entity.imageUrl = undefined;
+                entity.imageUrl = null;
             }
         }
     } catch (e) {

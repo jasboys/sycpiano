@@ -9,6 +9,8 @@ import {
 } from '@mikro-orm/core';
 import { CalendarPiece } from './CalendarPiece.js';
 import { Calendar } from './Calendar.js';
+import { ProgramPiece } from './ProgramPiece.js';
+import { Program } from './Program.js';
 
 @Entity()
 export class Piece {
@@ -33,6 +35,16 @@ export class Piece {
         orderBy: { dateTime: 'DESC' },
     })
     calendars = new Collection<Calendar>(this);
+
+    @OneToMany({ entity: () => ProgramPiece, mappedBy: (pp) => pp.piece })
+    programPieces = new Collection<ProgramPiece>(this);
+
+    @ManyToMany({
+        entity: () => Program,
+        pivotEntity: () => ProgramPiece,
+        mappedBy: (pp) => pp.pieces,
+    })
+    programs = new Collection<Program>(this);
 
     @Property({ persist: false })
     order?: number;
