@@ -50,7 +50,7 @@ export class Product {
     permalink?: string;
 
     @Property({})
-    purchasedCount!: number;
+    purchasedCount?: number;
 
     @ManyToMany({ entity: () => User, mappedBy: (u) => u.products })
     users = new Collection<User>(this);
