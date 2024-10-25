@@ -23,6 +23,7 @@ import {
     TextField,
     TextInput,
     TopToolbar,
+    useCanAccess,
     useNotify,
     useRecordContext,
     useRefresh,
@@ -115,6 +116,10 @@ const BulkActions = () => (
 );
 
 export const PieceList = (props: ListProps) => {
+    const { canAccess } = useCanAccess({
+        action: 'edit',
+        resource: 'pieces',
+    });
     return (
         <List
             {...props}
@@ -124,7 +129,7 @@ export const PieceList = (props: ListProps) => {
             actions={<ListActions />}
         >
             <Datagrid
-                rowClick="edit"
+                rowClick={canAccess ? "edit" : "show"}
                 expand={<ExpandPanel />}
                 bulkActionButtons={<BulkActions />}
             >

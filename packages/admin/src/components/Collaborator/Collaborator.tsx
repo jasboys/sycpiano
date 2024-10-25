@@ -23,6 +23,7 @@ import {
     TextField,
     TextInput,
     TopToolbar,
+    useCanAccess,
     useNotify,
     useRecordContext,
     useRefresh,
@@ -63,7 +64,7 @@ const ExpandPanel = () => {
             <ArrayField source="calendars">
                 <Datagrid
                     rowClick={(_id, _basePath, record) =>
-                        `/calendars/${record.id}/collaborators`
+                        `/calendars/${record.id}/show`
                     }
                     bulkActionButtons={false}
                 >
@@ -118,6 +119,10 @@ const BulkActions = () => (
 );
 
 export const CollaboratorList = (props: ListProps) => {
+    const { canAccess } = useCanAccess({
+        action: 'edit',
+        resource: 'collaborators',
+    });
     return (
         <List
             {...props}
@@ -127,7 +132,7 @@ export const CollaboratorList = (props: ListProps) => {
             actions={<ListActions />}
         >
             <Datagrid
-                rowClick="edit"
+                rowClick={canAccess ? 'edit' : 'show'}
                 expand={<ExpandPanel />}
                 bulkActionButtons={<BulkActions />}
             >

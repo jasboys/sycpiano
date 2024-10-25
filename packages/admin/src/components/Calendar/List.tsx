@@ -11,7 +11,6 @@ import {
     SearchInput,
     TextField,
     TopToolbar,
-    UrlField,
     useNotify,
     useRefresh,
     type Identifier,
