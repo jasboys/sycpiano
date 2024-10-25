@@ -7,7 +7,6 @@ import {
     Create,
     CreateButton,
     Datagrid,
-    DateField,
     Edit,
     FilterButton,
     FunctionField,
@@ -87,7 +86,7 @@ const ExpandPanel = () => {
             <ArrayField source="calendars">
                 <Datagrid
                     rowClick={(_, __, record) =>
-                        `/calendars/${record.id}/pieces`
+                        `/calendars/${record.id}/show`
                     }
                     bulkActionButtons={false}
                 >
@@ -147,7 +146,10 @@ export const PieceShow = (props: ShowProps) => (
             <Tab label="Info">
                 <TextField source="id" />
                 <TextField source="composer" />
-                <DateField source="piece" />
+                <TextField source="piece" />
+            </Tab>
+            <Tab label="calendars">
+                <ExpandPanel />
             </Tab>
         </TabbedShowLayout>
     </Show>

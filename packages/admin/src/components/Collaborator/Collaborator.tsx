@@ -7,7 +7,6 @@ import {
     Create,
     CreateButton,
     Datagrid,
-    DateField,
     Edit,
     FilterButton,
     FunctionField,
@@ -150,7 +149,10 @@ export const CollaboratorShow = (props: ShowProps) => (
             <Tab label="Info">
                 <TextField source="id" />
                 <TextField source="name" />
-                <DateField source="instrument" />
+                <TextField source="instrument" />
+            </Tab>
+            <Tab label="Calendars">
+                <ExpandPanel />
             </Tab>
         </TabbedShowLayout>
     </Show>
