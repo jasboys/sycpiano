@@ -33,6 +33,7 @@ export const authorize = async (user: string) => {
 
 enum Role {
     ADMIN = 'admin',
+    READONLY = 'readonly',
     CUSTOMER = 'customer',
 }
 
@@ -84,11 +85,11 @@ export const checkAdmin: HandlerWithRole = async (req, res, next) => {
 };
 
 authRouter.post('/status', authAndGetRole, async (_, res) => {
-    res.status(200).send('Authorized');
+    res.status(200).json({ role: res.locals.role });
 });
 
 authRouter.post('/admin-status', authAndGetRole, checkAdmin, async (_, res) => {
-    res.status(200).send('Authorized');
+    res.status(200).send({ role: 'admin' });
 });
 
 authRouter.post('/register', async (req, res) => {
@@ -136,7 +137,7 @@ authRouter.post('/login', async (req, res) => {
         }
 
         const user = await orm.em.findOneOrFail(User, {
-            $and: [{ username }, { role: 'admin' }],
+            $and: [{ username }, { role: ['admin', 'readonly'] }],
         });
 
         console.log(user);
