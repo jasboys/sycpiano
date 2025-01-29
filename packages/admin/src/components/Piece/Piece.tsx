@@ -7,7 +7,6 @@ import {
     Create,
     CreateButton,
     Datagrid,
-    DateField,
     Edit,
     FilterButton,
     FunctionField,
@@ -23,6 +22,7 @@ import {
     TextField,
     TextInput,
     TopToolbar,
+    useCanAccess,
     useNotify,
     useRecordContext,
     useRefresh,
@@ -86,7 +86,7 @@ const ExpandPanel = () => {
             <ArrayField source="calendars">
                 <Datagrid
                     rowClick={(_, __, record) =>
-                        `/calendars/${record.id}/pieces`
+                        `/calendars/${record.id}/show`
                     }
                     bulkActionButtons={false}
                 >
@@ -115,6 +115,10 @@ const BulkActions = () => (
 );
 
 export const PieceList = (props: ListProps) => {
+    const { canAccess } = useCanAccess({
+        action: 'edit',
+        resource: 'pieces',
+    });
     return (
         <List
             {...props}
@@ -124,7 +128,7 @@ export const PieceList = (props: ListProps) => {
             actions={<ListActions />}
         >
             <Datagrid
-                rowClick="edit"
+                rowClick={canAccess ? "edit" : "show"}
                 expand={<ExpandPanel />}
                 bulkActionButtons={<BulkActions />}
             >
@@ -142,7 +146,10 @@ export const PieceShow = (props: ShowProps) => (
             <Tab label="Info">
                 <TextField source="id" />
                 <TextField source="composer" />
-                <DateField source="piece" />
+                <TextField source="piece" />
+            </Tab>
+            <Tab label="calendars">
+                <ExpandPanel />
             </Tab>
         </TabbedShowLayout>
     </Show>

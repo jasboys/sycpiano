@@ -4,14 +4,18 @@ import orm from './database.js';
 import { User } from './models/User.js';
 
 async function main() {
-    if (process.argv.length < 4) {
+    if (process.argv.length < 5) {
         console.log(
-            'usage: node server/build/createAdmin.js username password',
+            'usage: node server/build/createAdmin.js role username password',
         );
         throw new Error('Too few args.');
     }
-    const username = process.argv[2];
-    const password = process.argv[3];
+    const role = process.argv[2];
+    if (!['admin', 'readonly'].includes(role)) {
+        throw new Error('Role must be admin or readonly');
+    }
+    const username = process.argv[3];
+    const password = process.argv[4];
     try {
         const passHash = await argon2.hash(password, { type: 2 });
         const em = orm.em.fork();
@@ -20,7 +24,7 @@ async function main() {
             id: randomUUID(),
             username,
             passHash,
-            role: 'admin',
+            role,
         });
         await em.persist(user).flush();
         console.log('Successfully created Admin user.');

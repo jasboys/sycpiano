@@ -6,6 +6,7 @@ import {
     Entity,
     type EventArgs,
     ManyToMany,
+    type Opt,
     PrimaryKey,
     Property,
 } from '@mikro-orm/core';
@@ -37,7 +38,7 @@ export class Product {
     @Property({ nullable: true })
     pages?: number;
 
-    @Property({})
+    @Property()
     price!: number;
 
     @Property({ columnType: 'text', nullable: true })
@@ -49,8 +50,8 @@ export class Product {
     @Property({ columnType: 'text', nullable: true })
     permalink?: string;
 
-    @Property({})
-    purchasedCount!: number;
+    @Property()
+    purchasedCount: number & Opt = 0;
 
     @ManyToMany({ entity: () => User, mappedBy: (u) => u.products })
     users = new Collection<User>(this);

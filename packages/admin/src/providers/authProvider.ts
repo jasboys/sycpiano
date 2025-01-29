@@ -1,4 +1,5 @@
-import axios from 'axios';
+import axios, { type AxiosResponse } from 'axios';
+import { capitalize } from 'lodash-es';
 import type { AuthProvider } from 'react-admin';
 
 const authProvider = (apiUrl: string): AuthProvider => {
@@ -33,14 +34,45 @@ const authProvider = (apiUrl: string): AuthProvider => {
                 console.log(`Wasn't logged in.`);
             }
         },
-        checkAuth: async () => {
-            await axiosInstance.post('/status');
+        checkAuth: async (params) => {
+            console.log('calling checkAuth', params);
+            await axiosInstance.post<unknown, AxiosResponse<{ role: string }>>(
+                '/status',
+            );
         },
         getPermissions: async () => {
-            return Promise.resolve();
+            return Promise.reject();
+        },
+        canAccess: async ({
+            action,
+            resource,
+        }: { action: string; resource: string }) => {
+            const response = await axiosInstance.post<
+                unknown,
+                AxiosResponse<{ role: string }>
+            >('/status');
+            console.log('calling canAccess');
+            if (response.data.role === 'admin') {
+                return true;
+            }
+            if (
+                response.data.role === 'readonly' &&
+                ['list', 'show'].includes(action) &&
+                ['pieces', 'calendars', 'collaborators'].includes(resource)
+            ) {
+                return true;
+            }
+            return false;
         },
         getIdentity: async () => {
-            return Promise.resolve({ id: 'admin', fullName: 'Admin' });
+            const response = await axiosInstance.post<
+                unknown,
+                AxiosResponse<{ role: string }>
+            >('/status');
+            return {
+                id: response.data.role,
+                fullName: capitalize(response.data.role),
+            };
         },
     };
 };

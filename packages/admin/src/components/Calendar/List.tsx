@@ -7,14 +7,16 @@ import {
     FilterButton,
     FunctionField,
     List,
+    type RaRecord,
     SearchInput,
     TextField,
     TopToolbar,
-    UrlField,
     useNotify,
     useRefresh,
     type Identifier,
     type ListProps,
+    ArrayField,
+    useCanAccess,
 } from 'react-admin';
 
 import { useMutation } from '@tanstack/react-query';
@@ -76,7 +78,30 @@ const BulkActionButtons = () => (
     website: string;
     */
 
+const CalendarPanel: React.FC<{
+    id: Identifier;
+    record: RaRecord;
+    resource: string;
+}> = () => {
+    return (
+        <ArrayField source="collaborators">
+            <Datagrid
+                sx={{ marginBottom: '1rem' }}
+                isRowSelectable={() => false}
+                bulkActionButtons={false}
+            >
+                <TextField source="name" />
+                <TextField source="instrument" />
+            </Datagrid>
+        </ArrayField>
+    );
+};
+
 export const CalendarList = (props: ListProps) => {
+    const { canAccess } = useCanAccess({
+        action: 'edit',
+        resource: 'calendars',
+    });
     return (
         <List
             {...props}
@@ -92,13 +117,15 @@ export const CalendarList = (props: ListProps) => {
                     },
                 }}
                 style={{ tableLayout: 'fixed' }}
-                rowClick="edit"
+                rowClick={canAccess ? 'edit' : 'show'}
                 bulkActionButtons={<BulkActionButtons />}
+                expand={(props) => <CalendarPanel {...props} />}
             >
-				<TextField source="id" />
+                <TextField source="id" />
                 <TextField source="name" />
                 <FunctionField
                     label="Date Time"
+                    source="dateTime"
                     render={(record: Record<string, any>) =>
                         formatInTimeZone(
                             record?.dateTime,
@@ -112,15 +139,26 @@ export const CalendarList = (props: ListProps) => {
                 <TextField source="timezone" />
                 <TextField source="location" />
                 <TextField source="type" />
-                <UrlField
+                <FunctionField
                     source="website"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    render={(record: Record<string, any>) =>
+                        !record?.website ? (
+                            'null'
+                        ) : (
+                            <a
+                                href={record.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >{`${record.website.substring(0, 16)}\u2026`}</a>
+                        )
+                    }
                 />
                 <FunctionField
                     label="imageUrl"
                     render={(record: Record<string, any>) =>
-                        record?.imageUrl === null ? 'null' : record?.imageUrl
+                        record?.imageUrl === null
+                            ? 'null'
+                            : `${record?.imageUrl.substring(0, 16)}\u2026`
                     }
                 />
             </Datagrid>

@@ -91,6 +91,8 @@ const main = async () => {
                         "'self'",
                         "'unsafe-inline'",
                         "'unsafe-eval'",
+                        'https://www.youtube.com/iframe_api',
+                        'https://www.youtube.com/s/player/',
                         'https://m.stripe.network',
                         'http://localhost:5173',
                         'http://localhost:5174',

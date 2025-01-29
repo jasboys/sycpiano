@@ -38,8 +38,7 @@ class ConnectedMailer implements Mailer {
     initialize = async (): Promise<ConnectedMailer> => {
         const transportOptions: SMTPTransport.Options = {
             host: process.env.SMTP_HOST,
-            secure:
-                Number.parseInt(process.env.SMTP_PORT) === 465 ? true : false,
+            secure: Number.parseInt(process.env.SMTP_PORT) === 465,
             port: Number.parseInt(process.env.SMTP_PORT),
             auth: {
                 user: process.env.SMTP_USERNAME,
@@ -224,6 +223,7 @@ class ConnectedMailer implements Mailer {
                     );
                 }
                 await zip.finalize();
+                console.log(`Successfully zipped ${products.length} products.`);
                 attachments = [
                     ...attachments,
                     {
@@ -255,17 +255,48 @@ class ConnectedMailer implements Mailer {
                 attachments,
             };
 
-            const result = await this.transporter?.sendMail(message);
-            if (process.env.NODE_ENV === 'development') {
-                console.log(email);
-                console.log(attachments);
-                console.log(result);
+            if (this.transporter) {
+                const result = await this.transporter.sendMail(message);
+                if (process.env.NODE_ENV === 'development') {
+                    console.log(email);
+                    console.log(attachments);
+                    console.log(result);
+                } else {
+                    console.log(`Successfully sent email to: ${email}`);
+                    this.infoEmailer(
+                        'Emailer',
+                        `Successfully sent email to: ${email}`,
+                    );
+                }
             } else {
-                console.log(`Successfully sent email to: ${email}`);
+                throw new Error('this.transporter was undefined or null.');
             }
         } catch (e) {
             console.error(e);
             this.errorEmailer('Emailer', JSON.stringify(e));
+        }
+    };
+
+    infoEmailer = async (domain: string, error: string) => {
+        try {
+            const message: nodemailer.SendMailOptions = {
+                from: 'Sean Chen Piano <seanchen@seanchenpiano.com>',
+                replyTo: 'seanchen@seanchenpiano.com',
+                to: 'seanchen@seanchenpiano.com',
+                subject: `[Server Info]: ${domain}`,
+                text: `
+                On ${new Date()}, ${domain} received this info:
+                ${error}
+            `,
+            };
+
+            const result = await this.transporter?.sendMail(message);
+            if (process.env.NODE_ENV === 'development') {
+                console.log('Sent info email');
+                console.log(result);
+            }
+        } catch (e) {
+            console.error(e);
         }
     };
 
