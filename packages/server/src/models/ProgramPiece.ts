@@ -13,7 +13,7 @@ export class ProgramPiece {
         primary: true,
         index: 'program_piece_program_idx',
     })
-    calendar!: Rel<Program>;
+    program!: Rel<Program>;
 
     @ManyToOne({
         entity: () => Piece,

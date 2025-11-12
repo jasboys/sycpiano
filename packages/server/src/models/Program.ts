@@ -20,7 +20,7 @@ export class Program {
     @Property({ columnType: 'text', nullable: true })
     nickname?: string;
 
-    @OneToMany({ entity: () => ProgramPiece, mappedBy: (pp) => pp.piece })
+    @OneToMany({ entity: () => ProgramPiece, mappedBy: (pp) => pp.program })
     programPieces = new Collection<ProgramPiece>(this);
 
     @ManyToMany({

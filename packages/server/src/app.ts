@@ -36,13 +36,10 @@ const main = async () => {
         if (isProduction) {
             const { pino } = await import('pino');
             const { pinoHttp } = await import('pino-http');
+            const { req, res, err } = await import('pino-std-serializers');
             return pinoHttp({
                 logger: pino(),
-                serializers: {
-                    req: pino.stdSerializers.req,
-                    res: pino.stdSerializers.res,
-                    err: pino.stdSerializers.err,
-                },
+                serializers: { req, res, err },
             });
         }
         const { default: morgan } = await import('morgan');

@@ -4,7 +4,7 @@ import mustache from 'mustache';
 import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as nodemailer from 'nodemailer';
-import type { Attachment } from 'nodemailer/lib/mailer';
+import Mail from 'nodemailer/lib/mailer/index.js';
 import type SMTPTransport from 'nodemailer/lib/smtp-transport/index.js';
 import orm from '../database.js';
 import { Product } from '../models/Product.js';
@@ -68,7 +68,7 @@ class ConnectedMailer implements Mailer {
         if (process.env.IMAGE_ASSETS_DIR === undefined) {
             throw new Error('Missing env vars');
         }
-        const attachments: Attachment[] = [
+        const attachments: Mail.Attachment[] = [
             {
                 filename: 'logo.png',
                 path: path.resolve(
@@ -111,7 +111,7 @@ class ConnectedMailer implements Mailer {
         if (process.env.IMAGE_ASSETS_DIR === undefined) {
             throw new Error('Missing env vars');
         }
-        const attachments: Attachment[] = [
+        const attachments: Mail.Attachment[] = [
             {
                 filename: 'logo.png',
                 path: path.resolve(
@@ -170,7 +170,7 @@ class ConnectedMailer implements Mailer {
                 },
             });
 
-            let attachments: Attachment[] = [
+            let attachments: Mail.Attachment[] = [
                 {
                     filename: 'logo.png',
                     path: path.resolve(
