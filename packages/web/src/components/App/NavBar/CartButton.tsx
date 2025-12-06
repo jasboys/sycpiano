@@ -2,13 +2,12 @@ import { css } from '@emotion/react';
 import { gsap } from 'gsap';
 import { mix } from 'polished';
 import * as React from 'react';
-
+import { cartStore } from 'src/components/Cart/store.js';
+import { toMedia } from 'src/mediaQuery';
+import { isHamburger } from 'src/screens';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
-import { isHamburger } from 'src/screens';
-import { toMedia } from 'src/mediaQuery';
-import { cartStore } from 'src/components/Cart/store.js';
 import { navBarStore } from './store.js';
 
 const cartStyles = {
@@ -75,7 +74,7 @@ const scaleDown = (tl: gsap.core.Tween) => {
     tl.reverse();
 };
 
-const scaleUp = (el: HTMLDivElement) => {
+const scaleUp = (el: HTMLButtonElement) => {
     const tl = gsap.fromTo(
         el,
         {
@@ -95,12 +94,10 @@ interface CartButtonProps {
     isHome: boolean;
 }
 
-const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(
-    ({ isHome }, ref) => {
-
+const CartButton = ({ isHome, ref }: React.ComponentPropsWithRef<'button'> & CartButtonProps) => {
         const cart = cartStore.useTrackedStore()
         const menuOpened = navBarStore.use.isExpanded();
-        const cartRef = React.useRef<HTMLDivElement | null>(null);
+        const cartRef = React.useRef<HTMLButtonElement>(null);
 
         React.useEffect(() => {
             const el = cartRef.current;
@@ -109,7 +106,7 @@ const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(
             }
         }, [cart.items.length]);
 
-        const makeRef = React.useCallback((el: HTMLDivElement) => {
+        const makeRef = React.useCallback((el: HTMLButtonElement) => {
             cartRef.current = el;
             if (typeof ref === 'function') {
                 ref(el);
@@ -124,7 +121,8 @@ const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(
         }, [menuOpened]);
 
         return (
-            <div
+            <button
+                type='button'
                 css={[
                     cartStyles.base,
                     isHome && cartStyles.isHome,
@@ -165,9 +163,8 @@ const CartButton = React.forwardRef<HTMLDivElement, CartButtonProps>(
                         </>
                     )}
                 </svg>
-            </div>
+            </button>
         );
-    },
-);
+    };
 
 export default CartButton;

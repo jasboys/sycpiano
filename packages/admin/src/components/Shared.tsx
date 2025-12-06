@@ -1,5 +1,5 @@
 
-import EditIcon from '@mui/icons-material/Edit.js';
+import EditIcon from '@mui/icons-material/Edit';
 import {
     Dialog,
     DialogTitle,

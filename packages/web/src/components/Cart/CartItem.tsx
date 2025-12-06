@@ -89,15 +89,14 @@ export const CartItem: React.FC<CartProps> = ({ item, error }) => {
                     >
                         {item.name}
                     </ItemName>
-                    <a
-                        css={{ flex: '0 0 auto', fontWeight: 300 }}
-                        role="button"
+                    <button
+                        css={{ all: 'unset', flex: '0 0 auto', fontWeight: 300 }}
+                        type="button"
                         tabIndex={0}
-                        // biome-ignore lint/a11y/useValidAnchor: <explanation>
                         onClick={() => cartStore.set.removeItem(item.id)}
                     >
                         Remove
-                    </a>
+                    </button>
                 </div>
                 <div css={{ marginTop: '0.5rem' }}>
                     <ItemPrice>{formatPrice(item.price)}</ItemPrice>

@@ -3,10 +3,9 @@ import styled from '@emotion/styled';
 import { gsap } from 'gsap';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
-
-import { toMedia } from 'src/mediaQuery';
 import { LazyImage } from 'src/components/LazyImage';
 import { cliburn1, generateSrcsetWidths, resizedImage } from 'src/imageUrls';
+import { toMedia } from 'src/mediaQuery';
 import {
     minRes,
     screenLengths,
@@ -102,14 +101,15 @@ const PreviewOverlay: React.FC<PreviewOverlayProps> = (props) => {
     }, [props.isMobile]);
 
     return (
-        <Transition<undefined>
+        <Transition
             in={isPreviewOverlay}
-            onExit={(el: HTMLElement) => {
-                gsap.fromTo(el, { opacity: 1, duration: 0.3 }, { opacity: 0 });
+            onExit={() => {
+                gsap.fromTo(bgRef.current, { opacity: 1, duration: 0.3 }, { opacity: 0 });
             }}
             timeout={300}
             unmountOnExit={true}
             mountOnEnter={true}
+            nodeRef={bgRef}
         >
             <StyledPreviewOverlay
                 onClick={clickCallback}

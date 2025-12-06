@@ -6,11 +6,11 @@ import type * as React from 'react';
 import DiscListItem from 'src/components/About/Discs/DiscListItem';
 import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
+import { useStore } from 'src/store.js';
 import { logoBlue } from 'src/styles/colors.js';
 import { latoFont } from 'src/styles/fonts';
 import { camel2var } from 'src/styles/variables';
 import type { Disc } from './types.js';
-import { useStore } from 'src/store.js';
 
 type DiscListProps = Record<never, unknown>;
 

@@ -1,19 +1,18 @@
 import { css } from '@emotion/react';
-import { easeQuadOut } from 'd3-ease';
-import { gsap } from 'gsap';
-import * as React from 'react';
-
-import PortfolioButton from 'src/components/About/Bio/PortfolioButton';
-import { toMedia } from 'src/mediaQuery';
 // import { fetchBio } from 'src/components/About/Bio/store';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import { easeQuadOut } from 'd3-ease';
+import { gsap } from 'gsap';
+import * as React from 'react';
+import PortfolioButton from 'src/components/About/Bio/PortfolioButton';
 import { LazyImage } from 'src/components/LazyImage';
 import {
     generateSrcsetWidths,
     resizedImage,
     sycWithPianoBW,
 } from 'src/imageUrls';
+import { toMedia } from 'src/mediaQuery';
 import {
     screenLengths,
     screenM,
@@ -21,12 +20,12 @@ import {
     screenWidths,
     screenXS,
 } from 'src/screens';
+import { rootStore, useStore } from 'src/store.js';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 import { isImageElement } from 'src/utils';
 import { MemoizedBioText } from './BioText';
 import type { Blurb } from './types.js';
-import { rootStore, useStore } from 'src/store.js';
 
 const pictureHeight = 250;
 
@@ -107,6 +106,7 @@ const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
             if (screenXS || screenPortrait) {
                 const height = Number.parseInt(
                     window.getComputedStyle(bgRef.current).height,
+                    10
                 );
                 const float = easeQuadOut(Math.max(1 - scrollTop / height, 0));
                 const rounded =
@@ -155,6 +155,7 @@ const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
                                   const height = Number.parseInt(
                                       window.getComputedStyle(bgRef.current)
                                           .height,
+                                          10
                                   );
                                   rootStore.navBar.set.onScroll(
                                       height + navBarHeight.get(hiDpx),

@@ -1,22 +1,20 @@
 /* global MUSIC_PATH */
 
+
+import { css } from '@emotion/react';
+import { useQuery } from '@tanstack/react-query';
 import isEmpty from 'lodash-es/isEmpty';
 import * as React from 'react';
 import {
-    useMatch,
-    useNavigate,
     type NavigateFunction,
     type PathMatch,
+    useMatch,
+    useNavigate,
 } from 'react-router-dom';
-
 import AudioInfo from 'src/components/Media/Music/AudioInfo';
 import AudioUI from 'src/components/Media/Music/AudioUI';
 import type { AudioVisualizerType } from 'src/components/Media/Music/AudioVisualizerBase.jsx';
 import MusicPlaylist from 'src/components/Media/Music/MusicPlaylist';
-import { toMedia } from 'src/mediaQuery';
-
-import { css } from '@emotion/react';
-import { useQuery } from '@tanstack/react-query';
 import {
     fetchPlaylistFn,
     itemsToFlatItems,
@@ -32,6 +30,7 @@ import {
     getSrc,
     getWaveformSrc,
 } from 'src/components/Media/Music/utils';
+import { toMedia } from 'src/mediaQuery';
 import extractModule from 'src/module';
 import {
     minRes,
@@ -40,10 +39,10 @@ import {
     screenShort,
     webkitMinDPR,
 } from 'src/screens';
+import { rootStore, useStore } from 'src/store.js';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight, playlistContainerWidth } from 'src/styles/variables';
 import { MusicPlayer } from './MusicPlayer.js';
-import { rootStore, useStore } from 'src/store.js';
 
 const detectWebGL = () => {
     const canvas = document.createElement('canvas');
@@ -142,7 +141,7 @@ const Music: React.FC = () => {
 
     const navigate = useNavigate();
 
-    const Visualizer = React.useRef<AudioVisualizerType>();
+    const Visualizer = React.useRef<AudioVisualizerType>(null);
 
     const [visualizerLoaded, setVisualizerLoaded] =
         React.useState<boolean>(false);
@@ -166,7 +165,7 @@ const Music: React.FC = () => {
         prev: HTMLAudioElement | null;
         next: HTMLAudioElement | null;
     }>({ prev: null, next: null });
-    const shouldPlay = React.useRef<boolean>();
+    const shouldPlay = React.useRef<boolean>(false);
     const tracks = React.useRef<{
         prev: MusicFileItem | undefined;
         next: MusicFileItem | undefined;
@@ -343,7 +342,7 @@ const Music: React.FC = () => {
                 navigator.mediaSession.setActionHandler('previoustrack', () =>
                     playSubsequent('prev'),
                 );
-            } catch (e) {
+            } catch (_e) {
                 console.log('Media session action is not supported');
             }
         }
@@ -438,13 +437,17 @@ const Music: React.FC = () => {
             <audio
                 id="prev"
                 crossOrigin="anonymous"
-                ref={(el) => (buffers.current.prev = el)}
+                ref={(el) => {
+                    buffers.current.prev = el}
+                }
                 preload="auto"
             />
             <audio
                 id="next"
                 crossOrigin="anonymous"
-                ref={(el) => (buffers.current.next = el)}
+                ref={(el) => {
+                    buffers.current.next = el
+                }}
                 preload="auto"
             />
             <div

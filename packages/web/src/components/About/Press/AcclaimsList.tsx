@@ -6,11 +6,11 @@ import type * as React from 'react';
 import AcclaimsListItem from 'src/components/About/Press/AcclaimsListItem';
 import { toMedia } from 'src/mediaQuery';
 import { hiDpx, isHamburger } from 'src/screens';
+import { useStore } from 'src/store.js';
 import { logoBlue } from 'src/styles/colors.js';
 import { latoFont } from 'src/styles/fonts';
 import { navBarHeight } from 'src/styles/variables';
 import type { AcclaimItemShape } from './types.js';
-import { useStore } from 'src/store.js';
 
 interface AcclaimsListProps {
     className?: string;

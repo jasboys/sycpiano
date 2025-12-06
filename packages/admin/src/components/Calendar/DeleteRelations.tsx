@@ -1,4 +1,4 @@
-import IconDelete from '@mui/icons-material/Delete.js';
+import IconDelete from '@mui/icons-material/Delete';
 import { Button as MuiButton } from '@mui/material';
 import {
     useDelete,
@@ -17,7 +17,7 @@ export const DeleteCalendarPiece = () => {
     const notify = useNotify();
 
     const handleClick = () => {
-        deleteOne(
+        record && deleteOne(
             'calendar-pieces',
             {
                 id: record.pivotId,
@@ -51,7 +51,7 @@ export const DeleteCalendarCollaborator = () => {
 
 
     const handleClick = () => {
-            deleteOne(
+            record && deleteOne(
                 'calendar-collaborators',
                 {
                     id: record.pivotId,

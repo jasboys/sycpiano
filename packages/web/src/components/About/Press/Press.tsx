@@ -1,12 +1,12 @@
 import { css } from '@emotion/react';
 import type * as React from 'react';
 
-import { toMedia } from 'src/mediaQuery';
 import AcclaimsList from 'src/components/About/Press/AcclaimsList';
+import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenXS } from 'src/screens';
+import { rootStore } from 'src/store.js';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
-import { rootStore } from 'src/store.js';
 
 interface PressProps {
     className?: string;

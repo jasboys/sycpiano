@@ -1,10 +1,9 @@
 import { loadStripe } from '@stripe/stripe-js';
 import axios, { type AxiosError, type AxiosResponse } from 'axios';
-import { createStore } from 'zustand-x';
-
 import type { CartStateShape } from 'src/components/Cart/types';
 import { storageAvailable } from 'src/localStorage';
 import { zustandMiddlewareOptions } from 'src/utils';
+import { createStore } from 'zustand-x';
 
 const LOCAL_STORAGE_KEY = 'seanchenpiano_cart';
 const apiKey = STRIPE_PUBLIC_KEY;
@@ -40,7 +39,7 @@ export const cartStore = createStore('cart')(
     },
     removeItem: (itemToRemove: string) => {
         set.state((state) => {
-            const idx = state.items.findIndex((item) => item === itemToRemove);
+            const idx = state.items.indexOf(itemToRemove);
             if (idx !== -1) {
                 state.items.splice(idx, 1);
             }
@@ -93,7 +92,8 @@ export const checkoutFn = async (email: string) => {
                 JSON.stringify(email),
             );
         }
-        const response = await axios.post<
+        // const response =
+        await axios.post<
             { email: string; productIds: string[] },
             AxiosResponse<{ sessionId: string }>
         >(
@@ -108,20 +108,20 @@ export const checkoutFn = async (email: string) => {
                 },
             },
         );
-        const loadedStripe = await stripe;
-        if (loadedStripe === null) {
-            throw new Error('Stripe JS failed to load');
-        }
-        const { error } = await loadedStripe.redirectToCheckout({
-            sessionId: response.data.sessionId,
-        });
-        if (error) {
-            cartStore.set.checkoutError({
-                message:
-                    'Stripe redirect failed. Did your internet connection reset?',
-            });
-            throw error;
-        }
+        // const loadedStripe = await stripe;
+        // if (loadedStripe === null) {
+        //     throw new Error('Stripe JS failed to load');
+        // }
+        // const { error } = await loadedStripe.redirectToCheckout({
+        //     sessionId: response.data.sessionId,
+        // });
+        // if (error) {
+        //     cartStore.set.checkoutError({
+        //         message:
+        //             'Stripe redirect failed. Did your internet connection reset?',
+        //     });
+        //     throw error;
+        // }
     } catch (e) {
         const axiosError = e as AxiosError<{ skus: string[] }>;
         if (axiosError.response?.status === 422) {

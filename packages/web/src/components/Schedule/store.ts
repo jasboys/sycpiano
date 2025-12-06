@@ -4,9 +4,9 @@ import type {
     EventListName,
     ScheduleStateShape,
 } from 'src/components/Schedule/types';
-import { createMonthGroups, maxOfMonthGroups, minOfMonthGroups } from './utils';
-import { createStore } from 'zustand-x';
 import { zustandMiddlewareOptions } from 'src/utils';
+import { createStore } from 'zustand-x';
+import { createMonthGroups, maxOfMonthGroups, minOfMonthGroups } from './utils';
 
 // const FETCH_LIMIT = 25;
 
@@ -36,12 +36,22 @@ const initialScheduleState: ScheduleStateShape = {
     isFetching: false,
 };
 
-export const scheduleStore = createStore('scheduleEventItems')(
-    initialScheduleState,
-    zustandMiddlewareOptions,
-)
+export const scheduleStore = createStore(
+    'scheduleEventItems',
+)<ScheduleStateShape>(initialScheduleState, zustandMiddlewareOptions)
     .extendSelectors((_set, get, _api) => ({
         itemsLength: (name: EventListName) => get[name]().items.length,
+        getEventList: (type: EventListName) => {
+            const name = type;
+            return {
+                eventItems: get[name]().items,
+                eventItemsLength: get[name]().items.length,
+                minDate: get[name]().minDate,
+                maxDate: get[name]().maxDate,
+                lastQuery: get[name]().lastQuery,
+                isSearching: get.isFetching(),
+            };
+        },
     }))
     .extendActions((set, _get, _api) => ({
         clearList: (name: EventListName) => {

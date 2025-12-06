@@ -16,9 +16,9 @@ import {
 } from 'src/imageUrls';
 import { toMedia } from 'src/mediaQuery';
 import { minRes, screenWidths, webkitMinDPR } from 'src/screens';
+import { useStore } from 'src/store.js';
 import { navBarHeight } from 'src/styles/variables';
 import { isImageElement } from 'src/utils';
-import { useStore } from 'src/store.js';
 
 interface PhotoAttributes {
     jpg?: string;

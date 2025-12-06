@@ -98,12 +98,15 @@ interface SocialMediaLinkProps {
     url: string;
 }
 
-const SocialMediaLink: React.FC<SocialMediaLinkProps> = (props) => (
+const SocialMediaLink = (
+    props: React.ComponentPropsWithRef<'a'> & SocialMediaLinkProps,
+) => (
     <SocialLink
         canHover={props.canHover}
         show={props.show}
         href={props.url}
         target="_blank"
+        ref={props.ref}
     >
         <img
             alt={`${props.social} icon`}
@@ -112,110 +115,113 @@ const SocialMediaLink: React.FC<SocialMediaLinkProps> = (props) => (
     </SocialLink>
 );
 
-interface SocialState {
-    show: boolean;
-    canHover: { [key: string]: boolean };
-}
+const defaultCanHover = Object.keys(socials).reduce(
+    (prev, curr) => {
+        prev[curr] = false;
+        return prev;
+    },
+    {} as Record<string, boolean>,
+);
 
-class Social extends React.PureComponent<Record<never, unknown>, SocialState> {
-    defaultCanHover = Object.keys(socials).reduce(
-        (prev, curr) => {
-            prev[curr] = false;
-            return prev;
-        },
-        {} as Record<string, boolean>,
+const socialLength = Object.keys(socials).length;
+
+const Social = () => {
+    const [show, setShow] = React.useState<boolean>(false);
+    const [canHover, setCanHover] = React.useState<Record<string, boolean>>({});
+    const refs = React.useRef<React.RefObject<HTMLAnchorElement | null>[]>(
+        Object.keys(socials).map(() => React.createRef<HTMLAnchorElement>()),
     );
 
-    state: SocialState = {
-        show: false,
-        canHover: this.defaultCanHover,
-    };
+    const onSocialEnter = React.useCallback(
+        (id: number, ref: React.RefObject<HTMLAnchorElement | null>) => () => {
+            const relative = id - (socialLength / 2 - 0.5);
+            ref.current &&
+                gsap.fromTo(
+                    ref.current,
+                    {
+                        opacity: 0,
+                        y: '-50%',
+                        x: `${relative * -100}%`,
+                        duration: 0.25,
+                    },
+                    {
+                        opacity: 1,
+                        y: '0%',
+                        x: '0%',
+                        delay: 0.05 * id,
+                        ease: Elastic.easeOut.config(1, 0.75),
+                        clearProps: 'transform',
+                    },
+                );
+        },
+        [],
+    );
 
-    onHandleClick = (): void => {
-        this.setState({ show: !this.state.show });
-    };
+    const onSocialExit = React.useCallback(
+        (id: number, ref: React.RefObject<HTMLAnchorElement | null>) => () => {
+            const relative = id - Math.floor(socialLength / 2);
+            ref.current &&
+                gsap.fromTo(
+                    ref.current,
+                    {
+                        opacity: 1,
+                        y: '0%',
+                        x: '0%',
+                        duration: 0.25,
+                    },
+                    {
+                        opacity: 0,
+                        y: '-50%',
+                        x: `${relative * -100}%`,
+                        delay: 0.05 * id,
+                        ease: Elastic.easeOut.config(1, 0.75),
+                        clearProps: 'transform',
+                    },
+                );
+            setCanHover(defaultCanHover);
+        },
+        [],
+    );
 
-    onSocialEnter =
-        (id: number) =>
-        (el: HTMLElement): void => {
-            const relative = id - (Object.keys(socials).length / 2 - 0.5);
-            gsap.fromTo(
-                el,
-                {
-                    opacity: 0,
-                    y: '-50%',
-                    x: `${relative * -100}%`,
-                    duration: 0.25,
-                },
-                {
-                    opacity: 1,
-                    y: '0%',
-                    x: '0%',
-                    delay: 0.05 * id,
-                    ease: Elastic.easeOut.config(1, 0.75),
-                    clearProps: 'transform',
-                },
-            );
-        };
-
-    onSocialExit =
-        (id: number) =>
-        (el: HTMLElement): void => {
-            const relative = id - Math.floor(Object.keys(socials).length / 2);
-            gsap.fromTo(
-                el,
-                {
-                    opacity: 1,
-                    y: '0%',
-                    x: '0%',
-                    duration: 0.25,
-                },
-                {
-                    opacity: 0,
-                    y: '-50%',
-                    x: `${relative * -100}%`,
-                    delay: 0.05 * id,
-                    ease: Elastic.easeOut.config(1, 0.75),
-                    clearProps: 'transform',
-                },
-            );
-            this.setState({ canHover: this.defaultCanHover });
-        };
-    render() {
-        return (
-            <SocialContainer>
-                <Handle onClick={this.onHandleClick}>
-                    <HandleText>@seanchenpiano</HandleText>
-                </Handle>
-                <SocialIconsContainer>
-                    {Object.keys(socials).map((key, idx) => (
-                        <Transition<undefined>
-                            key={key}
-                            in={this.state.show}
-                            onEnter={this.onSocialEnter(idx)}
-                            onExit={this.onSocialExit(idx)}
-                            timeout={250 + 50 * idx}
-                            onEntered={() =>
-                                this.setState({
-                                    canHover: {
-                                        ...this.state.canHover,
-                                        [key]: true,
-                                    },
-                                })
-                            }
-                        >
-                            <SocialMediaLink
-                                canHover={this.state.canHover[key]}
-                                show={this.state.show}
-                                url={socials[key]}
-                                social={key}
-                            />
-                        </Transition>
-                    ))}
-                </SocialIconsContainer>
-            </SocialContainer>
-        );
-    }
-}
+    return (
+        <SocialContainer>
+            <Handle
+                onClick={() => {
+                    setShow(!show);
+                }}
+            >
+                <HandleText>@seanchenpiano</HandleText>
+            </Handle>
+            <SocialIconsContainer>
+                {Object.keys(socials).map((key, idx) => (
+                    <Transition
+                        key={key}
+                        in={show}
+                        onEnter={onSocialEnter(idx, refs.current[idx])}
+                        onExit={onSocialExit(idx, refs.current[idx])}
+                        timeout={250 + 50 * idx}
+                        onEntered={() =>
+                            setCanHover({
+                                ...canHover,
+                                [key]: true,
+                            })
+                        }
+                        nodeRef={refs.current[idx]}
+                    >
+                        <SocialMediaLink
+                            canHover={canHover[key]}
+                            show={show}
+                            url={socials[key]}
+                            social={key}
+                            ref={(el) => {
+                                refs.current[idx].current = el;
+                            }}
+                        />
+                    </Transition>
+                ))}
+            </SocialIconsContainer>
+        </SocialContainer>
+    );
+};
 
 export default Social;

@@ -1,4 +1,4 @@
-import IconMerge from '@mui/icons-material/Merge.js';
+import IconMerge from '@mui/icons-material/Merge';
 import { Box } from '@mui/material';
 import { formatInTimeZone } from 'date-fns-tz';
 import {

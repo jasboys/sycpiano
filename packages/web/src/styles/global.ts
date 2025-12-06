@@ -1,14 +1,14 @@
-import type { CSSInterpolation } from '@emotion/css';
 import { type CSSObject, css } from '@emotion/react';
+import type { CSSInterpolation } from '@emotion/serialize';
 import { toMedia } from 'src/mediaQuery';
 import { hiDpx, screenM } from 'src/screens';
 
 import { colorVars, logoBlue } from 'src/styles/colors';
 import { link } from 'src/styles/mixins';
 import {
+    CSSVariables,
     camel2prop,
     camel2var,
-    CSSVariables,
     navBarHeight,
     toPx,
 } from 'src/styles/variables';
@@ -96,6 +96,9 @@ export const globalCss = css([
         },
 
         a: link(logoBlue),
+        button: {
+            all: 'unset',
+        },
     },
     loadFont('Lato', 'lato-hairline', 100, {
         textRendering: 'optimizeLegibility',

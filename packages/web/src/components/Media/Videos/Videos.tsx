@@ -13,10 +13,10 @@ import VideoPlaylist from 'src/components/Media/Videos/VideoPlaylist';
 import { toMedia } from 'src/mediaQuery';
 import { minRes, screenPortrait, screenXS, webkitMinDPR } from 'src/screens';
 import youTube from 'src/services/YouTube';
+import { useStore } from 'src/store.js';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 import { titleStringBase } from 'src/utils';
-import { useStore } from 'src/store.js';
 import type { VideoItemShape } from './types.js';
 
 type VideosProps = Record<never, unknown>;
@@ -121,6 +121,7 @@ const Videos: React.FC<VideosProps> = () => {
     const isPlayerReady = videoStore.use.isPlayerReady();
     const match = useMatch('media/videos/:videoId');
     const domElement = React.useRef<HTMLDivElement>(null);
+    const overlayRef = React.useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
 
     const { data: videos } = useQuery({
@@ -177,16 +178,17 @@ const Videos: React.FC<VideosProps> = () => {
             )}
             <StyledVideos ref={domElement}>
                 <PreviewOverlay isMobile={isHamburger} />
-                <Transition<undefined>
+                <Transition
                     in={!isPlayerReady}
-                    onExit={(el) =>
-                        gsap.to(el, { duration: 0.3, autoAlpha: 0 })
+                    onExit={() =>
+                        gsap.to(overlayRef.current, { duration: 0.3, autoAlpha: 0 })
                     }
                     timeout={300}
                     mountOnEnter={true}
                     unmountOnExit={true}
+                    nodeRef={overlayRef}
                 >
-                    <LoadingOverlayDiv>
+                    <LoadingOverlayDiv ref={overlayRef}>
                         <LoadingInstanceContainer>
                             <LoadingInstance />
                         </LoadingInstanceContainer>

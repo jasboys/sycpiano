@@ -4,11 +4,11 @@ import { type InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
 import { Back, gsap } from 'gsap';
 import debounce from 'lodash-es/debounce';
 import startCase from 'lodash-es/startCase';
+import { transparentize } from 'polished';
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
-
 import { LoadingInstance } from 'src/components/LoadingSVG.jsx';
 import { MonthEvents } from 'src/components/Schedule/EventMonth.jsx';
 import { scheduleStore } from 'src/components/Schedule/store.js';
@@ -19,12 +19,10 @@ import type {
 } from 'src/components/Schedule/types';
 import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenXS, screenXSandPortrait } from 'src/screens';
+import { useStore } from 'src/store.js';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { metaDescriptions, titleStringBase } from 'src/utils';
-import { shallow } from 'zustand/shallow';
-import { transparentize } from 'polished';
-import { useStore } from 'src/store.js';
 import {
     FETCH_LIMIT,
     fetchEvents,
@@ -108,17 +106,17 @@ const ScrollingContainer = styled.div<{ isSearch: boolean }>((props) => ({
     },
 }));
 
-const loadingOnEnter = (el: HTMLElement) => {
+const loadingOnEnter = (el: React.RefObject<HTMLDivElement | null>) => () => {
     gsap.fromTo(
-        el,
+        el.current,
         { y: 200 },
         { duration: 0.5, y: 0, ease: Back.easeOut.config(1) },
     );
 };
 
-const loadingOnExit = (el: HTMLElement) => {
+const loadingOnExit = (el: React.RefObject<HTMLDivElement | null>) => () => {
     gsap.fromTo(
-        el,
+        el.current,
         { y: 0 },
         {
             duration: 0.5,
@@ -130,6 +128,8 @@ const loadingOnExit = (el: HTMLElement) => {
 };
 
 export const EventList: React.FC<EventListProps> = (props) => {
+    const loadingRef = React.useRef<HTMLDivElement>(null);
+
     const {
         eventItems,
         minDate,
@@ -137,17 +137,8 @@ export const EventList: React.FC<EventListProps> = (props) => {
         eventItemsLength,
         lastQuery,
         isSearching,
-    } = scheduleStore.useStore((state) => {
-        const name = props.type;
-        return {
-            eventItems: state[name].items,
-            eventItemsLength: state[name].items.length,
-            minDate: state[name].minDate,
-            maxDate: state[name].maxDate,
-            lastQuery: state[name].lastQuery,
-            isSearching: state.isFetching,
-        };
-    }, shallow);
+    } = scheduleStore.use.getEventList(props.type);
+
     const navigate = useNavigate();
     const routeParams = useParams();
     const { '*': date } = routeParams;
@@ -290,14 +281,15 @@ export const EventList: React.FC<EventListProps> = (props) => {
                     </EndOfList>
                 )}
             </ScrollingContainer>
-            <Transition<undefined>
+            <Transition
                 in={isFetching || isSearching}
                 timeout={300}
-                onEnter={loadingOnEnter}
-                onExit={loadingOnExit}
+                onEnter={loadingOnEnter(loadingRef)}
+                onExit={loadingOnExit(loadingRef)}
                 appear={true}
+                nodeRef={loadingRef}
             >
-                <LoadingDiv>
+                <LoadingDiv ref={loadingRef}>
                     <SpinnerContainer>
                         <LoadingInstance
                             css={loadingStyle}

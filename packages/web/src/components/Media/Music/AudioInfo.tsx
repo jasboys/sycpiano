@@ -7,12 +7,12 @@ import { formatTime } from 'src/components/Media/Music/utils';
 import { staticImage } from 'src/imageUrls.js';
 import { toMedia } from 'src/mediaQuery';
 import { minRes, screenPortrait, webkitMinDPR } from 'src/screens';
+import { useStore } from 'src/store.js';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { metaDescriptions, titleStringBase } from 'src/utils';
-import { musicStore } from './store.js';
 import { shallow } from 'zustand/shallow';
-import { useStore } from 'src/store.js';
+import { musicStore } from './store.js';
 
 interface AudioInfoProps {
     matchParams: boolean;

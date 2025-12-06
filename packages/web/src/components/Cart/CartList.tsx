@@ -1,25 +1,25 @@
 import styled from '@emotion/styled';
 import TextField from '@mui/material/TextField';
 import { ThemeProvider } from '@mui/system';
+import { useMutation } from '@tanstack/react-query';
 import Markdown from 'markdown-to-jsx';
 import { mix } from 'polished';
 import * as React from 'react';
-import isEmail from 'validator/es/lib/isEmail';
 
 import { Link } from 'react-router-dom';
 import { CartItem } from 'src/components/Cart/CartItem';
 import type { Product } from 'src/components/Shop/ShopList/types';
 import { toMedia } from 'src/mediaQuery';
 import { screenS } from 'src/screens';
+import { useStore, useTrackedStore } from 'src/store.js';
 import { lightBlue, logoBlue, theme } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { cartWidth } from 'src/styles/variables';
 import { formatPrice } from 'src/utils';
+import isEmail from 'validator/es/lib/isEmail';
 import { LoadingInstance } from '../LoadingSVG.jsx';
 import { cartStore, checkoutFn } from './store.js';
-import { useTrackedStore } from 'src/store.js';
-import { useMutation } from '@tanstack/react-query';
 
 const ARROW_SIDE = 32;
 
@@ -324,17 +324,10 @@ const faqRedirectLink: React.FC<
 };
 
 export const CartList: React.FC<Record<never, unknown>> = () => {
-    // const isCheckingOut = useAppSelector(({ cart }) => cart.isCheckingOut);
-    // const shopItems = useAppSelector(({ shop }) => shop.items);
-    // const cart = useAppSelector(({ cart }) => cart.items);
-    // const checkoutError = useAppSelector(({ cart }) => cart.checkoutError);
-    const { isCheckingOut, cartItems, checkoutError } = cartStore.useStore(
-        (state) => ({
-            isCheckingOut: state.isCheckingOut,
-            cartItems: state.items,
-            checkoutError: state.checkoutError,
-        }),
-    );
+    const isCheckingOut = useStore().cart.isCheckingOut();
+    const cartItems = useStore().cart.items();
+    const checkoutError = useStore().cart.checkoutError();
+
     const shopItems = useTrackedStore().shop.items?.();
 
     let subtotal = 0;

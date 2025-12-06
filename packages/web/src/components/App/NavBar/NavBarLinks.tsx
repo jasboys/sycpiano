@@ -1,8 +1,7 @@
-import * as React from 'react';
-
 import { css } from '@emotion/react';
-import NavBarLink from 'src/components/App/NavBar/NavBarLink';
+import * as React from 'react';
 import { links } from 'src/components/App/NavBar/links';
+import NavBarLink from 'src/components/App/NavBar/NavBarLink';
 import type { LinkShape, NavBarLinksProps } from 'src/components/App/NavBar/types';
 import { toMedia } from 'src/mediaQuery';
 import { hiDpx } from 'src/screens';

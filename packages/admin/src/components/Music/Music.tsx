@@ -1,6 +1,6 @@
-import IconCancel from '@mui/icons-material/Cancel.js';
-import IconDelete from '@mui/icons-material/Delete.js';
-import IconRestore from '@mui/icons-material/Restore.js';
+import IconCancel from '@mui/icons-material/Cancel';
+import IconDelete from '@mui/icons-material/Delete';
+import IconRestore from '@mui/icons-material/Restore';
 import {
     DialogActions,
     DialogContent,

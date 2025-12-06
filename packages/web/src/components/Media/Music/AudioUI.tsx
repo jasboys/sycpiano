@@ -19,10 +19,10 @@ import {
 import { cartesianToPolar } from 'src/components/Media/Music/utils';
 import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
+import { rootStore } from 'src/store.js';
 import { lightBlue } from 'src/styles/colors';
 import { fadeOnEnter, fadeOnExit } from 'src/utils.js';
 import { musicStore } from './store.js';
-import { rootStore } from 'src/store.js';
 
 const isMouseEvent = <E extends Element>(
     event: AggregateUIEvent<E>,
@@ -139,12 +139,16 @@ const AudioUI: React.FC<AudioUIProps> = ({
         centerY: number;
     }>({ height: 0, width: 0, centerX: 0, centerY: 0 });
 
-    const timerId = React.useRef<ReturnType<typeof setTimeout>>();
+    const timerId = React.useRef<ReturnType<typeof setTimeout>>(0);
     const prevPercentage = React.useRef<number>(0);
-    const isDragging = React.useRef<boolean>();
+    const isDragging = React.useRef<boolean>(false);
 
     const seekRing = React.useRef<HTMLCanvasElement | null>(null);
-    const visualizationCtx = React.useRef<CanvasRenderingContext2D | null>();
+    const visualizationCtx = React.useRef<CanvasRenderingContext2D | null>(
+        null,
+    );
+
+    const controlsRef = React.useRef<HTMLDivElement | null>(null);
 
     const {
         isLoading,
@@ -489,13 +493,14 @@ const AudioUI: React.FC<AudioUIProps> = ({
             )}
             <Transition
                 in={isMouseMove || isHamburger}
-                onEnter={fadeOnEnter()}
-                onExit={fadeOnExit()}
+                onEnter={fadeOnEnter(controlsRef)}
+                onExit={fadeOnExit(controlsRef)}
                 timeout={250}
                 mountOnEnter={true}
                 unmountOnExit={true}
+                nodeRef={controlsRef}
             >
-                <ControlsContainer>
+                <ControlsContainer ref={controlsRef}>
                     <PauseIcon
                         ref={pauseIcon}
                         width={buttonLength}
@@ -509,7 +514,9 @@ const AudioUI: React.FC<AudioUIProps> = ({
                         verticalOffset={verticalOffset}
                     />
                     <SkipButton
-                        ref={(el) => (buttonRefs.current.prev = el)}
+                        ref={(el) => {
+                            buttonRefs.current.prev = el
+                        }}
                         key="prev-button"
                         onClick={() => playSubsequent('prev')}
                         isHovering={state.isHoverPrev}
@@ -526,7 +533,9 @@ const AudioUI: React.FC<AudioUIProps> = ({
                     />
                     {isPlaying ? (
                         <PauseButton
-                            ref={(el) => (buttonRefs.current.pause = el)}
+                            ref={(el) => {
+                                buttonRefs.current.pause = el
+                            }}
                             key="pause-button"
                             onClick={togglePlay}
                             isHovering={state.isHoverPlaypause}
@@ -542,7 +551,9 @@ const AudioUI: React.FC<AudioUIProps> = ({
                         />
                     ) : (
                         <PlayButton
-                            ref={(el) => (buttonRefs.current.play = el)}
+                            ref={(el) => {
+                                buttonRefs.current.play = el
+                            }}
                             key="play-button"
                             onClick={togglePlay}
                             isHovering={state.isHoverPlaypause}
@@ -558,7 +569,9 @@ const AudioUI: React.FC<AudioUIProps> = ({
                         />
                     )}
                     <SkipButton
-                        ref={(el) => (buttonRefs.current.next = el)}
+                        ref={(el) => {
+                            buttonRefs.current.next = el;
+                        }}
                         key="next-button"
                         onClick={() => playSubsequent('next')}
                         isHovering={state.isHoverNext}

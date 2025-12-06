@@ -229,14 +229,19 @@ shopRouter.post('/checkout', async (req, res) => {
 
         const priceIds = prods.map((prod) => prod.priceId);
 
-        const sessionId = await stripeClient.createCheckoutSession(
+        const session = await stripeClient.createCheckoutSession(
             productIds,
             priceIds,
             customer.stripeId,
         );
-        res.json({
-            sessionId,
-        });
+        if (!session.url || !session.id) {
+            throw new Error('Checkout Session Creation Failed');
+        }
+        // res.json({
+        //     sessionId: session.id,
+        //     sessionUrl: session.url,
+        // });
+        res.redirect(303, session.url);
     } catch (e) {
         console.error('Checkout error', e);
         res.sendStatus(400);

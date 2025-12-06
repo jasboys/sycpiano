@@ -1,8 +1,7 @@
 import { debounce } from 'lodash-es';
-import type { NavBarStateShape } from './types.js';
-import { createStore } from 'zustand-x';
+import { create, StateCreator } from 'zustand';
 import { findParent } from './links.js';
-import { zustandMiddlewareOptions } from 'src/utils.js';
+import type { NavBarStateShape } from './types.js';
 
 const SCROLL_THRESHOLD = 10;
 
@@ -15,15 +14,29 @@ const initialState: NavBarStateShape = {
     specificRouteName: '',
 };
 
-export const navBarStore = createStore('navbar')(
-    initialState,
-    zustandMiddlewareOptions,
-)
-    .extendActions((set, _get, _api) => ({
-        debouncedToggle: debounce((show: boolean) => set.isVisible(show), 50, {
-            leading: true,
-        }),
-    }))
+interface NavBarActions {
+    debouncedToggle: (show: boolean) => void;
+    toggleNavBar: (show?: boolean) => void;
+    toggleExpanded: (expanded?: boolean) => void;
+    callSub: (args: { sub?: string; isHamburger?: boolean }) => void;
+    onScroll: (triggerHeight: number) =>
+            (event: React.UIEvent<HTMLElement> | UIEvent) => void;
+
+}
+
+export const navBarStore: StateCreator<
+    NavBarStateShape & NavBarActions,
+    [['zustand/immer', never]],
+    [],
+    NavBarStateShape & NavBarActions
+    >
+    (set) => ({
+    ...initialState,
+    debouncedToggle: debounce((show: boolean) => set.isVisible(show), 50, {
+        leading: true,
+    }),
+})
+
     .extendActions((set, get, _api) => ({
         toggleNavBar: (show?: boolean) => {
             const definedShow = show ?? !get.isVisible();

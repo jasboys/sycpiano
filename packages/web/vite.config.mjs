@@ -1,7 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
-import { splitVendorChunkPlugin } from 'vite';
 import * as path from 'node:path';
 import dotenv from 'dotenv';
 dotenv.config({ override: true, path: '../../.env' });

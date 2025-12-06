@@ -14,13 +14,12 @@ import { Transition } from 'react-transition-group';
 import { SearchIconInstance } from 'src/components/Schedule/SearchIconSVG';
 import { toMedia } from 'src/mediaQuery';
 import { screenXSandPortrait } from 'src/screens';
+import { useStore } from 'src/store.js';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
-
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
 import { scheduleStore } from './store.js';
-import { useStore } from 'src/store.js';
 
 const unfocusedGray = rgba(180, 180, 180, 0.4);
 
@@ -197,6 +196,7 @@ const SubmitButton = styled.button<{ dirty: boolean; expanded: boolean }>(
 );
 
 export const Search: React.FC<SearchProps> = () => {
+    const inputRef = React.useRef<HTMLDivElement>(null);
     const { lastQuery } = scheduleStore.useTracked.search();
     const isFetching = scheduleStore.use.isFetching();
     const itemsLength = scheduleStore.use.itemsLength('search');
@@ -320,15 +320,16 @@ export const Search: React.FC<SearchProps> = () => {
                 >
                     <SearchIconInstance />
                 </SubmitButton>
-                <Transition<undefined>
+                <Transition
                     in={expanded}
                     timeout={250}
-                    onEnter={fadeOnEnter()}
-                    onExit={fadeOnExit()}
+                    onEnter={fadeOnEnter(inputRef)}
+                    onExit={fadeOnExit(inputRef)}
                     mountOnEnter={false}
                     unmountOnExit={false}
+                    nodeRef={inputRef}
                 >
-                    <InputGroup isMobile={screenXS || !!searchParams.get('q')}>
+                    <InputGroup ref={inputRef} isMobile={screenXS || !!searchParams.get('q')}>
                         <Span focused={focused}>
                             <Input
                                 id="search"

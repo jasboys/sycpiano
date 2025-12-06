@@ -11,37 +11,34 @@ import * as React from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import {
     Navigate,
+    type PathMatch,
     Route,
     Routes,
     useLocation,
     useMatch,
     useNavigate,
-    type PathMatch,
 } from 'react-router-dom';
 import { SwitchTransition, Transition } from 'react-transition-group';
-
-import Container from 'src/components/App/Container';
-
 import type { RequiredProps as BioProps } from 'src/components/About/Bio/Bio';
 import type { RequiredProps as DiscsProps } from 'src/components/About/Discs/Discs';
 import type { RequiredProps as PressProps } from 'src/components/About/Press/Press';
-import type { RequiredProps as ContactProps } from 'src/components/Contact/Contact';
-import type { RequiredProps as HomeProps } from 'src/components/Home/Home';
-import type { RequiredProps as MusicProps } from 'src/components/Media/Music/Music';
-import type { RequiredProps as PhotosProps } from 'src/components/Media/Photos/Photos';
-import type { RequiredProps as VideosProps } from 'src/components/Media/Videos/Videos';
-import type { RequiredProps as ScheduleProps } from 'src/components/Schedule/Schedule';
-import type { RequiredProps as CheckoutSuccessProps } from 'src/components/Shop/CheckoutSuccess/CheckoutSuccess';
-import type { RequiredProps as FAQsProps } from 'src/components/Shop/FAQs/FAQs';
-import type { RequiredProps as RetrievalFormProps } from 'src/components/Shop/RetrievePurchases/RetrievePurchases';
-import type { RequiredProps as ShopListProps } from 'src/components/Shop/ShopList/ShopList';
-
+import Container from 'src/components/App/Container';
 import NavBar from 'src/components/App/NavBar/NavBar';
 import AsyncComponent from 'src/components/AsyncComponent';
 import Cart from 'src/components/Cart/Cart';
 import { ClickListenerOverlay } from 'src/components/ClickListenerOverlay';
+import type { RequiredProps as ContactProps } from 'src/components/Contact/Contact';
+import type { RequiredProps as HomeProps } from 'src/components/Home/Home';
 import { LogoSVG } from 'src/components/LogoSVG';
+import type { RequiredProps as MusicProps } from 'src/components/Media/Music/Music';
+import type { RequiredProps as PhotosProps } from 'src/components/Media/Photos/Photos';
+import type { RequiredProps as VideosProps } from 'src/components/Media/Videos/Videos';
+import type { RequiredProps as ScheduleProps } from 'src/components/Schedule/Schedule';
 import { eventListNamesArr } from 'src/components/Schedule/types';
+import type { RequiredProps as CheckoutSuccessProps } from 'src/components/Shop/CheckoutSuccess/CheckoutSuccess';
+import type { RequiredProps as FAQsProps } from 'src/components/Shop/FAQs/FAQs';
+import type { RequiredProps as RetrievalFormProps } from 'src/components/Shop/RetrievePurchases/RetrievePurchases';
+import type { RequiredProps as ShopListProps } from 'src/components/Shop/ShopList/ShopList';
 import extractModule from 'src/module';
 import { GLOBAL_QUERIES } from 'src/screens';
 import { rootStore } from 'src/store.js';
@@ -164,11 +161,11 @@ const getMostSpecificRouteName = (pathname: string) => {
     return match ? match.slice(1) : '';
 };
 
-const fadeOnEnter0 = fadeOnEnter(0);
-const slideOnEnter0 = slideOnEnter(0);
-const slideOnExit0 = slideOnExit(0);
-const fadeOnEnter02 = fadeOnEnter(0.2);
-const fadeOnExit05 = fadeOnExit(0.5);
+const fadeOnEnter0 = (ref: React.RefObject<HTMLDivElement | null>) => fadeOnEnter(ref, 0);
+const slideOnEnter0 = (ref: React.RefObject<HTMLDivElement | null>) => slideOnEnter(ref, 0);
+const slideOnExit0 = (ref: React.RefObject<HTMLDivElement | null>) => slideOnExit(ref, 0);
+const fadeOnEnter02 = (ref: React.RefObject<HTMLDivElement | null>) => fadeOnEnter(ref, 0.2);
+const fadeOnExit05 = (ref: React.RefObject<HTMLDivElement | null>) => fadeOnExit(ref, 0.5);
 
 type RouterMatchPaths =
     | PathMatch<'about'>
@@ -259,8 +256,10 @@ const App: React.FC<Record<never, unknown>> = () => {
         getMostSpecificRouteName(location.pathname),
     );
 
-    const arrowRef = React.useRef<HTMLDivElement | null>(null);
-    const timerRef = React.useRef<ReturnType<typeof setTimeout>>();
+    const arrowRef = React.useRef<HTMLDivElement>(null);
+    const timerRef = React.useRef<ReturnType<typeof setTimeout>>(0);
+    const navbarRef = React.useRef<HTMLDivElement>(null);
+    const fadingRef = React.useRef<HTMLDivElement>(null);
 
     const { matches: mediaMatches } = useMediaQueries(GLOBAL_QUERIES);
     const { isHamburger, screenXS, screenM, hiDpx } = mediaMatches;
@@ -288,11 +287,11 @@ const App: React.FC<Record<never, unknown>> = () => {
     const {
         x,
         y,
-        refs: { reference, floating },
+        refs: { reference: anchorRef, floating },
         strategy,
         middlewareData,
         update,
-    } = useFloating<HTMLDivElement>({
+    } = useFloating<HTMLButtonElement>({
         middleware: [
             offset({ mainAxis: hiDpx ? -12 : -4 }),
             shift(),
@@ -373,35 +372,38 @@ const App: React.FC<Record<never, unknown>> = () => {
             />
             <RootContainer isHome={location.pathname === '/'}>
                 <LogoSVG />
-                <Transition<undefined>
+                <Transition
                     in={navBarVisible || !isMobile}
-                    onEntering={(el, isAppearing) => {
+                    onEntering={(isAppearing) => {
                         if (isAppearing) {
-                            fadeOnEnter0(el, isAppearing);
+                            fadeOnEnter0(navbarRef)(isAppearing);
                         } else {
-                            slideOnEnter0(el);
+                            slideOnEnter0(navbarRef);
                         }
                     }}
-                    onExiting={slideOnExit0}
+                    onExiting={slideOnExit0(navbarRef)}
                     timeout={250}
                     appear={true}
+                    nodeRef={navbarRef}
                 >
                     <NavBar
                         delayedRouteBase={delayedRouteBase}
                         currentBasePath={getRouteBase(location.pathname)}
                         specificRouteName={delayedSpecific}
-                        ref={reference}
+                        anchorRef={anchorRef}
+                        navbarRef={navbarRef}
                     />
                 </Transition>
                 <SwitchTransition>
-                    <Transition<undefined>
+                    <Transition
                         key={transitionMatch?.pathnameBase}
-                        onEntering={fadeOnEnter02}
-                        onExiting={fadeOnExit05}
+                        onEntering={fadeOnEnter02(fadingRef)}
+                        onExiting={fadeOnExit05(fadingRef)}
                         timeout={800}
                         appear={true}
+                        nodeRef={fadingRef}
                     >
-                        <FadingContainer>
+                        <FadingContainer ref={fadingRef}>
                             <Routes
                                 location={{
                                     ...location,

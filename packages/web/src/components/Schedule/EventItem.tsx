@@ -220,7 +220,7 @@ const EventItem: React.FC<EventItemProps> = ({
                         setShared(undefined);
                     }, 2000);
                 }
-            } catch (e) {
+            } catch (_e) {
                 await window.navigator.clipboard.writeText(
                     `${window.location.protocol}//${window.location.host}${permaLink}`,
                 );
@@ -286,20 +286,21 @@ const EventItem: React.FC<EventItemProps> = ({
                             ref={reference}
                         />
                     </button>
-                    <Transition<undefined>
+                    <Transition
                         in={!!shared}
-                        onEnter={fadeOnEnter(0, 0.15)}
-                        onExit={fadeOnExit(0, 0.15)}
+                        onEnter={fadeOnEnter(floating as React.RefObject<HTMLDivElement>, 0, 0.15)}
+                        onExit={fadeOnExit(floating as React.RefObject<HTMLDivElement>, 0, 0.15)}
                         timeout={250}
                         mountOnEnter={true}
                         unmountOnExit={true}
+                        nodeRef={floating}
                     >
                         <CopiedTooltip
                             x={x ?? 0}
                             y={y ?? 0}
                             strategy={strategy}
                             ref={
-                                floating as React.MutableRefObject<HTMLDivElement>
+                                floating as React.RefObject<HTMLDivElement>
                             }
                         >
                             <Arrow

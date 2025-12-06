@@ -61,34 +61,41 @@ const playlistStyle = css`
 
 const Playlist = React.forwardRef<HTMLElement, PlaylistProps>((props, ref) => {
     const ulRef = React.useRef<HTMLUListElement | null>(null);
+    const divRef = React.useRef<HTMLDivElement | null>(null);
 
-    const onEnter = (el: HTMLElement, isAppearing: boolean): void => {
+    const onEnter = (isAppearing: boolean): void => {
         if ((!props.hasToggler || !props.shouldAppear) && isAppearing) {
-            el.style.transform = 'translateX(0)';
+            if (divRef.current) {
+                divRef.current.style.transform = 'translateX(0)';
+            }
         } else {
-            if (ulRef.current) {
+            if (ulRef.current && divRef.current) {
                 const amount = ulRef.current.getBoundingClientRect().width;
-                slideLeft(el, amount, isAppearing ? 0.25 : 0);
+                slideLeft(divRef.current, amount, isAppearing ? 0.25 : 0);
             }
         }
     };
 
-    const onExit = (el: HTMLElement): void => {
-        if (ulRef.current) {
+    const onExit = (): void => {
+        if (ulRef.current && divRef.current) {
             const amount = ulRef.current.getBoundingClientRect().width;
-            slideRight(el, amount);
+            slideRight(divRef.current, amount);
         }
     };
 
     return (
-        <Transition<undefined>
+        <Transition
             in={props.isShow}
             appear={true}
             onEnter={onEnter}
             onExit={onExit}
             timeout={400}
+            nodeRef={divRef}
         >
-            <div css={[playlistContainerStyle, props.extraStyles?.div]}>
+            <div
+                css={[playlistContainerStyle, props.extraStyles?.div]}
+                ref={divRef}
+            >
                 {props.hasToggler && (
                     <PlaylistToggler
                         isPlaylistVisible={props.isShow}

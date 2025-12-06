@@ -5,18 +5,20 @@ import CartButton from 'src/components/App/NavBar/CartButton';
 import HamburgerNav from 'src/components/App/NavBar/HamburgerNav';
 import NavBarLinks from 'src/components/App/NavBar/NavBarLinks';
 import NavBarLogo from 'src/components/App/NavBar/NavBarLogo';
-import { navBarHeight } from 'src/styles/variables';
-import { navBarStore } from './store.js';
 import { cartStore } from 'src/components/Cart/store.js';
 import { rootStore } from 'src/store.js';
+import { navBarHeight } from 'src/styles/variables';
+import { navBarStore } from './store.js';
 
 const shopEnabled = JSON.parse(ENABLE_SHOP) === true;
 
-interface NavBarProps {
+type NavBarProps = {
     readonly currentBasePath: string;
     readonly delayedRouteBase: string;
     readonly className?: string;
     readonly specificRouteName: string;
+    readonly anchorRef: React.RefObject<HTMLButtonElement | null>
+    readonly navbarRef: React.RefObject<HTMLDivElement | null>
 }
 
 const StyledNavBar = styled.div<{
@@ -81,8 +83,7 @@ menu: (portrait || dppx > 2 || (max-width: 1280 and orientation: landscape)) ? h
 
 */
 
-const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(
-    ({ currentBasePath, specificRouteName, delayedRouteBase }, ref) => {
+const NavBar = ({ currentBasePath, specificRouteName, delayedRouteBase, navbarRef, anchorRef }: NavBarProps) => {
         const isExpanded = navBarStore.use.isExpanded();
         const cartIsOpen = cartStore.use.visible();
         const { isHamburger, hiDpx } = rootStore.mediaQueries.useTrackedStore();
@@ -106,6 +107,7 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(
                 menuExpanded={isExpanded}
                 cartExpanded={cartIsOpen}
                 height={navBarHeight.get(hiDpx)}
+                ref={navbarRef}
             >
                 <NavBarLogo
                     isHome={isHome}
@@ -126,11 +128,10 @@ const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(
                             isHamburger={false}
                         />
                     )}
-                    {shopEnabled && <CartButton isHome={isHome} ref={ref} />}
+                    {shopEnabled && <CartButton isHome={isHome} ref={anchorRef} />}
                 </StyledNavAndCart>
             </StyledNavBar>
         );
-    },
-);
+    };
 
 export default NavBar;

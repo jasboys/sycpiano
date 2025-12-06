@@ -5,6 +5,7 @@ import * as React from 'react';
 import { Transition } from 'react-transition-group';
 
 import { LazyImage } from 'src/components/LazyImage';
+import { LoadingInstance } from 'src/components/LoadingSVG.jsx';
 import type { PhotoItem } from 'src/components/Media/Photos/types';
 import {
     idFromItem,
@@ -13,9 +14,8 @@ import {
 } from 'src/components/Media/Photos/utils';
 import { generateSrcsetWidths } from 'src/imageUrls';
 import { screenWidths } from 'src/screens';
-import { fadeOnEnter, fadeOnExit, isImageElement } from 'src/utils';
 import { lightBlue } from 'src/styles/colors.js';
-import { LoadingInstance } from 'src/components/LoadingSVG.jsx';
+import { fadeOnEnter, fadeOnExit, isImageElement } from 'src/utils';
 import { photoStore } from './store.js';
 
 interface PhotoFaderProps {
@@ -58,6 +58,7 @@ const PhotoFader: React.FC<PhotoFaderProps> = ({
 }) => {
     const urlWebP = resizedPathFromItem(item, { gallery: true, webp: true });
     const urlJpg = resizedPathFromItem(item, { gallery: true });
+    const divRef = React.useRef<HTMLDivElement>(null);
 
     const successCb = React.useCallback(
         (el: HTMLImageElement | HTMLElement | Element | undefined) => {
@@ -70,16 +71,25 @@ const PhotoFader: React.FC<PhotoFaderProps> = ({
     );
 
     return (
-        <Transition<undefined>
+        <Transition
             key={idx}
             mountOnEnter={true}
             unmountOnExit={true}
             in={isCurrent}
-            onEntering={fadeOnEnter()}
-            onExiting={fadeOnExit()}
+            onEntering={fadeOnEnter(divRef)}
+            onExiting={fadeOnExit(divRef)}
             appear={true}
             timeout={250}
+            nodeRef={divRef}
         >
+            <div ref={divRef} css={{
+                position: 'absolute',
+                width: '100%',
+                height: '100%',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+            }}>
             <LazyImage
                 id={`${idFromItem(item)}_view`}
                 alt="Sean Chen Pianist Photo Viewer"
@@ -113,6 +123,7 @@ const PhotoFader: React.FC<PhotoFaderProps> = ({
                 successCb={successCb}
                 isMobile={isMobile}
             />
+            </div>
         </Transition>
     );
 };

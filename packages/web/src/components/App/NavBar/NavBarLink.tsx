@@ -117,8 +117,8 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
     currentSpecificPath,
 }) => {
     const showSubs = navBarStore.use.showSubs();
-    const enterTimeline = React.useRef<GSAPTimeline>();
-    const exitTimeline = React.useRef<GSAPTimeline>();
+    const enterTimeline = React.useRef<GSAPTimeline>(null);
+    const exitTimeline = React.useRef<GSAPTimeline>(null);
     const el = React.useRef<HTMLDivElement>(null);
 
     // css attr is common
@@ -221,7 +221,7 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
                 </Link>
             )}
             {subNavLinks && (
-                <Transition<HTMLDivElement>
+                <Transition
                     nodeRef={el}
                     in={showSubs.includes(link.name)}
                     onEnter={(isAppearing) => {

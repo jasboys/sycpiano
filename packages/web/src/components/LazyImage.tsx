@@ -1,8 +1,7 @@
+import { css, type Interpolation, type Theme } from '@emotion/react';
 import Blazy from 'blazy';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
-
-import { css, type Interpolation, type Theme } from '@emotion/react';
 
 import { LoadingInstance } from 'src/components/LoadingSVG';
 import { lightBlue } from 'src/styles/colors';
@@ -55,9 +54,10 @@ interface LazyImageProps {
 
 export const LazyImage: React.FC<LazyImageProps> = (props) => {
     const [isLoaded, setIsLoaded] = React.useState(false);
-    const blazy = React.useRef<BlazyInstance>();
+    const blazy = React.useRef<BlazyInstance>(null);
     const mounted = React.useRef<boolean>(false);
-    const timeout = React.useRef<ReturnType<typeof setTimeout>>();
+    const timeout = React.useRef<ReturnType<typeof setTimeout>>(null);
+    const fadeRef = React.useRef<HTMLDivElement>(null);
 
     const activateBlazy = React.useCallback(() => {
         blazy.current = new Blazy({
@@ -140,15 +140,16 @@ export const LazyImage: React.FC<LazyImageProps> = (props) => {
 
     return (
         <React.Fragment>
-            <Transition<undefined>
+            <Transition
                 in={!!LoadingComponent && !isLoaded}
                 mountOnEnter={true}
                 unmountOnExit={true}
-                onEnter={fadeOnEnter()}
-                onExit={fadeOnExit()}
+                onEnter={fadeOnEnter(fadeRef)}
+                onExit={fadeOnExit(fadeRef)}
                 timeout={250}
+                nodeRef={fadeRef}
             >
-                <div css={[loadingContainerStyle, csss?.loading]}>
+                <div ref={fadeRef} css={[loadingContainerStyle, csss?.loading]}>
                     {Loading ? <Loading /> : null}
                 </div>
             </Transition>

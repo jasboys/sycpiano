@@ -1,6 +1,6 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import type * as React from 'react';
+import * as React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SwitchTransition, Transition } from 'react-transition-group';
 
@@ -43,6 +43,7 @@ interface ScheduleProps { type: EventListName; }
 
 const Schedule: React.FC<ScheduleProps> = ({ type }) => {
     const [params, _setParams] = useSearchParams();
+    const fadingRef = React.useRef<HTMLDivElement>(null);
 
     const searchQ = params.get('q') ?? undefined;
     return (
@@ -50,14 +51,15 @@ const Schedule: React.FC<ScheduleProps> = ({ type }) => {
             <Search />
             <div css={css({ height: '100%' })}>
                 <SwitchTransition>
-                    <Transition<undefined>
+                    <Transition
                         timeout={800}
-                        onEntering={fadeOnEnter(0.2)}
-                        onExiting={fadeOnExit(0.5)}
+                        onEntering={fadeOnEnter(fadingRef, 0.2)}
+                        onExiting={fadeOnExit(fadingRef, 0.5)}
                         key={`${type}`}
                         appear={true}
+                        nodeRef={fadingRef}
                     >
-                        <Fading>
+                        <Fading ref={fadingRef}>
                             <EventList
                                 key={type}
                                 type={type}

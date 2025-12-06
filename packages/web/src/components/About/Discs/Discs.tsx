@@ -1,12 +1,12 @@
 import { css } from '@emotion/react';
 import type * as React from 'react';
 
-import { toMedia } from 'src/mediaQuery';
 import DiscList from 'src/components/About/Discs/DiscList';
+import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
+import { rootStore } from 'src/store.js';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
-import { rootStore } from 'src/store.js';
 
 const containerStyle = css(pushed, {
     width: '100%',

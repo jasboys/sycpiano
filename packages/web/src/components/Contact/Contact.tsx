@@ -5,9 +5,9 @@ import ContactItem from 'src/components/Contact/ContactItem';
 import contacts from 'src/components/Contact/contacts';
 import { toMedia } from 'src/mediaQuery';
 import { minRes, webkitMinDPR } from 'src/screens';
+import { rootStore } from 'src/store.js';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
-import { rootStore } from 'src/store.js';
 
 type ContactProps = Record<never, unknown>;
 

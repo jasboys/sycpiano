@@ -3,12 +3,12 @@ import type * as React from 'react';
 import { Link } from 'react-router-dom';
 
 import { SycLogo, sycLogoSize } from 'src/components/App/NavBar/SycLogo';
+import { rootStore } from 'src/store.js';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 import { navBarStore } from './store.js';
-import { rootStore } from 'src/store.js';
 
 const navBarFontSizeREM = 2.5;
 const letterSpacing = 0.05;

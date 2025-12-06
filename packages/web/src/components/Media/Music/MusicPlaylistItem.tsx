@@ -135,7 +135,7 @@ const MusicItem: React.FC<MusicItemProps> = ({ item, onClick }) => {
                     try {
                         onClick(musicFile);
                         musicStore.set.isPlaying(true);
-                    } catch (e) {
+                    } catch (_e) {
                         // already loading track;
                     }
                 }}
@@ -176,7 +176,7 @@ const MusicCollectionItem: React.FC<
                     try {
                         onClick(musicFile);
                         musicStore.set.isPlaying(true);
-                    } catch (e) {
+                    } catch (_e) {
                         // already loading track;
                     }
                 }}

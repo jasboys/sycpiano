@@ -6,9 +6,9 @@ import { Transition } from 'react-transition-group';
 import HamburgerMenu from 'src/components/App/NavBar/HamburgerMenu';
 import NavBarLinks from 'src/components/App/NavBar/NavBarLinks';
 import type { NavBarLinksProps } from 'src/components/App/NavBar/types';
+import { cartStore } from 'src/components/Cart/store.js';
 import { logoBlue } from 'src/styles/colors';
 import { navBarStore } from './store.js';
-import { cartStore } from 'src/components/Cart/store.js';
 
 const MenuContainer = styled.div({
     margin: 'auto 0',
@@ -20,8 +20,8 @@ const HamburgerNav: React.FC<Omit<NavBarLinksProps, 'isHamburger'>> = ({
 }) => {
     const isExpanded = navBarStore.use.isExpanded();
     const cartOpen = cartStore.use.visible();
-    const enterTimeline = React.useRef<GSAPTimeline>();
-    const exitTimeline = React.useRef<GSAPTimeline>();
+    const enterTimeline = React.useRef<GSAPTimeline>(null);
+    const exitTimeline = React.useRef<GSAPTimeline>(null);
     const el = React.useRef<HTMLDivElement>(null);
 
     React.useLayoutEffect(() => {
@@ -70,7 +70,7 @@ const HamburgerNav: React.FC<Omit<NavBarLinksProps, 'isHamburger'>> = ({
                 onClick={onClick}
                 layerColor={specificPath === '' ? 'white' : logoBlue}
             />
-            <Transition<HTMLDivElement>
+            <Transition
                 nodeRef={el}
                 in={isExpanded}
                 onEnter={() => {

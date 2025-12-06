@@ -105,7 +105,7 @@ export const createCheckoutSession = async (
     productIDs: string[],
     priceIDs: string[],
     customerId: string,
-): Promise<string> => {
+): Promise<Stripe.Checkout.Session> => {
     try {
         const coupons = await stripe.coupons.list();
         const couponName =
@@ -145,7 +145,7 @@ export const createCheckoutSession = async (
         }
 
         const session = await stripe.checkout.sessions.create(params);
-        return session.id;
+        return session;
     } catch (e) {
         console.error('Checkout session creation failed.', e);
         throw e;

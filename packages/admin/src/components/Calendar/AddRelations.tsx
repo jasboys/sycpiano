@@ -1,4 +1,4 @@
-import IconCancel from '@mui/icons-material/Cancel.js';
+import IconCancel from '@mui/icons-material/Cancel';
 import { DialogActions, DialogContent } from '@mui/material';
 import type React from 'react';
 import {
