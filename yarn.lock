@@ -8170,6 +8170,64 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jotai-immer@npm:^0.4.1":
+  version: 0.4.1
+  resolution: "jotai-immer@npm:0.4.1"
+  peerDependencies:
+    immer: ">=9.0.0"
+    jotai: ">=2.0.0"
+  checksum: 10/3964b55cd380f06f2a4e179104b9225fe665d41e6e1a4c526d76f3e43d46d5a3031574d4f10645a94758d6a272eb00405ed9b55b217624c24ebdf5d5696ea74d
+  languageName: node
+  linkType: hard
+
+"jotai-optics@npm:^0.4.0":
+  version: 0.4.0
+  resolution: "jotai-optics@npm:0.4.0"
+  peerDependencies:
+    jotai: ">=2.0.0"
+    optics-ts: ">=2.0.0"
+  checksum: 10/b3771f93a9bcc5feeae38c4a92432bc6c635124a795252644b1fe5edbed1466038a12dc78655ea0dd692edd38bcc8cf4bc936967645c61ceb9a2439bf1c176fa
+  languageName: node
+  linkType: hard
+
+"jotai-tanstack-query@npm:^0.11.0":
+  version: 0.11.0
+  resolution: "jotai-tanstack-query@npm:0.11.0"
+  peerDependencies:
+    "@tanstack/query-core": "*"
+    "@tanstack/react-query": "*"
+    jotai: ">=2.0.0"
+    react: ^18.0.0 || ^19.0.0
+  peerDependenciesMeta:
+    "@tanstack/react-query":
+      optional: true
+    react:
+      optional: true
+  checksum: 10/ecca381233cca5bd39d3f6147f0c59f0fad674976d1171a79884fb4db164d228baea1ebb54e1f606cdef4619410e5b274e7ecbcd596c6e07a7b38941a76ce6d9
+  languageName: node
+  linkType: hard
+
+"jotai@npm:^2.15.2":
+  version: 2.15.2
+  resolution: "jotai@npm:2.15.2"
+  peerDependencies:
+    "@babel/core": ">=7.0.0"
+    "@babel/template": ">=7.0.0"
+    "@types/react": ">=17.0.0"
+    react: ">=17.0.0"
+  peerDependenciesMeta:
+    "@babel/core":
+      optional: true
+    "@babel/template":
+      optional: true
+    "@types/react":
+      optional: true
+    react:
+      optional: true
+  checksum: 10/5da99d9d43a7b4fd0ab5517ec12bfc384b819b94a4b9fba7085b79821d6a8d68ca786896e475866dbd30201fb30effa208cf319b93b29d1dbe7be8f8111f00b9
+  languageName: node
+  linkType: hard
+
 "js-tokens@npm:^3.0.0 || ^4.0.0, js-tokens@npm:^4.0.0":
   version: 4.0.0
   resolution: "js-tokens@npm:4.0.0"
@@ -9151,6 +9209,13 @@ __metadata:
     is-docker: "npm:^2.1.1"
     is-wsl: "npm:^2.2.0"
   checksum: 10/acd81a1d19879c818acb3af2d2e8e9d81d17b5367561e623248133deb7dd3aefaed527531df2677d3e6aaf0199f84df57b6b2262babff8bf46ea0029aac536c9
+  languageName: node
+  linkType: hard
+
+"optics-ts@npm:^2.4.1":
+  version: 2.4.1
+  resolution: "optics-ts@npm:2.4.1"
+  checksum: 10/4b13f3b6790f7561a73833e115af90da85e8c4922aeeeb91ae8fe148030730eff52c073c58791ace860c057159e9c8bf01993c4c142bceaf219d67c6c6d4d5de
   languageName: node
   linkType: hard
 
@@ -12097,10 +12162,15 @@ __metadata:
     gsap: "npm:^3.13.0"
     html-webpack-plugin: "npm:^5.6.4"
     immer: "npm:^11.0.1"
+    jotai: "npm:^2.15.2"
+    jotai-immer: "npm:^0.4.1"
+    jotai-optics: "npm:^0.4.0"
+    jotai-tanstack-query: "npm:^0.11.0"
     lodash-es: "npm:^4.17.21"
     markdown-to-jsx: "npm:^8.0.0"
     mathjs: "npm:^13.2.3"
     mini-svg-data-uri: "npm:^1.4.4"
+    optics-ts: "npm:^2.4.1"
     parse-iso-duration: "npm:^1.1.0"
     path-browserify: "npm:^1.0.1"
     polished: "npm:^4.3.1"

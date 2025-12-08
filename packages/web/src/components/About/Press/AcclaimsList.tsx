@@ -3,10 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import type * as React from 'react';
 
+import { useAtomValue } from 'jotai';
 import AcclaimsListItem from 'src/components/About/Press/AcclaimsListItem';
+import { mediaQueriesAtoms } from 'src/components/App/store.js';
 import { toMedia } from 'src/mediaQuery';
 import { hiDpx, isHamburger } from 'src/screens';
-import { useStore } from 'src/store.js';
 import { logoBlue } from 'src/styles/colors.js';
 import { latoFont } from 'src/styles/fonts';
 import { navBarHeight } from 'src/styles/variables';
@@ -43,7 +44,8 @@ const styles = {
 };
 
 const AcclaimsList: React.FC<AcclaimsListProps> = () => {
-    const isHamburger = useStore().mediaQueries.isHamburger();
+    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
+
     const { data: acclaims } = useQuery({
         queryKey: ['acclaims'],
         queryFn: async () => {

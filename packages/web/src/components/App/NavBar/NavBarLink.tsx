@@ -1,5 +1,6 @@
 import { css } from '@emotion/react';
 import { gsap } from 'gsap';
+import { useAtom, useSetAtom } from 'jotai';
 import { mix } from 'polished';
 import * as React from 'react';
 import { Link, type LinkProps } from 'react-router-dom';
@@ -11,7 +12,7 @@ import type { LinkShape } from 'src/components/App/NavBar/types';
 import { lightBlue, logoBlue, navFontColor } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
-import { navBarStore } from './store.js';
+import { navBarAtoms } from './store';
 
 interface NavBarLinkProps {
     readonly active: boolean;
@@ -116,7 +117,8 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
     subNavLinks,
     currentSpecificPath,
 }) => {
-    const showSubs = navBarStore.use.showSubs();
+    const [showSubs, setShowSubs] = useAtom(navBarAtoms.showSubs);
+    const toggleExpanded = useSetAtom(navBarAtoms.isExpanded);
     const enterTimeline = React.useRef<GSAPTimeline>(null);
     const exitTimeline = React.useRef<GSAPTimeline>(null);
     const el = React.useRef<HTMLDivElement>(null);
@@ -136,13 +138,13 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
         attr.href = link.path;
     } else if (subNavLinks) {
         attr.onClick = () => {
-            navBarStore.set.callSub({ sub: link.name, isHamburger });
+            setShowSubs({ sub: link.name, isHamburger });
         };
     } else {
         attr.to = link.path;
         attr.onClick = () => {
-            (!isHamburger || !subNavLinks) && navBarStore.set.callSub({});
-            isHamburger && navBarStore.set.toggleExpanded(false);
+            (!isHamburger || !subNavLinks) && setShowSubs({});
+            isHamburger && toggleExpanded(false);
         };
     }
 
@@ -163,7 +165,12 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
                 exitTimeline.current = gsap.timeline({ paused: true });
                 if (isHamburger) {
                     enterTimeline.current = enterTimeline.current
-                        .fromTo(el.current, { height: 0 }, { height: 'auto' }, 0)
+                        .fromTo(
+                            el.current,
+                            { height: 0 },
+                            { height: 'auto' },
+                            0,
+                        )
                         .fromTo(
                             `.${link.name}`,
                             { autoAlpha: 0, x: 80 },
@@ -250,8 +257,8 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
                             links={subNavLinks}
                             currentSpecificPath={currentSpecificPath}
                             onClick={() => {
-                                !isHamburger && navBarStore.set.callSub({});
-                                isHamburger && navBarStore.set.toggleExpanded(false);
+                                !isHamburger && setShowSubs({});
+                                isHamburger && toggleExpanded(false);
                             }}
                             isHome={isHome}
                         />

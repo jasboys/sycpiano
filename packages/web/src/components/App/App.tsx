@@ -2,9 +2,8 @@ import { Global } from '@emotion/react';
 import styled from '@emotion/styled';
 import { arrow, offset, shift, useFloating } from '@floating-ui/react-dom';
 import { useMediaQueries } from '@react-hook/media-query';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
 import { format } from 'date-fns';
+import { useAtom, useSetAtom } from 'jotai';
 import { omit, startCase, toLower } from 'lodash-es';
 import { parse, stringify } from 'qs';
 import * as React from 'react';
@@ -41,7 +40,6 @@ import type { RequiredProps as RetrievalFormProps } from 'src/components/Shop/Re
 import type { RequiredProps as ShopListProps } from 'src/components/Shop/ShopList/ShopList';
 import extractModule from 'src/module';
 import { GLOBAL_QUERIES } from 'src/screens';
-import { rootStore } from 'src/store.js';
 import { globalCss } from 'src/styles/global';
 import {
     fadeOnEnter,
@@ -51,8 +49,9 @@ import {
     slideOnExit,
     titleStringBase,
 } from 'src/utils';
-import type { ProductMap } from '../Shop/ShopList/types.js';
-import { mediaQueriesStore } from './store';
+import { cartAtoms } from '../Cart/store.js';
+import { navBarAtoms } from './NavBar/store.js';
+import { mediaQueriesMatch } from './store.js';
 
 const register = extractModule();
 const Contact = () =>
@@ -161,11 +160,16 @@ const getMostSpecificRouteName = (pathname: string) => {
     return match ? match.slice(1) : '';
 };
 
-const fadeOnEnter0 = (ref: React.RefObject<HTMLDivElement | null>) => fadeOnEnter(ref, 0);
-const slideOnEnter0 = (ref: React.RefObject<HTMLDivElement | null>) => slideOnEnter(ref, 0);
-const slideOnExit0 = (ref: React.RefObject<HTMLDivElement | null>) => slideOnExit(ref, 0);
-const fadeOnEnter02 = (ref: React.RefObject<HTMLDivElement | null>) => fadeOnEnter(ref, 0.2);
-const fadeOnExit05 = (ref: React.RefObject<HTMLDivElement | null>) => fadeOnExit(ref, 0.5);
+const fadeOnEnter0 = (ref: React.RefObject<HTMLDivElement | null>) =>
+    fadeOnEnter(ref, 0);
+const slideOnEnter0 = (ref: React.RefObject<HTMLDivElement | null>) =>
+    slideOnEnter(ref, 0);
+const slideOnExit0 = (ref: React.RefObject<HTMLDivElement | null>) =>
+    slideOnExit(ref, 0);
+const fadeOnEnter02 = (ref: React.RefObject<HTMLDivElement | null>) =>
+    fadeOnEnter(ref, 0.2);
+const fadeOnExit05 = (ref: React.RefObject<HTMLDivElement | null>) =>
+    fadeOnExit(ref, 0.5);
 
 type RouterMatchPaths =
     | PathMatch<'about'>
@@ -245,8 +249,14 @@ const StyledClickDiv = styled(ClickListenerOverlay)<{
 
 const App: React.FC<Record<never, unknown>> = () => {
     const location = useLocation();
-    const { visible: cartVisible } = rootStore.cart.useTrackedStore();
-    const { isVisible: navBarVisible, isExpanded: navBarExpanded, showSubs } = rootStore.navBar.useTrackedStore();
+    const [cartVisible, toggleCartVisible] = useAtom(cartAtoms.visible);
+    const [navBarVisible, toggleNavBar] = useAtom(navBarAtoms.isVisible);
+    const [navBarExpanded, toggleNavBarExpanded] = useAtom(
+        navBarAtoms.isExpanded,
+    );
+    const [showSubs, setShowSubs] = useAtom(navBarAtoms.showSubs);
+    const setMediaQueries = useSetAtom(mediaQueriesMatch);
+    // const { isVisible: navBarVisible, isExpanded: navBarExpanded, showSubs } = rootStore.navBar.useTrackedStore();
 
     const [delayedRouteBase, setDelayedRouteBase] = React.useState(
         getRouteBase(location.pathname),
@@ -269,20 +279,20 @@ const App: React.FC<Record<never, unknown>> = () => {
     // Make sure to adjust this match array when adding new pages, especially with subpaths
     const [routerMatch, transitionMatch] = useCustomMatch();
 
-    const { data: shopItems, isSuccess } = useQuery({
-        queryKey: ['shop'],
-        queryFn: async () => {
-            const { data: items } =
-                await axios.get<ProductMap>('/api/shop/items');
-            return items;
-        },
-    });
+    // const { data: shopItems, isSuccess } = useQuery({
+    //     queryKey: ['shop'],
+    //     queryFn: async () => {
+    //         const { data: items } =
+    //             await axios.get<ProductMap>('/api/shop/items');
+    //         return items;
+    //     },
+    // });
 
-    React.useEffect(() => {
-        if (isSuccess) {
-            rootStore.shop.set.items?.(shopItems);
-        }
-    }, [shopItems, isSuccess]);
+    // React.useEffect(() => {
+    //     if (isSuccess) {
+    //         rootStore.shop.set.items?.(shopItems);
+    //     }
+    // }, [shopItems, isSuccess]);
 
     const {
         x,
@@ -324,10 +334,8 @@ const App: React.FC<Record<never, unknown>> = () => {
     }, [location]);
 
     React.useEffect(() => {
-        if (!isHamburger) {
-            if (!navBarVisible) {
-                rootStore.navBar.set.toggleNavBar(true);
-            }
+        if (!isHamburger && !navBarVisible) {
+            toggleNavBar(true);
         }
     }, [screenXS, screenM, navBarVisible]);
 
@@ -336,7 +344,7 @@ const App: React.FC<Record<never, unknown>> = () => {
         .map(([_, v]) => v);
 
     React.useEffect(() => {
-        mediaQueriesStore.set.matches(mediaMatches);
+        setMediaQueries(mediaMatches);
     }, [...stableMediaArray]);
 
     React.useEffect(() => {
@@ -603,12 +611,10 @@ const App: React.FC<Record<never, unknown>> = () => {
                         isMobile={isMobile}
                         cartOpen={cartVisible}
                         onClick={() => {
-                            cartVisible &&
-                                rootStore.cart.set.toggleCartVisible(false);
-                            navBarExpanded &&
-                                rootStore.navBar.set.toggleExpanded(false);
+                            cartVisible && toggleCartVisible(false);
+                            navBarExpanded && toggleNavBarExpanded(false);
                             showSubs.length &&
-                                rootStore.navBar.set.callSub({
+                                setShowSubs({
                                     sub: '',
                                     isHamburger: isMobile,
                                 });

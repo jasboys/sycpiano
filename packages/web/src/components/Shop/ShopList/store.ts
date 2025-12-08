@@ -1,13 +1,15 @@
-import { createStore } from 'zustand-x';
+import axios from 'axios';
+import { atomWithQuery } from 'jotai-tanstack-query';
+import type { ProductMap } from 'src/components/Shop/ShopList/types';
 
-import type { ShopStateShape } from 'src/components/Shop/ShopList/types';
-import { zustandMiddlewareOptions } from 'src/utils';
+// const initialState: ShopStateShape = {
+//     items: undefined,
+// };
 
-const initialState: ShopStateShape = {
-    items: undefined,
-};
-
-export const shopStore = createStore('shop')(
-    initialState,
-    zustandMiddlewareOptions,
-);
+export const shopItemsAtom = atomWithQuery<ProductMap>((_get) => ({
+    queryKey: ['shop'],
+    queryFn: async () => {
+        const { data: items } = await axios.get<ProductMap>('/api/shop/items');
+        return items;
+    },
+}));

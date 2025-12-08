@@ -4,17 +4,13 @@ import * as React from 'react';
 import { useParams } from 'react-router-dom';
 
 import { ShopItem } from 'src/components/Shop/ShopList/ShopItem';
-import type {
-    Product,
-    ProductTypes,
-} from 'src/components/Shop/ShopList/types';
+import type { Product, ProductTypes } from 'src/components/Shop/ShopList/types';
 import { toMedia } from 'src/mediaQuery.js';
 import { isHamburger, screenPortrait, screenXS } from 'src/screens.js';
 import { logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { pushed } from 'src/styles/mixins';
-import { shopStore } from './store.js';
-import { useStore } from 'src/store.js';
+import { shopItemsAtom } from './store';
 
 type ShopListProps = Record<never, unknown>;
 

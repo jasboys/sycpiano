@@ -1,10 +1,12 @@
 import { css } from '@emotion/react';
+import { useAtomValue, useSetAtom } from 'jotai';
 import type * as React from 'react';
 
 import AcclaimsList from 'src/components/About/Press/AcclaimsList';
+import { navBarActions } from 'src/components/App/NavBar/store';
+import { mediaQueriesAtoms } from 'src/components/App/store';
 import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenXS } from 'src/screens';
-import { rootStore } from 'src/store.js';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 
@@ -24,14 +26,16 @@ const containerStyle = css(pushed, {
 });
 
 const Press: React.FC<PressProps> = () => {
-    const { isHamburger, hiDpx } = rootStore.mediaQueries.useTrackedStore();
+    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
+    const hiDpx = useAtomValue(mediaQueriesAtoms.hiDpx);
+    const onScroll = useSetAtom(navBarActions.onScroll);
 
     return (
         <div
             css={containerStyle}
             onScroll={
                 isHamburger
-                    ? rootStore.navBar.set.onScroll(navBarHeight.get(hiDpx))
+                    ? (ev) => onScroll(navBarHeight.get(hiDpx), ev)
                     : undefined
             }
         >

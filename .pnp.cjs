@@ -10525,6 +10525,122 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["jotai", [\
+      ["npm:2.15.2", {\
+        "packageLocation": "./.yarn/cache/jotai-npm-2.15.2-8101b091e0-5da99d9d43.zip/node_modules/jotai/",\
+        "packageDependencies": [\
+          ["jotai", "npm:2.15.2"]\
+        ],\
+        "linkType": "SOFT"\
+      }],\
+      ["virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:2.15.2", {\
+        "packageLocation": "./.yarn/__virtual__/jotai-virtual-b98363405e/0/cache/jotai-npm-2.15.2-8101b091e0-5da99d9d43.zip/node_modules/jotai/",\
+        "packageDependencies": [\
+          ["@babel/core", "npm:7.28.5"],\
+          ["@babel/template", null],\
+          ["@types/babel__core", null],\
+          ["@types/babel__template", null],\
+          ["@types/react", "npm:19.2.4"],\
+          ["jotai", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:2.15.2"],\
+          ["react", "npm:19.2.0"]\
+        ],\
+        "packagePeers": [\
+          "@babel/core",\
+          "@babel/template",\
+          "@types/babel__core",\
+          "@types/babel__template",\
+          "@types/react",\
+          "react"\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["jotai-immer", [\
+      ["npm:0.4.1", {\
+        "packageLocation": "./.yarn/cache/jotai-immer-npm-0.4.1-02ec6cd73a-3964b55cd3.zip/node_modules/jotai-immer/",\
+        "packageDependencies": [\
+          ["jotai-immer", "npm:0.4.1"]\
+        ],\
+        "linkType": "SOFT"\
+      }],\
+      ["virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:0.4.1", {\
+        "packageLocation": "./.yarn/__virtual__/jotai-immer-virtual-6679f44e20/0/cache/jotai-immer-npm-0.4.1-02ec6cd73a-3964b55cd3.zip/node_modules/jotai-immer/",\
+        "packageDependencies": [\
+          ["@types/immer", null],\
+          ["@types/jotai", null],\
+          ["immer", "npm:11.0.1"],\
+          ["jotai", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:2.15.2"],\
+          ["jotai-immer", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:0.4.1"]\
+        ],\
+        "packagePeers": [\
+          "@types/immer",\
+          "@types/jotai",\
+          "immer",\
+          "jotai"\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["jotai-optics", [\
+      ["npm:0.4.0", {\
+        "packageLocation": "./.yarn/cache/jotai-optics-npm-0.4.0-36d51de3d1-b3771f93a9.zip/node_modules/jotai-optics/",\
+        "packageDependencies": [\
+          ["jotai-optics", "npm:0.4.0"]\
+        ],\
+        "linkType": "SOFT"\
+      }],\
+      ["virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:0.4.0", {\
+        "packageLocation": "./.yarn/__virtual__/jotai-optics-virtual-f4a72f3c75/0/cache/jotai-optics-npm-0.4.0-36d51de3d1-b3771f93a9.zip/node_modules/jotai-optics/",\
+        "packageDependencies": [\
+          ["@types/jotai", null],\
+          ["@types/optics-ts", null],\
+          ["jotai", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:2.15.2"],\
+          ["jotai-optics", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:0.4.0"],\
+          ["optics-ts", "npm:2.4.1"]\
+        ],\
+        "packagePeers": [\
+          "@types/jotai",\
+          "@types/optics-ts",\
+          "jotai",\
+          "optics-ts"\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["jotai-tanstack-query", [\
+      ["npm:0.11.0", {\
+        "packageLocation": "./.yarn/cache/jotai-tanstack-query-npm-0.11.0-03b723286e-ecca381233.zip/node_modules/jotai-tanstack-query/",\
+        "packageDependencies": [\
+          ["jotai-tanstack-query", "npm:0.11.0"]\
+        ],\
+        "linkType": "SOFT"\
+      }],\
+      ["virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:0.11.0", {\
+        "packageLocation": "./.yarn/__virtual__/jotai-tanstack-query-virtual-38a6ae012b/0/cache/jotai-tanstack-query-npm-0.11.0-03b723286e-ecca381233.zip/node_modules/jotai-tanstack-query/",\
+        "packageDependencies": [\
+          ["@tanstack/query-core", null],\
+          ["@tanstack/react-query", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:5.90.8"],\
+          ["@types/jotai", null],\
+          ["@types/react", "npm:19.2.4"],\
+          ["@types/tanstack__query-core", null],\
+          ["@types/tanstack__react-query", null],\
+          ["jotai", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:2.15.2"],\
+          ["jotai-tanstack-query", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:0.11.0"],\
+          ["react", "npm:19.2.0"]\
+        ],\
+        "packagePeers": [\
+          "@tanstack/query-core",\
+          "@tanstack/react-query",\
+          "@types/jotai",\
+          "@types/react",\
+          "@types/tanstack__query-core",\
+          "@types/tanstack__react-query",\
+          "jotai",\
+          "react"\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["js-tokens", [\
       ["npm:4.0.0", {\
         "packageLocation": "./.yarn/cache/js-tokens-npm-4.0.0-0ac852e9e2-af37d0d913.zip/node_modules/js-tokens/",\
@@ -11619,6 +11735,15 @@ const RAW_RUNTIME_STATE =
           ["is-docker", "npm:2.2.1"],\
           ["is-wsl", "npm:2.2.0"],\
           ["open", "npm:8.4.2"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
+    ["optics-ts", [\
+      ["npm:2.4.1", {\
+        "packageLocation": "./.yarn/cache/optics-ts-npm-2.4.1-6367f79740-4b13f3b679.zip/node_modules/optics-ts/",\
+        "packageDependencies": [\
+          ["optics-ts", "npm:2.4.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -15208,10 +15333,15 @@ const RAW_RUNTIME_STATE =
           ["gsap", "npm:3.13.0"],\
           ["html-webpack-plugin", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:5.6.4"],\
           ["immer", "npm:11.0.1"],\
+          ["jotai", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:2.15.2"],\
+          ["jotai-immer", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:0.4.1"],\
+          ["jotai-optics", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:0.4.0"],\
+          ["jotai-tanstack-query", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:0.11.0"],\
           ["lodash-es", "npm:4.17.21"],\
           ["markdown-to-jsx", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:8.0.0"],\
           ["mathjs", "npm:13.2.3"],\
           ["mini-svg-data-uri", "npm:1.4.4"],\
+          ["optics-ts", "npm:2.4.1"],\
           ["parse-iso-duration", "npm:1.1.0"],\
           ["path-browserify", "npm:1.0.1"],\
           ["polished", "npm:4.3.1"],\

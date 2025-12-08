@@ -20,7 +20,10 @@ import {
     screenWidths,
     screenXS,
 } from 'src/screens';
-import { rootStore, useStore } from 'src/store.js';
+// import { rootStore, useStore } from 'src/store.js';
+import { atom, useAtomValue, useSetAtom } from 'jotai';
+import { navBarActions, navBarAtoms } from 'src/components/App/NavBar/store';
+import { mediaQueriesAtoms } from 'src/components/App/store';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 import { isImageElement } from 'src/utils';
@@ -86,12 +89,24 @@ const IMAGE_RATIO = 1736 / 2560;
 
 const srcWidths = screenLengths.map((value) => Math.round(value * IMAGE_RATIO));
 
+const useMediaQuerySelectAtom = atom((get) => {
+    const { hiDpx, isHamburger, screenXS, screenPortrait } = mediaQueriesAtoms;
+    return {
+        hiDpx: get(hiDpx),
+        isHamburger: get(isHamburger),
+        screenXS: get(screenXS),
+        screenPortrait: get(screenPortrait),
+    };
+});
+
 const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
-    const { hiDpx, isHamburger, screenXS, screenPortrait } =
-        rootStore.mediaQueries.useTrackedStore();
+    const { hiDpx, isHamburger, screenXS, screenPortrait } = useAtomValue(
+        useMediaQuerySelectAtom,
+    );
     const [bgImage, setBgImage] = React.useState('');
     const bgRef = React.useRef<HTMLImageElement>(null);
-    const scrollTop = useStore().navBar.lastScrollTop();
+    const scrollTop = useAtomValue(navBarAtoms.lastScrollTop);
+    const onScroll = useSetAtom(navBarActions.onScroll);
 
     const { data: bio } = useQuery({
         queryKey: ['bio'],
@@ -106,7 +121,7 @@ const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
             if (screenXS || screenPortrait) {
                 const height = Number.parseInt(
                     window.getComputedStyle(bgRef.current).height,
-                    10
+                    10,
                 );
                 const float = easeQuadOut(Math.max(1 - scrollTop / height, 0));
                 const rounded =
@@ -155,11 +170,12 @@ const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
                                   const height = Number.parseInt(
                                       window.getComputedStyle(bgRef.current)
                                           .height,
-                                          10
+                                      10,
                                   );
-                                  rootStore.navBar.set.onScroll(
+                                  onScroll(
                                       height + navBarHeight.get(hiDpx),
-                                  )(ev);
+                                      ev,
+                                  );
                               }
                           }
                         : undefined

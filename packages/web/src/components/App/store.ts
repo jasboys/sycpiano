@@ -1,7 +1,7 @@
+import { atom } from 'jotai';
 import { GLOBAL_QUERIES } from 'src/screens';
+import { toAtoms } from 'src/store';
 import type { MediaQueryStateShape } from 'src/types';
-import { zustandMiddlewareOptions } from 'src/utils';
-import { createStore } from 'zustand-x';
 
 const defaultMedia = Object.fromEntries(
     (Object.keys(GLOBAL_QUERIES) as (keyof typeof GLOBAL_QUERIES)[]).map(
@@ -9,19 +9,28 @@ const defaultMedia = Object.fromEntries(
     ) as Iterable<readonly [keyof MediaQueryStateShape, boolean]>,
 ) as MediaQueryStateShape;
 
-export const mediaQueriesStore = createStore('mediaQueries')(
-    defaultMedia,
-    zustandMiddlewareOptions,
-).extendActions((set, _get, _api) => ({
-    matches: (matches: MediaQueryStateShape) => {
-        set.state((state) => {
-            return {
-                ...state,
-                ...matches,
-            };
-        });
+const mediaQueriesBaseAtom = atom(defaultMedia);
+export const mediaQueriesAtoms = toAtoms(mediaQueriesBaseAtom);
+export const mediaQueriesMatch = atom(
+    null,
+    (_get, set, update: MediaQueryStateShape) => {
+        set(mediaQueriesBaseAtom, (prev) => ({ ...prev, ...update }));
     },
-}));
+);
+
+// export const mediaQueriesStore = createStore('mediaQueries')(
+//     defaultMedia,
+//     zustandMiddlewareOptions,
+// ).extendActions((set, _get, _api) => ({
+//     matches: (matches: MediaQueryStateShape) => {
+//         set.state((state) => {
+//             return {
+//                 ...state,
+//                 ...matches,
+//             };
+//         });
+//     },
+// }));
 
 type SelectorMapEntriesType = Iterable<
     readonly [

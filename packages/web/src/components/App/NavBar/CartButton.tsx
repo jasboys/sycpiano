@@ -1,14 +1,15 @@
 import { css } from '@emotion/react';
 import { gsap } from 'gsap';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { mix } from 'polished';
 import * as React from 'react';
-import { cartStore } from 'src/components/Cart/store.js';
+import { cartActions, cartAtoms } from 'src/components/Cart/store';
 import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
-import { navBarStore } from './store.js';
+import { navBarAtoms } from './store';
 
 const cartStyles = {
     base: css(latoFont(400), {
@@ -94,77 +95,79 @@ interface CartButtonProps {
     isHome: boolean;
 }
 
-const CartButton = ({ isHome, ref }: React.ComponentPropsWithRef<'button'> & CartButtonProps) => {
-        const cart = cartStore.useTrackedStore()
-        const menuOpened = navBarStore.use.isExpanded();
-        const cartRef = React.useRef<HTMLButtonElement>(null);
+const CartButton = ({
+    isHome,
+    ref,
+}: React.ComponentPropsWithRef<'button'> & CartButtonProps) => {
+    const items = useAtomValue(cartAtoms.items);
+    const isInit = useAtomValue(cartAtoms.isInit);
+    const cartVisible = useAtomValue(cartAtoms.visible);
+    const toggleCartVisible = useSetAtom(cartActions.toggleCartVisible);
+    const toggleExpanded = useSetAtom(navBarAtoms.isExpanded);
+    const menuOpened = useAtomValue(navBarAtoms.isExpanded);
+    const cartRef = React.useRef<HTMLButtonElement>(null);
 
-        React.useEffect(() => {
-            const el = cartRef.current;
-            if (el && cart.isInit) {
-                scaleUp(el);
-            }
-        }, [cart.items.length]);
+    React.useEffect(() => {
+        const el = cartRef.current;
+        if (el && isInit) {
+            scaleUp(el);
+        }
+    }, [items.length]);
 
-        const makeRef = React.useCallback((el: HTMLButtonElement) => {
-            cartRef.current = el;
-            if (typeof ref === 'function') {
-                ref(el);
-            } else if (ref) {
-                ref.current = el;
-            }
-        }, []);
+    const makeRef = React.useCallback((el: HTMLButtonElement) => {
+        cartRef.current = el;
+        if (typeof ref === 'function') {
+            ref(el);
+        } else if (ref) {
+            ref.current = el;
+        }
+    }, []);
 
-        const onClick = React.useCallback(() => {
-            cartStore.set.toggleCartVisible();
-            menuOpened && navBarStore.set.toggleExpanded(false);
-        }, [menuOpened]);
+    const onClick = React.useCallback(() => {
+        toggleCartVisible();
+        menuOpened && toggleExpanded(false);
+    }, [menuOpened]);
 
-        return (
-            <button
-                type='button'
-                css={[
-                    cartStyles.base,
-                    isHome && cartStyles.isHome,
-                    cart.visible && !isHome && cartStyles.isOpen,
-                ]}
-                onClick={onClick}
-                onKeyUp={onClick}
-                ref={makeRef}
+    return (
+        <button
+            type="button"
+            css={[
+                cartStyles.base,
+                isHome && cartStyles.isHome,
+                cartVisible && !isHome && cartStyles.isOpen,
+            ]}
+            onClick={onClick}
+            onKeyUp={onClick}
+            ref={makeRef}
+        >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="-4 -5 36 32"
+                height="36"
+                width="40"
             >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="-4 -5 36 32"
-                    height="36"
-                    width="40"
-                >
-                    <title>Cart Icon</title>
-                    <path
-                        strokeWidth="0"
-                        d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 3c0 .55.45 1 1 1h1l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h11c.55 0 1-.45 1-1s-.45-1-1-1H7l1.1-2h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.37-.66-.11-1.48-.87-1.48H5.21l-.67-1.43c-.16-.35-.52-.57-.9-.57H2c-.55 0-1 .45-1 1zm16 15c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"
-                    />
-                    {cart.items.length !== 0 && (
-                        <>
-                            <circle
-                                cx="23"
-                                cy="2"
-                                r="6"
-                                strokeWidth="1"
-                            />
-                            <text
-                                x="23.5"
-                                y="3"
-                                textAnchor="middle"
-                                dominantBaseline="middle"
-                                fontSize="0.6rem"
-                            >
-                                {cart.items.length}
-                            </text>
-                        </>
-                    )}
-                </svg>
-            </button>
-        );
-    };
+                <title>Cart Icon</title>
+                <path
+                    strokeWidth="0"
+                    d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 3c0 .55.45 1 1 1h1l3.6 7.59-1.35 2.44C4.52 15.37 5.48 17 7 17h11c.55 0 1-.45 1-1s-.45-1-1-1H7l1.1-2h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.37-.66-.11-1.48-.87-1.48H5.21l-.67-1.43c-.16-.35-.52-.57-.9-.57H2c-.55 0-1 .45-1 1zm16 15c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"
+                />
+                {items.length !== 0 && (
+                    <>
+                        <circle cx="23" cy="2" r="6" strokeWidth="1" />
+                        <text
+                            x="23.5"
+                            y="3"
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            fontSize="0.6rem"
+                        >
+                            {items.length}
+                        </text>
+                    </>
+                )}
+            </svg>
+        </button>
+    );
+};
 
 export default CartButton;
