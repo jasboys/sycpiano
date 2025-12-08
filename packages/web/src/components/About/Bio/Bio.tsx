@@ -21,9 +21,10 @@ import {
     screenXS,
 } from 'src/screens';
 // import { rootStore, useStore } from 'src/store.js';
-import { atom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { focusAtom } from 'jotai-optics';
 import { navBarActions, navBarAtoms } from 'src/components/App/NavBar/store';
-import { mediaQueriesAtoms } from 'src/components/App/store';
+import { mediaQueriesBaseAtom } from 'src/components/App/store';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 import { isImageElement } from 'src/utils';
@@ -89,15 +90,9 @@ const IMAGE_RATIO = 1736 / 2560;
 
 const srcWidths = screenLengths.map((value) => Math.round(value * IMAGE_RATIO));
 
-const useMediaQuerySelectAtom = atom((get) => {
-    const { hiDpx, isHamburger, screenXS, screenPortrait } = mediaQueriesAtoms;
-    return {
-        hiDpx: get(hiDpx),
-        isHamburger: get(isHamburger),
-        screenXS: get(screenXS),
-        screenPortrait: get(screenPortrait),
-    };
-});
+const useMediaQuerySelectAtom = focusAtom(mediaQueriesBaseAtom, (optic) =>
+    optic.pick(['hiDpx', 'isHamburger', 'screenXS', 'screenPortrait']),
+);
 
 const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
     const { hiDpx, isHamburger, screenXS, screenPortrait } = useAtomValue(

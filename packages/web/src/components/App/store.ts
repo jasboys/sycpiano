@@ -9,7 +9,7 @@ const defaultMedia = Object.fromEntries(
     ) as Iterable<readonly [keyof MediaQueryStateShape, boolean]>,
 ) as MediaQueryStateShape;
 
-const mediaQueriesBaseAtom = atom(defaultMedia);
+export const mediaQueriesBaseAtom = atom(defaultMedia);
 export const mediaQueriesAtoms = toAtoms(mediaQueriesBaseAtom);
 export const mediaQueriesMatch = atom(
     null,

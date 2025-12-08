@@ -101,42 +101,6 @@ const debouncedNavBarToggle = atom(null, (_get, set, show: boolean) => {
     debouncedToggleFn(set, show);
 });
 
-const callSub = atom(
-    null,
-    (get, set, args: { sub?: string; isHamburger?: boolean }) => {
-        if (get(navBarAtoms.visiblePending)) {
-            return;
-        }
-        set(navBarStore, (draft) => {
-            draft.visiblePending = true;
-        });
-        const { sub = '', isHamburger = false } =
-            typeof args === 'object' ? args : {};
-        let showSubs = get(navBarAtoms.showSubs);
-        if (isHamburger) {
-            if (sub === '') {
-                showSubs = [];
-            } else if (showSubs.includes(sub)) {
-                showSubs = showSubs.filter((value) => sub !== value);
-            } else {
-                showSubs = [...showSubs, sub];
-            }
-        } else {
-            if (sub === '' || sub === showSubs[0]) {
-                showSubs = [];
-            } else {
-                showSubs = [sub];
-            }
-        }
-        set(navBarStore, (draft) => {
-            draft.showSubs = showSubs;
-        });
-        set(navBarStore, (draft) => {
-            draft.visiblePending = false;
-        });
-    },
-);
-
 const onScroll = atom(
     null,
     (

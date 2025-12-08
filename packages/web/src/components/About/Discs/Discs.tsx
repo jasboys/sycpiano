@@ -1,10 +1,11 @@
 import { css } from '@emotion/react';
-import { atom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { focusAtom } from 'jotai-optics';
 import type * as React from 'react';
 
 import DiscList from 'src/components/About/Discs/DiscList';
 import { navBarActions } from 'src/components/App/NavBar/store';
-import { mediaQueriesAtoms } from 'src/components/App/store';
+import { mediaQueriesBaseAtom } from 'src/components/App/store';
 import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
 import { pushed } from 'src/styles/mixins';
@@ -22,13 +23,9 @@ const containerStyle = css(pushed, {
 
 type DiscsProps = Record<never, unknown>;
 
-const mediaQueries = atom((get) => {
-    const { isHamburger, hiDpx } = mediaQueriesAtoms;
-    return {
-        isHamburger: get(isHamburger),
-        hiDpx: get(hiDpx),
-    };
-});
+const mediaQueries = focusAtom(mediaQueriesBaseAtom, (optic) =>
+    optic.pick(['isHamburger', 'hiDpx']),
+);
 
 const Discs: React.FC<DiscsProps> = () => {
     const { isHamburger, hiDpx } = useAtomValue(mediaQueries);

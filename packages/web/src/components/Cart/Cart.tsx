@@ -1,16 +1,16 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
 import { gsap } from 'gsap';
 import * as React from 'react';
 import isEqual from 'react-fast-compare';
 import { Transition } from 'react-transition-group';
 
+import { useAtomValue } from 'jotai';
 import { CartList } from 'src/components/Cart/CartList';
 import { toMedia } from 'src/mediaQuery.js';
 import { hiDpx, screenS } from 'src/screens.js';
-import { useStore } from 'src/store.js';
 import { navBarHeight } from 'src/styles/variables';
-import { cartStore, initCartFn } from './store.js';
+import { mediaQueriesAtoms } from '../App/store';
+import { cartAtoms } from './store';
 
 const Arrow = styled.div({
     position: 'absolute',
@@ -73,28 +73,31 @@ const Cart: React.FC<CartProps> = ({
     arrow,
     update,
 }) => {
-    const screenS = useStore().mediaQueries.screenS();
-    const visible = cartStore.use.visible();
-    const cartLength = cartStore.use.items().length;
+    const screenS = useAtomValue(mediaQueriesAtoms.screenS);
+    const cartVisible = useAtomValue(cartAtoms.visible);
     const tl = React.useRef<GSAPTimeline>(null);
     const fadeRef = React.useRef<HTMLDivElement>(null);
 
-    const { data: { items, email } = { items: [], email: '' }, isSuccess } =
-        useQuery({
-            queryKey: ['localStorageCart'],
-            queryFn: initCartFn,
-        });
+    // const { data: { items, email } = { items: [], email: '' }, isSuccess } =
+    //     useQuery({
+    //         queryKey: ['localStorageCart'],
+    //         queryFn: initCartFn,
+    //     });
 
-    React.useEffect(() => {
-        if (isSuccess) {
-            cartStore.set.items(items);
-            cartStore.set.email(email);
-        }
-    }, [items, email, isSuccess]);
+    // React.useEffect(() => {
+    //     if (isSuccess) {
+    //         cartStore.set.items(items);
+    //         cartStore.set.email(email);
+    //     }
+    // }, [items, email, isSuccess]);
 
-    React.useEffect(() => {
-        cartStore.set.syncStorage();
-    }, [cartLength]);
+    // React.useEffect(() => {
+    //     initCartFn()
+    // }, []);
+
+    // React.useEffect(() => {
+    //     cartStore.set.syncStorage();
+    // }, [cartLength]);
 
     const arrowCallback = React.useCallback(
         (el: HTMLDivElement) => {
@@ -106,7 +109,7 @@ const Cart: React.FC<CartProps> = ({
 
     return (
         <Transition
-            in={visible}
+            in={cartVisible}
             timeout={250}
             onEnter={() => {
                 if (!tl.current) {

@@ -3,6 +3,7 @@ import styled from '@emotion/styled';
 import { gsap } from 'gsap';
 import * as React from 'react';
 
+import { useAtomValue } from 'jotai';
 import { ContactInfo } from 'src/components/Contact/ContactInfo';
 import { ContactSocialMedia } from 'src/components/Contact/ContactSocialMedia';
 import type { ContactItemShape } from 'src/components/Contact/types';
@@ -16,9 +17,9 @@ import {
 } from 'src/imageUrls';
 import { toMedia } from 'src/mediaQuery';
 import { minRes, screenWidths, webkitMinDPR } from 'src/screens';
-import { useStore } from 'src/store.js';
 import { navBarHeight } from 'src/styles/variables';
 import { isImageElement } from 'src/utils';
+import { mediaQueriesAtoms } from '../App/store';
 
 interface PhotoAttributes {
     jpg?: string;
@@ -110,7 +111,7 @@ const StyledContactItem = styled.div({
 type ContactItemProps = ContactItemShape;
 
 const ContactItem: React.FC<ContactItemProps> = (props) => {
-    const isHamburger = useStore().mediaQueries.isHamburger();
+    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
     const [bgImage, setBgImage] = React.useState('');
     const bgRef = React.useRef<HTMLDivElement>(null);
 

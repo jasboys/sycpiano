@@ -1,10 +1,11 @@
 import { css } from '@emotion/react';
 import { useAtomValue, useSetAtom } from 'jotai';
+import { focusAtom } from 'jotai-optics';
 import type * as React from 'react';
 
 import AcclaimsList from 'src/components/About/Press/AcclaimsList';
 import { navBarActions } from 'src/components/App/NavBar/store';
-import { mediaQueriesAtoms } from 'src/components/App/store';
+import { mediaQueriesBaseAtom } from 'src/components/App/store';
 import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenXS } from 'src/screens';
 import { pushed } from 'src/styles/mixins';
@@ -25,9 +26,12 @@ const containerStyle = css(pushed, {
     },
 });
 
+const mediaQueries = focusAtom(mediaQueriesBaseAtom, (optic) =>
+    optic.pick(['isHamburger', 'hiDpx']),
+);
+
 const Press: React.FC<PressProps> = () => {
-    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
-    const hiDpx = useAtomValue(mediaQueriesAtoms.hiDpx);
+    const { isHamburger, hiDpx } = useAtomValue(mediaQueries);
     const onScroll = useSetAtom(navBarActions.onScroll);
 
     return (

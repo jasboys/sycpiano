@@ -5,9 +5,9 @@ export interface CheckoutErrorObject {
 
 export interface CartStateShape {
     isInit: boolean;
-    items: string[];
+    // items: string[];
     visible: boolean;
     checkoutError: CheckoutErrorObject;
     isCheckingOut: boolean;
-    email: string;
+    // email: string;
 }

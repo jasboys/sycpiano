@@ -1,17 +1,21 @@
 import styled from '@emotion/styled';
 import TextField from '@mui/material/TextField';
 import { ThemeProvider } from '@mui/system';
-import { useMutation } from '@tanstack/react-query';
+import {
+    type DefaultError,
+    type QueryObserverResult,
+    useMutation,
+} from '@tanstack/react-query';
 import Markdown from 'markdown-to-jsx';
 import { mix } from 'polished';
 import * as React from 'react';
 
+import { useAtom, useAtomValue, useSetAtom, type WritableAtom } from 'jotai';
 import { Link } from 'react-router-dom';
 import { CartItem } from 'src/components/Cart/CartItem';
-import type { Product } from 'src/components/Shop/ShopList/types';
+import type { Product, ProductMap } from 'src/components/Shop/ShopList/types';
 import { toMedia } from 'src/mediaQuery';
 import { screenS } from 'src/screens';
-import { useStore, useTrackedStore } from 'src/store.js';
 import { lightBlue, logoBlue, theme } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
@@ -19,7 +23,8 @@ import { cartWidth } from 'src/styles/variables';
 import { formatPrice } from 'src/utils';
 import isEmail from 'validator/es/lib/isEmail';
 import { LoadingInstance } from '../LoadingSVG.jsx';
-import { cartStore, checkoutFn } from './store.js';
+import { shopItemsAtom } from '../Shop/ShopList/store.js';
+import { cartActions, cartAtoms } from './store.js';
 
 const ARROW_SIDE = 32;
 
@@ -186,7 +191,7 @@ const StripeLink = styled.a({
 });
 
 const Heading: React.FC<Record<never, unknown>> = () => {
-
+    const toggleCartVisible = useSetAtom(cartAtoms.visible);
     return (
         <StyledHeading>
             <div
@@ -203,7 +208,7 @@ const Heading: React.FC<Record<never, unknown>> = () => {
                 viewBox="0 0 120 120"
                 height="42"
                 width="42"
-                onClick={() => cartStore.set.toggleCartVisible(false)}
+                onClick={() => toggleCartVisible(false)}
             >
                 <path
                     d="M40 40L80 80M40 80L80 40"
@@ -217,21 +222,18 @@ const Heading: React.FC<Record<never, unknown>> = () => {
 
 const CheckoutForm: React.FC<{ cartLength: number }> = ({ cartLength }) => {
     const [isMouseDown, setIsMouseDown] = React.useState(false);
-    const savedEmail = cartStore.use.email();
-    const [email, setEmail] = React.useState('');
+    const [email, setEmail] = useAtom(cartAtoms.email);
     const [error, setError] = React.useState(false);
+    const checkoutFn = useSetAtom(cartActions.checkoutFn);
+    const setIsCheckingOut = useSetAtom(cartAtoms.isCheckingOut);
 
     const { mutate, isPending } = useMutation({
         mutationFn: checkoutFn,
-    })
+    });
 
     React.useEffect(() => {
-        setEmail(savedEmail);
-    }, [savedEmail]);
-
-    React.useEffect(() => {
-        cartStore.set.isCheckingOut(isPending);
-    }, [isPending])
+        setIsCheckingOut(isPending);
+    }, [isPending]);
 
     const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setEmail(event.target.value);
@@ -313,10 +315,11 @@ const InnerBorderContainer = styled.div<{ isCheckingOut: boolean }>(
 const faqRedirectLink: React.FC<
     React.AnchorHTMLAttributes<HTMLAnchorElement>
 > = ({ href }) => {
+    const toggleCartVisible = useSetAtom(cartAtoms.visible);
 
     return (
         href && (
-            <Link to={href} onClick={() => cartStore.set.toggleCartVisible(false)}>
+            <Link to={href} onClick={() => toggleCartVisible(false)}>
                 FAQs
             </Link>
         )
@@ -324,18 +327,25 @@ const faqRedirectLink: React.FC<
 };
 
 export const CartList: React.FC<Record<never, unknown>> = () => {
-    const isCheckingOut = useStore().cart.isCheckingOut();
-    const cartItems = useStore().cart.items();
-    const checkoutError = useStore().cart.checkoutError();
+    const isCheckingOut = useAtomValue(cartAtoms.isCheckingOut);
+    const cartItems = useAtomValue(cartAtoms.items);
+    const checkoutError = useAtomValue(cartAtoms.checkoutError);
+    const clearErrors = useSetAtom(cartActions.clearErrors);
 
-    const shopItems = useTrackedStore().shop.items?.();
+    const { data: shopItems } = useAtomValue(
+        shopItemsAtom as WritableAtom<
+            QueryObserverResult<ProductMap, DefaultError>,
+            [],
+            void
+        >,
+    );
 
     let subtotal = 0;
     const clearError =
         checkoutError.message !== '' &&
         cartItems.every((val) => !checkoutError.data?.includes(val));
     if (clearError) {
-        cartStore.set.clearErrors();
+        clearErrors();
     }
 
     return (

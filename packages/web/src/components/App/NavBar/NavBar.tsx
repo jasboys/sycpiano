@@ -1,14 +1,15 @@
 import styled from '@emotion/styled';
-import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import * as React from 'react';
 
+import { focusAtom } from 'jotai-optics';
 import CartButton from 'src/components/App/NavBar/CartButton';
 import HamburgerNav from 'src/components/App/NavBar/HamburgerNav';
 import NavBarLinks from 'src/components/App/NavBar/NavBarLinks';
 import NavBarLogo from 'src/components/App/NavBar/NavBarLogo';
 import { cartAtoms } from 'src/components/Cart/store';
 import { navBarHeight } from 'src/styles/variables';
-import { mediaQueriesAtoms } from '../store';
+import { mediaQueriesBaseAtom } from '../store';
 import { navBarAtoms } from './store';
 
 const shopEnabled = JSON.parse(ENABLE_SHOP) === true;
@@ -84,13 +85,9 @@ menu: (portrait || dppx > 2 || (max-width: 1280 and orientation: landscape)) ? h
 
 */
 
-const mediaQueries = atom((get) => {
-    const { isHamburger, hiDpx } = mediaQueriesAtoms;
-    return {
-        isHamburger: get(isHamburger),
-        hiDpx: get(hiDpx),
-    };
-});
+const mediaQueries = focusAtom(mediaQueriesBaseAtom, (optic) =>
+    optic.pick(['isHamburger', 'hiDpx']),
+);
 
 const NavBar = ({
     currentBasePath,

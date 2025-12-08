@@ -5,56 +5,129 @@ import { atomWithImmer } from 'jotai-immer';
 import type { CartStateShape } from 'src/components/Cart/types';
 import { storageAvailable } from 'src/localStorage';
 import { toAtoms } from 'src/store';
+import { atomWithStorage } from 'jotai/utils';
 
 const LOCAL_STORAGE_KEY = 'seanchenpiano_cart';
 // const apiKey = STRIPE_PUBLIC_KEY;
 // const stripe = loadStripe(apiKey);
 
 const initialState: CartStateShape = {
-    items: [],
+    // items: [],
     isInit: false,
     visible: false,
     isCheckingOut: false,
     checkoutError: {
         message: '',
     },
-    email: '',
+    // email: '',
 };
 
 const cartStore = atomWithImmer(initialState);
+
+const itemsAtom = atomWithStorage(
+    LOCAL_STORAGE_KEY,
+    [] as string[],
+    {
+        getItem: (_key, initialValue) => {
+            if (storageAvailable()) {
+                const cart: string[] = JSON.parse(
+                    window.localStorage.getItem(LOCAL_STORAGE_KEY) ?? '[]',
+                );
+                return cart;
+            } else {
+                return initialValue;
+            }
+        },
+        setItem: (_key, value) => {
+            if (storageAvailable()) {
+                window.localStorage.setItem(
+                    LOCAL_STORAGE_KEY,
+                    JSON.stringify(value),
+                );
+            }
+        },
+        removeItem: (_key) => {
+            if (storageAvailable()) {
+                window.localStorage.removeItem(LOCAL_STORAGE_KEY);
+            }
+        },
+    },
+    { getOnInit: true },
+);
+
+export const emailAtom = atomWithStorage('customer_email', '', undefined, {
+    getOnInit: true,
+});
+
 export const cartAtoms = {
     ...toAtoms(cartStore),
     visible: atom(
         (get) => get(cartStore).visible,
-        (_get, set, val: boolean) =>
-            set(cartStore, (draft) => (draft.visible = val)),
+        (_get, set, val?: boolean) =>
+            set(cartStore, (draft) => {
+                draft.visible = val === undefined ? !draft.visible : val;
+            }),
     ),
+    // itemsLength: atom((get) => get(cartStore).items.length),
+    isCheckingOut: atom(
+        (get) => get(cartStore).isCheckingOut,
+        (_get, set, val: boolean) => {
+            set(cartStore, (draft) => {
+                draft.isCheckingOut = val;
+            });
+        },
+    ),
+    items: atom((get) => get(itemsAtom)),
+    email: emailAtom,
 };
 
-const syncStorage = atom(null, (get, _set) => {
-    if (storageAvailable()) {
-        window.localStorage.setItem(
-            LOCAL_STORAGE_KEY,
-            JSON.stringify(get(cartAtoms.items)),
-        );
-    }
-});
+// export const cartItemsAtom = atom((get) => get(itemsAtom));
+
+// const syncStorage = atom(null, (get, _set) => {
+//     if (storageAvailable()) {
+//         window.localStorage.setItem(
+//             LOCAL_STORAGE_KEY,
+//             JSON.stringify(get(cartAtoms.items)),
+//         );
+//     }
+// });
+
+// const addItem = atom(null, (_get, set, item: string) => {
+//     set(cartStore, (draft) => draft.items.push(item));
+// });
 
 const addItem = atom(null, (_get, set, item: string) => {
-    set(cartStore, (draft) => draft.items.push(item));
-});
-
-const removeItem = atom(null, (_get, set, itemToRemove: string) => {
-    set(cartStore, (draft) => {
-        const idx = draft.items.indexOf(itemToRemove);
-        if (idx !== -1) {
-            draft.items.splice(idx, 1);
-        }
+    set(itemsAtom, (prev) => {
+        prev.push(item);
+        return prev;
     });
 });
 
+// const removeItem = atom(null, (_get, set, itemToRemove: string) => {
+//     set(cartStore, (draft) => {
+//         const idx = draft.items.indexOf(itemToRemove);
+//         if (idx !== -1) {
+//             draft.items.splice(idx, 1);
+//         }
+//     });
+// });
+
+const removeItem = atom(null, (_get, set, itemToRemove: string) => {
+    set(itemsAtom, (prev) => {
+        const idx = prev.indexOf(itemToRemove);
+        if (idx !== -1) {
+            prev.splice(idx, 1);
+        }
+        return prev;
+    });
+});
+
+// const clearCart = atom(null, (_get, set) => {
+//     set(cartStore, (draft) => (draft.items = []));
+// });
+
 const clearCart = atom(null, (_get, set) => {
-    set(cartStore, (draft) => (draft.items = []));
+    set(itemsAtom, []);
 });
 
 const clearErrors = atom(null, (_get, set) => {
@@ -66,33 +139,29 @@ const clearErrors = atom(null, (_get, set) => {
     });
 });
 
-const toggleCartVisible = atom(null, (_get, set, visible?: boolean) => {
-    set(cartStore, (draft) => {
-        draft.visible = visible === undefined ? !draft.visible : visible;
-    });
-});
+// const toggleCartVisible = atom(null, (_get, set, visible?: boolean) => {
+//     set(cartStore, (draft) => {
+//         draft.visible = visible === undefined ? !draft.visible : visible;
+//     });
+// });
 
-const initCartFn = atom(null, async (get, set) => {
-    if (storageAvailable() && !get(cartAtoms.isInit)) {
-        const cart: string[] = JSON.parse(
-            window.localStorage.getItem(LOCAL_STORAGE_KEY) ?? '[]',
-        );
-        const email: string = JSON.parse(
-            window.localStorage.getItem('customer_email') ?? '[]',
-        );
-        set(cartStore, (draft) => (draft.isInit = true));
-        return {
-            items: cart,
-            email,
-        };
-    }
-    set(cartStore, (draft) => (draft.isInit = true));
-
-    return Promise.resolve({
-        items: [],
-        email: '',
-    });
-});
+// const initCartFn = atom(null, (get, set) => {
+//     if (storageAvailable() && !get(cartAtoms.isInit)) {
+//         const cart: string[] = JSON.parse(
+//             window.localStorage.getItem(LOCAL_STORAGE_KEY) ?? '[]',
+//         );
+//         const email: string = JSON.parse(
+//             window.localStorage.getItem('customer_email') ?? '[]',
+//         );
+//         set(cartStore, (draft) => {
+//             draft.items = cart;
+//             draft.email = email;
+//             draft.isInit = true;
+//         });
+//     } else {
+//         set(cartStore, (draft) => (draft.isInit = true));
+//     }
+// });
 
 const checkoutFn = atom(null, async (get, set, email: string) => {
     try {
@@ -138,13 +207,13 @@ const checkoutFn = atom(null, async (get, set, email: string) => {
 });
 
 export const cartActions = {
-    syncStorage,
+    // syncStorage,
     addItem,
     removeItem,
     clearCart,
     clearErrors,
-    toggleCartVisible,
-    initCartFn,
+    // toggleCartVisible,
+    // initCartFn,
     checkoutFn,
 };
 

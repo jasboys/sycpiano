@@ -23,11 +23,13 @@ import {
     screenPortrait,
     screenXSandPortrait,
 } from 'src/screens';
-import { rootStore, useStore } from 'src/store.js';
 import { interFont, latoFont } from 'src/styles/fonts';
 import { container, noHighlight } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
+import { focusAtom } from 'jotai-optics';
+import { mediaQueriesAtoms, mediaQueriesBaseAtom } from '../App/store';
+import { useAtomValue } from 'jotai';
 
 const textShadowColor = 'rgba(0 0 0 / 0.75)';
 
@@ -206,9 +208,12 @@ const Content: React.FC = () => (
     </React.Fragment>
 );
 
+const mediaQueries = focusAtom(mediaQueriesBaseAtom, (optic) =>
+    optic.pick(['isHamburger', 'hiDpx', 'screenPortrait']),
+);
+
 const Home: React.FC<Record<never, unknown>> = () => {
-    const { isHamburger, hiDpx, screenPortrait } =
-        rootStore.mediaQueries.useTrackedStore();
+    const { isHamburger, hiDpx, screenPortrait } = useAtomValue(mediaQueries);
     const menuExpanded = useStore().navBar.isExpanded();
     const cartExpanded = useStore().cart.visible();
     const backgroundRef = React.useRef<HTMLDivElement>(null);
@@ -283,7 +288,11 @@ const Home: React.FC<Record<never, unknown>> = () => {
                     timeout={400}
                     nodeRef={navbarRef}
                 >
-                    <NavBarGradient ref={navbarRef} hiDpx={hiDpx} isHamburger={isHamburger} />
+                    <NavBarGradient
+                        ref={navbarRef}
+                        hiDpx={hiDpx}
+                        isHamburger={isHamburger}
+                    />
                 </Transition>
             </BackgroundContainer>
             <ContentContainer

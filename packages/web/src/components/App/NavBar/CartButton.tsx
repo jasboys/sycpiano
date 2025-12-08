@@ -1,9 +1,9 @@
 import { css } from '@emotion/react';
 import { gsap } from 'gsap';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { mix } from 'polished';
 import * as React from 'react';
-import { cartActions, cartAtoms } from 'src/components/Cart/store';
+import { cartAtoms } from 'src/components/Cart/store';
 import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
 import { lightBlue, logoBlue } from 'src/styles/colors';
@@ -101,8 +101,7 @@ const CartButton = ({
 }: React.ComponentPropsWithRef<'button'> & CartButtonProps) => {
     const items = useAtomValue(cartAtoms.items);
     const isInit = useAtomValue(cartAtoms.isInit);
-    const cartVisible = useAtomValue(cartAtoms.visible);
-    const toggleCartVisible = useSetAtom(cartActions.toggleCartVisible);
+    const [cartVisible, toggleCartVisible] = useAtom(cartAtoms.visible);
     const toggleExpanded = useSetAtom(navBarAtoms.isExpanded);
     const menuOpened = useAtomValue(navBarAtoms.isExpanded);
     const cartRef = React.useRef<HTMLButtonElement>(null);
