@@ -1,5 +1,6 @@
 import isPropValid from '@emotion/is-prop-valid';
 import styled from '@emotion/styled';
+import { useSetAtom } from 'jotai';
 import type * as React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -7,7 +8,7 @@ import type { Product } from 'src/components/Shop/ShopList/types';
 import { staticImage } from 'src/imageUrls';
 import { latoFont } from 'src/styles/fonts.js';
 import { formatPrice } from 'src/utils';
-import { cartStore } from './store.js';
+import { cartActions } from './store';
 
 const ItemContainer = styled.div({
     display: 'flex',
@@ -73,6 +74,7 @@ interface CartProps {
 }
 
 export const CartItem: React.FC<CartProps> = ({ item, error }) => {
+    const removeItem = useSetAtom(cartActions.removeItem);
     return (
         <ItemContainer>
             <ItemThumbnail>
@@ -90,10 +92,14 @@ export const CartItem: React.FC<CartProps> = ({ item, error }) => {
                         {item.name}
                     </ItemName>
                     <button
-                        css={{ all: 'unset', flex: '0 0 auto', fontWeight: 300 }}
+                        css={{
+                            all: 'unset',
+                            flex: '0 0 auto',
+                            fontWeight: 300,
+                        }}
                         type="button"
                         tabIndex={0}
-                        onClick={() => cartStore.set.removeItem(item.id)}
+                        onClick={() => removeItem(item.id)}
                     >
                         Remove
                     </button>

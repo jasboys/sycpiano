@@ -28,8 +28,10 @@ import { container, noHighlight } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
 import { focusAtom } from 'jotai-optics';
-import { mediaQueriesAtoms, mediaQueriesBaseAtom } from '../App/store';
+import { mediaQueriesBaseAtom } from '../App/store';
 import { useAtomValue } from 'jotai';
+import { navBarAtoms } from '../App/NavBar/store';
+import { cartAtoms } from '../Cart/store';
 
 const textShadowColor = 'rgba(0 0 0 / 0.75)';
 
@@ -214,8 +216,8 @@ const mediaQueries = focusAtom(mediaQueriesBaseAtom, (optic) =>
 
 const Home: React.FC<Record<never, unknown>> = () => {
     const { isHamburger, hiDpx, screenPortrait } = useAtomValue(mediaQueries);
-    const menuExpanded = useStore().navBar.isExpanded();
-    const cartExpanded = useStore().cart.visible();
+    const menuExpanded = useAtomValue(navBarAtoms.isExpanded);
+    const cartExpanded = useAtomValue(cartAtoms.visible);
     const backgroundRef = React.useRef<HTMLDivElement>(null);
     const navbarRef = React.useRef<HTMLDivElement>(null);
     return (

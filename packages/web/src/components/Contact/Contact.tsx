@@ -9,7 +9,8 @@ import { minRes, webkitMinDPR } from 'src/screens';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 import { navBarActions } from '../App/NavBar/store';
-import { mediaQueriesAtoms } from '../App/store';
+import { mediaQueriesBaseAtom } from '../App/store';
+import { focusAtom } from 'jotai-optics';
 
 type ContactProps = Record<never, unknown>;
 
@@ -32,9 +33,12 @@ const ContactContainer = styled.div(pushed, {
     },
 });
 
+const mediaQueries = focusAtom(mediaQueriesBaseAtom, (optic) =>
+    optic.pick(['isHamburger', 'hiDpx']),
+);
+
 const Contact: React.FC<ContactProps> = () => {
-    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
-    const hiDpx = useAtomValue(mediaQueriesAtoms.hiDpx);
+    const { isHamburger, hiDpx } = useAtomValue(mediaQueries);
     const onScroll = useSetAtom(navBarActions.onScroll);
 
     return (
