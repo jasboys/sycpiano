@@ -13,6 +13,7 @@ import {
 } from 'src/components/Media/Music/types';
 import { toAtoms } from 'src/store.js';
 import { getLastName, modulo, normalizeString } from './utils.js';
+import { atomWithQuery } from 'jotai-tanstack-query';
 
 const initialState: MusicStateShape = {
     isFetching: false,
@@ -57,15 +58,14 @@ const musicListIfExists = (
     return [];
 };
 
-export interface FetchPlaylistThunkReturn {
-    items: MusicListItem[];
-    flatItems: MusicFileItem[];
-    firstTrack: MusicFileItem;
-    prevTrack?: MusicFileItem;
-    nextTrack?: MusicFileItem;
-}
+/* 
+{
+        queryKey: ['musicPlaylist'],
+        queryFn: async () => await fetchPlaylistFn(),
+    }
+        */
 
-export const fetchPlaylistFn = async () => {
+const fetchPlaylistFn = async () => {
     const { data: response } = await axios.get<MusicResponse>('/api/music');
     const mappedResponse: MusicResponse = {};
     for (const category in response) {
@@ -112,20 +112,37 @@ export const fetchPlaylistFn = async () => {
     return items;
 };
 
-export const itemsToFlatItems = (items: MusicListItem[]): MusicFileItem[] => {
-    const flatItems: MusicFileItem[] = [];
-    for (const musicListItem of items) {
-        if (isMusicItem(musicListItem)) {
-            flatItems.push(...musicListItem.musicFiles);
-        }
-    }
+// export const itemsToFlatItems = (items: MusicListItem[]): MusicFileItem[] => {
+//     const flatItems: MusicFileItem[] = [];
+//     for (const musicListItem of items) {
+//         if (isMusicItem(musicListItem)) {
+//             flatItems.push(...musicListItem.musicFiles);
+//         }
+//     }
 
-    return flatItems.map((item, idx) => ({ ...item, idx }));
-};
+//     return flatItems.map((item, idx) => ({ ...item, idx }));
+// };
 
 const musicStore = atomWithImmer(initialState);
 export const musicAtoms = {
     ...toAtoms(musicStore),
+    items: atomWithQuery(() => ({
+        queryKey: ['musicPlaylist'],
+        queryFn: fetchPlaylistFn,
+    })),
+    flatItems: atom(
+        (get) => get(musicStore).flatItems,
+        (get, _set) => {
+            const flatItems: MusicFileItem[] = [];
+            for (const musicListItem of get(musicStore).items) {
+                if (isMusicItem(musicListItem)) {
+                    flatItems.push(...musicListItem.musicFiles);
+                }
+            }
+
+            return flatItems.map((item, idx) => ({ ...item, idx }));
+        },
+    ),
     isShuffle: atom(
         (get) => get(musicStore).isShuffle,
         (_get, set) => {
@@ -224,6 +241,12 @@ const callbackAction = atom(
         });
     },
 );
+
+export const musicActions = {
+    callbackAction,
+    getFirstTrackAtom,
+    getNextTrackAtom,
+};
 
 // export const musicStore = createStore('musicPlayer')(
 //     initialState,

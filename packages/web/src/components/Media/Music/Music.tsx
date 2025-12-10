@@ -1,6 +1,5 @@
 /* global MUSIC_PATH */
 
-
 import { css } from '@emotion/react';
 import { useQuery } from '@tanstack/react-query';
 import isEmpty from 'lodash-es/isEmpty';
@@ -18,6 +17,7 @@ import MusicPlaylist from 'src/components/Media/Music/MusicPlaylist';
 import {
     fetchPlaylistFn,
     itemsToFlatItems,
+    musicAtoms,
     musicStore,
 } from 'src/components/Media/Music/store.js';
 import type {
@@ -39,10 +39,13 @@ import {
     screenShort,
     webkitMinDPR,
 } from 'src/screens';
-import { rootStore, useStore } from 'src/store.js';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight, playlistContainerWidth } from 'src/styles/variables';
 import { MusicPlayer } from './MusicPlayer.js';
+import { useAtom, useAtomValue } from 'jotai';
+import { focusAtom } from 'jotai-optics';
+import { navBarAtoms } from 'src/components/App/NavBar/store.js';
+import { mediaQueriesBaseAtom } from 'src/components/App/store.js';
 
 const detectWebGL = () => {
     const canvas = document.createElement('canvas');
@@ -65,11 +68,10 @@ type PathMatchResult =
     | PathMatch<'composer' | 'piece' | 'movement'>
     | null;
 
-type MusicProps = MusicStateToProps &
-    {
-        matches: PathMatchResult;
-        navigate: NavigateFunction;
-    };
+type MusicProps = MusicStateToProps & {
+    matches: PathMatchResult;
+    navigate: NavigateFunction;
+};
 
 const styles = {
     music: css(pushed, {
@@ -123,20 +125,36 @@ const styles = {
     }),
 };
 
-const Music: React.FC = () => {
-    const { data: items, isSuccess } = useQuery({
-        queryKey: ['musicPlaylist'],
-        queryFn: async () => await fetchPlaylistFn(),
-    });
+const musicSelectorAtom = focusAtom(musicStore, (optic) =>
+    optic.pick([
+        'isPlaying',
+        'flatItems',
+        'currentTrack',
+        'isShuffle',
+        'isHoverSeekring',
+        'duration',
+        'volume',
+        'angle',
+    ]),
+);
 
-    React.useEffect(() => {
-        isSuccess && items && musicStore.set.items(items);
-        isSuccess && items && musicStore.set.flatItems(itemsToFlatItems(items));
-    }, [isSuccess, items]);
+const mediaQueriesAtom = focusAtom(mediaQueriesBaseAtom, (optic) =>
+    optic.pick([
+        'hiDpx',
+        'isHamburger',
+        'screenPortrait',
+        'screenM',
+        'screenL',
+        'screenLandscape',
+    ]),
+);
+
+const Music: React.FC = () => {
+    const { isSuccess } = useAtomValue(musicAtoms.items);
 
     const matches: PathMatchResult = [
         useMatch('media/music/:composer/:piece'),
-        useMatch('media/music/:composer/:piece/:movement')
+        useMatch('media/music/:composer/:piece/:movement'),
     ].reduce((prev, curr) => prev ?? curr, null);
 
     const navigate = useNavigate();
@@ -157,8 +175,8 @@ const Music: React.FC = () => {
         duration,
         volume,
         angle,
-    } = musicStore.useTrackedStore();
-    const navBarShow = useStore().navBar.isVisible();
+    } = useAtomValue(musicSelectorAtom);
+    const navBarShow = useAtomValue(navBarAtoms.isVisible);
 
     const audio = React.useRef<HTMLAudioElement | null>(null);
     const buffers = React.useRef<{
@@ -438,15 +456,15 @@ const Music: React.FC = () => {
                 id="prev"
                 crossOrigin="anonymous"
                 ref={(el) => {
-                    buffers.current.prev = el}
-                }
+                    buffers.current.prev = el;
+                }}
                 preload="auto"
             />
             <audio
                 id="next"
                 crossOrigin="anonymous"
                 ref={(el) => {
-                    buffers.current.next = el
+                    buffers.current.next = el;
                 }}
                 preload="auto"
             />
