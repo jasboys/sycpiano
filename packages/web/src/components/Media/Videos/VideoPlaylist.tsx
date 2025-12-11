@@ -5,11 +5,12 @@ import * as React from 'react';
 import { toMedia } from 'src/mediaQuery';
 import Playlist from 'src/components/Media/Playlist';
 import VideoPlaylistItem from 'src/components/Media/Videos/VideoPlaylistItem';
-import { videoStore } from 'src/components/Media/Videos/store.js';
 import { screenPortrait, screenXS } from 'src/screens';
 import { latoFont } from 'src/styles/fonts.js';
 import type { VideoItemShape } from './types.js';
-import { rootStore } from 'src/store.js';
+import { mediaQueriesAtoms } from 'src/components/App/store.js';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { videoPlayerActions, videoPlayerAtoms } from './store.js';
 
 const StyledPlaylistContainer = styled.div`
     width: fit-content;
@@ -44,18 +45,21 @@ const videoULStyle = css({
 });
 
 const VideoPlaylist: React.FC<{ videos?: VideoItemShape[] }> = ({ videos }) => {
-    const { screenLandscape, screenPortrait } =
-        rootStore.mediaQueries.useTrackedStore();
-    const playlistVisible = videoStore.use.playlistVisible();
-    const videoId = videoStore.use.videoId();
+    const screenLandscape = useAtomValue(mediaQueriesAtoms.screenLandscape);
+    const screenPortrait = useAtomValue(mediaQueriesAtoms.screenPortrait);
+    const [playlistVisible, togglePlaylist] = useAtom(
+        videoPlayerAtoms.playlistVisible,
+    );
+    const playVideo = useSetAtom(videoPlayerActions.playVideo);
+    const videoId = useAtomValue(videoPlayerAtoms.videoId);
 
     const toggleAction = React.useCallback((show?: boolean) => {
-        videoStore.set.togglePlaylist(show);
+        togglePlaylist(show);
     }, []);
 
     const playAction = React.useCallback(
         (videoId: string) => {
-            videoStore.set.playVideo(videoId, screenPortrait);
+            playVideo(videoId, screenPortrait);
         },
         [screenPortrait],
     );

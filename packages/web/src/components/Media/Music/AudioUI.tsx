@@ -4,6 +4,9 @@ import { gsap } from 'gsap';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
 
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { focusAtom } from 'jotai-optics';
+import { mediaQueriesAtoms } from 'src/components/App/store.js';
 import { LoadingInstance } from 'src/components/LoadingSVG';
 import {
     HEIGHT_ADJUST_DESKTOP,
@@ -19,10 +22,9 @@ import {
 import { cartesianToPolar } from 'src/components/Media/Music/utils';
 import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
-import { rootStore } from 'src/store.js';
 import { lightBlue } from 'src/styles/colors';
 import { fadeOnEnter, fadeOnExit } from 'src/utils.js';
-import { musicStore } from './store.js';
+import { musicAtoms, musicStore } from './store.js';
 
 const isMouseEvent = <E extends Element>(
     event: AggregateUIEvent<E>,
@@ -105,6 +107,10 @@ type AggregateUIEvent<E> =
     | React.TouchEvent<E>
     | TouchEvent;
 
+const atomsSelectorAtom = focusAtom(musicStore, (optic) =>
+    optic.pick(['isLoading', 'isMouseMove', 'isPlaying', 'radii']),
+);
+
 const AudioUI: React.FC<AudioUIProps> = ({
     seekAudio,
     onStartDrag,
@@ -152,11 +158,14 @@ const AudioUI: React.FC<AudioUIProps> = ({
 
     const {
         isLoading,
-        isMouseMove,
         isPlaying,
         radii: { inner, outer, base },
-    } = musicStore.useTrackedStore();
-    const isHamburger = rootStore.mediaQueries.use.isHamburger();
+    } = useAtomValue(atomsSelectorAtom);
+    const [isMouseMove, setIsMouseMove] = useAtom(musicAtoms.isMouseMove);
+    const setAngle = useSetAtom(musicAtoms.angle);
+    const setIsHoverSeekring = useSetAtom(musicAtoms.isHoverSeekring);
+    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
+    // const toggleShuffle = useSetAtom(musicAtoms.isShuffle);
 
     // const dispatch = useAppDispatch();
 
@@ -171,8 +180,18 @@ const AudioUI: React.FC<AudioUIProps> = ({
             (event as React.KeyboardEvent<E> | KeyboardEvent).key === ' ' ||
             (event as React.MouseEvent<E> | MouseEvent).button === 0
         ) {
-            musicStore.set.toggleShuffle();
+            togglePlay();
             event.preventDefault();
+        }
+    };
+
+    const skipKeyDown = <E extends Element>(
+        event: KeyboardEvent | React.KeyboardEvent<E>,
+    ) => {
+        if (event.key === 'ArrowRight') {
+            playSubsequent('next');
+        } else if (event.key === 'ArrowLeft') {
+            playSubsequent('prev');
         }
     };
 
@@ -197,7 +216,7 @@ const AudioUI: React.FC<AudioUIProps> = ({
             onResize();
             visualizationCtx.current = seekRing.current.getContext('2d');
             isDragging.current = false;
-            musicStore.set.isMouseMove(false);
+            setIsMouseMove(false);
             setState((prev) => ({ ...prev, isHoverPlaypause: false }));
         }
     };
@@ -299,33 +318,33 @@ const AudioUI: React.FC<AudioUIProps> = ({
                 seekRing.current.style.cursor = isMouseEvent(event)
                     ? 'pointer'
                     : 'default';
-                musicStore.set.isMouseMove(false);
+                setIsMouseMove(false);
                 if (!passive) {
                     event.preventDefault();
                 }
             } else {
                 if (isEventInSeekRing(event) && !isHamburger) {
                     seekRing.current.style.cursor = 'pointer';
-                    musicStore.set.isHoverSeekring(true);
-                    musicStore.set.angle?.(mousePositionToAngle(event));
+                    setIsHoverSeekring(true);
+                    setAngle(mousePositionToAngle(event));
                     if (!prevMoving) {
-                        musicStore.set.isMouseMove(false);
+                        setIsMouseMove(false);
                     } else {
                         if (timerId.current) {
                             clearTimeout(timerId.current);
                         }
                         timerId.current = setTimeout(
-                            () => musicStore.set.isMouseMove(false),
+                            () => setIsMouseMove(false),
                             3000,
                         );
                     }
                 } else {
                     seekRing.current.style.cursor = 'default';
-                    musicStore.set.isHoverSeekring(false);
+                    setIsHoverSeekring(false);
                     if (timerId.current) {
                         clearTimeout(timerId.current);
                     }
-                    musicStore.set.isMouseMove(true);
+                    setIsMouseMove(true);
                     if (
                         Object.values(buttonRefs.current).includes(
                             event.currentTarget as HTMLDivElement,
@@ -334,7 +353,7 @@ const AudioUI: React.FC<AudioUIProps> = ({
                         event.stopPropagation();
                     } else {
                         timerId.current = setTimeout(
-                            () => musicStore.set.isMouseMove(false),
+                            () => setIsMouseMove(false),
                             3000,
                         );
                     }
@@ -359,13 +378,13 @@ const AudioUI: React.FC<AudioUIProps> = ({
                 seekAudio(prevPercentage.current);
                 isDragging.current = false;
                 if (!prevMoving) {
-                    musicStore.set.isMouseMove(false);
+                    setIsMouseMove(false);
                 } else {
                     if (timerId.current) {
                         clearTimeout(timerId.current);
                     }
                     timerId.current = setTimeout(
-                        () => musicStore.set.isMouseMove(false),
+                        () => setIsMouseMove(false),
                         3000,
                     );
                 }
@@ -515,7 +534,7 @@ const AudioUI: React.FC<AudioUIProps> = ({
                     />
                     <SkipButton
                         ref={(el) => {
-                            buttonRefs.current.prev = el
+                            buttonRefs.current.prev = el;
                         }}
                         key="prev-button"
                         onClick={() => playSubsequent('prev')}
@@ -526,6 +545,7 @@ const AudioUI: React.FC<AudioUIProps> = ({
                         onBlur={handleMouseout('isHoverPrev')}
                         onFocus={handleMouseover('isHoverPrev')}
                         onMouseUp={handleMouseup}
+                        onKeyDown={skipKeyDown}
                         width={(buttonLength * 4) / 5}
                         height={(buttonLength * 8) / 15}
                         verticalOffset={verticalOffset}
@@ -534,7 +554,7 @@ const AudioUI: React.FC<AudioUIProps> = ({
                     {isPlaying ? (
                         <PauseButton
                             ref={(el) => {
-                                buttonRefs.current.pause = el
+                                buttonRefs.current.pause = el;
                             }}
                             key="pause-button"
                             onClick={togglePlay}
@@ -548,11 +568,12 @@ const AudioUI: React.FC<AudioUIProps> = ({
                             width={buttonLength}
                             height={buttonLength}
                             verticalOffset={verticalOffset}
+                            onKeyDown={togglePlaying}
                         />
                     ) : (
                         <PlayButton
                             ref={(el) => {
-                                buttonRefs.current.play = el
+                                buttonRefs.current.play = el;
                             }}
                             key="play-button"
                             onClick={togglePlay}
@@ -566,6 +587,7 @@ const AudioUI: React.FC<AudioUIProps> = ({
                             width={buttonLength}
                             height={buttonLength}
                             verticalOffset={verticalOffset}
+                            onKeyDown={togglePlaying}
                         />
                     )}
                     <SkipButton
@@ -581,6 +603,7 @@ const AudioUI: React.FC<AudioUIProps> = ({
                         onBlur={handleMouseout('isHoverNext')}
                         onFocus={handleMouseover('isHoverNext')}
                         onMouseUp={handleMouseup}
+                        onKeyDown={skipKeyDown}
                         width={(buttonLength * 4) / 5}
                         height={(buttonLength * 8) / 15}
                         verticalOffset={verticalOffset}

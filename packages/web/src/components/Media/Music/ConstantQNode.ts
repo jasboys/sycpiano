@@ -3,7 +3,7 @@ import { constantQ } from 'src/components/Media/Music/VisualizationUtils';
 export class ConstantQNode extends AnalyserNode {
     maxBin?: number;
     highPassBin?: number;
-    intArray!: Uint8Array;
+    intArray!: Uint8Array<ArrayBuffer>;
     floatArray!: Float32Array;
     endIdx!: number;
 

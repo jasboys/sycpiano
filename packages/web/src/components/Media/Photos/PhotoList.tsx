@@ -1,6 +1,9 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
+import { useAtomValue, useSetAtom } from 'jotai';
 import type * as React from 'react';
+import { navBarActions } from 'src/components/App/NavBar/store';
+import { mediaQueriesAtoms } from 'src/components/App/store';
 
 import DropboxButton from 'src/components/Media/Photos/DropboxButton';
 import PhotoListItem from 'src/components/Media/Photos/PhotoListItem';
@@ -9,7 +12,6 @@ import { idFromItem } from 'src/components/Media/Photos/utils';
 import Playlist from 'src/components/Media/Playlist';
 import { toMedia } from 'src/mediaQuery';
 import { minRes, screenPortrait, screenXS, webkitMinDPR } from 'src/screens';
-import { rootStore } from 'src/store.js';
 import { navBarHeight } from 'src/styles/variables';
 
 const photoListStyle = css({
@@ -61,7 +63,9 @@ interface PhotoListProps {
 }
 
 const PhotoList: React.FC<PhotoListProps> = (props) => {
-    const { screenXS, hiDpx } = rootStore.mediaQueries.useTrackedStore();
+    const screenXS = useAtomValue(mediaQueriesAtoms.screenXS);
+    const hiDpx = useAtomValue(mediaQueriesAtoms.hiDpx);
+    const onScroll = useSetAtom(navBarActions.onScroll);
 
     const { items, currentItem, selectPhoto } = props;
     return (
@@ -75,7 +79,7 @@ const PhotoList: React.FC<PhotoListProps> = (props) => {
                 shouldAppear={false}
                 onScroll={
                     screenXS
-                        ? rootStore.navBar.set.onScroll(navBarHeight.get(hiDpx))
+                        ? (ev) => onScroll(navBarHeight.get(hiDpx), ev)
                         : undefined
                 }
             >

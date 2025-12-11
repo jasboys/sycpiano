@@ -1,7 +1,6 @@
 /* global MUSIC_PATH */
 
 import { css } from '@emotion/react';
-import { useQuery } from '@tanstack/react-query';
 import { getDefaultStore, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { focusAtom } from 'jotai-optics';
 import isEmpty from 'lodash-es/isEmpty';
@@ -12,15 +11,13 @@ import {
     useMatch,
     useNavigate,
 } from 'react-router-dom';
-import { navBarAtoms } from 'src/components/App/NavBar/store.js';
+import { navBarActions, navBarAtoms } from 'src/components/App/NavBar/store.js';
 import { mediaQueriesBaseAtom } from 'src/components/App/store.js';
 import AudioInfo from 'src/components/Media/Music/AudioInfo';
 import AudioUI from 'src/components/Media/Music/AudioUI';
 import type { AudioVisualizerType } from 'src/components/Media/Music/AudioVisualizerBase.jsx';
 import MusicPlaylist from 'src/components/Media/Music/MusicPlaylist';
 import {
-    fetchPlaylistFn,
-    itemsToFlatItems,
     musicActions,
     musicAtoms,
     musicStore,
@@ -147,7 +144,8 @@ const mediaQueriesSelectorAtom = focusAtom(mediaQueriesBaseAtom, (optic) =>
         'screenM',
         'screenL',
         'screenLandscape',
-    ]));
+    ]),
+);
 
 const Music: React.FC = () => {
     const { isSuccess } = useAtomValue(musicAtoms.items);
@@ -169,7 +167,6 @@ const Music: React.FC = () => {
     const {
         isPlaying,
         flatItems,
-        currentTrack,
         isShuffle,
         isHoverSeekring,
         duration,
@@ -178,10 +175,15 @@ const Music: React.FC = () => {
     } = useAtomValue(musicSelectorAtom);
     const setVolume = useSetAtom(musicAtoms.volume);
     const setIsLoading = useSetAtom(musicAtoms.isLoading);
+    const setRadii = useSetAtom(musicAtoms.radii);
+    const setPlaybackPosition = useSetAtom(musicAtoms.playbackPosition);
+    const [currentTrack, setCurrentTrack] = useAtom(musicAtoms.currentTrack);
+    const { fn: getNextTrack } = useAtomValue(musicActions.getNextTrackAtom);
+    const { fn: getFirstTrack } = useAtomValue(musicActions.getFirstTrackAtom);
+    const callbackAction = useSetAtom(musicActions.callbackAction);
+
     const navBarShow = useAtomValue(navBarAtoms.isVisible);
-    const { fn: getNextTrack } = useAtomValue(musicActions.getNextTrackAtom)
-    const { fn: getFirstTrack } = useAtomValue(musicActions.getFirstTrackAtom)
-    const { fn: callbackAction } = useAtomValue(musicActions.callbackAction)
+    const onScroll = useSetAtom(navBarActions.onScroll);
 
     const audio = React.useRef<HTMLAudioElement | null>(null);
     const buffers = React.useRef<{
@@ -213,12 +215,12 @@ const Music: React.FC = () => {
     );
 
     React.useEffect(() => {
-        const prev = (tracks.current.prev = musicActions.getNextTrack.fn(
+        const prev = (tracks.current.prev = getNextTrack(
             currentTrack,
             'prev',
             true,
         ));
-        const next = (tracks.current.next = musicStore.get.getNextTrack(
+        const next = (tracks.current.next = getNextTrack(
             currentTrack,
             'next',
             true,
@@ -265,7 +267,7 @@ const Music: React.FC = () => {
                         subsequent.name,
                     ),
                 );
-                musicStore.set.currentTrack?.(subsequent);
+                setCurrentTrack(subsequent);
                 musicPlayer.current.setTrack(
                     getSrc(subsequent),
                     getWaveformSrc(subsequent),
@@ -330,13 +332,13 @@ const Music: React.FC = () => {
                     ...matches?.params,
                 };
 
-                const first = musicStore.get.getFirstTrack({
+                const first = getFirstTrack({
                     composer,
                     piece,
                     movement,
                 });
 
-                musicStore.set.currentTrack?.(first);
+                setCurrentTrack(first);
                 await musicPlayer.current.initialize(
                     audio.current,
                     buffers.current.prev,
@@ -345,7 +347,7 @@ const Music: React.FC = () => {
                 );
                 setInitialized(true);
             };
-            musicStore.set.isLoading(true);
+            setIsLoading(true);
             importVisualizer();
             initialize();
             return () => {
@@ -378,7 +380,7 @@ const Music: React.FC = () => {
     const onDrag = React.useCallback((percent: number) => {
         const position = musicPlayer.current.audio.duration * percent;
 
-        musicStore.set.playbackPosition(position);
+        setPlaybackPosition(position);
         musicPlayer.current.audio.currentTime = position;
     }, []);
 
@@ -404,7 +406,7 @@ const Music: React.FC = () => {
         (play?: boolean) => () => {
             if (currentTrack) {
                 const audio = musicPlayer.current.audio;
-                musicStore.set.callbackAction({
+                callbackAction({
                     playing:
                         play !== undefined && isPlaying !== play
                             ? play
@@ -423,7 +425,7 @@ const Music: React.FC = () => {
                 await musicPlayer.current.context.resume();
             }
             if (musicFile.id !== currentTrack?.id) {
-                musicStore.set.currentTrack?.(musicFile);
+                setCurrentTrack(musicFile);
                 musicPlayer.current.setTrack(
                     getSrc(musicFile),
                     getWaveformSrc(musicFile),
@@ -439,7 +441,7 @@ const Music: React.FC = () => {
             css={styles.music}
             onScroll={
                 isHamburger
-                    ? rootStore.navBar.set.onScroll(navBarHeight.get(hiDpx))
+                    ? (ev) => onScroll(navBarHeight.get(hiDpx), ev)
                     : undefined
             }
         >
@@ -499,7 +501,8 @@ const Music: React.FC = () => {
                         }
                         isHoverSeekring={isHoverSeekring}
                         hoverAngle={angle}
-                        setRadii={musicStore.set.radii}
+                        setRadii={setRadii}
+                        store={getDefaultStore()}
                     />
                 )}
             </div>

@@ -1,6 +1,7 @@
 import { css } from '@emotion/react';
 import { fitGradient } from 'dont-crop';
 import { gsap } from 'gsap';
+import { useSetAtom } from 'jotai';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
 
@@ -16,7 +17,7 @@ import { generateSrcsetWidths } from 'src/imageUrls';
 import { screenWidths } from 'src/screens';
 import { lightBlue } from 'src/styles/colors.js';
 import { fadeOnEnter, fadeOnExit, isImageElement } from 'src/utils';
-import { photoStore } from './store.js';
+import { photoAtoms } from './store';
 
 interface PhotoFaderProps {
     readonly item: PhotoItem;
@@ -59,11 +60,12 @@ const PhotoFader: React.FC<PhotoFaderProps> = ({
     const urlWebP = resizedPathFromItem(item, { gallery: true, webp: true });
     const urlJpg = resizedPathFromItem(item, { gallery: true });
     const divRef = React.useRef<HTMLDivElement>(null);
+    const setBackground = useSetAtom(photoAtoms.background);
 
     const successCb = React.useCallback(
         (el: HTMLImageElement | HTMLElement | Element | undefined) => {
             if (el && isImageElement(el)) {
-                photoStore.set.background(fitGradient(el));
+                setBackground(fitGradient(el));
                 gsap.to(el, { autoAlpha: 1, duration: 0.2 });
             }
         },
@@ -82,20 +84,23 @@ const PhotoFader: React.FC<PhotoFaderProps> = ({
             timeout={250}
             nodeRef={divRef}
         >
-            <div ref={divRef} css={{
-                position: 'absolute',
-                width: '100%',
-                height: '100%',
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-            }}>
-            <LazyImage
-                id={`${idFromItem(item)}_view`}
-                alt="Sean Chen Pianist Photo Viewer"
-                csss={{
-                    desktop: css` visibility: hidden; `,
-                    picture: css`
+            <div
+                ref={divRef}
+                css={{
+                    position: 'absolute',
+                    width: '100%',
+                    height: '100%',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                }}
+            >
+                <LazyImage
+                    id={`${idFromItem(item)}_view`}
+                    alt="Sean Chen Pianist Photo Viewer"
+                    csss={{
+                        desktop: css` visibility: hidden; `,
+                        picture: css`
                         position: absolute;
                         width: 100%;
                         height: 100%;
@@ -107,22 +112,22 @@ const PhotoFader: React.FC<PhotoFaderProps> = ({
                             box-shadow: 0px 2px 7px -2px rgba(0 0 0 / 0.8);
                         }
                     `,
-                }}
-                desktopAttributes={{
-                    webp: {
-                        srcset: generateSrcsetWidths(urlWebP, screenWidths),
-                        sizes: '100vh',
-                    },
-                    jpg: {
-                        srcset: generateSrcsetWidths(urlJpg, screenWidths),
-                        sizes: '100vh',
-                    },
-                    src: staticPathFromItem(item),
-                }}
-                loadingComponent={LoadingGroup}
-                successCb={successCb}
-                isMobile={isMobile}
-            />
+                    }}
+                    desktopAttributes={{
+                        webp: {
+                            srcset: generateSrcsetWidths(urlWebP, screenWidths),
+                            sizes: '100vh',
+                        },
+                        jpg: {
+                            srcset: generateSrcsetWidths(urlJpg, screenWidths),
+                            sizes: '100vh',
+                        },
+                        src: staticPathFromItem(item),
+                    }}
+                    loadingComponent={LoadingGroup}
+                    successCb={successCb}
+                    isMobile={isMobile}
+                />
             </div>
         </Transition>
     );

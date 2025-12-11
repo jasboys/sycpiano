@@ -2,10 +2,10 @@
 import axios, { type AxiosError, type AxiosResponse } from 'axios';
 import { atom } from 'jotai';
 import { atomWithImmer } from 'jotai-immer';
+import { atomWithStorage } from 'jotai/utils';
 import type { CartStateShape } from 'src/components/Cart/types';
 import { storageAvailable } from 'src/localStorage';
-import { toAtoms } from 'src/store';
-import { atomWithStorage } from 'jotai/utils';
+import { partialAtomGetter, toAtoms } from 'src/store';
 
 const LOCAL_STORAGE_KEY = 'seanchenpiano_cart';
 // const apiKey = STRIPE_PUBLIC_KEY;
@@ -59,25 +59,12 @@ export const emailAtom = atomWithStorage('customer_email', '', undefined, {
     getOnInit: true,
 });
 
+const { toToggleAtom, toWriteAtom } = partialAtomGetter(cartStore);
 export const cartAtoms = {
     ...toAtoms(cartStore),
-    visible: atom(
-        (get) => get(cartStore).visible,
-        (_get, set, val?: boolean) =>
-            set(cartStore, (draft) => {
-                draft.visible = val === undefined ? !draft.visible : val;
-            }),
-    ),
-    // itemsLength: atom((get) => get(cartStore).items.length),
-    isCheckingOut: atom(
-        (get) => get(cartStore).isCheckingOut,
-        (_get, set, val: boolean) => {
-            set(cartStore, (draft) => {
-                draft.isCheckingOut = val;
-            });
-        },
-    ),
-    items: atom((get) => get(itemsAtom)),
+    visible: toToggleAtom('visible'),
+    isCheckingOut: toWriteAtom('isCheckingOut'),
+    items: itemsAtom,
     email: emailAtom,
 };
 

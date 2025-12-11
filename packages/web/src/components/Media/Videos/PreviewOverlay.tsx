@@ -1,6 +1,7 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { gsap } from 'gsap';
+import { useAtomValue, useSetAtom } from 'jotai';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
 import { LazyImage } from 'src/components/LazyImage';
@@ -15,7 +16,7 @@ import {
 } from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
 import { isImageElement } from 'src/utils';
-import { videoStore } from './store.js';
+import { videoPlayerActions, videoPlayerAtoms } from './store';
 
 type PreviewOverlayProps = { isMobile: boolean };
 
@@ -74,7 +75,8 @@ const imageLoaderStyle = css({
 const PreviewOverlay: React.FC<PreviewOverlayProps> = (props) => {
     const [bgImage, setBgImage] = React.useState('');
     const bgRef = React.useRef<HTMLDivElement>(null);
-    const isPreviewOverlay = videoStore.use.isPreviewOverlay();
+    const isPreviewOverlay = useAtomValue(videoPlayerAtoms.isPreviewOverlay);
+    const playVideo = useSetAtom(videoPlayerActions.playVideo);
 
     React.useEffect(() => {
         if (bgRef.current) {
@@ -97,14 +99,18 @@ const PreviewOverlay: React.FC<PreviewOverlayProps> = (props) => {
     );
 
     const clickCallback = React.useCallback(() => {
-        videoStore.set.playVideo(undefined, props.isMobile);
+        playVideo(undefined, props.isMobile);
     }, [props.isMobile]);
 
     return (
         <Transition
             in={isPreviewOverlay}
             onExit={() => {
-                gsap.fromTo(bgRef.current, { opacity: 1, duration: 0.3 }, { opacity: 0 });
+                gsap.fromTo(
+                    bgRef.current,
+                    { opacity: 1, duration: 0.3 },
+                    { opacity: 0 },
+                );
             }}
             timeout={300}
             unmountOnExit={true}

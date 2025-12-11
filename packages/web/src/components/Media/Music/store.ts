@@ -1,5 +1,6 @@
+import type { QueryObserverResult } from '@tanstack/react-query';
 import axios from 'axios';
-import { atom } from 'jotai';
+import { atom, type WritableAtom } from 'jotai';
 import { atomWithImmer } from 'jotai-immer';
 import { atomWithQuery } from 'jotai-tanstack-query';
 import { compact, shuffle, sortBy } from 'lodash-es';
@@ -11,9 +12,8 @@ import {
     type MusicListItem,
     type MusicResponse,
     type MusicStateShape,
-    type Radii,
 } from 'src/components/Media/Music/types';
-import { toAtoms } from 'src/store.js';
+import { partialAtomGetter, toAtoms } from 'src/store.js';
 import { getLastName, modulo, normalizeString } from './utils.js';
 
 const initialState: MusicStateShape = {
@@ -58,13 +58,6 @@ const musicListIfExists = (
     }
     return [];
 };
-
-/*
-{
-        queryKey: ['musicPlaylist'],
-        queryFn: async () => await fetchPlaylistFn(),
-    }
-        */
 
 const fetchPlaylistFn = async () => {
     const { data: response } = await axios.get<MusicResponse>('/api/music');
@@ -113,25 +106,22 @@ const fetchPlaylistFn = async () => {
     return items;
 };
 
-// export const itemsToFlatItems = (items: MusicListItem[]): MusicFileItem[] => {
-//     const flatItems: MusicFileItem[] = [];
-//     for (const musicListItem of items) {
-//         if (isMusicItem(musicListItem)) {
-//             flatItems.push(...musicListItem.musicFiles);
-//         }
-//     }
-
-//     return flatItems.map((item, idx) => ({ ...item, idx }));
-// };
+// For typing purposes, does not work when created within the object.
+const queryItemsAtom: WritableAtom<
+    QueryObserverResult<MusicListItem[], Error>,
+    [],
+    void
+> = atomWithQuery<MusicListItem[]>(() => ({
+    queryKey: ['musicPlaylist'],
+    queryFn: fetchPlaylistFn,
+}));
 
 export const musicStore = atomWithImmer(initialState);
+const { toWriteAtom, toToggleAtom } = partialAtomGetter(musicStore);
+
 export const musicAtoms = {
     ...toAtoms(musicStore),
-    items: atomWithQuery(() => ({
-        queryKey: ['musicPlaylist'],
-        queryFn: fetchPlaylistFn,
-    })),
-
+    items: queryItemsAtom,
     flatItems: atom(
         (get) => get(musicStore).flatItems,
         (get, _set) => {
@@ -156,54 +146,15 @@ export const musicAtoms = {
             });
         },
     ),
-    isPlaying: atom(
-        (get) => get(musicStore).isPlaying,
-        (_get, set, play?: boolean) => {
-            set(musicStore, (draft) => {
-                draft.isPlaying = play ?? !draft.isPlaying;
-            });
-        },
-    ),
-    isLoading: atom(
-        (get) => get(musicStore).isLoading,
-        (_get, set, loading?: boolean) => {
-            set(musicStore, (draft) => {
-                draft.isLoading = loading ?? !draft.isLoading;
-            });
-        },
-    ),
-    volume: atom(
-        (get) => get(musicStore).volume,
-        (_get, set, volume: number) => {
-            set(musicStore, (draft) => {
-                draft.volume = volume;
-            });
-        },
-    ),
-    currentTrack: atom(
-        (get) => get(musicStore).currentTrack,
-        (_get, set, currentTrack: MusicFileItem) => {
-            set(musicStore, (draft) => {
-                draft.currentTrack = currentTrack;
-            });
-        },
-    ),
-    playbackPosition: atom(
-        (get) => get(musicStore).playbackPosition,
-        (_get, set, playbackPosition: number) => {
-            set(musicStore, (draft) => {
-                draft.playbackPosition = playbackPosition;
-            });
-        },
-    ),
-    radii: atom(
-        (get) => get(musicStore).radii,
-        (_get, set, radii: Radii) => {
-            set(musicStore, (draft) => {
-                draft.radii = radii;
-            });
-        },
-    ),
+    isPlaying: toToggleAtom('isPlaying'),
+    isLoading: toToggleAtom('isLoading'),
+    isMouseMove: toToggleAtom('isMouseMove'),
+    volume: toWriteAtom('volume'),
+    currentTrack: toWriteAtom('currentTrack'),
+    playbackPosition: toWriteAtom('playbackPosition'),
+    radii: toWriteAtom('radii'),
+    angle: toWriteAtom('angle'),
+    isHoverSeekring: toWriteAtom('isHoverSeekring'),
 };
 
 const getFirstTrackAtom = atom((get) => ({

@@ -1,7 +1,7 @@
 import { atom, type Setter } from 'jotai';
 import { atomWithImmer } from 'jotai-immer';
 import { debounce } from 'lodash-es';
-import { toAtoms } from 'src/store.js';
+import { partialAtomGetter, toAtoms } from 'src/store.js';
 import { findParent } from './links.js';
 import type { NavBarStateShape } from './types.js';
 
@@ -80,12 +80,8 @@ export const navBarAtoms = {
             });
         },
     ),
-    specificRouteName: atom(
-        (get) => get(navBarStore).specificRouteName,
-        (_get, set, val: string) => {
-            set(navBarStore, (draft) => (draft.specificRouteName = val));
-        },
-    ),
+    specificRouteName:
+        partialAtomGetter(navBarStore).toWriteAtom('specificRouteName'),
 };
 
 const debouncedToggleFn = debounce(
