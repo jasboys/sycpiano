@@ -1,13 +1,37 @@
-import { create, type StoreApi, type UseBoundStore } from 'zustand';
-import { navBarStore } from './components/App/NavBar/store.js';
-import { mediaQueriesStore } from './components/App/store.js';
-import { cartStore } from './components/Cart/store.js';
-import { shopStore } from './components/Shop/ShopList/store.js';
-import { atom, Atom } from 'jotai';
-import { getDefaultStore } from 'jotai';
+import { castDraft, castImmutable, WritableDraft } from 'immer';
+import { Atom, atom, getDefaultStore, WritableAtom } from 'jotai';
 
 export type AtomMap<T> = {
-    [K in keyof T]: Atom<T[K]>;
+    [K in keyof T]-?: Atom<T[K]>;
+};
+
+// type AllRequired<T> = {
+//     [K in keyof T]-?: T[K];
+// };
+
+export type ReadWriteAtomMap<T, Arg extends unknown[]> = {
+    [K in keyof T]-?: WritableAtom<T[K], Arg, void>;
+};
+
+export const toReadWriteAtoms = <T extends {}, K extends keyof T>(
+    stateAtom: WritableAtom<T, [T | ((draft: WritableDraft<T>) => void)], void>,
+) => {
+    return Object.keys(getDefaultStore().get(stateAtom)).reduce(
+        (prev, k) => {
+            const key = k as keyof T;
+            return {
+                ...prev,
+                [key]: atom(
+                    (get) => get(stateAtom)[key],
+                    (_get, set, val: T[K]) =>
+                        set(stateAtom, (draft) => {
+                            (draft[key] as T[K]) = val;
+                        }),
+                ),
+            };
+        },
+        {} as ReadWriteAtomMap<T, [T[K]]>,
+    );
 };
 
 export const toAtoms = <T extends {}>(stateAtom: Atom<T>) => {

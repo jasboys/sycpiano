@@ -2,6 +2,8 @@
 
 import { css } from '@emotion/react';
 import { useQuery } from '@tanstack/react-query';
+import { getDefaultStore, useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { focusAtom } from 'jotai-optics';
 import isEmpty from 'lodash-es/isEmpty';
 import * as React from 'react';
 import {
@@ -10,6 +12,8 @@ import {
     useMatch,
     useNavigate,
 } from 'react-router-dom';
+import { navBarAtoms } from 'src/components/App/NavBar/store.js';
+import { mediaQueriesBaseAtom } from 'src/components/App/store.js';
 import AudioInfo from 'src/components/Media/Music/AudioInfo';
 import AudioUI from 'src/components/Media/Music/AudioUI';
 import type { AudioVisualizerType } from 'src/components/Media/Music/AudioVisualizerBase.jsx';
@@ -17,6 +21,7 @@ import MusicPlaylist from 'src/components/Media/Music/MusicPlaylist';
 import {
     fetchPlaylistFn,
     itemsToFlatItems,
+    musicActions,
     musicAtoms,
     musicStore,
 } from 'src/components/Media/Music/store.js';
@@ -42,10 +47,6 @@ import {
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight, playlistContainerWidth } from 'src/styles/variables';
 import { MusicPlayer } from './MusicPlayer.js';
-import { useAtom, useAtomValue } from 'jotai';
-import { focusAtom } from 'jotai-optics';
-import { navBarAtoms } from 'src/components/App/NavBar/store.js';
-import { mediaQueriesBaseAtom } from 'src/components/App/store.js';
 
 const detectWebGL = () => {
     const canvas = document.createElement('canvas');
@@ -138,7 +139,7 @@ const musicSelectorAtom = focusAtom(musicStore, (optic) =>
     ]),
 );
 
-const mediaQueriesAtom = focusAtom(mediaQueriesBaseAtom, (optic) =>
+const mediaQueriesSelectorAtom = focusAtom(mediaQueriesBaseAtom, (optic) =>
     optic.pick([
         'hiDpx',
         'isHamburger',
@@ -146,8 +147,7 @@ const mediaQueriesAtom = focusAtom(mediaQueriesBaseAtom, (optic) =>
         'screenM',
         'screenL',
         'screenLandscape',
-    ]),
-);
+    ]));
 
 const Music: React.FC = () => {
     const { isSuccess } = useAtomValue(musicAtoms.items);
@@ -176,7 +176,12 @@ const Music: React.FC = () => {
         volume,
         angle,
     } = useAtomValue(musicSelectorAtom);
+    const setVolume = useSetAtom(musicAtoms.volume);
+    const setIsLoading = useSetAtom(musicAtoms.isLoading);
     const navBarShow = useAtomValue(navBarAtoms.isVisible);
+    const { fn: getNextTrack } = useAtomValue(musicActions.getNextTrackAtom)
+    const { fn: getFirstTrack } = useAtomValue(musicActions.getFirstTrackAtom)
+    const { fn: callbackAction } = useAtomValue(musicActions.callbackAction)
 
     const audio = React.useRef<HTMLAudioElement | null>(null);
     const buffers = React.useRef<{
@@ -196,19 +201,19 @@ const Music: React.FC = () => {
         screenM,
         screenL,
         screenLandscape,
-    } = rootStore.mediaQueries.useTrackedStore();
+    } = useAtomValue(mediaQueriesSelectorAtom);
 
     const musicPlayer = React.useRef<MusicPlayer>(
         new MusicPlayer({
             isMobile: isHamburger,
-            volumeCallback: (volume: number) => musicStore.set.volume(volume),
-            loadingCallback: () => musicStore.set.isLoading(true),
-            loadedCallback: () => musicStore.set.isLoading(false),
+            volumeCallback: (volume: number) => setVolume(volume),
+            loadingCallback: () => setIsLoading(true),
+            loadedCallback: () => setIsLoading(false),
         }),
     );
 
     React.useEffect(() => {
-        const prev = (tracks.current.prev = musicStore.get.getNextTrack(
+        const prev = (tracks.current.prev = musicActions.getNextTrack.fn(
             currentTrack,
             'prev',
             true,

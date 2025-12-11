@@ -1,12 +1,12 @@
 import styled from '@emotion/styled';
 import { gsap } from 'gsap';
+import type { Store } from 'jotai/vanilla/store';
 import * as React from 'react';
-
 import type { MusicPlayer } from './MusicPlayer.js';
-import { CIRCLE_SAMPLES, constantQ, firLoader } from './VisualizationUtils.js';
-import { nextPow2 } from './utils.js';
+import { musicAtoms, musicStore } from './store.js';
 import type { Radii } from './types.js';
-import { musicStore } from './store.js';
+import { nextPow2 } from './utils.js';
+import { CIRCLE_SAMPLES, constantQ, firLoader } from './VisualizationUtils.js';
 
 const VisualizerContainer = styled.div({
     position: 'absolute',
@@ -42,6 +42,7 @@ export interface AudioVisualizerProps {
     readonly isHoverSeekring: boolean;
     readonly hoverAngle?: number;
     readonly setRadii: ({ inner, outer, base }: Radii) => void;
+    readonly store: Store
 }
 
 type ColorType<C> = C extends WebGL2RenderingContext | WebGLRenderingContext
@@ -60,8 +61,8 @@ export abstract class AudioVisualizerBase<
     lastPlayheadPosition = 0;
     height!: number;
     width!: number;
-    visualization: React.RefObject<HTMLCanvasElement> = React.createRef();
-    container: React.RefObject<HTMLDivElement> = React.createRef();
+    visualization: React.RefObject<HTMLCanvasElement | null> = React.createRef();
+    container: React.RefObject<HTMLDivElement | null> = React.createRef();
     SCALE!: number;
     RADIUS_SCALE!: number;
     RADIUS_BASE!: number;
@@ -76,8 +77,8 @@ export abstract class AudioVisualizerBase<
     rightCQResult!: Float32Array;
     vizBins!: Float32Array;
 
-    leftData!: Float32Array;
-    rightData!: Float32Array;
+    leftData!: Float32Array<ArrayBuffer>;
+    rightData!: Float32Array<ArrayBuffer>;
 
     MAX_BIN!: number;
     HIGH_PASS_BIN!: number;
@@ -201,20 +202,23 @@ export abstract class AudioVisualizerBase<
             }
         }
 
-        if (!musicStore.get.isPlaying()) {
+        const get = this.props.store.get;
+        const { isHoverSeekring, playbackPosition, angle } = get(musicStore);
+
+        if (!get(musicAtoms.isPlaying)) {
             // reset idleStart time if either hover, hoverangle, or currPos changes
             if (
-                this.lastIsHover !== musicStore.get.isHoverSeekring() ||
+                this.lastIsHover !== isHoverSeekring ||
                 this.lastCurrentPosition !==
-                    musicStore.get.playbackPosition() ||
-                this.lastHover !== musicStore.get.angle?.()
+                    playbackPosition ||
+                this.lastHover !== angle
             ) {
                 this.idleStart = timestamp;
             }
             // update hover, hoverangle, currPos (no effect obviously if no change)
-            this.lastIsHover = musicStore.get.isHoverSeekring();
-            this.lastHover = musicStore.get.angle?.();
-            this.lastCurrentPosition = musicStore.get.playbackPosition();
+            this.lastIsHover = isHoverSeekring;
+            this.lastHover = angle;
+            this.lastCurrentPosition = playbackPosition;
             // if has been idle for over 3.5 seconds, cancel animation
             if (this.idleStart !== 0 && timestamp - this.idleStart > 3500) {
                 gsap.ticker.remove(this.onAnalyze);

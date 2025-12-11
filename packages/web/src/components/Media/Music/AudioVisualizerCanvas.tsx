@@ -13,7 +13,7 @@ import {
     drawCircleMask,
     firLoader,
 } from 'src/components/Media/Music/VisualizationUtils';
-import { musicStore } from './store.js';
+import { musicAtoms } from './store.js';
 
 declare global {
     interface CanvasRenderingContext2D {
@@ -71,7 +71,7 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
                     (firLoader.coeffs[i] +
                         fractionalPart * firLoader.deltas[i]);
             }
-            const result = radius + musicStore.get.volume() * sum * this.SCALE;
+            const result = radius + this.props.store.get(musicAtoms.volume) * sum * this.SCALE;
             let { x, y } = constantQ.angles[currentSample];
             x *= result;
             y *= result;
@@ -104,7 +104,7 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
         }
 
         const waveformLength = waveform.length / 2;
-        const volumeHeightScale = musicStore.get.volume() * this.WAVEFORM_HALF_HEIGHT;
+        const volumeHeightScale = this.props.store.get(musicAtoms.volume) * this.WAVEFORM_HALF_HEIGHT;
         this.renderingContext.save();
         this.renderingContext.beginPath();
         // going through mins from start to end
@@ -162,7 +162,7 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
             currentPosition && duration
                 ? Math.min((TWO_PI * currentPosition) / duration)
                 : 0;
-        const volume = musicStore.get.volume();
+        const volume = this.props.store.get(musicAtoms.volume);
         this.drawPlaybackHead(
             angle,
             WAVEFORM_CENTER_AXIS -
@@ -171,8 +171,8 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
                 volume * this.WAVEFORM_HALF_HEIGHT,
             '#FFF',
         );
-        const hoverAngle = musicStore.get.angle?.();
-        if (musicStore.get.isHoverSeekring() && hoverAngle !== undefined) {
+        const hoverAngle = this.props.store.get(musicAtoms.angle);
+        if (this.props.store.get(musicAtoms.isHoverSeekring) && hoverAngle !== undefined) {
             this.drawPlaybackHead(
                 hoverAngle,
                 WAVEFORM_CENTER_AXIS -
