@@ -1,8 +1,7 @@
 import styled from '@emotion/styled';
 import { useAtom, useAtomValue, useSetAtom } from 'jotai';
-import * as React from 'react';
-
 import { focusAtom } from 'jotai-optics';
+import * as React from 'react';
 import CartButton from 'src/components/App/NavBar/CartButton';
 import HamburgerNav from 'src/components/App/NavBar/HamburgerNav';
 import NavBarLinks from 'src/components/App/NavBar/NavBarLinks';
@@ -10,7 +9,7 @@ import NavBarLogo from 'src/components/App/NavBar/NavBarLogo';
 import { cartAtoms } from 'src/components/Cart/store';
 import { navBarHeight } from 'src/styles/variables';
 import { mediaQueriesBaseAtom } from '../store';
-import { navBarAtoms } from './store';
+import { navBarAtoms, navBarStore } from './store';
 
 const shopEnabled = JSON.parse(ENABLE_SHOP) === true;
 
@@ -96,6 +95,7 @@ const NavBar = ({
     navbarRef,
     anchorRef,
 }: NavBarProps) => {
+    // const [nvbr] = useAtom(navBarStore);
     const [isExpanded, toggleExpanded] = useAtom(navBarAtoms.isExpanded);
     const cartIsOpen = useAtomValue(cartAtoms.visible);
     const { isHamburger, hiDpx } = useAtomValue(mediaQueries);
@@ -105,11 +105,12 @@ const NavBar = ({
         setSpecificRouteName(specificRouteName ?? '');
     }, [specificRouteName]);
 
+
     React.useEffect(() => {
         if (!isHamburger) {
             toggleExpanded(false);
         }
-    }, [isHamburger]);
+    }, [isHamburger, toggleExpanded]);
 
     const isHome = delayedRouteBase === '/';
     return (

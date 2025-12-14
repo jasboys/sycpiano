@@ -16,7 +16,7 @@ const initialState: NavBarStateShape = {
     specificRouteName: '',
 };
 
-const navBarStore = atomWithImmer(initialState);
+export const navBarStore = atomWithImmer(initialState);
 export const navBarAtoms = {
     ...toAtoms(navBarStore),
     isVisible: atom(
@@ -29,17 +29,21 @@ export const navBarAtoms = {
         },
     ),
     isExpanded: atom(
-        (get) => get(navBarStore).isExpanded,
+        (get) => {
+            console.log(get(navBarStore));
+            return get(navBarStore).isExpanded;
+        },
         (get, set, expanded?: boolean) => {
-            const definedExpand = expanded ?? !get(navBarAtoms.isExpanded);
+            const definedExpand = expanded ?? !get(navBarStore).isExpanded;
             const parentToExpand = findParent(
-                get(navBarAtoms.specificRouteName),
+                get(navBarStore).specificRouteName,
             )?.name;
             if (definedExpand && parentToExpand !== undefined) {
                 set(navBarStore, (draft) => {
                     draft.showSubs = [parentToExpand];
                 });
             }
+            console.log(get(navBarStore));
             set(navBarStore, (draft) => {
                 draft.isExpanded = definedExpand;
             });

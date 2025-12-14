@@ -1,13 +1,12 @@
 import styled from '@emotion/styled';
+import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import type * as React from 'react';
 import { useSearchParams } from 'react-router-dom';
-
 import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenXS } from 'src/screens';
 import { latoFont } from 'src/styles/fonts';
 import { pushed } from 'src/styles/mixins';
-import { useQuery } from '@tanstack/react-query';
 
 const Container = styled.div(latoFont(300), pushed, {
     display: 'flex',

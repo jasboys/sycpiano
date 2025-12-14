@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { useAtomValue } from 'jotai';
 import { lighten, rgba } from 'polished';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
@@ -14,12 +15,12 @@ import { Transition } from 'react-transition-group';
 import { SearchIconInstance } from 'src/components/Schedule/SearchIconSVG';
 import { toMedia } from 'src/mediaQuery';
 import { screenXSandPortrait } from 'src/screens';
-import { useStore } from 'src/store.js';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
-import { scheduleStore } from './store.js';
+import { mediaQueriesAtoms } from '../App/store.js';
+import { scheduleAtoms } from './store.js';
 
 const unfocusedGray = rgba(180, 180, 180, 0.4);
 
@@ -197,10 +198,10 @@ const SubmitButton = styled.button<{ dirty: boolean; expanded: boolean }>(
 
 export const Search: React.FC<SearchProps> = () => {
     const inputRef = React.useRef<HTMLDivElement>(null);
-    const { lastQuery } = scheduleStore.useTracked.search();
-    const isFetching = scheduleStore.use.isFetching();
-    const itemsLength = scheduleStore.use.itemsLength('search');
-    const screenXS = useStore().mediaQueries.screenXS();
+    const lastQuery = useAtomValue(scheduleAtoms.lastQuery);
+    const isFetching = useAtomValue(scheduleAtoms.isFetching);
+    const itemsLength = useAtomValue(scheduleAtoms.itemsLength);
+    const screenXS = useAtomValue(mediaQueriesAtoms.screenXS)
     const [searchParams] = useSearchParams();
     const [focused, setFocused] = React.useState(false);
     const match = useMatch('/schedule/search');
@@ -248,8 +249,8 @@ export const Search: React.FC<SearchProps> = () => {
             // if (data.search === '') {
             //     navigate('/schedule/upcoming');
             // }
-            scheduleStore.set.isFetching(true);
-            scheduleStore.set.clearList('search');
+            // scheduleStore.set.isFetching(true);
+            // scheduleStore.set.clearList('search');
             navigate(
                 `/schedule/search?${createSearchParams({ q: data.search })}`,
                 {

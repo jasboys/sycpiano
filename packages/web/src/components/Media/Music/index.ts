@@ -1,3 +1,1 @@
-import Music from 'src/components/Media/Music/Music';
-
-export const Component = Music;
+export { default } from 'src/components/Media/Music/Music';

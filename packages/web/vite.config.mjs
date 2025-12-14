@@ -1,8 +1,11 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react';
-import { visualizer } from 'rollup-plugin-visualizer';
 import * as path from 'node:path';
+import react from '@vitejs/plugin-react';
 import dotenv from 'dotenv';
+import jotaiDebugLabel from 'jotai/babel/plugin-debug-label';
+import jotaiReactRefresh from 'jotai/babel/plugin-react-refresh';
+import { visualizer } from 'rollup-plugin-visualizer';
+import { defineConfig } from 'vite';
+
 dotenv.config({ override: true, path: '../../.env' });
 
 const staticPrefix = '/static';
@@ -31,7 +34,11 @@ export default defineConfig({
         react({
             jsxImportSource: '@emotion/react',
             babel: {
-                plugins: ['@emotion/babel-plugin'],
+                plugins: [
+                    '@emotion/babel-plugin',
+                    jotaiDebugLabel,
+                    jotaiReactRefresh,
+                ],
             },
         }),
         visualizer(),

@@ -1,8 +1,7 @@
-import youTube from 'src/services/YouTube';
-
 import { atom } from 'jotai';
 import { atomWithImmer } from 'jotai-immer';
 import type { VideoPlayerStateShape } from 'src/components/Media/Videos/types';
+import youTube from 'src/services/YouTube';
 import { partialAtomGetter, toAtoms } from 'src/store';
 
 const videoPlayerInitialState: VideoPlayerStateShape = {

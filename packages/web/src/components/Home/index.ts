@@ -1,3 +1,1 @@
-import Home from 'src/components/Home/Home';
-
-export const Component = Home;
+export { default } from 'src/components/Home/Home';

@@ -1,16 +1,18 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
+import type { QueryObserverResult } from '@tanstack/react-query';
+import { useAtomValue } from 'jotai';
 import * as React from 'react';
 import { useParams } from 'react-router-dom';
-
+import { mediaQueriesAtoms } from 'src/components/App/store.js';
 import { ShopItem } from 'src/components/Shop/ShopList/ShopItem';
-import type { Product, ProductTypes } from 'src/components/Shop/ShopList/types';
+import type { Product, ProductMap, ProductTypes } from 'src/components/Shop/ShopList/types';
 import { toMedia } from 'src/mediaQuery.js';
 import { isHamburger, screenPortrait, screenXS } from 'src/screens.js';
 import { logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { pushed } from 'src/styles/mixins';
-import { shopItemsAtom } from './store';
+import { shopItemsAtom } from './store.js';
 
 type ShopListProps = Record<never, unknown>;
 
@@ -70,9 +72,9 @@ const CategoryToLabel: Record<(typeof ProductTypes)[number], string> = {
 };
 
 const ShopList: React.FC<ShopListProps> = () => {
-    const isHamburger = useStore().mediaQueries.isHamburger();
+    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger)
     const { product } = useParams();
-    const shopItems = shopStore.use.items?.();
+    const { data: shopItems } = useAtomValue<QueryObserverResult<ProductMap>>(shopItemsAtom)
 
     React.useEffect(() => {
         if (shopItems && Object.keys(shopItems).length && product) {

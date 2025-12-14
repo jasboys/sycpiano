@@ -1,4 +1,1 @@
-import RetrievePurchases from 'src/components/Shop/RetrievePurchases/RetrievePurchases';
-
-export const Component = RetrievePurchases;
-export const reducers = {};
+export { default } from 'src/components/Shop/RetrievePurchases/RetrievePurchases';

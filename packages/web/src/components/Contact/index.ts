@@ -1,3 +1,1 @@
-import Contact from 'src/components/Contact/Contact';
-
-export const Component = Contact;
+export { default } from 'src/components/Contact/Contact';

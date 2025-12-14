@@ -18,27 +18,12 @@ import {
     useNavigate,
 } from 'react-router-dom';
 import { SwitchTransition, Transition } from 'react-transition-group';
-import type { RequiredProps as BioProps } from 'src/components/About/Bio/Bio';
-import type { RequiredProps as DiscsProps } from 'src/components/About/Discs/Discs';
-import type { RequiredProps as PressProps } from 'src/components/About/Press/Press';
 import Container from 'src/components/App/Container';
 import NavBar from 'src/components/App/NavBar/NavBar';
-import AsyncComponent from 'src/components/AsyncComponent';
 import Cart from 'src/components/Cart/Cart';
 import { ClickListenerOverlay } from 'src/components/ClickListenerOverlay';
-import type { RequiredProps as ContactProps } from 'src/components/Contact/Contact';
-import type { RequiredProps as HomeProps } from 'src/components/Home/Home';
 import { LogoSVG } from 'src/components/LogoSVG';
-import type { RequiredProps as MusicProps } from 'src/components/Media/Music/Music';
-import type { RequiredProps as PhotosProps } from 'src/components/Media/Photos/Photos';
-import type { RequiredProps as VideosProps } from 'src/components/Media/Videos/Videos';
-import type { RequiredProps as ScheduleProps } from 'src/components/Schedule/Schedule';
 import { eventListNamesArr } from 'src/components/Schedule/types';
-import type { RequiredProps as CheckoutSuccessProps } from 'src/components/Shop/CheckoutSuccess/CheckoutSuccess';
-import type { RequiredProps as FAQsProps } from 'src/components/Shop/FAQs/FAQs';
-import type { RequiredProps as RetrievalFormProps } from 'src/components/Shop/RetrievePurchases/RetrievePurchases';
-import type { RequiredProps as ShopListProps } from 'src/components/Shop/ShopList/ShopList';
-import extractModule from 'src/module';
 import { GLOBAL_QUERIES } from 'src/screens';
 import { globalCss } from 'src/styles/global';
 import {
@@ -53,84 +38,27 @@ import { cartAtoms } from '../Cart/store.js';
 import { navBarAtoms } from './NavBar/store.js';
 import { mediaQueriesMatch } from './store.js';
 
-const register = extractModule();
-const Contact = () =>
-    register(
-        'contact',
-        import(/* webpackChunkName: 'contact' */ 'src/components/Contact'),
-    );
-const Home = () =>
-    register(
-        'home',
-        import(/* webpackChunkName: 'home' */ 'src/components/Home'),
-    );
-const Schedule = () =>
-    register(
-        'schedule',
-        import(/* webpackChunkName: 'schedule' */ 'src/components/Schedule'),
-    );
-const Page404 = () =>
-    register(
-        'page404',
-        import(/* webpackChunkName: 'page404' */ 'src/components/Error'),
-    );
+const Contact = React.lazy(() => import('src/components/Contact'));
+const Home = React.lazy(() => import('src/components/Home'));
+const Schedule = React.lazy(() => import('src/components/Schedule'));
+const Page404 = React.lazy(() => import('src/components/Error'));
 
-const Bio = () =>
-    register(
-        'bio',
-        import(/* webpackChunkName: 'bio' */ 'src/components/About/Bio'),
-    );
-const Press = () =>
-    register(
-        'press',
-        import(/* webpackChunkName: 'press' */ 'src/components/About/Press'),
-    );
-const Discs = () =>
-    register(
-        'discs',
-        import(/* webpackChunkName: 'discs' */ 'src/components/About/Discs'),
-    );
+const Bio = React.lazy(() => import('src/components/About/Bio'));
+const Press = React.lazy(() => import('src/components/About/Press'));
+const Discs = React.lazy(() => import('src/components/About/Discs'));
 
-const Music = () =>
-    register(
-        'music',
-        import(/* webpackChunkName: 'music' */ 'src/components/Media/Music'),
-    );
-const Photos = () =>
-    register(
-        'photos',
-        import(/* webpackChunkName: 'photos' */ 'src/components/Media/Photos'),
-    );
-const Videos = () =>
-    register(
-        'videos',
-        import(/* webpackChunkName: 'videos' */ 'src/components/Media/Videos'),
-    );
+const Music = React.lazy(() => import('src/components/Media/Music'));
+const Photos = React.lazy(() => import('src/components/Media/Photos'));
+const Videos = React.lazy(() => import('src/components/Media/Videos'));
 
-const ShopList = () =>
-    register(
-        'shop',
-        import(/* webpackChunkName: 'shop' */ 'src/components/Shop/ShopList'),
-    );
-const RetrievalForm = () =>
-    register(
-        'retrievalForm',
-        import(
-            /* webpackChunkName: 'retrievalForm' */ 'src/components/Shop/RetrievePurchases'
-        ),
-    );
-const FAQs = () =>
-    register(
-        'faqs',
-        import(/* webpackChunkName: 'faqs' */ 'src/components/Shop/FAQs'),
-    );
-const CheckoutSuccess = () =>
-    register(
-        'checkoutSuccess',
-        import(
-            /* webpackChunkName: 'checkoutSuccess' */ 'src/components/Shop/CheckoutSuccess'
-        ),
-    );
+const ShopList = React.lazy(() => import('src/components/Shop/ShopList'));
+const RetrievalForm = React.lazy(
+    () => import('src/components/Shop/RetrievePurchases'),
+);
+const FAQs = React.lazy(() => import('src/components/Shop/FAQs'));
+const CheckoutSuccess = React.lazy(
+    () => import('src/components/Shop/CheckoutSuccess'),
+);
 
 const shopEnabled = JSON.parse(ENABLE_SHOP) === true;
 
@@ -410,6 +338,8 @@ const App: React.FC<Record<never, unknown>> = () => {
                         timeout={800}
                         appear={true}
                         nodeRef={fadingRef}
+                        mountOnEnter={true}
+                        unmountOnExit={true}
                     >
                         <FadingContainer ref={fadingRef}>
                             <Routes
@@ -420,29 +350,11 @@ const App: React.FC<Record<never, unknown>> = () => {
                                 }}
                             >
                                 <Route path="about/*" element={<Container />}>
-                                    <Route
-                                        path="biography"
-                                        element={
-                                            <AsyncComponent<BioProps>
-                                                moduleProvider={Bio}
-                                            />
-                                        }
-                                    />
-                                    <Route
-                                        path="press"
-                                        element={
-                                            <AsyncComponent<PressProps>
-                                                moduleProvider={Press}
-                                            />
-                                        }
-                                    />
+                                    <Route path="biography" element={<Bio />} />
+                                    <Route path="press" element={<Press />} />
                                     <Route
                                         path="discography"
-                                        element={
-                                            <AsyncComponent<DiscsProps>
-                                                moduleProvider={Discs}
-                                            />
-                                        }
+                                        element={<Discs />}
                                     />
                                     <Route
                                         index
@@ -455,39 +367,14 @@ const App: React.FC<Record<never, unknown>> = () => {
                                         element={<Navigate to="/not-found" />}
                                     />
                                 </Route>
-                                <Route
-                                    path="contact"
-                                    element={
-                                        <AsyncComponent<ContactProps>
-                                            moduleProvider={Contact}
-                                        />
-                                    }
-                                />
+                                <Route path="contact" element={<Contact />} />
                                 <Route path="media/*" element={<Container />}>
                                     <Route
                                         path="videos/*"
-                                        element={
-                                            <AsyncComponent<VideosProps>
-                                                moduleProvider={Videos}
-                                            />
-                                        }
+                                        element={<Videos />}
                                     />
-                                    <Route
-                                        path="music/*"
-                                        element={
-                                            <AsyncComponent<MusicProps>
-                                                moduleProvider={Music}
-                                            />
-                                        }
-                                    />
-                                    <Route
-                                        path="photos"
-                                        element={
-                                            <AsyncComponent<PhotosProps>
-                                                moduleProvider={Photos}
-                                            />
-                                        }
-                                    />
+                                    <Route path="music/*" element={<Music />} />
+                                    <Route path="photos" element={<Photos />} />
                                     <Route
                                         index
                                         element={
@@ -504,12 +391,7 @@ const App: React.FC<Record<never, unknown>> = () => {
                                         <Route
                                             key={`schedule-${type}`}
                                             path={type}
-                                            element={
-                                                <AsyncComponent<ScheduleProps>
-                                                    moduleProvider={Schedule}
-                                                    type={type}
-                                                />
-                                            }
+                                            element={<Schedule type={type} />}
                                         />
                                     ))}
                                     <Route
@@ -527,35 +409,16 @@ const App: React.FC<Record<never, unknown>> = () => {
                                 <Route path="shop/*" element={<Container />}>
                                     <Route
                                         path="scores/*"
-                                        element={
-                                            <AsyncComponent<ShopListProps>
-                                                moduleProvider={ShopList}
-                                            />
-                                        }
+                                        element={<ShopList />}
                                     />
                                     <Route
                                         path="retrieve-purchased"
-                                        element={
-                                            <AsyncComponent<RetrievalFormProps>
-                                                moduleProvider={RetrievalForm}
-                                            />
-                                        }
+                                        element={<RetrievalForm />}
                                     />
-                                    <Route
-                                        path="faqs"
-                                        element={
-                                            <AsyncComponent<FAQsProps>
-                                                moduleProvider={FAQs}
-                                            />
-                                        }
-                                    />
+                                    <Route path="faqs" element={<FAQs />} />
                                     <Route
                                         path="checkout-success"
-                                        element={
-                                            <AsyncComponent<CheckoutSuccessProps>
-                                                moduleProvider={CheckoutSuccess}
-                                            />
-                                        }
+                                        element={<CheckoutSuccess />}
                                     />
                                     <Route
                                         index
@@ -568,27 +431,15 @@ const App: React.FC<Record<never, unknown>> = () => {
                                 </Route>
                                 <Route
                                     path="not-found"
-                                    element={
-                                        <AsyncComponent<object>
-                                            moduleProvider={Page404}
-                                        />
-                                    }
+                                    element={<Page404 />}
                                 />
                                 <Route
                                     index
-                                    element={
-                                        <AsyncComponent<HomeProps>
-                                            moduleProvider={Home}
-                                        />
-                                    }
+                                    element={<Home />}
                                 />
                                 <Route
                                     path="*"
-                                    element={
-                                        <AsyncComponent<object>
-                                            moduleProvider={Page404}
-                                        />
-                                    }
+                                    element={<Page404 />}
                                 />
                             </Routes>
                         </FadingContainer>
@@ -597,7 +448,7 @@ const App: React.FC<Record<never, unknown>> = () => {
                 {shopEnabled && (
                     <Cart
                         floatingRef={
-                            floating as React.MutableRefObject<HTMLDivElement>
+                            floating as React.RefObject<HTMLDivElement>
                         }
                         arrowRef={arrowRef}
                         strategy={strategy}

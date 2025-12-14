@@ -56,6 +56,8 @@ export interface LoadingItem {
 
 export type ScheduleStateShape = Record<EventListName, EventItemsStateShape> & {
     isFetching: boolean;
+    date?: string;
+    // lastQuery?: string;
 };
 
 export interface MonthGroup {
@@ -75,7 +77,7 @@ export interface EventItemsStateShape {
     items: MonthGroups;
     minDate?: string;
     maxDate?: string;
-    lastQuery?: string;
+    // lastQuery?: string;
 }
 
 // export interface SearchEventsArguments {

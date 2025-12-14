@@ -3,15 +3,16 @@ import TextField from '@mui/material/TextField';
 import { ThemeProvider } from '@mui/system';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
+import { useAtomValue } from 'jotai';
 import { mix } from 'polished';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
+import { mediaQueriesAtoms } from 'src/components/App/store.js';
 
 import { lightBlue, logoBlue, theme } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight, pushed } from 'src/styles/mixins';
 import { validateEmail } from 'src/utils';
-import { useStore } from 'src/store.js';
 
 const Container = styled.div(latoFont(300), pushed, {
     display: 'flex',
@@ -100,7 +101,7 @@ const Title = styled.div(latoFont(400), {
 });
 
 const RetrievalForm: React.FC<Record<never, unknown>> = () => {
-    const isHamburger = useStore().mediaQueries.isHamburger();
+    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
     const [isMouseDown, setIsMouseDown] = React.useState(false);
     const [email, setEmail] = React.useState('');
     const [error, setError] = React.useState(false);

@@ -1,9 +1,11 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
+import { atom, useAtomValue, useSetAtom } from 'jotai';
 import toUpper from 'lodash-es/toUpper';
 import { mix } from 'polished';
 import * as React from 'react';
-
+import { mediaQueriesAtoms } from 'src/components/App/store.js';
+import { cartActions, cartAtoms } from 'src/components/Cart/store.js';
 import type { Product } from 'src/components/Shop/ShopList/types';
 import { staticImage } from 'src/imageUrls';
 import { toMedia } from 'src/mediaQuery.js';
@@ -12,7 +14,6 @@ import { logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { getHoverStyle, noHighlight } from 'src/styles/mixins';
 import { formatPrice } from 'src/utils.js';
-import { rootStore, useStore } from 'src/store.js';
 
 interface ShopItemProps {
     item: Product;
@@ -210,11 +211,13 @@ const leftHighlight = css({
 });
 
 export const ShopItem: React.FC<ShopItemProps> = ({ item, className }) => {
-    const isHamburger = useStore().mediaQueries.isHamburger();
-    const isItemInCart = rootStore.cart.useStore((state) =>
-        state.items.includes(item.id),
-    );
+    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger)
+    const isItemInCart = useAtomValue(React.useMemo(() => {
+        return atom((get) => get(cartAtoms.items).includes(item.id))
+    }, []))
     const [isMouseDown, setIsMouseDown] = React.useState(false);
+    const removeItem = useSetAtom(cartActions.removeItem);
+    const addItem = useSetAtom(cartActions.addItem);
 
     return (
         <ShopItemContainer
@@ -277,8 +280,8 @@ export const ShopItem: React.FC<ShopItemProps> = ({ item, className }) => {
                         }}
                         onClick={() =>
                             isItemInCart
-                                ? rootStore.cart.set.removeItem(item.id)
-                                : rootStore.cart.set.addItem(item.id)
+                                ? removeItem(item.id)
+                                : addItem(item.id)
                         }
                     >
                         {isItemInCart ? 'Remove from Cart' : 'Add to Cart'}

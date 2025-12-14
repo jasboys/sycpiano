@@ -1,7 +1,7 @@
-import { DefaultError } from '@tanstack/react-query';
+import type { DefaultError } from '@tanstack/react-query';
 import axios from 'axios';
-import { WritableAtom } from 'jotai';
-import { atomWithQuery, AtomWithQueryResult } from 'jotai-tanstack-query';
+import type { WritableAtom } from 'jotai';
+import { type AtomWithQueryResult, atomWithQuery } from 'jotai-tanstack-query';
 import type { ProductMap } from 'src/components/Shop/ShopList/types';
 
 // const initialState: ShopStateShape = {

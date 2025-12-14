@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import styled from '@emotion/styled';
-import { type InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
 import { Back, gsap } from 'gsap';
+import { useAtomValue, useSetAtom } from 'jotai';
 import debounce from 'lodash-es/debounce';
 import startCase from 'lodash-es/startCase';
 import { transparentize } from 'polished';
@@ -11,29 +11,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
 import { LoadingInstance } from 'src/components/LoadingSVG.jsx';
 import { MonthEvents } from 'src/components/Schedule/EventMonth.jsx';
-import { scheduleStore } from 'src/components/Schedule/store.js';
-import type {
-    EventItem,
-    EventListName,
-    FetchEventsArguments,
-} from 'src/components/Schedule/types';
+import { eventsQueryAtom, scheduleActions, scheduleAtoms } from 'src/components/Schedule/store.js';
 import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenXS, screenXSandPortrait } from 'src/screens';
-import { useStore } from 'src/store.js';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { metaDescriptions, titleStringBase } from 'src/utils';
-import {
-    FETCH_LIMIT,
-    fetchEvents,
-    getInitFetchParams,
-    getScrollFetchParams,
-} from './queryFunctions.js';
-
-interface EventListProps {
-    readonly type: EventListName;
-    readonly searchQ?: string;
-}
+import { mediaQueriesAtoms } from '../App/store.js';
 
 interface OnScrollProps {
     scrollTop: number;
@@ -127,85 +111,71 @@ const loadingOnExit = (el: React.RefObject<HTMLDivElement | null>) => () => {
     );
 };
 
-export const EventList: React.FC<EventListProps> = (props) => {
+const useEventList = () => {
+    const { fetchNextPage, hasNextPage, isSuccess, isFetching, data } =
+        useAtomValue(
+            eventsQueryAtom,
+        );
+    const setFetching = useSetAtom(scheduleAtoms.isFetching);
+    const setFulfilled = useSetAtom(scheduleActions.fulfilled);
+
+    React.useEffect(() => {
+        setFetching(isFetching);
+    }, [isFetching]);
+
+    React.useEffect(() => {
+        isSuccess &&
+            data &&
+            setFulfilled({
+                pagedEvents: data.pages,
+            });
+    }, [isSuccess, data]);
+
+    return {
+        fetchNextPage,
+        hasNextPage,
+    }
+}
+
+export const EventList: React.FC = () => {
     const loadingRef = React.useRef<HTMLDivElement>(null);
 
     const {
         eventItems,
         minDate,
         maxDate,
-        eventItemsLength,
-        lastQuery,
-        isSearching,
-    } = scheduleStore.use.getEventList(props.type);
+        eventItemsLength
+    } = useAtomValue(scheduleAtoms.eventList);
+    const type = useAtomValue(scheduleAtoms.currentType);
+    const searchQ = useAtomValue(scheduleAtoms.lastQuery);
+    const isFetching = useAtomValue(scheduleAtoms.isFetching)
 
     const navigate = useNavigate();
     const routeParams = useParams();
     const { '*': date } = routeParams;
-    const isHamburger = useStore().mediaQueries.isHamburger();
+    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
 
-    const searchQ = props.searchQ;
 
     const checkRedirects = React.useCallback(() => {
         if (
-            props.type === 'search' &&
+            type === 'search' &&
             (searchQ === undefined || searchQ === '')
         ) {
             navigate('/schedule/upcoming');
             return;
         }
-        if (props.type === 'event' && !date) {
+        if (type === 'event' && !date) {
             navigate('/schedule/upcoming');
             return;
         }
         return;
-    }, [searchQ, date, props.type]);
+    }, [searchQ, date, type]);
 
     React.useEffect(() => {
         checkRedirects();
-    }, [props.type, searchQ, date]);
+    }, [type, searchQ, date]);
 
-    const { fetchNextPage, hasNextPage, isSuccess, isFetching, data } =
-        useInfiniteQuery<
-            EventItem[],
-            Error,
-            InfiniteData<EventItem[], FetchEventsArguments>,
-            (string | undefined)[],
-            FetchEventsArguments
-        >({
-            queryKey: ['schedule', props.type, searchQ ?? undefined],
-            queryFn: async ({ pageParam }) => {
-                return await fetchEvents(pageParam);
-            },
-            initialPageParam: getInitFetchParams({
-                type: props.type,
-                searchQ,
-                eventDate: date,
-            }),
-            getNextPageParam: (_lastPage, allPages) => {
-                const lastPage = allPages[allPages.length - 1];
-                if (lastPage.length === 0 || lastPage.length !== FETCH_LIMIT) {
-                    return undefined;
-                }
-                return getScrollFetchParams(props.type);
-            },
-            refetchOnWindowFocus: false,
-        });
-
-    React.useEffect(() => {
-        scheduleStore.set.isFetching(isFetching);
-    }, [isFetching]);
-
-    // Store data (will be transformed into monthGroups)
-    React.useEffect(() => {
-        isSuccess &&
-            data &&
-            scheduleStore.set.fulfilled({
-                name: props.type,
-                pagedEvents: data.pages,
-                lastQuery: searchQ,
-            });
-    }, [isSuccess, props.type, data]);
+    const { fetchNextPage, hasNextPage } = useEventList();
 
     const onScroll = React.useCallback(
         ({ clientHeight, scrollTop, scrollHeight }: OnScrollProps) => {
@@ -216,12 +186,12 @@ export const EventList: React.FC<EventListProps> = (props) => {
                 !!maxDate &&
                 !!minDate
             ) {
-                if (props.type !== 'search' && props.type !== 'event') {
+                if (type !== 'search' && type !== 'event') {
                     fetchNextPage();
                 }
             }
         },
-        [hasNextPage, isFetching, maxDate, minDate, props.type],
+        [hasNextPage, isFetching, maxDate, minDate, type],
     );
 
     const debouncedFetch = React.useMemo(
@@ -229,9 +199,9 @@ export const EventList: React.FC<EventListProps> = (props) => {
         [onScroll],
     );
 
-    const title = `${titleStringBase}Schedule | ${props.type === 'archive' ? 'Archived' : startCase(props.type)} Events${searchQ ? '' : `: ${searchQ}`}`;
+    const title = `${titleStringBase}Schedule | ${type === 'archive' ? 'Archived' : startCase(type)} Events${searchQ ? '' : `: ${searchQ}`}`;
 
-    const description = metaDescriptions[props.type] as string;
+    const description = metaDescriptions[type] as string;
 
     const loadingDimension = isHamburger ? 50 : 96;
 
@@ -247,7 +217,7 @@ export const EventList: React.FC<EventListProps> = (props) => {
                 ]}
             />
             <ScrollingContainer
-                isSearch={props.type === 'search'}
+                isSearch={type === 'search'}
                 onScroll={(ev) => {
                     ev.persist();
                     const { scrollTop, scrollHeight, clientHeight } =
@@ -259,19 +229,19 @@ export const EventList: React.FC<EventListProps> = (props) => {
                     eventItems.monthGroups.map((monthGroup, idx) => (
                         <MonthEvents
                             key={monthGroup.dateTime}
-                            type={props.type}
+                            type={type}
                             idx={idx}
                             monthGroup={monthGroup}
                             isHamburger={isHamburger}
-                            lastQuery={lastQuery}
+                            lastQuery={searchQ}
                         />
                     ))
                 ) : (
                     <div />
                 )}
-                {props.type !== 'event' && (
+                {type !== 'event' && (
                     <EndOfList>
-                        {isFetching || isSearching
+                        {isFetching
                             ? 'Fetching events...'
                             : eventItemsLength === 0
                               ? 'No events fetched'
@@ -282,7 +252,7 @@ export const EventList: React.FC<EventListProps> = (props) => {
                 )}
             </ScrollingContainer>
             <Transition
-                in={isFetching || isSearching}
+                in={isFetching}
                 timeout={300}
                 onEnter={loadingOnEnter(loadingRef)}
                 onExit={loadingOnExit(loadingRef)}

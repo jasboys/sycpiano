@@ -3961,6 +3961,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tanstack/query-core@npm:^5.90.12":
+  version: 5.90.12
+  resolution: "@tanstack/query-core@npm:5.90.12"
+  checksum: 10/e7a23a83152c40c5eced669a0d0965b19467c03009b383b6bc18b5ee86db7a7357984a2c851ba60859cbeb6966bb9756314c153c14532c75fd24d0159cbe7e56
+  languageName: node
+  linkType: hard
+
 "@tanstack/react-query@npm:^5.83.0":
   version: 5.90.7
   resolution: "@tanstack/react-query@npm:5.90.7"
@@ -4028,6 +4035,16 @@ __metadata:
     "@babel/parser": "npm:^7.1.0"
     "@babel/types": "npm:^7.0.0"
   checksum: 10/55deb814c94d1bfb78c4d1de1de1b73eb17c79374602f3bd8aa14e356a77fca64d01646cebe25ec9b307f53a047acc6d53ad6e931019d0726422f5f911e945aa
+  languageName: node
+  linkType: hard
+
+"@types/babel__template@npm:^7":
+  version: 7.4.4
+  resolution: "@types/babel__template@npm:7.4.4"
+  dependencies:
+    "@babel/parser": "npm:^7.1.0"
+    "@babel/types": "npm:^7.0.0"
+  checksum: 10/d7a02d2a9b67e822694d8e6a7ddb8f2b71a1d6962dfd266554d2513eefbb205b33ca71a0d163b1caea3981ccf849211f9964d8bd0727124d18ace45aa6c9ae29
   languageName: node
   linkType: hard
 
@@ -12114,6 +12131,7 @@ __metadata:
     "@babel/preset-env": "npm:^7.28.5"
     "@babel/preset-react": "npm:^7.28.5"
     "@babel/preset-typescript": "npm:^7.28.5"
+    "@babel/template": "npm:^7.27.2"
     "@emotion/babel-plugin": "npm:^11.13.5"
     "@emotion/css": "npm:^11.13.5"
     "@emotion/is-prop-valid": "npm:^1.4.0"
@@ -12128,7 +12146,9 @@ __metadata:
     "@rollup/plugin-replace": "npm:^6.0.3"
     "@stripe/stripe-js": "npm:^8.4.0"
     "@swc/plugin-emotion": "npm:^13.0.0"
+    "@tanstack/query-core": "npm:^5.90.12"
     "@tanstack/react-query": "npm:^5.90.8"
+    "@types/babel__template": "npm:^7"
     "@types/blazy": "npm:^1.5.36"
     "@types/d3-ease": "npm:^3.0.2"
     "@types/lodash-es": "npm:^4.17.12"
