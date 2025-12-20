@@ -1,8 +1,8 @@
 import gsap from 'gsap';
 import { MOBILE_MSPF } from './AudioVisualizerBase.jsx';
 import { ConstantQNode } from './ConstantQNode.js';
-import { WaveformLoader } from './VisualizationUtils.js';
 import { type BufferSrc, getAudioContext, nextPow2 } from './utils.js';
+import { WaveformLoader } from './VisualizationUtils.js';
 
 class Audio {
     element: HTMLAudioElement | null = null;

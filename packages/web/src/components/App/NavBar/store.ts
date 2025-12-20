@@ -30,7 +30,6 @@ export const navBarAtoms = {
     ),
     isExpanded: atom(
         (get) => {
-            console.log(get(navBarStore));
             return get(navBarStore).isExpanded;
         },
         (get, set, expanded?: boolean) => {
@@ -43,7 +42,6 @@ export const navBarAtoms = {
                     draft.showSubs = [parentToExpand];
                 });
             }
-            console.log(get(navBarStore));
             set(navBarStore, (draft) => {
                 draft.isExpanded = definedExpand;
             });

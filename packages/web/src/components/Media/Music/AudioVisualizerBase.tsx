@@ -43,6 +43,7 @@ export interface AudioVisualizerProps {
     readonly hoverAngle?: number;
     readonly setRadii: ({ inner, outer, base }: Radii) => void;
     readonly store: Store
+    // readonly loadedCallback: () => void;
 }
 
 type ColorType<C> = C extends WebGL2RenderingContext | WebGLRenderingContext

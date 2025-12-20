@@ -678,4 +678,4 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
     };
 }
 
-export const Component = AudioVisualizer;
+export default AudioVisualizer;

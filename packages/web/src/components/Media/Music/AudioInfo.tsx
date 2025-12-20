@@ -92,7 +92,7 @@ const AudioInfo: React.FC<AudioInfoProps> = ({ matchParams }) => {
     const [forceUpdate, setForceUpdate] = React.useState<number>(0);
     const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
 
-    const playbackTimeString = useAtom(
+    const [playbackTimeString,] = useAtom(
         React.useMemo(
             () => atom((get) => formatTime(get(musicAtoms.playbackPosition))),
             [],

@@ -328,4 +328,4 @@ class AudioVisualizer extends AudioVisualizerBase<CanvasRenderingContext2D> {
     };
 }
 
-export const Component = AudioVisualizer;
+export default AudioVisualizer;

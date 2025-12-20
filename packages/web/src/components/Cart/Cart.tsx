@@ -1,10 +1,9 @@
 import styled from '@emotion/styled';
 import { gsap } from 'gsap';
+import { useAtomValue } from 'jotai';
 import * as React from 'react';
 import isEqual from 'react-fast-compare';
 import { Transition } from 'react-transition-group';
-
-import { useAtomValue } from 'jotai';
 import { CartList } from 'src/components/Cart/CartList';
 import { toMedia } from 'src/mediaQuery.js';
 import { hiDpx, screenS } from 'src/screens.js';
@@ -99,6 +98,22 @@ const Cart: React.FC<CartProps> = ({
     //     cartStore.set.syncStorage();
     // }, [cartLength]);
 
+    React.useLayoutEffect(() => {
+        if (fadeRef.current) {
+            const ctx = gsap.context(() => {
+                tl.current = gsap
+                        .timeline({ reversed: true, paused: true })
+                        // .to(el, { height: 'auto', duration: 0.30, ease: 'quad.inOut' });
+                        .to(fadeRef.current, {
+                            autoAlpha: 1,
+                            duration: 0.12,
+                            ease: 'quad.inOut',
+                        }, 0);
+            }, fadeRef.current);
+            return () => ctx.revert();
+        }
+    }, []);
+
     const arrowCallback = React.useCallback(
         (el: HTMLDivElement) => {
             arrowRef.current = el;
@@ -112,22 +127,13 @@ const Cart: React.FC<CartProps> = ({
             in={cartVisible}
             timeout={250}
             onEnter={() => {
-                if (!tl.current) {
-                    tl.current = gsap
-                        .timeline({ reversed: true, paused: true })
-                        // .to(el, { height: 'auto', duration: 0.30, ease: 'quad.inOut' });
-                        .to(fadeRef, {
-                            autoAlpha: 1,
-                            duration: 0.12,
-                            ease: 'quad.inOut',
-                        });
-                }
-                tl.current.pause().play();
+                tl.current?.pause().play();
             }}
             onExit={() => {
                 tl.current?.pause().reverse();
             }}
             nodeRef={fadeRef}
+            appear
         >
             <CartContainer
                 css={

@@ -54,6 +54,27 @@ const detectWebGL = () => {
     return gl;
 };
 
+let Visualizer: React.LazyExoticComponent<AudioVisualizerType>;
+const gl = detectWebGL();
+if (gl) {
+    if (gl instanceof WebGL2RenderingContext) {
+        Visualizer = React.lazy(
+            async () =>
+                import('src/components/Media/Music/AudioVisualizerWebGL2.js'),
+        );
+    } else {
+        Visualizer = React.lazy(
+            async () =>
+                import('src/components/Media/Music/AudioVisualizerWebGL.js'),
+        );
+    }
+} else {
+    Visualizer = React.lazy(
+        async () =>
+            import('src/components/Media/Music/AudioVisualizerCanvas.js'),
+    );
+}
+
 interface MusicStateToProps {
     readonly items: MusicListItem[];
     readonly flatItems: MusicFileItem[];
@@ -157,22 +178,22 @@ const Music: React.FC = () => {
 
     const navigate = useNavigate();
 
-    const Visualizer = React.useRef<AudioVisualizerType>(null);
+    // const Visualizer = React.useRef<AudioVisualizerType>(null);
 
-    const [visualizerLoaded, setVisualizerLoaded] =
-        React.useState<boolean>(false);
+    // const [visualizerLoaded, setVisualizerLoaded] =
+    //     React.useState<boolean>(false);
 
     const [initialized, setInitialized] = React.useState<boolean>(false);
 
     const {
         isPlaying,
-        flatItems,
         isShuffle,
         isHoverSeekring,
         duration,
         volume,
         angle,
     } = useAtomValue(musicSelectorAtom);
+    const flatItems = useAtomValue(musicAtoms.flatItems);
     const setVolume = useSetAtom(musicAtoms.volume);
     const setIsLoading = useSetAtom(musicAtoms.isLoading);
     const setRadii = useSetAtom(musicAtoms.radii);
@@ -278,44 +299,6 @@ const Music: React.FC = () => {
         [flatItems, currentTrack],
     );
 
-    const importVisualizer = React.useCallback(async () => {
-        const register = extractModule();
-        const gl = detectWebGL();
-        if (gl) {
-            if (gl instanceof WebGL2RenderingContext) {
-                const component = await register(
-                    'visualizer',
-                    import(
-                        /* webpackChunkName: 'visualizerWebGL2' */ 'src/components/Media/Music/AudioVisualizerWebGL2.js'
-                    ),
-                );
-                console.log('Using WebGL2');
-                Visualizer.current = component;
-                setVisualizerLoaded(true);
-            } else {
-                const component = await register(
-                    'visualizer',
-                    import(
-                        /* webpackChunkName: 'visualizerWebGL' */ 'src/components/Media/Music/AudioVisualizerWebGL.js'
-                    ),
-                );
-                console.log('Using WebGL');
-                Visualizer.current = component;
-                setVisualizerLoaded(true);
-            }
-        } else {
-            const component = await register(
-                'visualizer',
-                import(
-                    /* webpackChunkName: 'visualizerCanvas' */ 'src/components/Media/Music/AudioVisualizerCanvas'
-                ),
-            );
-            console.log('Using Canvas');
-            Visualizer.current = component;
-            setVisualizerLoaded(true);
-        }
-    }, []);
-
     React.useEffect(() => {
         if (isSuccess && flatItems.length && !initialized) {
             const initialize = async () => {
@@ -348,13 +331,12 @@ const Music: React.FC = () => {
                 setInitialized(true);
             };
             setIsLoading(true);
-            importVisualizer();
             initialize();
             return () => {
                 musicPlayer.current.pause();
             };
         }
-    }, [isSuccess, flatItems, initialized, matches]);
+    }, [isSuccess, flatItems, initialized, matches, getFirstTrack]);
 
     React.useEffect(() => {
         if ('mediaSession' in navigator) {
@@ -382,7 +364,7 @@ const Music: React.FC = () => {
 
         setPlaybackPosition(position);
         musicPlayer.current.audio.currentTime = position;
-    }, []);
+    }, [setPlaybackPosition]);
 
     const onStartDrag = React.useCallback((percent: number) => {
         const audio = musicPlayer.current.audio;
@@ -416,7 +398,7 @@ const Music: React.FC = () => {
                 });
             }
         },
-        [currentTrack, isPlaying],
+        [currentTrack, isPlaying, callbackAction],
     );
 
     const selectTrack = React.useCallback(
@@ -433,8 +415,12 @@ const Music: React.FC = () => {
                 );
             }
         },
-        [currentTrack],
+        [currentTrack, setCurrentTrack],
     );
+
+    // const visualizerLoadedCallback = React.useCallback(() => {
+    //     setVisualizerLoaded(true);
+    // })
 
     return (
         <div
@@ -489,8 +475,8 @@ const Music: React.FC = () => {
                     playSubsequent={playSubsequent}
                 />
                 <AudioInfo matchParams={!isEmpty(matches?.params)} />
-                {visualizerLoaded && Visualizer.current && (
-                    <Visualizer.current
+                <React.Suspense fallback={null}>
+                    <Visualizer
                         musicPlayer={musicPlayer.current}
                         isPlaying={isPlaying}
                         duration={duration}
@@ -504,7 +490,7 @@ const Music: React.FC = () => {
                         setRadii={setRadii}
                         store={getDefaultStore()}
                     />
-                )}
+                </React.Suspense>
             </div>
             <MusicPlaylist onClick={selectTrack} />
         </div>

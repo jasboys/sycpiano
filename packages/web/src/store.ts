@@ -54,7 +54,6 @@ export const partialAtomGetter = <T>(stateAtom: AtomWithImmer<T>) => ({
             (get) => get(stateAtom)[key],
             (_get, set, val: T[K]) => {
                 set(stateAtom, (draft) => {
-                    console.log(key, val);
                     (draft[key] as T[K]) = val;
                 });
             },
@@ -64,10 +63,9 @@ export const partialAtomGetter = <T>(stateAtom: AtomWithImmer<T>) => ({
         return atom(
             (get) => get(stateAtom)[key],
             (_get, set, val?: boolean) => {
-                set(
-                    stateAtom,
-                    (draft) => ((draft[key] as boolean) = val ?? !draft[key]),
-                );
+                set(stateAtom, (draft) => {
+                    (draft[key] as boolean) = val ?? !draft[key];
+                });
             },
         );
     },

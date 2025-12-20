@@ -116,33 +116,39 @@ const queryItemsAtom: WritableAtom<
     queryFn: fetchPlaylistFn,
 }));
 
+const flatItemsAtom = atom((get) => {
+    const items = get(queryItemsAtom).data;
+    const isShuffle = get(musicAtoms.isShuffle);
+    const flatItems: MusicFileItem[] = [];
+    if (items?.length) {
+        for (const musicListItem of get(queryItemsAtom).data ?? []) {
+            if (isMusicItem(musicListItem)) {
+                flatItems.push(...musicListItem.musicFiles);
+            }
+        }
+
+        const out = flatItems.map((item, idx) => ({ ...item, idx }));
+        if (isShuffle) {
+            return shuffle(out);
+        } else {
+            return sortBy(out, ['idx']);
+        }
+    }
+    return [];
+});
+
 export const musicStore = atomWithImmer(initialState);
 const { toWriteAtom, toToggleAtom } = partialAtomGetter(musicStore);
 
 export const musicAtoms = {
     ...toAtoms(musicStore),
     items: queryItemsAtom,
-    flatItems: atom(
-        (get) => get(musicStore).flatItems,
-        (get, _set) => {
-            const flatItems: MusicFileItem[] = [];
-            for (const musicListItem of get(musicStore).items) {
-                if (isMusicItem(musicListItem)) {
-                    flatItems.push(...musicListItem.musicFiles);
-                }
-            }
-
-            return flatItems.map((item, idx) => ({ ...item, idx }));
-        },
-    ),
+    flatItems: flatItemsAtom,
     isShuffle: atom(
         (get) => get(musicStore).isShuffle,
         (_get, set) => {
             set(musicStore, (draft) => {
                 draft.isShuffle = !draft.isShuffle;
-                draft.flatItems = draft.isShuffle
-                    ? shuffle(draft.flatItems)
-                    : sortBy(draft.flatItems, ['idx']);
             });
         },
     ),
@@ -160,7 +166,7 @@ export const musicAtoms = {
 const getFirstTrackAtom = atom((get) => ({
     fn: (args: { composer?: string; piece?: string; movement?: string }) => {
         const { composer, piece, movement = '' } = args;
-        const flatItems = get(musicStore).flatItems;
+        const flatItems = get(musicAtoms.flatItems);
 
         if (composer && piece) {
             return (
@@ -200,7 +206,7 @@ const getNextTrackAtom = atom((get) => ({
         which: 'next' | 'prev',
         force = false,
     ) => {
-        const flat = get(musicStore).flatItems;
+        const flat = get(musicAtoms.flatItems);
         const trackNo = flat.findIndex((item) => item.id === currentTrack?.id);
         const nextTrackNo = which === 'next' ? trackNo + 1 : trackNo - 1;
         if (force) {
