@@ -2,18 +2,14 @@ import styled from '@emotion/styled';
 import TextField from '@mui/material/TextField';
 import { ThemeProvider } from '@mui/system';
 import {
-    type DefaultError,
-    type QueryObserverResult,
     useMutation,
 } from '@tanstack/react-query';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import Markdown from 'markdown-to-jsx';
 import { mix } from 'polished';
 import * as React from 'react';
-
-import { useAtom, useAtomValue, useSetAtom, type WritableAtom } from 'jotai';
 import { Link } from 'react-router-dom';
 import { CartItem } from 'src/components/Cart/CartItem';
-import type { Product, ProductMap } from 'src/components/Shop/ShopList/types';
 import { toMedia } from 'src/mediaQuery';
 import { screenS } from 'src/screens';
 import { lightBlue, logoBlue, theme } from 'src/styles/colors';
@@ -23,7 +19,7 @@ import { cartWidth } from 'src/styles/variables';
 import { formatPrice } from 'src/utils';
 import isEmail from 'validator/es/lib/isEmail';
 import { LoadingInstance } from '../LoadingSVG.jsx';
-import { shopItemsAtom } from '../Shop/ShopList/store.js';
+import { shopFlatItemsAtom } from '../Shop/ShopList/store.js';
 import { cartActions, cartAtoms } from './store.js';
 
 const ARROW_SIDE = 32;
@@ -167,10 +163,11 @@ const Subtotal = styled.div({
 });
 
 const EmptyMessage = styled.div({
-    padding: '1rem',
+    padding: '2rem 1rem',
     width: '100%',
-    fontSize: '1.2rem',
+    fontSize: '1rem',
     backgroundColor: 'white',
+    textAlign: 'center',
 });
 
 const StripeDiv = styled.div({
@@ -332,13 +329,7 @@ export const CartList: React.FC<Record<never, unknown>> = () => {
     const checkoutError = useAtomValue(cartAtoms.checkoutError);
     const clearErrors = useSetAtom(cartActions.clearErrors);
 
-    const { data: shopItems } = useAtomValue(
-        shopItemsAtom as WritableAtom<
-            QueryObserverResult<ProductMap, DefaultError>,
-            [],
-            void
-        >,
-    );
+    const shopItems = useAtomValue(shopFlatItemsAtom);
 
     let subtotal = 0;
     const clearError =
@@ -359,7 +350,7 @@ export const CartList: React.FC<Record<never, unknown>> = () => {
                 <Heading />
                 {cartItems.length !== 0 &&
                 shopItems &&
-                Object.keys(shopItems).length !== 0 ? (
+                shopItems.length !== 0 ? (
                     <StyledItemList>
                         <PromoMessage green={cartItems.length >= 2}>
                             <div>
@@ -391,38 +382,30 @@ export const CartList: React.FC<Record<never, unknown>> = () => {
                                 </Markdown>
                             </ErrorMessage>
                         )}
-                        {cartItems.map((item: string) => {
-                            // item = cart item
-                            // reduce over all categories of shop items { arrangement: Product[]; cadenza: Product[]; original: Product[] },
-                            // accumulate starting with undefined
-                            // if accumulator is falsy, then return
-                            // within all items in that category find the one where id === item
-                            // null coalesce
-                            const currentItem = Object.values(shopItems).reduce(
-                                (acc: Product | undefined, prods) =>
-                                    acc !== undefined
-                                        ? acc
-                                        : prods?.find((el) => el.id === item),
-                                undefined,
-                            );
-                            subtotal += currentItem ? currentItem.price : 0;
-                            const error =
-                                checkoutError.message !== '' &&
-                                !!checkoutError.data &&
-                                checkoutError.data?.includes(item);
-                            return (
-                                currentItem && (
+                        {cartItems
+                            .map((id) => {
+                                return shopItems.find((prod) => prod.id === id);
+                            })
+                            .map((prod) => {
+                                if (!prod) {
+                                    return null;
+                                }
+                                subtotal += prod.price;
+                                const error =
+                                    checkoutError.message !== '' &&
+                                    !!checkoutError.data &&
+                                    checkoutError.data?.includes(prod.id);
+                                return (
                                     <CartItem
-                                        key={item}
-                                        item={currentItem}
+                                        key={prod.id}
+                                        item={prod}
                                         error={error}
                                     />
-                                )
-                            );
-                        })}
+                                );
+                            })}
                     </StyledItemList>
                 ) : (
-                    <EmptyMessage>Cart is Empty!</EmptyMessage>
+                    <EmptyMessage>Cart is Empty! Add items at the <Link to="/shop/scores" state={{ from: 'cart' }}>shop</Link> page.</EmptyMessage>
                 )}
                 <Subtotal>
                     <div>Subtotal:</div>

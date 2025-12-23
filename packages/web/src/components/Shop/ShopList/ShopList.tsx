@@ -1,10 +1,11 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import type { QueryObserverResult } from '@tanstack/react-query';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import * as React from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { mediaQueriesAtoms } from 'src/components/App/store.js';
+import { cartAtoms } from 'src/components/Cart/store.js';
 import { ShopItem } from 'src/components/Shop/ShopList/ShopItem';
 import type { Product, ProductMap, ProductTypes } from 'src/components/Shop/ShopList/types';
 import { toMedia } from 'src/mediaQuery.js';
@@ -72,9 +73,12 @@ const CategoryToLabel: Record<(typeof ProductTypes)[number], string> = {
 };
 
 const ShopList: React.FC<ShopListProps> = () => {
-    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger)
+    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
+    const setCartOpen = useSetAtom(cartAtoms.visible);
     const { product } = useParams();
-    const { data: shopItems } = useAtomValue<QueryObserverResult<ProductMap>>(shopItemsAtom)
+    const { data: shopItems } = useAtomValue<QueryObserverResult<ProductMap>>(shopItemsAtom);
+    const { state } = useLocation();
+    const navigate = useNavigate();
 
     React.useEffect(() => {
         if (shopItems && Object.keys(shopItems).length && product) {
@@ -84,6 +88,13 @@ const ShopList: React.FC<ShopListProps> = () => {
             }
         }
     }, [shopItems, product]);
+
+    React.useEffect(() => {
+        if (state?.from === 'cart') {
+            setCartOpen(false);
+            navigate({}, { replace: true });
+        }
+    }, [state])
 
     return (
         shopItems && (

@@ -22,9 +22,10 @@ export const navBarAtoms = {
     isVisible: atom(
         (get) => get(navBarStore).isVisible,
         (get, set, show?: boolean) => {
-            const definedShow = show ?? !get(navBarAtoms.isVisible);
-            if (get(navBarAtoms.isVisible) !== definedShow) {
-                set(debouncedNavBarToggle, definedShow);
+            const definedShow = show ?? !get(navBarStore).isVisible;
+            if (get(navBarStore).isVisible !== definedShow) {
+                const { fn } = get(debouncedNavBarToggle);
+                fn(set, definedShow);
             }
         },
     ),
@@ -95,8 +96,10 @@ const debouncedToggleFn = debounce(
     { leading: true },
 );
 
-const debouncedNavBarToggle = atom(null, (_get, set, show: boolean) => {
-    debouncedToggleFn(set, show);
+const debouncedNavBarToggle = atom({
+    fn: (set: Setter, show: boolean) => {
+        debouncedToggleFn(set, show);
+    },
 });
 
 const onScroll = atom(
@@ -120,7 +123,7 @@ const onScroll = atom(
             scrollTop > lastScrollTop && scrollTop > triggerHeight
         );
         if (showNavBar !== get(navBarAtoms.isVisible)) {
-            set(navBarAtoms.isVisible); // may need to be set.isVisible(!get.isVisible())
+            set(navBarAtoms.isVisible, showNavBar); // may need to be set.isVisible(!get.isVisible())
         }
         set(navBarStore, (draft) => {
             draft.lastScrollTop = scrollTop;

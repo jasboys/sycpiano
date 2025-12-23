@@ -1,8 +1,8 @@
 // import { loadStripe } from '@stripe/stripe-js';
 import axios, { type AxiosError, type AxiosResponse } from 'axios';
 import { atom } from 'jotai';
-import { atomWithImmer } from 'jotai-immer';
 import { atomWithStorage } from 'jotai/utils';
+import { atomWithImmer } from 'jotai-immer';
 import type { CartStateShape } from 'src/components/Cart/types';
 import { storageAvailable } from 'src/localStorage';
 import { partialAtomGetter, toAtoms } from 'src/store';
@@ -86,7 +86,7 @@ export const cartAtoms = {
 const addItem = atom(null, (_get, set, item: string) => {
     set(itemsAtom, (prev) => {
         prev.push(item);
-        return prev;
+        return [...prev];
     });
 });
 
@@ -105,7 +105,7 @@ const removeItem = atom(null, (_get, set, itemToRemove: string) => {
         if (idx !== -1) {
             prev.splice(idx, 1);
         }
-        return prev;
+        return [...prev];
     });
 });
 
@@ -178,18 +178,17 @@ const checkoutFn = atom(null, async (get, set, email: string) => {
         const axiosError = e as AxiosError<{ skus: string[] }>;
         if (axiosError.response?.status === 422) {
             const prevPurchasedData = axiosError.response.data.skus;
-            set(
-                cartStore,
-                (draft) =>
-                    (draft.checkoutError = {
-                        message:
-                            'The items marked in red below have been previously purchased. Please remove them to continue with checkout. To request previously purchased scores, visit the [FAQs](/shop/faqs).',
-                        data: prevPurchasedData,
-                    }),
-            );
+            set(cartStore, (draft) => {
+                draft.checkoutError = {
+                    message:
+                        'The items marked in red below have been previously purchased. Please remove them to continue with checkout. To request previously purchased scores, visit the [FAQs](/shop/faqs).',
+                    data: prevPurchasedData,
+                };
+            });
+        } else {
+            console.error('Unexpected Checkout Error.', e);
+            throw e;
         }
-        console.error('Checkout Error.', e);
-        throw e;
     }
 });
 

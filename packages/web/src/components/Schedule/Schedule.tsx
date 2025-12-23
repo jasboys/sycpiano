@@ -1,6 +1,5 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import { useSetAtom } from 'jotai';
 import * as React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SwitchTransition, Transition } from 'react-transition-group';
@@ -16,7 +15,6 @@ import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenXS } from 'src/screens';
 import { container, pushed } from 'src/styles/mixins';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
-import { scheduleAtoms } from './store.js';
 
 const ScheduleContainer = styled.div(
     pushed,
@@ -46,18 +44,11 @@ interface ScheduleProps { type: EventListName; }
 const Schedule: React.FC<ScheduleProps> = ({ type }) => {
     const [params, _setParams] = useSearchParams();
     const fadingRef = React.useRef<HTMLDivElement>(null);
-    const setType = useSetAtom(scheduleAtoms.currentType);
-    const setLastQuery = useSetAtom(scheduleAtoms.lastQuery);
+    // const setType = useSetAtom(scheduleAtoms.currentType);
+    // const setLastQuery = useSetAtom(scheduleAtoms.lastQuery);
+    // const [ready, setReady] = React.useState(false);
 
     const searchQ = params.get('q') ?? undefined;
-
-    React.useEffect(() => {
-        setType(type);
-    }, [type]);
-
-    React.useEffect(() => {
-        setLastQuery(searchQ);
-    }, [searchQ])
 
     return (
         <ScheduleContainer>
@@ -75,6 +66,8 @@ const Schedule: React.FC<ScheduleProps> = ({ type }) => {
                         <Fading ref={fadingRef}>
                             <EventList
                                 key={type}
+                                type={type}
+                                searchQ={searchQ}
                             />
                         </Fading>
                     </Transition>

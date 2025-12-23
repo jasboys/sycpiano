@@ -30,6 +30,7 @@ const linkStyles = {
         cursor: 'pointer',
         transition: 'all 0.5s',
         WebkitTapHighlightColor: 'transparent',
+        fontWeight: 'unset',
 
         '&:hover': {
             color: mix(0.5, logoBlue, '#444'),

@@ -1,11 +1,12 @@
 import isPropValid from '@emotion/is-prop-valid';
 import styled from '@emotion/styled';
 import { useSetAtom } from 'jotai';
+import { mix } from 'polished';
 import type * as React from 'react';
 import { Link } from 'react-router-dom';
-
 import type { Product } from 'src/components/Shop/ShopList/types';
 import { staticImage } from 'src/imageUrls';
+import { logoBlue } from 'src/styles/colors.js';
 import { latoFont } from 'src/styles/fonts.js';
 import { formatPrice } from 'src/utils';
 import { cartActions } from './store';
@@ -96,12 +97,26 @@ export const CartItem: React.FC<CartProps> = ({ item, error }) => {
                             all: 'unset',
                             flex: '0 0 auto',
                             fontWeight: 300,
+                            fontSize: '0.72rem',
+                            borderRadius: 4,
+                            color: logoBlue,
+                            backgroundColor: 'white',
+                            border: `1px solid ${logoBlue}`,
+                            padding: '0.25rem 0.4rem',
+                            height: 'fit-content',
+                            transition: 'all 0.15s',
+                            '&:hover': {
+                                backgroundColor: mix(0.75, logoBlue, '#FFF'),
+                                color: 'white',
+                                cursor: 'pointer',
+                                border: `1px solid ${mix(0.75, logoBlue, '#FFF')}`,
+                            },
                         }}
                         type="button"
                         tabIndex={0}
                         onClick={() => removeItem(item.id)}
                     >
-                        Remove
+                        remove
                     </button>
                 </div>
                 <div css={{ marginTop: '0.5rem' }}>

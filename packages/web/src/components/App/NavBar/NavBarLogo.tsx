@@ -1,8 +1,7 @@
 import styled from '@emotion/styled';
+import { atom, useAtomValue, useSetAtom } from 'jotai';
 import type * as React from 'react';
 import { Link } from 'react-router-dom';
-
-import { atom, useAtomValue, useSetAtom } from 'jotai';
 import { SycLogo, sycLogoSize } from 'src/components/App/NavBar/SycLogo';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
@@ -44,6 +43,7 @@ const StyledLink = styled(Link, {
 })<{ isHome: boolean; isExpanded: boolean }>(
     latoFont(300),
     {
+        textDecoration: 'none',
         display: 'inline-flex',
         fontSize: `${navBarFontSizeREM}rem`,
         letterSpacing: `${letterSpacing}rem`,

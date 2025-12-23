@@ -20,6 +20,8 @@ interface SubNavLinkProps {
 const styles = {
     link: css({
         color: navFontColor,
+        textDecoration: 'none',
+        fontWeight: 'unset',
         position: 'relative',
         width: '100%',
         display: 'block',

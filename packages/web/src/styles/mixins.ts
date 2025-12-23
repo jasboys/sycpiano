@@ -1,12 +1,11 @@
 // Various CSS emotion mixins
 
 import { css } from '@emotion/react';
-import { mix, darken } from 'polished';
-
+import { darken, mix } from 'polished';
+import { toMedia } from 'src/mediaQuery';
 import { hiDpx } from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
 import { logoBlue } from './colors';
-import { toMedia } from 'src/mediaQuery';
 
 export const pushedHelper = (marginTop: number, unit: '%' | 'vh' = '%') => ({
     height: `calc(100${unit} - ${marginTop}px)`,
@@ -25,8 +24,9 @@ export const pushed = css({
 
 export const link = (colorString: string, hoverDelta = 0.2) =>
     css({
+        // fontWeight: 'bold',
         color: colorString,
-        textDecoration: 'none',
+        // textDecoration: 'none',
         cursor: 'pointer',
         transition: 'color 0.5s',
         '&:hover': {

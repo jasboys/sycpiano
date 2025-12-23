@@ -3,7 +3,7 @@ import type { CSSInterpolation } from '@emotion/serialize';
 import { toMedia } from 'src/mediaQuery';
 import { hiDpx, screenM } from 'src/screens';
 
-import { colorVars, logoBlue } from 'src/styles/colors';
+import { colorVars, lightBlue, logoBlue } from 'src/styles/colors';
 import { link } from 'src/styles/mixins';
 import {
     CSSVariables,
@@ -95,7 +95,7 @@ export const globalCss = css([
             height: '100%',
         },
 
-        a: link(logoBlue),
+        a: link(lightBlue),
         button: {
             all: 'unset',
         },

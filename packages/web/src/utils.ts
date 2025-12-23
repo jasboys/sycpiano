@@ -79,6 +79,7 @@ export const fadeOnExit =
 export const slideOnEnter =
     (ref: React.RefObject<HTMLDivElement | null>, delay = 0, duration = 0.25) =>
     (): void => {
+        console.log(ref.current);
         if (ref.current) {
             gsap.fromTo(
                 ref.current,

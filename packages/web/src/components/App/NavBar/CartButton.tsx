@@ -1,6 +1,6 @@
 import { css } from '@emotion/react';
 import { gsap } from 'gsap';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { atom, useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { mix } from 'polished';
 import * as React from 'react';
 import { cartAtoms } from 'src/components/Cart/store';
@@ -100,7 +100,9 @@ const CartButton = ({
     ref,
 }: React.ComponentPropsWithRef<'button'> & CartButtonProps) => {
     const items = useAtomValue(cartAtoms.items);
-    const isInit = useAtomValue(cartAtoms.isInit);
+    const itemsLength = useAtomValue(
+        React.useMemo(() => atom((get) => get(cartAtoms.items).length), []),
+    )
     const [cartVisible, toggleCartVisible] = useAtom(cartAtoms.visible);
     const toggleExpanded = useSetAtom(navBarAtoms.isExpanded);
     const menuOpened = useAtomValue(navBarAtoms.isExpanded);
@@ -108,10 +110,10 @@ const CartButton = ({
 
     React.useEffect(() => {
         const el = cartRef.current;
-        if (el && isInit) {
+        if (el) {
             scaleUp(el);
         }
-    }, [items.length]);
+    }, [itemsLength]);
 
     const makeRef = React.useCallback((el: HTMLButtonElement) => {
         cartRef.current = el;

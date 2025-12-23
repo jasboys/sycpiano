@@ -45,10 +45,11 @@ const eventLocationStyle = css({
     flexDirection: 'row',
     alignItems: 'center',
     width: 'fit-content',
-    textDecoration: 'underline solid transparent',
-    transition: 'text-decoration-color 0.2s',
+    // textDecoration: 'underline solid transparent',
+    transition: 'all 0.2s',
     margin: '0.3rem 0',
     marginLeft: 1,
+    fontWeight: 'unset',
     '&:hover': {
         color: logoBlue,
         textDecorationColor: logoBlue,

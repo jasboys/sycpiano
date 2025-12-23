@@ -314,7 +314,7 @@ const App: React.FC<Record<never, unknown>> = () => {
                         if (isAppearing) {
                             fadeOnEnter0(navbarRef)(isAppearing);
                         } else {
-                            slideOnEnter0(navbarRef);
+                            slideOnEnter0(navbarRef)();
                         }
                     }}
                     onExiting={slideOnExit0(navbarRef)}

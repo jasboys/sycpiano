@@ -46,6 +46,7 @@ const styles = {
         fontSize: '0.9rem',
         textAlign: 'right',
         color: logoBlue,
+        padding: '1rem',
     }),
 };
 
@@ -68,13 +69,13 @@ export const Author: React.FC<AuthorProps> = ({
         <div css={styles.container}>
             <Tag {...attributes}>
                 <span>{`— ${author} `}</span>
-                <span css={{ display: 'inline-block' }}>
+                {/* <span css={{ display: 'inline-block' }}>
                     {`(${
                         hasFullDate
                             ? format(date, 'MMMM dd, yyyy')
                             : format(date, 'MMMM yyyy')
                     })`}
-                </span>
+                </span> */}
             </Tag>
         </div>
     );

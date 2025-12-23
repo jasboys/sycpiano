@@ -5,9 +5,10 @@ import { useAtomValue, useSetAtom } from 'jotai';
 import debounce from 'lodash-es/debounce';
 import startCase from 'lodash-es/startCase';
 import { transparentize } from 'polished';
+import type { JSX } from 'react';
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
 import { LoadingInstance } from 'src/components/LoadingSVG.jsx';
 import { MonthEvents } from 'src/components/Schedule/EventMonth.jsx';
@@ -18,6 +19,7 @@ import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { metaDescriptions, titleStringBase } from 'src/utils';
 import { mediaQueriesAtoms } from '../App/store.js';
+import type { EventListName } from './types.js';
 
 interface OnScrollProps {
     scrollTop: number;
@@ -137,8 +139,19 @@ const useEventList = () => {
     }
 }
 
-export const EventList: React.FC = () => {
+export const EventList: React.FC<{ type: EventListName, searchQ?: string }> = ({ type, searchQ }) => {
     const loadingRef = React.useRef<HTMLDivElement>(null);
+
+    const setType = useSetAtom(scheduleAtoms.currentType);
+    const setLastQuery = useSetAtom(scheduleAtoms.lastQuery);
+
+    React.useEffect(() => {
+        setType(type);
+    }, [type]);
+
+    React.useEffect(() => {
+        setLastQuery(searchQ);
+    }, [searchQ])
 
     const {
         eventItems,
@@ -146,8 +159,7 @@ export const EventList: React.FC = () => {
         maxDate,
         eventItemsLength
     } = useAtomValue(scheduleAtoms.eventList);
-    const type = useAtomValue(scheduleAtoms.currentType);
-    const searchQ = useAtomValue(scheduleAtoms.lastQuery);
+    // const searchQ = useAtomValue(scheduleAtoms.lastQuery);
     const isFetching = useAtomValue(scheduleAtoms.isFetching)
 
     const navigate = useNavigate();
@@ -205,6 +217,18 @@ export const EventList: React.FC = () => {
 
     const loadingDimension = isHamburger ? 50 : 96;
 
+    let footerText: JSX.Element = <span></span>;
+    if (isFetching) {
+        footerText = <span>Fetching events...</span>;
+    } else if (eventItemsLength === 0) {
+        if (type === 'upcoming')
+        footerText = <span>No upcoming events posted. For past events, visit the <Link to='/schedule/archive'>archives</Link>.</span>
+    } else if (hasNextPage) {
+        footerText = <span></span>
+    } else {
+        footerText = <span>End of {type} list</span>
+    }
+
     return (
         <React.Fragment>
             <Helmet
@@ -241,13 +265,7 @@ export const EventList: React.FC = () => {
                 )}
                 {type !== 'event' && (
                     <EndOfList>
-                        {isFetching
-                            ? 'Fetching events...'
-                            : eventItemsLength === 0
-                              ? 'No events fetched'
-                              : hasNextPage
-                                ? ''
-                                : 'No more events'}
+                        {footerText}
                     </EndOfList>
                 )}
             </ScrollingContainer>

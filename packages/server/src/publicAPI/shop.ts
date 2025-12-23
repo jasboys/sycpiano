@@ -219,6 +219,7 @@ shopRouter.post('/checkout', async (req, res) => {
         }, [] as string[]);
 
         if (duplicates.length !== 0) {
+            console.error('Duplicates found');
             res.status(422).json({
                 skus: duplicates,
             });
