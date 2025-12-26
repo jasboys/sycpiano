@@ -95,6 +95,7 @@
     "@types/babel__template": "^7",
     "@types/scheduler": "^0.26.0",
     "@types/use-sync-external-store": "^1",
+    "jotai-devtools": "^0.13.0",
     "rollup-plugin-visualizer": "^6.0.5"
   }
 }

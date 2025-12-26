@@ -1,8 +1,8 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
+import { useAtomValue, useSetAtom } from 'jotai';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-
 import {
     categoryMap,
     isMusicItem,
@@ -16,8 +16,7 @@ import {
 } from 'src/components/Media/Music/utils';
 import { lightBlue, playlistBackground } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts.js';
-import { musicAtoms, musicStore } from './store.js';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { musicAtoms } from './store.js';
 
 interface MusicPlaylistItemProps {
     readonly item: MusicListItem;
@@ -127,6 +126,7 @@ const MusicItem: React.FC<MusicItemProps> = ({ item, onClick }) => {
     return (
         <StyledMusicItem id={musicFile.id}>
             <Link
+                css={{ textDecoration: 'none' }}
                 to={getRelativePermaLink(
                     item.composer,
                     item.piece,
@@ -170,6 +170,7 @@ const MusicCollectionItem: React.FC<
     return (
         <StyledCollectionItem key={index} id={musicFile.id}>
             <Link
+                css={{ textDecoration: 'none' }}
                 to={getRelativePermaLink(
                     item.composer,
                     item.piece,

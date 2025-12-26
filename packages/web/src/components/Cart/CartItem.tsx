@@ -88,6 +88,7 @@ export const CartItem: React.FC<CartProps> = ({ item, error }) => {
                 <div css={{ display: 'flex', justifyContent: 'space-between' }}>
                     <ItemName
                         to={`/shop/scores/${item.permalink}`}
+                        state={{ from: 'cart '}}
                         error={error}
                     >
                         {item.name}

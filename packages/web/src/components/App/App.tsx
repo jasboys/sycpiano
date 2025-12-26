@@ -408,7 +408,7 @@ const App: React.FC<Record<never, unknown>> = () => {
 
                                 <Route path="shop/*" element={<Container />}>
                                     <Route
-                                        path="scores/*"
+                                        path="scores/:product?"
                                         element={<ShopList />}
                                     />
                                     <Route
@@ -457,7 +457,7 @@ const App: React.FC<Record<never, unknown>> = () => {
                         update={update}
                     />
                 )}
-                {(navBarExpanded || cartVisible) && (
+                {(navBarExpanded || cartVisible || showSubs.length) && (
                     <StyledClickDiv
                         isMobile={isMobile}
                         cartOpen={cartVisible}

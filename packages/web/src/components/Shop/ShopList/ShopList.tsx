@@ -75,26 +75,28 @@ const CategoryToLabel: Record<(typeof ProductTypes)[number], string> = {
 const ShopList: React.FC<ShopListProps> = () => {
     const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
     const setCartOpen = useSetAtom(cartAtoms.visible);
-    const { product } = useParams();
+    const params = useParams();
     const { data: shopItems } = useAtomValue<QueryObserverResult<ProductMap>>(shopItemsAtom);
-    const { state } = useLocation();
+    const location = useLocation();
     const navigate = useNavigate();
 
     React.useEffect(() => {
-        if (shopItems && Object.keys(shopItems).length && product) {
-            const el = document.getElementById(product);
+        console.log(params.product);
+        if (shopItems && Object.keys(shopItems).length && params.product) {
+            const el = document.getElementById(params.product);
             if (el) {
                 el.scrollIntoView();
             }
         }
-    }, [shopItems, product]);
+    }, [shopItems, params.product, location.key]);
 
     React.useEffect(() => {
-        if (state?.from === 'cart') {
+        console.log(location);
+        if (location.state?.from === 'cart') {
             setCartOpen(false);
             navigate({}, { replace: true });
         }
-    }, [state])
+    }, [location])
 
     return (
         shopItems && (

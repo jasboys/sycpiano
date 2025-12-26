@@ -246,11 +246,6 @@ export const Search: React.FC<SearchProps> = () => {
 
     const onSubmit = React.useCallback(
         (data: { search: string }) => {
-            // if (data.search === '') {
-            //     navigate('/schedule/upcoming');
-            // }
-            // scheduleStore.set.isFetching(true);
-            // scheduleStore.set.clearList('search');
             navigate(
                 `/schedule/search?${createSearchParams({ q: data.search })}`,
                 {

@@ -12,34 +12,52 @@ import { SearchIconSVG } from 'src/components/Schedule/SearchIconSVG';
 import { ShareIconSVG } from 'src/components/Schedule/ShareIconSVG';
 import type { EventListName } from 'src/components/Schedule/types';
 import { toMedia } from 'src/mediaQuery';
-import { screenPortrait, screenXS } from 'src/screens';
+import { hiDpx, screenPortrait, screenXS } from 'src/screens';
+import { logoBlue } from 'src/styles/colors.js';
+import { latoFont } from 'src/styles/fonts.js';
 import { container, pushed } from 'src/styles/mixins';
+import { navBarHeight } from 'src/styles/variables.js';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
 
-const ScheduleContainer = styled.div(
-    pushed,
-    container,
-    {
-        fontSize: '100%',
-        width: '100%',
-        boxSizing: 'border-box',
-        backgroundColor: 'white',
-        [toMedia([screenXS, screenPortrait])]: {
-            fontSize: '80%'
-        }
-    });
+const ScheduleContainer = styled.div(pushed, container, {
+    fontSize: '100%',
+    width: '100%',
+    boxSizing: 'border-box',
+    backgroundColor: 'white',
+    [toMedia([screenXS, screenPortrait])]: {
+        fontSize: '80%',
+    },
+});
 
-const Fading = styled.div(
-    container,
-    {
-        height: '100%',
-        width: '100%',
-        overflow: 'hidden',
-        visibility: 'hidden',
-    }
-);
+const Fading = styled.div(container, {
+    height: '100%',
+    width: '100%',
+    overflow: 'hidden',
+    visibility: 'hidden',
+});
 
-interface ScheduleProps { type: EventListName; }
+const typeDisplayStyle = css(latoFont(300), {
+    position: 'fixed',
+    top: navBarHeight.lowDpx,
+    left: 0,
+    transformOrigin: '0 0',
+    transform: 'rotate(90deg) translateY(-100%)',
+    padding: '2rem 2.5rem',
+    fontSize: '3rem',
+    color: logoBlue,
+    letterSpacing: '0.6rem',
+    [toMedia(hiDpx)]: {
+        top: navBarHeight.hiDpx,
+    },
+});
+
+const TypeDisplay: React.FC<{ type: EventListName }> = ({ type }) => {
+    return <div css={typeDisplayStyle}>{type.toUpperCase()}</div>;
+};
+
+interface ScheduleProps {
+    type: EventListName;
+}
 
 const Schedule: React.FC<ScheduleProps> = ({ type }) => {
     const [params, _setParams] = useSearchParams();
@@ -53,6 +71,7 @@ const Schedule: React.FC<ScheduleProps> = ({ type }) => {
     return (
         <ScheduleContainer>
             <Search />
+            <TypeDisplay type={type} />
             <div css={css({ height: '100%' })}>
                 <SwitchTransition>
                     <Transition

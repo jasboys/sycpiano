@@ -118,12 +118,7 @@ const useEventList = () => {
         useAtomValue(
             eventsQueryAtom,
         );
-    const setFetching = useSetAtom(scheduleAtoms.isFetching);
     const setFulfilled = useSetAtom(scheduleActions.fulfilled);
-
-    React.useEffect(() => {
-        setFetching(isFetching);
-    }, [isFetching]);
 
     React.useEffect(() => {
         isSuccess &&
@@ -131,11 +126,12 @@ const useEventList = () => {
             setFulfilled({
                 pagedEvents: data.pages,
             });
-    }, [isSuccess, data]);
+    }, [isSuccess, data, setFulfilled]);
 
     return {
         fetchNextPage,
         hasNextPage,
+        isFetching,
     }
 }
 
@@ -159,8 +155,6 @@ export const EventList: React.FC<{ type: EventListName, searchQ?: string }> = ({
         maxDate,
         eventItemsLength
     } = useAtomValue(scheduleAtoms.eventList);
-    // const searchQ = useAtomValue(scheduleAtoms.lastQuery);
-    const isFetching = useAtomValue(scheduleAtoms.isFetching)
 
     const navigate = useNavigate();
     const routeParams = useParams();
@@ -187,7 +181,7 @@ export const EventList: React.FC<{ type: EventListName, searchQ?: string }> = ({
         checkRedirects();
     }, [type, searchQ, date]);
 
-    const { fetchNextPage, hasNextPage } = useEventList();
+    const { fetchNextPage, hasNextPage, isFetching } = useEventList();
 
     const onScroll = React.useCallback(
         ({ clientHeight, scrollTop, scrollHeight }: OnScrollProps) => {
