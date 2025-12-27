@@ -6,6 +6,7 @@ import { toMedia } from 'src/mediaQuery';
 import { hiDpx } from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
 import { logoBlue } from './colors';
+import { latoFont } from './fonts';
 
 export const pushedHelper = (marginTop: number, unit: '%' | 'vh' = '%') => ({
     height: `calc(100${unit} - ${marginTop}px)`,
@@ -64,3 +65,18 @@ export const cardShadow = `
     0 1px 1px 0 rgba(0 0 0 / 0.14),
     0 2px 1px -1px rgba(0 0 0 / 0.12);
 `;
+
+export const verticalTextStyle = css(latoFont(300), {
+    position: 'fixed',
+    top: navBarHeight.lowDpx,
+    left: 0,
+    transformOrigin: '0 0',
+    transform: 'rotate(90deg) translateY(-100%)',
+    padding: '2rem 2.5rem',
+    fontSize: '3rem',
+    color: logoBlue,
+    letterSpacing: '0.6rem',
+    [toMedia(hiDpx)]: {
+        top: navBarHeight.hiDpx,
+    },
+});

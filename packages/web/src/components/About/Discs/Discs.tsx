@@ -8,7 +8,7 @@ import { navBarActions } from 'src/components/App/NavBar/store';
 import { mediaQueriesBaseAtom } from 'src/components/App/store';
 import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
-import { pushed } from 'src/styles/mixins';
+import { pushed, verticalTextStyle } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 
 const containerStyle = css(pushed, {
@@ -21,6 +21,14 @@ const containerStyle = css(pushed, {
     },
 });
 
+const verticalStyle = css(
+    verticalTextStyle,
+    {
+        left: 'calc(50% - min(50%, 400px))',
+        transform: 'rotate(90deg) translateY(50%)',
+    }
+)
+
 type DiscsProps = Record<never, unknown>;
 
 const mediaQueries = focusAtom(mediaQueriesBaseAtom, (optic) =>
@@ -32,6 +40,8 @@ const Discs: React.FC<DiscsProps> = () => {
     const onScroll = useSetAtom(navBarActions.onScroll);
 
     return (
+        <>
+        {!isHamburger && <div css={verticalStyle}>DISCOGRAPHY</div>}
         <div
             css={containerStyle}
             onScroll={
@@ -42,6 +52,7 @@ const Discs: React.FC<DiscsProps> = () => {
         >
             <DiscList />
         </div>
+        </>
     );
 };
 

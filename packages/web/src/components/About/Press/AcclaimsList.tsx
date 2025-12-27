@@ -2,10 +2,7 @@ import { css } from '@emotion/react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import type * as React from 'react';
-
-import { useAtomValue } from 'jotai';
 import AcclaimsListItem from 'src/components/About/Press/AcclaimsListItem';
-import { mediaQueriesAtoms } from 'src/components/App/store.js';
 import { toMedia } from 'src/mediaQuery';
 import { hiDpx, isHamburger } from 'src/screens';
 import { logoBlue } from 'src/styles/colors.js';
@@ -44,8 +41,6 @@ const styles = {
 };
 
 const AcclaimsList: React.FC<AcclaimsListProps> = () => {
-    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
-
     const { data: acclaims } = useQuery({
         queryKey: ['acclaims'],
         queryFn: async () => {
@@ -58,9 +53,6 @@ const AcclaimsList: React.FC<AcclaimsListProps> = () => {
     return (
         acclaims && (
             <div>
-                {!isHamburger && (
-                    <li css={styles.title}>In the Press&hellip;</li>
-                )}
                 <ul css={styles.ul}>
                     {acclaims.map((acclaim) => (
                         <AcclaimsListItem acclaim={acclaim} key={acclaim.id} />

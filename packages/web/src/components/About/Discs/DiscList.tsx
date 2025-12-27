@@ -2,7 +2,6 @@ import { css } from '@emotion/react';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import type * as React from 'react';
-
 import DiscListItem from 'src/components/About/Discs/DiscListItem';
 import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
@@ -10,8 +9,6 @@ import { logoBlue } from 'src/styles/colors.js';
 import { latoFont } from 'src/styles/fonts';
 import { camel2var } from 'src/styles/variables';
 import type { Disc } from './types.js';
-import { mediaQueriesAtoms } from 'src/components/App/store.js';
-import { useAtomValue } from 'jotai';
 
 type DiscListProps = Record<never, unknown>;
 
@@ -37,7 +34,6 @@ const styles = {
 };
 
 const DiscList: React.FunctionComponent<DiscListProps> = () => {
-    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
     const { data: items } = useQuery({
         queryKey: ['discs'],
         queryFn: async () => {
@@ -52,7 +48,6 @@ const DiscList: React.FunctionComponent<DiscListProps> = () => {
         items && (
             <div>
                 <ul css={styles.ul}>
-                    {!isHamburger && <li css={styles.li}>Discography</li>}
                     {items.map((item) => (
                         <DiscListItem item={item} key={item.id} />
                     ))}
