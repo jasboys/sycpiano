@@ -226,6 +226,11 @@ const CheckoutForm: React.FC<{ cartLength: number }> = ({ cartLength }) => {
 
     const { mutate, isPending } = useMutation({
         mutationFn: checkoutFn,
+        onSettled: (data) => {
+            if (data) {
+                window.location.href = data;
+            }
+        }
     });
 
     React.useEffect(() => {

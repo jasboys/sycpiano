@@ -77,27 +77,6 @@ const Cart: React.FC<CartProps> = ({
     const tl = React.useRef<GSAPTimeline>(null);
     const fadeRef = React.useRef<HTMLDivElement>(null);
 
-    // const { data: { items, email } = { items: [], email: '' }, isSuccess } =
-    //     useQuery({
-    //         queryKey: ['localStorageCart'],
-    //         queryFn: initCartFn,
-    //     });
-
-    // React.useEffect(() => {
-    //     if (isSuccess) {
-    //         cartStore.set.items(items);
-    //         cartStore.set.email(email);
-    //     }
-    // }, [items, email, isSuccess]);
-
-    // React.useEffect(() => {
-    //     initCartFn()
-    // }, []);
-
-    // React.useEffect(() => {
-    //     cartStore.set.syncStorage();
-    // }, [cartLength]);
-
     React.useLayoutEffect(() => {
         if (fadeRef.current) {
             const ctx = gsap.context(() => {

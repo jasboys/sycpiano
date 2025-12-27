@@ -12,7 +12,7 @@ import { toMedia } from 'src/mediaQuery.js';
 import { isHamburger, screenPortrait, screenXS } from 'src/screens.js';
 import { logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
-import { pushed } from 'src/styles/mixins';
+import { pushed, verticalTextStyle } from 'src/styles/mixins';
 import { shopItemsAtom } from './store.js';
 
 type ShopListProps = Record<never, unknown>;
@@ -66,6 +66,14 @@ const categoryListStyle = css({
     },
 });
 
+const verticalStyle = css(
+    verticalTextStyle,
+    {
+        left: 'calc(50% - min(50%, 375px))',
+        transform: 'rotate(90deg)',
+    }
+)
+
 const CategoryToLabel: Record<(typeof ProductTypes)[number], string> = {
     arrangement: 'Arrangements',
     cadenza: 'Cadenzas',
@@ -99,7 +107,9 @@ const ShopList: React.FC<ShopListProps> = () => {
     }, [location])
 
     return (
-        shopItems && (
+        <>
+        {!isHamburger && <div css={verticalStyle}>SCORES</div>}
+        {shopItems && (
             <div css={listStyle}>
                 {Object.entries(shopItems).map(([key, items]) => (
                     <Category isHamburger={isHamburger} key={key}>
@@ -120,7 +130,8 @@ const ShopList: React.FC<ShopListProps> = () => {
                     </Category>
                 ))}
             </div>
-        )
+        )}
+        </>
     );
 };
 

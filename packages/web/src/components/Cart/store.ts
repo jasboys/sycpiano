@@ -159,9 +159,11 @@ const checkoutFn = atom(null, async (get, set, email: string) => {
             );
         }
         // const response =
-        await axios.post<
+        const {
+            data: { url },
+        } = await axios.post<
             { email: string; productIds: string[] },
-            AxiosResponse<{ sessionId: string }>
+            AxiosResponse<{ url: string }>
         >(
             '/api/shop/checkout',
             {
@@ -174,6 +176,7 @@ const checkoutFn = atom(null, async (get, set, email: string) => {
                 },
             },
         );
+        return url;
     } catch (e) {
         const axiosError = e as AxiosError<{ skus: string[] }>;
         if (axiosError.response?.status === 422) {

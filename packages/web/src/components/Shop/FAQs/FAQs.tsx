@@ -7,9 +7,8 @@ import type * as React from 'react';
 import { Link } from 'react-router-dom';
 import { mediaQueriesAtoms } from 'src/components/App/store.js';
 
-import { logoBlue } from 'src/styles/colors.js';
 import { latoFont } from 'src/styles/fonts';
-import { pushed } from 'src/styles/mixins';
+import { pushed, verticalTextStyle } from 'src/styles/mixins';
 
 const Container = styled.div(latoFont(300), pushed, {
     display: 'flex',
@@ -41,14 +40,9 @@ const Anchor: React.FC<{ href: string; children: React.ReactNode }> = (
         </Link>
     );
 
-const Title = styled.div(latoFont(400), {
-    textAlign: 'left',
-    fontSize: '1.5rem',
-    color: logoBlue,
-    width: '100%',
-    maxWidth: 800,
-    paddingLeft: '1rem',
-    marginBottom: '0.5rem',
+const Title = styled.div(verticalTextStyle, {
+    left: 'calc(50% - min(50%, 400px))',
+    transform: 'rotate(90deg)',
 });
 
 interface FAQ {
@@ -70,7 +64,7 @@ const FAQs: React.FC<Record<never, unknown>> = () => {
     return (
         faqs && (
             <Container>
-                {!isHamburger && <Title>Frequently Asked Questions</Title>}
+                {!isHamburger && <Title>FAQs</Title>}
                 <ul css={{ maxWidth: 800 }}>
                     {faqs.map((faq) => (
                         <li key={faq.question.substring(0, 16)}>

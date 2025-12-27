@@ -175,7 +175,7 @@ shopRouter.get<unknown, unknown, unknown, { session_id: string }>(
                 ]),
                 lineItems: lineItems.map((item) => item.description),
             });
-        } catch (e) {
+        } catch (_e) {
             res.sendStatus(400);
         }
     },
@@ -242,7 +242,7 @@ shopRouter.post('/checkout', async (req, res) => {
         //     sessionId: session.id,
         //     sessionUrl: session.url,
         // });
-        res.redirect(303, session.url);
+        res.json({ url: session.url });
     } catch (e) {
         console.error('Checkout error', e);
         res.sendStatus(400);
