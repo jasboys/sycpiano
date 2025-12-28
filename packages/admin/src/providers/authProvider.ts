@@ -30,7 +30,7 @@ const authProvider = (apiUrl: string): AuthProvider => {
         logout: async () => {
             try {
                 await axiosInstance.post('/logout');
-            } catch (e) {
+            } catch (_e) {
                 console.log(`Wasn't logged in.`);
             }
         },
@@ -46,7 +46,10 @@ const authProvider = (apiUrl: string): AuthProvider => {
         canAccess: async ({
             action,
             resource,
-        }: { action: string; resource: string }) => {
+        }: {
+            action: string;
+            resource: string;
+        }) => {
             const response = await axiosInstance.post<
                 unknown,
                 AxiosResponse<{ role: string }>

@@ -1,14 +1,14 @@
 import axios from 'axios';
 import { formatInTimeZone } from 'date-fns-tz';
 import {
-    HttpError,
-    useDataProvider,
-    withLifecycleCallbacks,
     type DataProvider,
     type GetListResult,
     type GetOneResult,
+    HttpError,
     type Identifier,
     type RaRecord,
+    useDataProvider,
+    withLifecycleCallbacks,
 } from 'react-admin';
 import { ADMIN_URI } from 'src/uris.js';
 import { toUTC } from '../utils';
@@ -116,7 +116,6 @@ const provider = (apiUrl: string): AdminProvider => {
         },
 
         update: async (resource, params) => {
-            console.log(params);
             const { data } = await axiosInstance.put(
                 `/${resource}/${params.id}`,
                 {
@@ -383,6 +382,32 @@ const provider = (apiUrl: string): AdminProvider => {
                 data,
             };
         },
+
+        extractProgram: async (
+            resource: string,
+            params: { id: Identifier; nickname?: string },
+        ) => {
+            if (resource !== 'programs') {
+                return Promise.reject(
+                    'Called on a resource that is not programs',
+                );
+            }
+            console.log(params);
+            const { data } = await axiosInstance.post(
+                `/actions/${resource}/extract`,
+                {
+                    calendarId: params.id,
+                },
+                {
+                    headers: {
+                        'X-CSRF-TOKEN': 'admin',
+                    },
+                },
+            );
+            return {
+                data,
+            };
+        },
     };
 };
 
@@ -419,6 +444,10 @@ export interface AdminProvider<ResourceType extends string = string>
     merge: <RecordType extends RaRecord>(
         resource: string,
         params: { ids: Identifier[] },
+    ) => Promise<GetOneResult<RecordType>>;
+    extractProgram: <RecordType extends RaRecord>(
+        resource: string,
+        params: { id: Identifier; nickname?: string },
     ) => Promise<GetOneResult<RecordType>>;
 }
 

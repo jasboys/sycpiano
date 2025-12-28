@@ -7,10 +7,10 @@ import {
     PrimaryKey,
     Property,
 } from '@mikro-orm/core';
-import { CalendarPiece } from './CalendarPiece.js';
 import { Calendar } from './Calendar.js';
-import { ProgramPiece } from './ProgramPiece.js';
+import { CalendarPiece } from './CalendarPiece.js';
 import { Program } from './Program.js';
+import { ProgramPiece } from './ProgramPiece.js';
 
 @Entity()
 export class Piece {

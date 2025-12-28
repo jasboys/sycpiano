@@ -1,32 +1,35 @@
+import { useMutation } from '@tanstack/react-query';
 import { formatInTimeZone } from 'date-fns-tz';
 import {
+    ArrayField,
     BooleanField,
     Button,
     CreateButton,
     Datagrid,
     FilterButton,
     FunctionField,
+    type Identifier,
     List,
+    type ListProps,
     type RaRecord,
     SearchInput,
     TextField,
     TopToolbar,
-    useNotify,
-    useRefresh,
-    type Identifier,
-    type ListProps,
-    ArrayField,
     useCanAccess,
+    useNotify,
+    useRecordContext,
+    useRefresh,
 } from 'react-admin';
-
-import { useMutation } from '@tanstack/react-query';
 import { useAppDataProvider } from '../../providers/restProvider.js';
+import { Empty } from '../Shared.jsx';
 
 const filters = [<SearchInput key="search" source="q" alwaysOn />];
 
 const PopulateImageFieldsButton = ({
     selectedIds,
-}: { selectedIds?: Identifier[] }) => {
+}: {
+    selectedIds?: Identifier[];
+}) => {
     const notify = useNotify();
     const refresh = useRefresh();
     const dataProvider = useAppDataProvider();
@@ -37,13 +40,12 @@ const PopulateImageFieldsButton = ({
                 selectedIds ? { ids: selectedIds } : {},
             ),
 
-            onSuccess: () => {
-                refresh();
-                notify('Populating Succeeded');
-            },
-            onError: (error) => notify(`Error: ${error}`, { type: 'warning' }),
+        onSuccess: () => {
+            refresh();
+            notify('Populating Succeeded');
         },
-    );
+        onError: (error) => notify(`Error: ${error}`, { type: 'warning' }),
+    });
     return (
         <Button
             label="Populate Image Fields"
@@ -84,16 +86,30 @@ const CalendarPanel: React.FC<{
     resource: string;
 }> = () => {
     return (
-        <ArrayField source="collaborators">
-            <Datagrid
-                sx={{ marginBottom: '1rem' }}
-                isRowSelectable={() => false}
-                bulkActionButtons={false}
-            >
-                <TextField source="name" />
-                <TextField source="instrument" />
-            </Datagrid>
-        </ArrayField>
+        <>
+            <ArrayField source="collaborators">
+                <Datagrid
+                    empty={<Empty assoc="collaborators" />}
+                    sx={{ marginBottom: '1rem' }}
+                    isRowSelectable={() => false}
+                    bulkActionButtons={false}
+                >
+                    <TextField source="name" />
+                    <TextField source="instrument" />
+                </Datagrid>
+            </ArrayField>
+            <ArrayField source="pieces">
+                <Datagrid
+                    empty={<Empty assoc="pieces" />}
+                    sx={{ marginBottom: '1rem' }}
+                    isRowSelectable={() => false}
+                    bulkActionButtons={false}
+                >
+                    <TextField source="composer" />
+                    <TextField source="piece" />
+                </Datagrid>
+            </ArrayField>
+        </>
     );
 };
 
@@ -135,6 +151,7 @@ export const CalendarList = (props: ListProps) => {
                     }
                 />
                 <BooleanField source="allDay" />
+                <BooleanField source="hidden" />
                 <TextField source="endDate" />
                 <TextField source="timezone" />
                 <TextField source="location" />

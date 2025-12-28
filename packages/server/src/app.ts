@@ -10,7 +10,6 @@ import cors from 'cors';
 import express, { json, type RequestHandler, urlencoded } from 'express';
 import helmet from 'helmet';
 import mustacheExpress from 'mustache-express';
-
 // import type { Options } from 'pino-http';
 import { AdminRest } from './adminAPI/index.js';
 import { AuthRouter, authAndGetRole, checkAdmin } from './authorization.js';
@@ -283,10 +282,9 @@ const main = async () => {
         cookieParser(process.env.COOKIE_SECRET),
         async (req, res) => {
             const { fbclid, ...queries } = req.query;
-            req.query = queries; // NO FACEBOOK
             const { sanitize = '', ...meta } = await getMetaFromPathAndSanitize(
                 req.path,
-                req.query.q as string,
+                queries.q as string,
             );
             if (sanitize) {
                 res.redirect(req.url.replace(`/${sanitize}`, ''));

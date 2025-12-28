@@ -19,7 +19,7 @@ if (process.env.STRIPE_SECRET_KEY === undefined) {
     throw new Error('Stripe Secret Key undefined');
 }
 const stripe: Stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2024-06-20',
+    apiVersion: '2025-12-15.clover',
 });
 
 const stripeCustomerActive = (cr: CustomerReturn): cr is Stripe.Customer => {
@@ -235,7 +235,7 @@ export const deleteProduct = async (
 ): Promise<Stripe.Response<Stripe.DeletedProduct | Stripe.Product>> => {
     try {
         return await stripe.products.del(id);
-    } catch (e) {
+    } catch (_e) {
         try {
             return await stripe.products.update(id, { active: false });
         } catch (e) {

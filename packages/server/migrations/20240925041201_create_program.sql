@@ -7,8 +7,9 @@ CREATE TABLE IF NOT EXISTS program (
 
 CREATE TABLE IF NOT EXISTS program_piece (
     id               uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-    program_id       serial REFERENCES program ON DELETE CASCADE,
-    piece_id         uuid REFERENCES piece ON DELETE CASCADE
+    program_id       uuid REFERENCES program ON DELETE CASCADE,
+    piece_id         uuid REFERENCES piece ON DELETE CASCADE,
+    "order"          integer
 );
 
 CREATE INDEX IF NOT EXISTS program_piece_program_idx ON program_piece(program_id);

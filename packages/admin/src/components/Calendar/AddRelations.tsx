@@ -4,42 +4,20 @@ import type React from 'react';
 import {
     AutocompleteInput,
     Button,
+    type Identifier,
     NumberInput,
+    type RaRecord,
     ReferenceInput,
     SaveButton,
     TextInput,
-    useChoicesContext,
     useCreate,
     useNotify,
     useRecordContext,
     useRefresh,
-    type Identifier,
-    type RaRecord,
-    type TextInputProps,
 } from 'react-admin';
 import { useFormContext } from 'react-hook-form';
 import type { AdminError } from 'src/types.js';
-
-interface ControllerInputProps extends TextInputProps {
-    property: string;
-}
-
-const ControlledInput = ({
-    source,
-    property,
-    ...rest
-}: ControllerInputProps) => {
-    const { selectedChoices } = useChoicesContext();
-
-    return selectedChoices && (
-        <TextInput
-            source={source}
-            disabled={!!selectedChoices[0]}
-            defaultValue={selectedChoices[0]?.[property]}
-            {...rest}
-        />
-    );
-};
+import { ControlledInput } from '../Shared.jsx';
 
 export const AddCalendarPieceForm: React.FC<{
     setShowDialog: (t: boolean) => void;
@@ -54,42 +32,43 @@ export const AddCalendarPieceForm: React.FC<{
     const refresh = useRefresh();
 
     const onSubmit = async (values: Partial<RaRecord>) => {
-        record && create(
-            'calendar-pieces',
-            {
-                data: {
-                    calendarId: record.id,
-                    order: values.order,
-                    ...values.piece,
+        record &&
+            create(
+                'calendar-pieces',
+                {
+                    data: {
+                        calendarId: record.id,
+                        order: values.order,
+                        ...values.piece,
+                    },
                 },
-            },
-            {
-                onSuccess: () => {
-                    setShowDialog(false);
-                    notify('Created calendar-piece.', {
-                        type: 'success',
-                    });
-                    refresh();
+                {
+                    onSuccess: () => {
+                        setShowDialog(false);
+                        notify('Created calendar-piece.', {
+                            type: 'success',
+                        });
+                        refresh();
+                    },
+                    onError: (error) => {
+                        notify(error.message, { type: 'error' });
+                    },
                 },
-                onError: (error) => {
-                    notify(error.message, { type: 'error' });
-                },
-            },
-        );
+            );
     };
 
-    return record && (
-        <>
-            <DialogContent>
-                <TextInput
-                    label="Calendar ID"
-                    source="id"
-                    defaultValue={record.id}
-                    disabled
-                    fullWidth
-                />
-                <ReferenceInput source="piece.id" reference="pieces">
-                    <>
+    return (
+        record && (
+            <>
+                <DialogContent>
+                    <TextInput
+                        label="Calendar ID"
+                        source="id"
+                        defaultValue={record.id}
+                        disabled
+                        fullWidth
+                    />
+                    <ReferenceInput source="piece.id" reference="pieces">
                         <AutocompleteInput
                             fullWidth
                             source="piece.id"
@@ -119,25 +98,25 @@ export const AddCalendarPieceForm: React.FC<{
                             property="piece"
                             fullWidth
                         />
-                    </>
-                </ReferenceInput>
-                <NumberInput source="order" />
-            </DialogContent>
-            <DialogActions>
-                <Button
-                    label="ra.action.cancel"
-                    onClick={() => setShowDialog(false)}
-                    disabled={isLoading}
-                >
-                    <IconCancel />
-                </Button>
-                <SaveButton
-                    onClick={handleSubmit(onSubmit)}
-                    type="button"
-                    disabled={isLoading}
-                />
-            </DialogActions>
-        </>
+                    </ReferenceInput>
+                    <NumberInput source="order" />
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        label="ra.action.cancel"
+                        onClick={() => setShowDialog(false)}
+                        disabled={isLoading}
+                    >
+                        <IconCancel />
+                    </Button>
+                    <SaveButton
+                        onClick={handleSubmit(onSubmit)}
+                        type="button"
+                        disabled={isLoading}
+                    />
+                </DialogActions>
+            </>
+        )
     );
 };
 
@@ -154,46 +133,47 @@ export const AddCalendarCollaboratorForm: React.FC<{
     const refresh = useRefresh();
 
     const onSubmit = async (values: Partial<RaRecord>) => {
-        record && create(
-            'calendar-collaborators',
-            {
-                data: {
-                    calendarId: record.id,
-                    order: values.order,
-                    ...values.collaborator,
+        record &&
+            create(
+                'calendar-collaborators',
+                {
+                    data: {
+                        calendarId: record.id,
+                        order: values.order,
+                        ...values.collaborator,
+                    },
                 },
-            },
-            {
-                onSuccess: () => {
-                    setShowDialog(false);
-                    notify('Created calendar-collaborator.', {
-                        type: 'success',
-                        undoable: true,
-                    });
-                    refresh();
+                {
+                    onSuccess: () => {
+                        setShowDialog(false);
+                        notify('Created calendar-collaborator.', {
+                            type: 'success',
+                            undoable: true,
+                        });
+                        refresh();
+                    },
+                    onError: (error) => {
+                        notify(error.message, { type: 'error' });
+                    },
                 },
-                onError: (error) => {
-                    notify(error.message, { type: 'error' });
-                },
-            },
-        );
+            );
     };
 
-    return record && (
-        <>
-            <DialogContent>
-                <TextInput
-                    label="Calendar ID"
-                    source="id"
-                    defaultValue={record.id}
-                    disabled
-                    fullWidth
-                />
-                <ReferenceInput
-                    source="collaborator.id"
-                    reference="collaborators"
-                >
-                    <>
+    return (
+        record && (
+            <>
+                <DialogContent>
+                    <TextInput
+                        label="Calendar ID"
+                        source="id"
+                        defaultValue={record.id}
+                        disabled
+                        fullWidth
+                    />
+                    <ReferenceInput
+                        source="collaborator.id"
+                        reference="collaborators"
+                    >
                         <AutocompleteInput
                             fullWidth
                             source="collaborator.id"
@@ -223,24 +203,24 @@ export const AddCalendarCollaboratorForm: React.FC<{
                             property="instrument"
                             fullWidth
                         />
-                    </>
-                </ReferenceInput>
-                <NumberInput source="order" />
-            </DialogContent>
-            <DialogActions>
-                <Button
-                    label="ra.action.cancel"
-                    onClick={() => setShowDialog(false)}
-                    disabled={isLoading}
-                >
-                    <IconCancel />
-                </Button>
-                <SaveButton
-                    onClick={handleSubmit(onSubmit)}
-                    type="button"
-                    disabled={isLoading}
-                />
-            </DialogActions>
-        </>
+                    </ReferenceInput>
+                    <NumberInput source="order" />
+                </DialogContent>
+                <DialogActions>
+                    <Button
+                        label="ra.action.cancel"
+                        onClick={() => setShowDialog(false)}
+                        disabled={isLoading}
+                    >
+                        <IconCancel />
+                    </Button>
+                    <SaveButton
+                        onClick={handleSubmit(onSubmit)}
+                        type="button"
+                        disabled={isLoading}
+                    />
+                </DialogActions>
+            </>
+        )
     );
 };

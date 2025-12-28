@@ -1,10 +1,10 @@
 import {
-    wrap,
     type EntityData,
     type FilterQuery,
     type Loaded,
     type QueryOrderMap,
     type RequiredEntityData,
+    wrap,
 } from '@mikro-orm/core';
 import type express from 'express';
 import orm from '../database.js';
@@ -135,9 +135,7 @@ const calendarRouter = crud('/calendars', {
                     'collaborators',
                     'pieces',
                     'calendarPieces',
-                    'calendarPieces.piece',
                     'calendarCollaborators',
-                    'calendarCollaborators.collaborator',
                 ],
             },
         );
@@ -168,7 +166,7 @@ const calendarRouter = crud('/calendars', {
         };
     },
     search: async ({ q, limit }, _) => {
-        const matchArray = q.trim().match(/^id\:(.*)$/i);
+        const matchArray = q.trim().match(/^id:(.*)$/i);
         let where: FilterQuery<Calendar>;
         if (matchArray?.[1]) {
             where = {
@@ -193,8 +191,6 @@ const calendarRouter = crud('/calendars', {
         }
         const calendarResults = await orm.em.findAndCount(Calendar, where, {
             populate: [
-                'collaborators',
-                'pieces',
                 'calendarPieces',
                 'calendarPieces.piece',
                 'calendarCollaborators',
@@ -241,7 +237,7 @@ const populateImages = async (entity: Calendar) => {
                 entity.imageUrl = null;
             }
         }
-    } catch (e) {
+    } catch (_e) {
         console.log('populate images error');
     }
 };

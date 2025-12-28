@@ -2,11 +2,11 @@ import { TextField as MUITextField } from '@mui/material';
 import {
     BooleanInput,
     Create,
+    type CreateProps,
     FormDataConsumer,
+    required,
     SimpleForm,
     TextInput,
-    required,
-    type CreateProps,
 } from 'react-admin';
 import { toUTC } from '../../utils.js';
 import { EndDate } from './EndDate.jsx';
@@ -47,6 +47,7 @@ export const CalendarCreate = (props: CreateProps) => {
                     )}
                 </FormDataConsumer>
                 <BooleanInput source="allDay" />
+                <BooleanInput source="hidden" />
                 <EndDate />
                 <TextInput source="timezone" disabled />
                 <TextInput source="location" fullWidth validate={required()} />

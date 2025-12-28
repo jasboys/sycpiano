@@ -3,13 +3,11 @@ import { JWT } from 'google-auth-library';
 import { Token } from '../models/Token.js';
 
 const authorize = async () => {
-    const jwt = new JWT(
-        process.env.GAPI_CLIENT_EMAIL,
-        undefined,
-        process.env.GAPI_PRIVATE_KEY,
-        ['https://www.googleapis.com/auth/calendar'],
-        undefined,
-    );
+    const jwt = new JWT({
+        email: process.env.GAPI_CLIENT_EMAIL,
+        key: process.env.GAPI_PRIVATE_KEY,
+        scopes: ['https://www.googleapis.com/auth/calendar'],
+    });
 
     try {
         const response = await jwt.authorize();

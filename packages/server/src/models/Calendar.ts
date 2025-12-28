@@ -1,3 +1,4 @@
+import type { EventArgs } from '@mikro-orm/core';
 import {
     AfterDelete,
     AfterUpdate,
@@ -11,8 +12,8 @@ import {
     PrimaryKey,
     Property,
 } from '@mikro-orm/core';
-import type { EventArgs } from '@mikro-orm/core';
-
+import { parse, startOfDay } from 'date-fns';
+import { fromZonedTime } from 'date-fns-tz';
 import {
     createCalendarEvent,
     deleteCalendarEvent,
@@ -26,8 +27,6 @@ import { CalendarCollaborator } from './CalendarCollaborator.js';
 import { CalendarPiece } from './CalendarPiece.js';
 import { Collaborator } from './Collaborator.js';
 import { Piece } from './Piece.js';
-import { parse, startOfDay } from 'date-fns';
-import { fromZonedTime } from 'date-fns-tz';
 
 async function beforeCreateHook(args: EventArgs<Calendar>) {
     console.log('[Hook: BeforeCreate] Start');
@@ -231,6 +230,9 @@ export class Calendar {
 
     @Property({ persist: false })
     dateTimeInput?: string;
+
+    @Property({ default: false })
+    hidden?: boolean;
 
     @OneToMany({
         entity: () => CalendarPiece,

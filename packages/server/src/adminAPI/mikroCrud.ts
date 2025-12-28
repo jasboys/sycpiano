@@ -1,5 +1,4 @@
 import {
-    wrap,
     type EntityClass,
     type EntityData,
     type EntityName,
@@ -10,9 +9,10 @@ import {
     type Loaded,
     type Populate,
     type Primary,
+    wrap,
 } from '@mikro-orm/core';
 import orm from '../database.js';
-import { NotFoundError, type CrudActions, type SearchParams } from './types.js';
+import { type CrudActions, NotFoundError, type SearchParams } from './types.js';
 
 interface CrudParams<R extends {}, K extends keyof R & string> {
     entity: EntityClass<R>;
@@ -55,7 +55,7 @@ const mikroSearchFields = <R extends {}, K extends keyof R & string>(
     const mappedFields =
         searchableFields && mapSearchFields(entity, searchableFields);
     return async ({ q, limit }: SearchParams) => {
-        const matchArray = q.trim().match(/^id\:(.*)$/i);
+        const matchArray = q.trim().match(/^id:(.*)$/i);
         let where: FilterQuery<R>;
         if (matchArray?.[1]) {
             where = {
@@ -128,7 +128,6 @@ export const mikroCrud = <
             } as R);
             for (const record of records) {
                 wrap(record).assign(body, { mergeObjectProperties: true });
-                // pojoRecords.push(wrap(record).toPOJO());
             }
             await orm.em.flush();
             return {

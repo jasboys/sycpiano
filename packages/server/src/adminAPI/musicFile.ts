@@ -1,6 +1,6 @@
-import multer from 'multer';
 import { stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import multer from 'multer';
 import orm from '../database.js';
 import { MusicFile } from '../models/MusicFile.js';
 import { crud } from './crud.js';
@@ -18,7 +18,7 @@ const musicStorage = multer.diskStorage({
         try {
             await stat(resolve(process.env.MUSIC_ASSETS_DIR, fileName));
             cb(Error('File already exists'), '');
-        } catch (e) {
+        } catch (_e) {
             cb(null, req.body.fileName);
         }
     },
@@ -44,7 +44,7 @@ musicFileRouter.post(
             );
 
             res.json({ fileName: req.body.fileName, duration });
-        } catch (e) {
+        } catch (_e) {
             res.statusMessage = 'Error generating waveform';
             res.sendStatus(500);
         }

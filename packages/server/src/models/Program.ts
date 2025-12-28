@@ -7,8 +7,8 @@ import {
     PrimaryKey,
     Property,
 } from '@mikro-orm/core';
-import { ProgramPiece } from './ProgramPiece.js';
 import { Piece } from './Piece.js';
+import { ProgramPiece } from './ProgramPiece.js';
 
 @Entity()
 export class Program {

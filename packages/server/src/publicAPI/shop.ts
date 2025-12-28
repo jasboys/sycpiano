@@ -182,7 +182,7 @@ shopRouter.get<unknown, unknown, unknown, { session_id: string }>(
 );
 
 // Enforce csrf mitigation for post routes.
-shopRouter.post('*', csrfMiddleware);
+shopRouter.post('*splat', csrfMiddleware);
 
 // new stripe API: old skus = new prices
 // However, we are using the Product IDs in the front end, so have to fetch

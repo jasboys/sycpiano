@@ -1,10 +1,10 @@
+import { readFile } from 'node:fs/promises';
+import * as path from 'node:path';
 import archiver from 'archiver';
 import { getYear } from 'date-fns';
 import mustache from 'mustache';
-import { readFile } from 'node:fs/promises';
-import * as path from 'node:path';
 import * as nodemailer from 'nodemailer';
-import Mail from 'nodemailer/lib/mailer/index.js';
+import type Mail from 'nodemailer/lib/mailer/index.js';
 import type SMTPTransport from 'nodemailer/lib/smtp-transport/index.js';
 import orm from '../database.js';
 import { Product } from '../models/Product.js';
@@ -38,8 +38,8 @@ class ConnectedMailer implements Mailer {
     initialize = async (): Promise<ConnectedMailer> => {
         const transportOptions: SMTPTransport.Options = {
             host: process.env.SMTP_HOST,
-            secure: Number.parseInt(process.env.SMTP_PORT) === 465,
-            port: Number.parseInt(process.env.SMTP_PORT),
+            secure: Number.parseInt(process.env.SMTP_PORT, 10) === 465,
+            port: Number.parseInt(process.env.SMTP_PORT, 10),
             auth: {
                 user: process.env.SMTP_USERNAME,
                 pass: process.env.SMTP_PASSWORD,

@@ -4,5 +4,4 @@ declare global {
     }
 }
 
-// biome-ignore lint/style/useExportType: Need to export for global
 export {};

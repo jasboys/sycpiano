@@ -2,15 +2,15 @@ import IconCancel from '@mui/icons-material/Cancel';
 import { DialogActions, DialogContent } from '@mui/material';
 import {
     Button,
+    type Identifier,
     NumberInput,
+    type RaRecord,
     SaveButton,
     TextInput,
     useNotify,
     useRecordContext,
     useRefresh,
     useUpdate,
-    type Identifier,
-    type RaRecord,
 } from 'react-admin';
 import { useFormContext, useFormState } from 'react-hook-form';
 import type { AdminError, MutateForm } from 'src/types.js';
@@ -46,7 +46,7 @@ export const EditCalendarPiece: MutateForm = ({ setShowDialog }) => {
             {
                 onSuccess: () => {
                     setShowDialog(false);
-                    notify(`Successfully updated calendar-collaborator ${id}.`, {
+                    notify(`Successfully updated calendar-piece ${id}.`, {
                         type: 'success',
                         undoable: true,
                     });

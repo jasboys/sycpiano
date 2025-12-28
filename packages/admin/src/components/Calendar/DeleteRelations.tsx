@@ -1,12 +1,12 @@
 import IconDelete from '@mui/icons-material/Delete';
 import { Button as MuiButton } from '@mui/material';
 import {
+    type Identifier,
+    type RaRecord,
     useDelete,
     useNotify,
     useRecordContext,
     useRefresh,
-    type Identifier,
-    type RaRecord,
 } from 'react-admin';
 import type { AdminError } from 'src/types.js';
 

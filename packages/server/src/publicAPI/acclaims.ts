@@ -16,7 +16,7 @@ const getAcclaims = async (
     _: NextFunction,
 ): Promise<void> => {
     const limit = req.params.count
-        ? Number.parseInt(req.params.count)
+        ? Number.parseInt(req.params.count, 10)
         : undefined;
     const acclaims = await orm.em.find(
         Acclaim,

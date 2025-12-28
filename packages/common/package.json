@@ -13,6 +13,6 @@
   },
   "dependencies": {
     "cross-env": "^10.1.0",
-    "date-fns": "3.6.0"
+    "date-fns": "4.1.0"
   }
 }

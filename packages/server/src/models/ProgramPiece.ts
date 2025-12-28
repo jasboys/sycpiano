@@ -1,7 +1,7 @@
 import type { Rel } from '@mikro-orm/core';
 import { Entity, ManyToOne, Property } from '@mikro-orm/core';
-import { Program } from './Program.js';
 import { Piece } from './Piece.js';
+import { Program } from './Program.js';
 
 @Entity()
 export class ProgramPiece {
@@ -21,4 +21,7 @@ export class ProgramPiece {
         index: 'program_piece_piece_idx',
     })
     piece!: Rel<Piece>;
+
+    @Property({ nullable: true })
+    order?: number;
 }

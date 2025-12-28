@@ -6,9 +6,9 @@ import {
     Button as MuiButton,
     Typography,
 } from '@mui/material';
-import React from 'react';
-import { Button, Form, useNotify, useRefresh, type Identifier } from 'react-admin';
 import { useMutation } from '@tanstack/react-query';
+import React from 'react';
+import { Button, Form, type Identifier, TextInput, type TextInputProps, useChoicesContext, useNotify, useRefresh } from 'react-admin';
 import { useAppDataProvider } from 'src/providers/restProvider.js';
 import type { MutateForm } from 'src/types.js';
 
@@ -80,6 +80,42 @@ export const AddReferenceButton: React.FC<{
     );
 };
 
+export const CustomFormButton: React.FC<{
+    action: string;
+    description: string;
+    Component: MutateForm;
+    parentId?: Identifier;
+}> = ({ action, description, Component }) => {
+    const [showDialog, setShowDialog] = React.useState(false);
+
+    return (
+        <>
+            <Button
+                onClick={() => setShowDialog(true)}
+                label={action}
+                sx={{
+                    '& span span': {
+                        paddingRight: '0.5em',
+                    },
+                }}
+                variant="outlined"
+            />
+            <Dialog
+                fullWidth
+                open={showDialog}
+                onClose={() => setShowDialog(false)}
+            >
+                <DialogTitle>{description}</DialogTitle>
+                <Form>
+                    <Component
+                        setShowDialog={setShowDialog}
+                    />
+                </Form>
+            </Dialog>
+        </>
+    );
+};
+
 export const TrimButton = ({
     resource
 }: { resource: string }) => {
@@ -105,5 +141,28 @@ export const TrimButton = ({
             onClick={() => mutate()}
             disabled={isPending}
         />
+    );
+};
+
+interface ControllerInputProps extends TextInputProps {
+    property: string;
+}
+
+export const ControlledInput = ({
+    source,
+    property,
+    ...rest
+}: ControllerInputProps) => {
+    const { selectedChoices } = useChoicesContext();
+
+    return (
+        selectedChoices && (
+            <TextInput
+                source={source}
+                disabled={!!selectedChoices[0]}
+                defaultValue={selectedChoices[0]?.[property]}
+                {...rest}
+            />
+        )
     );
 };

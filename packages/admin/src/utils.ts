@@ -7,7 +7,7 @@ export const toUTC = (dt: string, tz: string) => {
             startOfMinute(parse(dt, 'yyyy-MM-dd HH:mm', new Date())),
             tz,
         ).toISOString();
-    } catch (e) {
+    } catch (_e) {
         return '';
     }
 };

@@ -1,8 +1,8 @@
-import arp from 'app-root-path';
-import express from 'express';
-import * as util from 'node:util';
 import { stat } from 'node:fs/promises';
 import * as path from 'node:path';
+import * as util from 'node:util';
+import arp from 'app-root-path';
+import express from 'express';
 
 const root = arp.toString();
 
@@ -12,10 +12,10 @@ import Sharp from 'sharp';
 const resized = express();
 
 resized.get(
-    '/*',
+    '/*images',
     async (
         req: express.Request<
-            string[],
+            { images: string[] },
             unknown,
             unknown,
             { width?: string; height?: string }
@@ -23,7 +23,7 @@ resized.get(
         res,
     ) => {
         try {
-            let imgPath = req.params[0];
+            let imgPath = req.params.images[0];
             if (!imgPath) {
                 res.status(404).end();
             }
@@ -31,7 +31,6 @@ resized.get(
                 throw new Error('Missing env vars');
             }
             imgPath = path.join(process.env.IMAGE_ASSETS_DIR, imgPath);
-
             const w =
                 req.query.width === undefined
                     ? undefined
@@ -49,6 +48,7 @@ resized.get(
             if (!w && !h) {
                 try {
                     await sendFileAsync.call(res, imgPath, {
+                        dotfiles: 'allow',
                         maxAge: 31536000,
                     });
                     res.end();
@@ -56,9 +56,9 @@ resized.get(
                     console.error(e);
                 }
             } else {
-                const parsedPath = path.parse(req.params[0]);
-                const width = w ? `w${w}` : undefined;
-                const height = h ? `h${h}` : undefined;
+                const parsedPath = path.parse(req.params.images[0]);
+                const width = w ? `w${w}` : '';
+                const height = h ? `h${h}` : '';
                 const filename = `${parsedPath.name}.${width}${height}${parsedPath.ext}`;
                 const newDir = path.join(
                     root,
@@ -68,12 +68,12 @@ resized.get(
                 try {
                     await mkdirp(newDir);
                     const newPath = path.join(newDir, filename);
-
                     try {
                         await stat(newPath);
 
                         try {
                             await sendFileAsync.call(res, newPath, {
+                                dotfiles: 'allow',
                                 maxAge: 31536000,
                             });
                             res.end();
@@ -88,7 +88,7 @@ resized.get(
                                     withoutEnlargement: true,
                                 })
                                 .toFile(newPath);
-                        } catch (e) {
+                        } catch (_e) {
                             const parsedImg = path.parse(imgPath);
                             const jpegPath = `${parsedImg.dir}/${parsedImg.name}.jpg`;
                             try {
@@ -106,6 +106,7 @@ resized.get(
                         }
 
                         await sendFileAsync.call(res, newPath, {
+                            dotfiles: 'allow',
                             maxAge: 31536000,
                         });
                         res.end();
