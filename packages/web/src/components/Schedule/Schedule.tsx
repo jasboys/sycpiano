@@ -34,14 +34,11 @@ const Fading = styled.div(container, {
     visibility: 'hidden',
 });
 
-const verticalStyle = css(
-    verticalTextStyle,
-    {
-        left: 'calc(50vw - min(400px, 40vw))',
-        transform: 'rotate(90deg) translateY(50%)',
-        zIndex: 100
-    }
-)
+const verticalStyle = css(verticalTextStyle, {
+    left: 'calc(50vw - min(400px, 40vw))',
+    transform: 'rotate(90deg) translateY(50%)',
+    zIndex: 100,
+});
 
 const TypeDisplay: React.FC<{ type: EventListName }> = ({ type }) => {
     return <div css={verticalStyle}>{type.toUpperCase()}</div>;
@@ -55,16 +52,14 @@ const Schedule: React.FC<ScheduleProps> = ({ type }) => {
     const [params, _setParams] = useSearchParams();
     const fadingRef = React.useRef<HTMLDivElement>(null);
     const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
-    // const setType = useSetAtom(scheduleAtoms.currentType);
-    // const setLastQuery = useSetAtom(scheduleAtoms.lastQuery);
-    // const [ready, setReady] = React.useState(false);
 
     const searchQ = params.get('q') ?? undefined;
 
     return (
         <ScheduleContainer>
-            <Search />
             {!isHamburger && <TypeDisplay type={type} />}
+
+            <Search />
             <div css={css({ height: '100%' })}>
                 <SwitchTransition>
                     <Transition

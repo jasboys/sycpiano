@@ -31,7 +31,7 @@ const parseQuery = <R extends object, Q extends QueryString.ParsedQs>(
 
     console.log(filter, typeof filter);
     const { q, ...filters }: Filter =
-        typeof filter === 'string' ? JSON.parse(filter) : filter;
+        typeof filter === 'string' ? JSON.parse(filter) : (filter ?? {});
     console.log('filters', filters);
 
     return {

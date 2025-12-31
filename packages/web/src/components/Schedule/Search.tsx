@@ -200,8 +200,8 @@ export const Search: React.FC<SearchProps> = () => {
     const inputRef = React.useRef<HTMLDivElement>(null);
     const lastQuery = useAtomValue(scheduleAtoms.lastQuery);
     const isFetching = useAtomValue(scheduleAtoms.isFetching);
-    const itemsLength = useAtomValue(scheduleAtoms.itemsLength);
-    const screenXS = useAtomValue(mediaQueriesAtoms.screenXS)
+    const itemsLength = useAtomValue(scheduleAtoms.itemsLength.search);
+    const screenXS = useAtomValue(mediaQueriesAtoms.screenXS);
     const [searchParams] = useSearchParams();
     const [focused, setFocused] = React.useState(false);
     const match = useMatch('/schedule/search');
@@ -325,7 +325,10 @@ export const Search: React.FC<SearchProps> = () => {
                     unmountOnExit={false}
                     nodeRef={inputRef}
                 >
-                    <InputGroup ref={inputRef} isMobile={screenXS || !!searchParams.get('q')}>
+                    <InputGroup
+                        ref={inputRef}
+                        isMobile={screenXS || !!searchParams.get('q')}
+                    >
                         <Span focused={focused}>
                             <Input
                                 id="search"
@@ -352,7 +355,7 @@ export const Search: React.FC<SearchProps> = () => {
                     </InputGroup>
                 </Transition>
             </Container>
-            {!!match && !isFetching && (
+            {!!match && !isFetching && lastQuery && (
                 <ResultsContainer>
                     <div
                         css={{ height: 50, width: '100%', flex: '0 0 50px' }}

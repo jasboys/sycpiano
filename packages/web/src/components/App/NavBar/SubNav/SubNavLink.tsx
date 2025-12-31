@@ -48,8 +48,11 @@ const styles = {
         },
     }),
     isActive: css({
+        color: lightBlue,
+        borderLeft: '4px solid var(--light-blue)',
         [toMedia(isHamburger)]: {
             color: lightBlue,
+            borderLeft: 'unset',
         },
         '&:hover': {
             color: 'white',
@@ -85,6 +88,7 @@ const SubNavLink: React.FC<SubNavLinkProps> = ({
     isHome,
     currentSpecificPath,
 }) => {
+    console.log(link, currentSpecificPath);
     const isActive = link.name === currentSpecificPath;
     return (
         <li css={noHighlight} className={basePath.name}>

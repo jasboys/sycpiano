@@ -9,8 +9,20 @@ import type { ReactNode } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import App from 'src/components/App/App';
 import 'jotai-devtools/styles.css'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 const queryClient = new QueryClient();
+
+// This code is only for TypeScript
+declare global {
+  interface Window {
+    __TANSTACK_QUERY_CLIENT__:
+      import("@tanstack/query-core").QueryClient;
+  }
+}
+
+// This code is for all users
+window.__TANSTACK_QUERY_CLIENT__ = queryClient;
 
 const HydrateAtoms = ({ children }: { children: ReactNode }) => {
     useHydrateAtoms(new Map([[queryClientAtom, queryClient]]));
@@ -30,6 +42,7 @@ function main() {
                     </Routes>
                 </BrowserRouter>
             </HydrateAtoms>
+            <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>,
     );
 }

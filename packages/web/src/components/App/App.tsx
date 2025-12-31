@@ -390,10 +390,15 @@ const App: React.FC<Record<never, unknown>> = () => {
                                     {eventListNamesArr.map((type) => (
                                         <Route
                                             key={`schedule-${type}`}
-                                            path={type}
+                                            path={`${type}/*`}
                                             element={<Schedule type={type} />}
                                         />
                                     ))}
+                                    <Route
+                                        key="schedule-event"
+                                        path="event/*"
+                                        element={<Schedule type="event" />}
+                                    />
                                     <Route
                                         index
                                         element={

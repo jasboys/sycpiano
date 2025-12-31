@@ -213,9 +213,10 @@ programHandler.post('/actions/programs/import', async (req, res) => {
             const calPiece = orm.em.create(CalendarPiece, {
                 piece: programPiece.piece,
                 calendar: cal.id,
-                order: programPiece.order
-                    ? programPiece.order + highestOrder
-                    : undefined,
+                order:
+                    programPiece.order !== undefined
+                        ? programPiece.order + highestOrder
+                        : undefined,
             });
             orm.em.persist(calPiece);
         }

@@ -1,5 +1,7 @@
 import axios from 'axios';
 import { parseISO, startOfDay } from 'date-fns';
+import { getDefaultStore } from 'jotai';
+import { archiveMinDate, upcomingMaxDate } from './store.js';
 import type {
     EventItemResponse,
     EventListName,
@@ -12,33 +14,6 @@ export const FETCH_LIMIT = 25;
 
 const fetchDateParam = (type: string) =>
     type === 'upcoming' ? 'after' : 'before';
-
-// export const getScrollFetchParams = (
-//     type: EventListName,
-// ): FetchEventsArguments | undefined => {
-//     switch (type) {
-//         case 'upcoming': {
-//             const maxDate = scheduleStore.get.upcoming().maxDate;
-//             return {
-//                 name: 'upcoming',
-//                 after: maxDate ? parseISO(maxDate) : undefined,
-//             };
-//         }
-//         case 'archive': {
-//             const mniDate = scheduleStore.get.archive().minDate;
-//             return {
-//                 name: 'archive',
-//                 before: mniDate ? parseISO(mniDate) : undefined,
-//             };
-//         }
-//         case 'search':
-//         case 'event': {
-//             return undefined;
-//         }
-//         default:
-//             return undefined;
-//     }
-// };
 
 interface GetInitFetchParamsArgs {
     type: EventListName;
@@ -113,4 +88,31 @@ export const fetchEvents = async (args: FetchEventsArguments) => {
     const events = transformCachedEventsToListItems(data);
 
     return events;
+};
+
+export const getScrollFetchParams = (
+    type: EventListName,
+): FetchEventsArguments | undefined => {
+    switch (type) {
+        case 'upcoming': {
+            const maxDate = getDefaultStore().get(upcomingMaxDate);
+            return {
+                name: 'upcoming',
+                after: maxDate ? parseISO(maxDate) : undefined,
+            };
+        }
+        case 'archive': {
+            const minDate = getDefaultStore().get(archiveMinDate);
+            return {
+                name: 'archive',
+                before: minDate ? parseISO(minDate) : undefined,
+            };
+        }
+        case 'search':
+        case 'event': {
+            return undefined;
+        }
+        default:
+            return undefined;
+    }
 };

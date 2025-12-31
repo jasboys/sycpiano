@@ -1,6 +1,6 @@
 import axios, { type AxiosResponse } from 'axios';
 import { capitalize } from 'lodash-es';
-import type { AuthProvider } from 'react-admin';
+import type { AuthProvider, QueryFunctionContext } from 'react-admin';
 
 const authProvider = (apiUrl: string): AuthProvider => {
     const axiosInstance = axios.create({
@@ -10,6 +10,7 @@ const authProvider = (apiUrl: string): AuthProvider => {
         },
     });
     return {
+        supportAbortSignal: true,
         login: async ({ username, password }) => {
             await axiosInstance.post<
                 undefined,
@@ -38,6 +39,10 @@ const authProvider = (apiUrl: string): AuthProvider => {
             console.log('calling checkAuth', params);
             await axiosInstance.post<unknown, AxiosResponse<{ role: string }>>(
                 '/status',
+                {},
+                {
+                    signal: params.signal,
+                },
             );
         },
         getPermissions: async () => {
@@ -46,14 +51,15 @@ const authProvider = (apiUrl: string): AuthProvider => {
         canAccess: async ({
             action,
             resource,
+            signal,
         }: {
             action: string;
             resource: string;
-        }) => {
+        } & QueryFunctionContext) => {
             const response = await axiosInstance.post<
                 unknown,
                 AxiosResponse<{ role: string }>
-            >('/status');
+            >('/status', {}, { signal });
             console.log('calling canAccess');
             if (response.data.role === 'admin') {
                 return true;
@@ -67,11 +73,12 @@ const authProvider = (apiUrl: string): AuthProvider => {
             }
             return false;
         },
-        getIdentity: async () => {
+        getIdentity: async (params) => {
+            const signal = params?.signal;
             const response = await axiosInstance.post<
                 unknown,
                 AxiosResponse<{ role: string }>
-            >('/status');
+            >('/status', {}, { signal });
             return {
                 id: response.data.role,
                 fullName: capitalize(response.data.role),

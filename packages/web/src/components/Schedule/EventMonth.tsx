@@ -1,6 +1,6 @@
+import { tz } from '@date-fns/tz';
 import styled from '@emotion/styled';
 import { format, parseISO } from 'date-fns';
-import { formatInTimeZone } from 'date-fns-tz';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -30,7 +30,7 @@ const MonthBar = styled.div<{ isMobile: boolean }>(
     {
         fontSize: 'min(10vw, 2rem)',
         position: 'sticky',
-        top: -0.5,  // just in case stuff peaks out because of rounding?
+        top: -0.5, // just in case stuff peaks out because of rounding?
         zIndex: 4,
         width: '86vw',
         display: 'flex',
@@ -61,11 +61,13 @@ const BackButton = styled.div({
     strokeWidth: '1.5px',
     alignSelf: 'center',
     transition: 'all 250ms',
+    left: -8,
     '&:hover': {
         cursor: 'pointer',
         stroke: 'var(--light-blue)',
         borderColor: 'var(--light-blue)',
     },
+    transform: 'translateX(-100%)',
 });
 
 interface MonthEventsProps {
@@ -103,11 +105,9 @@ export const MonthEvents: React.FC<MonthEventsProps> = ({
             <Events>
                 {monthGroup.events.map((event, idx) => {
                     const permaLink = `/schedule/event/${encodeURIComponent(
-                        formatInTimeZone(
-                            parseISO(event.dateTime),
-                            'Zulu',
-                            `yyyyMMdd'T'HHmmssX`,
-                        ),
+                        format(parseISO(event.dateTime), `yyyyMMdd'T'HHmmssX`, {
+                            in: tz('utc'),
+                        }),
                     )}`;
                     return (
                         <EventItem

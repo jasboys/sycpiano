@@ -10,6 +10,8 @@ import type express from 'express';
 import orm from '../database.js';
 import { getImageFromMetaTag } from '../gapi/calendar.js';
 import { Calendar } from '../models/Calendar.js';
+import { CalendarCollaborator } from '../models/CalendarCollaborator.js';
+import { CalendarPiece } from '../models/CalendarPiece.js';
 import { crud, setGetListHeaders } from './crud.js';
 import { respondWithError } from './index.js';
 import { mikroCrud } from './mikroCrud.js';
@@ -301,5 +303,67 @@ calendarRouter.post(
         }
     },
 );
+
+calendarRouter.post('/actions/calendars/duplicate', async (req, res) => {
+    try {
+        const id = req.body.id;
+        const calendar = await orm.em.findOneOrFail(
+            Calendar,
+            { id },
+            { populate: ['calendarPieces', 'calendarCollaborators'] },
+        );
+
+        const {
+            name,
+            dateTime,
+            timezone,
+            location,
+            type,
+            website,
+            allDay,
+            endDate,
+            hidden,
+            imageUrl,
+        } = calendar;
+
+        const newCalendar = orm.em.create(Calendar, {
+            name,
+            dateTime,
+            timezone,
+            location,
+            type,
+            website,
+            allDay,
+            endDate,
+            hidden,
+            imageUrl,
+        });
+        orm.em.persist(newCalendar);
+
+        for (const pivot of calendar.calendarPieces) {
+            const newPivot = orm.em.create(CalendarPiece, {
+                calendar: newCalendar,
+                piece: pivot.piece,
+                order: pivot.order,
+            });
+            orm.em.persist(newPivot);
+        }
+
+        for (const pivot of calendar.calendarCollaborators) {
+            const newPivot = orm.em.create(CalendarCollaborator, {
+                calendar: newCalendar,
+                collaborator: pivot.collaborator,
+                order: pivot.order,
+            });
+            orm.em.persist(newPivot);
+        }
+
+        await orm.em.flush();
+
+        res.json({ calendar });
+    } catch (e) {
+        respondWithError(e as Error, res);
+    }
+});
 
 export const calendarHandler = calendarRouter;

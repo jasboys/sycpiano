@@ -1,4 +1,5 @@
 
+import { tz, tzName } from '@date-fns/tz';
 import EditIcon from '@mui/icons-material/Edit';
 import {
     Dialog,
@@ -7,10 +8,45 @@ import {
     Typography,
 } from '@mui/material';
 import { useMutation } from '@tanstack/react-query';
+import { format, parseISO } from 'date-fns';
 import React from 'react';
-import { Button, Form, type Identifier, TextInput, type TextInputProps, useChoicesContext, useNotify, useRefresh } from 'react-admin';
+import { Button, Form, FunctionField, type Identifier, TextInput, type TextInputProps, useChoicesContext, useNotify, useRefresh } from 'react-admin';
 import { useAppDataProvider } from 'src/providers/restProvider.js';
 import type { MutateForm } from 'src/types.js';
+
+
+export const DateTime = () => {
+    // const record = useRecordContext();
+    return (
+        <FunctionField
+            label="Date Time"
+            source="dateTime"
+            render={(record: Record<string, any>) => {
+                const date = parseISO(record?.dateTime);
+                const timezone = record?.timezone || 'America/Chicago';
+                return (
+                    format(date, 'yyyy-MM-dd HH:mm ', {
+                        in: tz(timezone),
+                    }) + tzName(timezone, date, 'short')
+                );
+            }}
+        />
+        // <DateField
+        //     showTime
+        //     source="dateTime"
+        //     options={{
+        //         timeZone: record?.timezone,
+        //         day: '2-digit',
+        //         month: '2-digit',
+        //         year: 'numeric',
+        //         hour: '2-digit',
+        //         minute: '2-digit',
+        //         hour12: false,
+        //         timeZoneName: 'short',
+        //     }}
+        // />
+    );
+};
 
 export const Empty = ({ assoc, children }: React.PropsWithChildren<{ assoc: string }>) => (
     <div>

@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
-import { raw } from '@mikro-orm/core';
+import { tz } from '@date-fns/tz';
+import { sql } from '@mikro-orm/core';
 import {
     matchPath,
     type ParamParseKey,
@@ -8,8 +9,7 @@ import {
 } from '@remix-run/router';
 import axios from 'axios';
 import { baseString, descriptions } from 'common';
-import { isValid, parseISO } from 'date-fns';
-import { formatInTimeZone } from 'date-fns-tz';
+import { isValid, parse } from 'date-fns';
 import * as dotenv from 'dotenv';
 import { bind, startCase } from 'lodash-es';
 import orm from './database.js';
@@ -211,23 +211,51 @@ export const getMetaFromPathAndSanitize = async (
                     description: descriptions[type] as string,
                 };
             }
-            const date = parseISO(eventISO);
+            const date = parse(eventISO, `yyyyMMdd'T'HHmmss'Z'`, new Date(), {
+                in: tz('utc'),
+            });
             if (!isValid(date)) {
                 throw new MatchException(eventISO);
             }
-            const event = await orm.em.findOne(Calendar, {
-                [raw('date_time::date')]: date.toISOString(),
-            });
-            if (event === null) {
-                throw new MatchException(eventISO);
-            }
+            const em = orm.em.fork();
+            const event = await em.findOneOrFail(
+                Calendar,
+                {
+                    dateTime: sql`${date}::timestamptz`,
+                },
+                {
+                    failHandler: () => {
+                        throw new MatchException(eventISO);
+                    },
+                },
+            );
+            console.log(
+                new Intl.DateTimeFormat('en-US', {
+                    weekday: 'short',
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    timeZoneName: 'short',
+                    timeZone: event.timezone,
+                }).format(event.dateTime),
+            );
             return {
-                title: `${baseString}Schedule | ${formatInTimeZone(
-                    event.dateTime,
-                    event.timezone,
-                    'EEE, MMMM dd, yyyy, h:mmaaa z',
-                )}`,
-                description: `${event.name} | ${event.location}`,
+                title: `${baseString}Schedule | ${new Intl.DateTimeFormat(
+                    'en-US',
+                    {
+                        weekday: 'short',
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        timeZoneName: 'short',
+                        timeZone: event.timezone,
+                    },
+                ).format(event.dateTime)}`,
+                description: `Event Details: ${event.name} | ${event.location}`,
             };
         } catch (e) {
             return {

@@ -28,6 +28,7 @@
         "typescript": "^5.9.3"
     },
     "dependencies": {
+        "@date-fns/tz": "^1.4.1",
         "@googlemaps/google-maps-services-js": "^3.4.2",
         "@mikro-orm/core": "^6.6.2",
         "@mikro-orm/postgresql": "^6.6.2",
@@ -43,7 +44,6 @@
         "cookie-parser": "^1.4.7",
         "cors": "^2.8.5",
         "date-fns": "4.1.0",
-        "date-fns-tz": "^3.2.0",
         "dotenv": "^17.2.3",
         "exifreader": "^4.33.1",
         "express": "^5.2.1",
@@ -61,7 +61,7 @@
         "pino": "^10.1.0",
         "pino-http": "^11.0.0",
         "pino-std-serializers": "^7.0.0",
-        "qs": "^6.14.0",
+        "qs": "^6.14.1",
         "reflect-metadata": "^0.2.2",
         "serve-favicon": "^2.5.1",
         "sharp": "^0.34.5",

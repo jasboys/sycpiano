@@ -1,7 +1,6 @@
 import styled from '@emotion/styled';
 import { arrow, offset, useFloating } from '@floating-ui/react-dom';
 import { parseISO } from 'date-fns';
-import { formatInTimeZone } from 'date-fns-tz';
 import { startCase } from 'lodash-es';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
@@ -23,7 +22,11 @@ import { latoFont } from 'src/styles/fonts.js';
 import { cardShadow } from 'src/styles/mixins.js';
 import { fadeOnEnter, fadeOnExit, titleStringBase } from 'src/utils.js';
 import { ShareIconInstance } from './ShareIconSVG.jsx';
-import type { EventItem as EventItemType, EventListName, EventType } from './types.js';
+import type {
+    EventItem as EventItemType,
+    EventListName,
+    EventType,
+} from './types.js';
 
 const eventPictureFallbackMap: Record<EventType, string> = {
     concerto: staticImage('/gallery/thumbnails/cip_5.jpg'),
@@ -185,39 +188,49 @@ const EventItem: React.FC<EventItemProps> = ({
     imageUrl,
 }) => {
     const arrowRef = React.useRef<HTMLDivElement | null>(null);
+    const [showTooltip, setShowTooltip] = React.useState(false);
     const [shared, setShared] = React.useState<
         'shared' | 'copied' | undefined
     >();
     const {
         x,
         y,
-        refs: { reference, floating },
+        refs: { setReference, setFloating, floating },
         strategy,
         middlewareData,
     } = useFloating<SVGSVGElement>({
         placement: 'right',
-        middleware: [offset(4), arrow({ element: arrowRef })],
+        middleware: [offset(12), arrow({ element: arrowRef })],
     });
+
+    console.log(strategy, x, y, middlewareData);
 
     const onClick = React.useCallback(
         async (ev: React.MouseEvent<HTMLButtonElement>) => {
             ev.preventDefault();
+            const formattedDate = new Intl.DateTimeFormat('en-US', {
+                weekday: 'short',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                timeZoneName: 'short',
+                timeZone: timezone,
+            }).format(parseISO(dateTime));
             const shareData: ShareData = {
-                title: `${titleStringBase}Event | ${formatInTimeZone(
-                    parseISO(dateTime),
-                    timezone,
-                    'EEE, MMMM dd, yyyy, h:mmaaa z',
-                )}`,
-                text: name,
+                title: `${titleStringBase}Event`,
+                text: `${name} | ${location} | ${formattedDate}`,
                 url: window.location.host + permaLink,
             };
-            console.log(navigator);
+            console.log(shareData);
             try {
                 if (window.navigator.canShare(shareData)) {
                     await window.navigator.share(shareData);
                     setShared('shared');
+                    setShowTooltip(true);
                     setTimeout(() => {
-                        setShared(undefined);
+                        setShowTooltip(false);
                     }, 2000);
                 }
             } catch (_e) {
@@ -225,12 +238,13 @@ const EventItem: React.FC<EventItemProps> = ({
                     `${window.location.protocol}//${window.location.host}${permaLink}`,
                 );
                 setShared('copied');
+                setShowTooltip(true);
                 setTimeout(() => {
-                    setShared(undefined);
+                    setShowTooltip(false);
                 }, 2000);
             }
         },
-        [permaLink],
+        [permaLink, name, dateTime, timezone],
     );
 
     const src = imageUrl || eventPictureFallbackMap[type];
@@ -283,13 +297,21 @@ const EventItem: React.FC<EventItemProps> = ({
                         <StyledShareIcon
                             width={36}
                             height={36}
-                            ref={reference}
+                            ref={setReference}
                         />
                     </button>
                     <Transition
-                        in={!!shared}
-                        onEnter={fadeOnEnter(floating as React.RefObject<HTMLDivElement>, 0, 0.15)}
-                        onExit={fadeOnExit(floating as React.RefObject<HTMLDivElement>, 0, 0.15)}
+                        in={!!showTooltip}
+                        onEnter={fadeOnEnter(
+                            floating as React.RefObject<HTMLDivElement>,
+                            0,
+                            0.15,
+                        )}
+                        onExit={fadeOnExit(
+                            floating as React.RefObject<HTMLDivElement>,
+                            0,
+                            0.15,
+                        )}
                         timeout={250}
                         mountOnEnter={true}
                         unmountOnExit={true}
@@ -299,9 +321,7 @@ const EventItem: React.FC<EventItemProps> = ({
                             x={x ?? 0}
                             y={y ?? 0}
                             strategy={strategy}
-                            ref={
-                                floating as React.RefObject<HTMLDivElement>
-                            }
+                            ref={setFloating}
                         >
                             <Arrow
                                 y={middlewareData.arrow?.y ?? 0}

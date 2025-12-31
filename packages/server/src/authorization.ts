@@ -128,7 +128,6 @@ authRouter.post('/register', async (req, res) => {
 authRouter.post('/login', async (req, res) => {
     const { username, password }: { username: string; password: string } =
         req.body;
-    console.log(req.body);
     try {
         // We will check for email validation on front-end as well
         // But just in case someone sends a POST not from front-end
@@ -139,8 +138,6 @@ authRouter.post('/login', async (req, res) => {
         const user = await orm.em.findOneOrFail(User, {
             $and: [{ username }, { role: ['admin', 'readonly'] }],
         });
-
-        console.log(user);
 
         if (!user.passHash || !user.username) {
             throw new Error('password empty');

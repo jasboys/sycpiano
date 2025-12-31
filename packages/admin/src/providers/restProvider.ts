@@ -1,5 +1,6 @@
+import { tz, tzName } from '@date-fns/tz';
 import axios from 'axios';
-import { formatInTimeZone } from 'date-fns-tz';
+import { format, parseISO } from 'date-fns';
 import {
     type DataProvider,
     type GetListResult,
@@ -25,6 +26,7 @@ const provider = (apiUrl: string): AdminProvider => {
     });
 
     return {
+        supportAbortSignal: true,
         getList: async (resource, params) => {
             const { page, perPage } = params.pagination ?? {};
             const { field, order } = params.sort ?? {};
@@ -52,6 +54,7 @@ const provider = (apiUrl: string): AdminProvider => {
                         JSON.stringify([rangeStart, rangeEnd]),
                     filter: JSON.stringify(params.filter),
                 },
+                signal: params.signal,
             });
 
             if (!headers?.['x-total-count']) {
@@ -65,6 +68,9 @@ const provider = (apiUrl: string): AdminProvider => {
         getOne: async (resource, params) => {
             const { data } = await axiosInstance.get(
                 `/${resource}/${params.id}`,
+                {
+                    signal: params.signal,
+                },
             );
             return {
                 data,
@@ -76,6 +82,7 @@ const provider = (apiUrl: string): AdminProvider => {
                     filter: {
                         id: params.ids,
                     },
+                    signal: params.signal,
                 },
             });
             return {
@@ -104,6 +111,7 @@ const provider = (apiUrl: string): AdminProvider => {
                         ...params.filter,
                         [params.target]: params.id,
                     }),
+                    signal: params.signal,
                 },
             });
             if (!headers?.['x-total-count']) {
@@ -392,7 +400,6 @@ const provider = (apiUrl: string): AdminProvider => {
                     'Called on a resource that is not programs',
                 );
             }
-            console.log(params);
             const { data } = await axiosInstance.post(
                 `/actions/${resource}/extract`,
                 {
@@ -406,6 +413,52 @@ const provider = (apiUrl: string): AdminProvider => {
             );
             return {
                 data,
+            };
+        },
+
+        importProgram: async (
+            resource: string,
+            params: { calId: Identifier; progId: Identifier },
+        ) => {
+            if (resource !== 'programs') {
+                return Promise.reject(
+                    'Called on a resource that is not programs',
+                );
+            }
+            const { data } = await axiosInstance.post(
+                `/actions/${resource}/import`,
+                {
+                    calendarId: params.calId,
+                    programId: params.progId,
+                },
+                {
+                    headers: {
+                        'X-CSRF-TOKEN': 'admin',
+                    },
+                },
+            );
+            return {
+                data,
+            };
+        },
+
+        duplicate: async (resource: string, { id }: { id: Identifier }) => {
+            if (resource !== 'calendars') {
+                return Promise.reject(
+                    'Called on a resource that is not calendars',
+                );
+            }
+            const { data } = await axiosInstance.post(
+                `/actions/${resource}/duplicate`,
+                { id },
+                {
+                    headers: {
+                        'X-CSRF-TOKEN': 'admin',
+                    },
+                },
+            );
+            return {
+                data: data.calendar,
             };
         },
     };
@@ -449,6 +502,14 @@ export interface AdminProvider<ResourceType extends string = string>
         resource: string,
         params: { id: Identifier; nickname?: string },
     ) => Promise<GetOneResult<RecordType>>;
+    importProgram: <RecordType extends RaRecord>(
+        resource: string,
+        params: { calId: Identifier; progId: Identifier },
+    ) => Promise<GetOneResult<RecordType>>;
+    duplicate: <RecordType extends RaRecord>(
+        resource: string,
+        params: { id: Identifier },
+    ) => Promise<GetOneResult<RecordType>>;
 }
 
 export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
@@ -480,13 +541,13 @@ export const providerWithLifecycleCallbacks = withLifecycleCallbacks(
                 };
             },
             afterRead: async (record, _dataProvider) => {
+                const date = parseISO(record?.dateTime);
+                const timezone = record?.timezone || 'America/Chicago';
                 return {
                     ...record,
-                    dateTimeInput: formatInTimeZone(
-                        record.dateTime,
-                        record.timezone || 'America/Chicago',
-                        'yyyy-MM-dd HH:mm',
-                    ),
+                    dateTimeInput: format(date, 'yyyy-MM-dd HH:mm', {
+                        in: tz(timezone),
+                    }),
                 };
             },
         },

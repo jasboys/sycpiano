@@ -1,7 +1,6 @@
 import IconMerge from '@mui/icons-material/Merge';
 import { Box } from '@mui/material';
 import { useMutation } from '@tanstack/react-query';
-import { formatInTimeZone } from 'date-fns-tz';
 import {
     ArrayField,
     Button,
@@ -36,7 +35,7 @@ import {
 } from 'react-admin';
 import { useAppDataProvider } from 'src/providers/restProvider.js';
 import type { AdminError } from 'src/types.js';
-import { TrimButton } from '../Shared.jsx';
+import { DateTime, TrimButton } from '../Shared.jsx';
 
 const filters = [<SearchInput key="search" source="q" alwaysOn />];
 
@@ -91,16 +90,7 @@ const ExpandPanel = () => {
                     bulkActionButtons={false}
                 >
                     <TextField source="name" />
-                    <FunctionField
-                        label="Date Time"
-                        render={(record: Record<string, any>) =>
-                            formatInTimeZone(
-                                record?.dateTime,
-                                record?.timezone || 'America/Chicago',
-                                'yyyy-MM-dd HH:mm zzz',
-                            )
-                        }
-                    />
+                    <DateTime />
                     <NumberField label="Order" source="calendarPiece.order" />
                 </Datagrid>
             </ArrayField>

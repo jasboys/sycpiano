@@ -12,7 +12,7 @@ import {
     useRecordContext,
     useRefresh,
 } from 'react-admin';
-import { useFormContext, useFormState } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import { useAppDataProvider } from '../../providers/restProvider.js';
 import type { MutateForm } from '../../types.js';
 

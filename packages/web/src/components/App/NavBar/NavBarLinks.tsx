@@ -2,7 +2,10 @@ import { css } from '@emotion/react';
 import * as React from 'react';
 import { links } from 'src/components/App/NavBar/links';
 import NavBarLink from 'src/components/App/NavBar/NavBarLink';
-import type { LinkShape, NavBarLinksProps } from 'src/components/App/NavBar/types';
+import type {
+    LinkShape,
+    NavBarLinksProps,
+} from 'src/components/App/NavBar/types';
 import { toMedia } from 'src/mediaQuery';
 import { hiDpx } from 'src/screens';
 import { noHighlight, pushedHelper } from 'src/styles/mixins';
@@ -65,36 +68,40 @@ const styles = {
     }),
 };
 
-const NavBarLinks = React.forwardRef<HTMLDivElement, NavBarLinksProps>(({
-    specificPath,
-    currentBasePath,
-    isHamburger,
-}, ref) => (
-    <div
-        ref={ref}
-        css={[
-            styles.linkBase,
-            isHamburger && styles.linkHamburger,
-            isHamburger && specificPath === '' && styles.linkHamburgerHome,
-        ]}
-    >
-        <ul css={[styles.ul, isHamburger && styles.ulHamburger]}>
-            {links.map((link: LinkShape) => {
-                return (
-                    <NavBarLink
-                        key={link.path}
-                        link={link}
-                        subNavLinks={link.subLinks}
-                        active={link.path === currentBasePath}
-                        currentSpecificPath={specificPath}
-                        isHome={specificPath === ''}
-                        isHamburger={isHamburger}
-                    />
-                );
-            })}
-        </ul>
-    </div>
-));
+const NavBarLinks = React.forwardRef<HTMLDivElement, NavBarLinksProps>(
+    ({ specificPath, currentBasePath, isHamburger }, ref) => {
+        return (
+            <div
+                ref={ref}
+                css={[
+                    styles.linkBase,
+                    isHamburger && styles.linkHamburger,
+                    isHamburger &&
+                        specificPath === '' &&
+                        styles.linkHamburgerHome,
+                ]}
+            >
+                <ul css={[styles.ul, isHamburger && styles.ulHamburger]}>
+                    {links.map((link: LinkShape) => {
+                        console.log(link, currentBasePath);
+
+                        return (
+                            <NavBarLink
+                                key={link.path}
+                                link={link}
+                                subNavLinks={link.subLinks}
+                                active={link.path === currentBasePath}
+                                currentSpecificPath={specificPath}
+                                isHome={specificPath === ''}
+                                isHamburger={isHamburger}
+                            />
+                        );
+                    })}
+                </ul>
+            </div>
+        );
+    },
+);
 
 const MemoizedLinks = React.memo(NavBarLinks, (prev, next) => {
     return (
