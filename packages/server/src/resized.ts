@@ -23,7 +23,7 @@ resized.get(
         res,
     ) => {
         try {
-            let imgPath = req.params.images[0];
+            let imgPath = req.params.images.join('/');
             if (!imgPath) {
                 res.status(404).end();
             }
@@ -56,7 +56,7 @@ resized.get(
                     console.error(e);
                 }
             } else {
-                const parsedPath = path.parse(req.params.images[0]);
+                const parsedPath = path.parse(req.params.images.join('/'));
                 const width = w ? `w${w}` : '';
                 const height = h ? `h${h}` : '';
                 const filename = `${parsedPath.name}.${width}${height}${parsedPath.ext}`;
