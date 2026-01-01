@@ -1,5 +1,4 @@
 import { css } from '@emotion/react';
-import { parseISO } from 'date-fns';
 import type * as React from 'react';
 
 import type { AcclaimItemShape } from 'src/components/About/Press/types';
@@ -39,8 +38,6 @@ const AcclaimsListItem: React.FC<AcclaimsListItemProps> = ({ acclaim }) => (
             <div css={styles.quote}>{acclaim.quote}</div>
             <Author
                 author={acclaim.author}
-                date={parseISO(acclaim.date)}
-                hasFullDate={acclaim.hasFullDate}
                 website={acclaim.website}
             />
         </div>

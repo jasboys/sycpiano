@@ -1,12 +1,9 @@
 import { css } from '@emotion/react';
-import { format } from 'date-fns';
 import { logoBlue } from 'src/styles/colors.js';
 import { latoFont } from 'src/styles/fonts.js';
 
 interface AuthorProps {
     author: string;
-    date: Date;
-    hasFullDate: boolean;
     website?: string;
     className?: string;
 }
@@ -52,8 +49,6 @@ const styles = {
 
 export const Author: React.FC<AuthorProps> = ({
     author,
-    date,
-    hasFullDate,
     website,
 }) => {
     const Tag = website ? 'a' : 'span';
@@ -69,13 +64,6 @@ export const Author: React.FC<AuthorProps> = ({
         <div css={styles.container}>
             <Tag {...attributes}>
                 <span>{`— ${author} `}</span>
-                {/* <span css={{ display: 'inline-block' }}>
-                    {`(${
-                        hasFullDate
-                            ? format(date, 'MMMM dd, yyyy')
-                            : format(date, 'MMMM yyyy')
-                    })`}
-                </span> */}
             </Tag>
         </div>
     );
