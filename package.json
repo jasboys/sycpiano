@@ -21,7 +21,7 @@
     },
     "packageManager": "yarn@4.11.0",
     "engines": {
-        "node": ">=16.0.0"
+        "node": ">=20.0.0"
     },
     "dependencies": {
         "cross-env": "^10.1.0",

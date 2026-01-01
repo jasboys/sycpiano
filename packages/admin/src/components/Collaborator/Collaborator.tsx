@@ -11,7 +11,6 @@ import {
     Edit,
     type EditProps,
     FilterButton,
-    FunctionField,
     type GetOneResult,
     type Identifier,
     List,
