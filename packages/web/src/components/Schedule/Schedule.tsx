@@ -59,7 +59,7 @@ const Schedule: React.FC<ScheduleProps> = ({ type }) => {
         <ScheduleContainer>
             {!isHamburger && <TypeDisplay type={type} />}
 
-            <Search />
+            <Search searchQ={searchQ} />
             <div css={css({ height: '100%' })}>
                 <SwitchTransition>
                     <Transition

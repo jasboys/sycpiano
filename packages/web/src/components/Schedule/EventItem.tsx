@@ -203,8 +203,6 @@ const EventItem: React.FC<EventItemProps> = ({
         middleware: [offset(12), arrow({ element: arrowRef })],
     });
 
-    console.log(strategy, x, y, middlewareData);
-
     const onClick = React.useCallback(
         async (ev: React.MouseEvent<HTMLButtonElement>) => {
             ev.preventDefault();

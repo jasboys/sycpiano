@@ -83,8 +83,6 @@ const NavBarLinks = React.forwardRef<HTMLDivElement, NavBarLinksProps>(
             >
                 <ul css={[styles.ul, isHamburger && styles.ulHamburger]}>
                     {links.map((link: LinkShape) => {
-                        console.log(link, currentBasePath);
-
                         return (
                             <NavBarLink
                                 key={link.path}

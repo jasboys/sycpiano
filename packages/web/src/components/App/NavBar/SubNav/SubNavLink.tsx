@@ -88,7 +88,6 @@ const SubNavLink: React.FC<SubNavLinkProps> = ({
     isHome,
     currentSpecificPath,
 }) => {
-    console.log(link, currentSpecificPath);
     const isActive = link.name === currentSpecificPath;
     return (
         <li css={noHighlight} className={basePath.name}>

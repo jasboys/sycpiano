@@ -341,7 +341,7 @@ export const EventList: React.FC<{ type: EventListName; searchQ?: string }> = ({
                         });
                 }}
             >
-                {eventItemsLength ? (
+                {eventItemsLength !== 0 ? (
                     eventItems.monthGroups.map((monthGroup, idx) => (
                         <MonthEvents
                             key={monthGroup.dateTime}

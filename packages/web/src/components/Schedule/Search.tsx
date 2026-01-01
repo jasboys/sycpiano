@@ -8,7 +8,6 @@ import {
     useLocation,
     useMatch,
     useNavigate,
-    useSearchParams,
 } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
 
@@ -26,6 +25,7 @@ const unfocusedGray = rgba(180, 180, 180, 0.4);
 
 type SearchProps = {
     className?: string;
+    searchQ?: string;
 };
 
 const ResultsContainer = styled.div(latoFont(200), {
@@ -196,19 +196,16 @@ const SubmitButton = styled.button<{ dirty: boolean; expanded: boolean }>(
     }),
 );
 
-export const Search: React.FC<SearchProps> = () => {
+export const Search: React.FC<SearchProps> = ({ searchQ }) => {
     const inputRef = React.useRef<HTMLDivElement>(null);
     const lastQuery = useAtomValue(scheduleAtoms.lastQuery);
     const isFetching = useAtomValue(scheduleAtoms.isFetching);
     const itemsLength = useAtomValue(scheduleAtoms.itemsLength.search);
     const screenXS = useAtomValue(mediaQueriesAtoms.screenXS);
-    const [searchParams] = useSearchParams();
     const [focused, setFocused] = React.useState(false);
     const match = useMatch('/schedule/search');
-    const [showCancel, setShowCancel] = React.useState(!!searchParams.get('q'));
-    const [expanded, setExpanded] = React.useState(
-        screenXS || !!searchParams.get('q'),
-    );
+    const [showCancel, setShowCancel] = React.useState(!!searchQ);
+    const [expanded, setExpanded] = React.useState(screenXS || !!searchQ);
     const {
         register,
         handleSubmit,
@@ -219,7 +216,7 @@ export const Search: React.FC<SearchProps> = () => {
         setValue,
     } = useForm<{ search: string }>({
         defaultValues: {
-            search: searchParams.get('q') ?? '',
+            search: searchQ ?? '',
         },
     });
 
@@ -293,13 +290,16 @@ export const Search: React.FC<SearchProps> = () => {
     }, [expanded]);
 
     React.useEffect(() => {
-        const q = searchParams.get('q');
-        if (!q || q === '') {
-            !screenXS && setExpanded(false);
-        } else {
-            setValue('search', searchParams.get('q') ?? '');
+        if (screenXS) {
+            setExpanded(true);
+            return;
         }
-    }, [searchParams, setValue, screenXS]);
+        if (!searchQ || searchQ === '') {
+            setExpanded(false);
+            return;
+        }
+        setValue('search', searchQ ?? '');
+    }, [searchQ, setValue, screenXS, setExpanded]);
 
     // Remember, flex-direction is row reverse inside the Container
     return (
@@ -325,10 +325,7 @@ export const Search: React.FC<SearchProps> = () => {
                     unmountOnExit={false}
                     nodeRef={inputRef}
                 >
-                    <InputGroup
-                        ref={inputRef}
-                        isMobile={screenXS || !!searchParams.get('q')}
-                    >
+                    <InputGroup ref={inputRef} isMobile={screenXS || !!searchQ}>
                         <Span focused={focused}>
                             <Input
                                 id="search"
