@@ -2953,6 +2953,15 @@ const RAW_RUNTIME_STATE =
         "linkType": "HARD"\
       }]\
     ]],\
+    ["@dmsnell/diff-match-patch", [\
+      ["npm:1.1.0", {\
+        "packageLocation": "./.yarn/cache/@dmsnell-diff-match-patch-npm-1.1.0-021308d314-fe4127b57a.zip/node_modules/@dmsnell/diff-match-patch/",\
+        "packageDependencies": [\
+          ["@dmsnell/diff-match-patch", "npm:1.1.0"]\
+        ],\
+        "linkType": "HARD"\
+      }]\
+    ]],\
     ["@emnapi/runtime", [\
       ["npm:1.7.0", {\
         "packageLocation": "./.yarn/cache/@emnapi-runtime-npm-1.7.0-c1c3f435d1-4dc726eb42.zip/node_modules/@emnapi/runtime/",\
@@ -7157,20 +7166,20 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["brace-expansion", [\
-      ["npm:1.1.11", {\
-        "packageLocation": "./.yarn/cache/brace-expansion-npm-1.1.11-fb95eb05ad-faf34a7bb0.zip/node_modules/brace-expansion/",\
+      ["npm:1.1.12", {\
+        "packageLocation": "./.yarn/cache/brace-expansion-npm-1.1.12-329e9ad7a1-12cb6d6310.zip/node_modules/brace-expansion/",\
         "packageDependencies": [\
           ["balanced-match", "npm:1.0.2"],\
-          ["brace-expansion", "npm:1.1.11"],\
+          ["brace-expansion", "npm:1.1.12"],\
           ["concat-map", "npm:0.0.1"]\
         ],\
         "linkType": "HARD"\
       }],\
-      ["npm:2.0.1", {\
-        "packageLocation": "./.yarn/cache/brace-expansion-npm-2.0.1-17aa2616f9-a61e7cd2e8.zip/node_modules/brace-expansion/",\
+      ["npm:2.0.2", {\
+        "packageLocation": "./.yarn/cache/brace-expansion-npm-2.0.2-bc7f134bbc-01dff195e3.zip/node_modules/brace-expansion/",\
         "packageDependencies": [\
           ["balanced-match", "npm:1.0.2"],\
-          ["brace-expansion", "npm:2.0.1"]\
+          ["brace-expansion", "npm:2.0.2"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -7361,17 +7370,6 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/caniuse-lite-npm-1.0.30001761-a0289502a7-9ebcef209a.zip/node_modules/caniuse-lite/",\
         "packageDependencies": [\
           ["caniuse-lite", "npm:1.0.30001761"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["chalk", [\
-      ["npm:3.0.0", {\
-        "packageLocation": "./.yarn/cache/chalk-npm-3.0.0-e813208025-37f90b31fd.zip/node_modules/chalk/",\
-        "packageDependencies": [\
-          ["ansi-styles", "npm:4.3.0"],\
-          ["chalk", "npm:3.0.0"],\
-          ["supports-color", "npm:7.2.0"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -8198,15 +8196,6 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/diacritic-npm-0.0.2-6aa0c73fba-baaaa92c05.zip/node_modules/diacritic/",\
         "packageDependencies": [\
           ["diacritic", "npm:0.0.2"]\
-        ],\
-        "linkType": "HARD"\
-      }]\
-    ]],\
-    ["diff-match-patch", [\
-      ["npm:1.0.5", {\
-        "packageLocation": "./.yarn/cache/diff-match-patch-npm-1.0.5-f715ad1381-fd1ab417eb.zip/node_modules/diff-match-patch/",\
-        "packageDependencies": [\
-          ["diff-match-patch", "npm:1.0.5"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -9472,7 +9461,7 @@ const RAW_RUNTIME_STATE =
           ["google-auth-library", "npm:10.5.0"],\
           ["google-logging-utils", "npm:1.1.3"],\
           ["gtoken", "npm:8.0.0"],\
-          ["jws", "npm:4.0.0"]\
+          ["jws", "npm:4.0.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -9519,7 +9508,7 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["gaxios", "npm:7.1.3"],\
           ["gtoken", "npm:8.0.0"],\
-          ["jws", "npm:4.0.0"]\
+          ["jws", "npm:4.0.1"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10413,7 +10402,7 @@ const RAW_RUNTIME_STATE =
           ["javascript-stringify", "npm:2.1.0"],\
           ["jotai", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:2.16.1"],\
           ["jotai-devtools", "virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:0.13.0"],\
-          ["jsondiffpatch", "npm:0.5.0"],\
+          ["jsondiffpatch", "npm:0.7.3"],\
           ["react", "npm:19.2.3"],\
           ["react-base16-styling", "npm:0.9.1"],\
           ["react-dom", "virtual:94de940a12aebd19f10e0a5b5702e435ff38d3f2a1b8621121e35f085410d4e466a0d0951ce6ee0822f9dc2cc191756fd20ef02eac83de5ee242939c7842ffa5#npm:19.2.3"],\
@@ -10574,12 +10563,11 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["jsondiffpatch", [\
-      ["npm:0.5.0", {\
-        "packageLocation": "./.yarn/cache/jsondiffpatch-npm-0.5.0-e0c1d35c06-ad223d6be7.zip/node_modules/jsondiffpatch/",\
+      ["npm:0.7.3", {\
+        "packageLocation": "./.yarn/cache/jsondiffpatch-npm-0.7.3-5579555f56-c7ad8f63c4.zip/node_modules/jsondiffpatch/",\
         "packageDependencies": [\
-          ["chalk", "npm:3.0.0"],\
-          ["diff-match-patch", "npm:1.0.5"],\
-          ["jsondiffpatch", "npm:0.5.0"]\
+          ["@dmsnell/diff-match-patch", "npm:1.1.0"],\
+          ["jsondiffpatch", "npm:0.7.3"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -10605,23 +10593,23 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["jwa", [\
-      ["npm:2.0.0", {\
-        "packageLocation": "./.yarn/cache/jwa-npm-2.0.0-52a7c3f1ca-ab983f6685.zip/node_modules/jwa/",\
+      ["npm:2.0.1", {\
+        "packageLocation": "./.yarn/cache/jwa-npm-2.0.1-9ebe28a626-b04312a1de.zip/node_modules/jwa/",\
         "packageDependencies": [\
           ["buffer-equal-constant-time", "npm:1.0.1"],\
           ["ecdsa-sig-formatter", "npm:1.0.11"],\
-          ["jwa", "npm:2.0.0"],\
+          ["jwa", "npm:2.0.1"],\
           ["safe-buffer", "npm:5.2.1"]\
         ],\
         "linkType": "HARD"\
       }]\
     ]],\
     ["jws", [\
-      ["npm:4.0.0", {\
-        "packageLocation": "./.yarn/cache/jws-npm-4.0.0-2a24fd53b9-1d15f4cdea.zip/node_modules/jws/",\
+      ["npm:4.0.1", {\
+        "packageLocation": "./.yarn/cache/jws-npm-4.0.1-0d8c257cbe-75d7b15748.zip/node_modules/jws/",\
         "packageDependencies": [\
-          ["jwa", "npm:2.0.0"],\
-          ["jws", "npm:4.0.0"],\
+          ["jwa", "npm:2.0.1"],\
+          ["jws", "npm:4.0.1"],\
           ["safe-buffer", "npm:5.2.1"]\
         ],\
         "linkType": "HARD"\
@@ -11055,7 +11043,7 @@ const RAW_RUNTIME_STATE =
       ["npm:3.1.2", {\
         "packageLocation": "./.yarn/cache/minimatch-npm-3.1.2-9405269906-e0b25b04cd.zip/node_modules/minimatch/",\
         "packageDependencies": [\
-          ["brace-expansion", "npm:1.1.11"],\
+          ["brace-expansion", "npm:1.1.12"],\
           ["minimatch", "npm:3.1.2"]\
         ],\
         "linkType": "HARD"\
@@ -11063,7 +11051,7 @@ const RAW_RUNTIME_STATE =
       ["npm:5.1.6", {\
         "packageLocation": "./.yarn/cache/minimatch-npm-5.1.6-1e71429f4c-126b36485b.zip/node_modules/minimatch/",\
         "packageDependencies": [\
-          ["brace-expansion", "npm:2.0.1"],\
+          ["brace-expansion", "npm:2.0.2"],\
           ["minimatch", "npm:5.1.6"]\
         ],\
         "linkType": "HARD"\
@@ -11071,7 +11059,7 @@ const RAW_RUNTIME_STATE =
       ["npm:9.0.5", {\
         "packageLocation": "./.yarn/cache/minimatch-npm-9.0.5-9aa93d97fa-dd6a8927b0.zip/node_modules/minimatch/",\
         "packageDependencies": [\
-          ["brace-expansion", "npm:2.0.1"],\
+          ["brace-expansion", "npm:2.0.2"],\
           ["minimatch", "npm:9.0.5"]\
         ],\
         "linkType": "HARD"\
@@ -14329,14 +14317,6 @@ const RAW_RUNTIME_STATE =
         "packageDependencies": [\
           ["has-flag", "npm:3.0.0"],\
           ["supports-color", "npm:5.5.0"]\
-        ],\
-        "linkType": "HARD"\
-      }],\
-      ["npm:7.2.0", {\
-        "packageLocation": "./.yarn/cache/supports-color-npm-7.2.0-606bfcf7da-c8bb7afd56.zip/node_modules/supports-color/",\
-        "packageDependencies": [\
-          ["has-flag", "npm:4.0.0"],\
-          ["supports-color", "npm:7.2.0"]\
         ],\
         "linkType": "HARD"\
       }],\

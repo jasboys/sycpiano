@@ -1,4 +1,4 @@
-import { tz, tzName } from '@date-fns/tz';
+import { tz } from '@date-fns/tz';
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
 import {

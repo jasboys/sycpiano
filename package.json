@@ -31,5 +31,11 @@
     "devDependencies": {
         "@biomejs/biome": "2.3.10",
         "nodemon": "^3.1.11"
+    },
+    "resolutions": {
+        "minimatch@npm:3.1.2/brace-expansion": "^1.1.12",
+        "minimatch@npm:5.1.6/brace-expansion": "^2.0.2",
+        "jsondiffpatch": "^0.7.2",
+        "jws": "^4.0.1"
     }
 }
