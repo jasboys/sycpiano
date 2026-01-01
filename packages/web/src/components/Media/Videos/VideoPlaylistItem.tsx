@@ -1,6 +1,11 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
-import { addMilliseconds, format, intervalToDuration, parseISO } from 'date-fns';
+import {
+    addMilliseconds,
+    format,
+    intervalToDuration,
+    parseISO,
+} from 'date-fns';
 import parseDuration from 'parse-iso-duration';
 import { lighten } from 'polished';
 import type * as React from 'react';
@@ -155,7 +160,7 @@ const TextBottom = styled.span(h4style, latoFont(400), {
         textAlign: 'left',
         [toMedia(screenXS)]: {
             textAlign: 'right',
-        }
+        },
     },
 });
 

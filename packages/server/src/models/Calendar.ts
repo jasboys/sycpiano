@@ -1,3 +1,5 @@
+import { tz } from '@date-fns/tz';
+import type { EventArgs } from '@mikro-orm/core';
 import {
     AfterDelete,
     AfterUpdate,
@@ -11,8 +13,7 @@ import {
     PrimaryKey,
     Property,
 } from '@mikro-orm/core';
-import type { EventArgs } from '@mikro-orm/core';
-
+import { parse, startOfDay } from 'date-fns';
 import {
     createCalendarEvent,
     deleteCalendarEvent,
@@ -26,8 +27,6 @@ import { CalendarCollaborator } from './CalendarCollaborator.js';
 import { CalendarPiece } from './CalendarPiece.js';
 import { Collaborator } from './Collaborator.js';
 import { Piece } from './Piece.js';
-import { parse, startOfDay } from 'date-fns';
-import { fromZonedTime } from 'date-fns-tz';
 
 async function beforeCreateHook(args: EventArgs<Calendar>) {
     console.log('[Hook: BeforeCreate] Start');
@@ -46,8 +45,17 @@ async function beforeCreateHook(args: EventArgs<Calendar>) {
     }
     console.log(`[Hook: BeforeCreate] timezone: ${timezone}`);
 
+    console.log('[Hook: BeforeCreate] Fetching image url from tags');
+    if (!imageUrl && website) {
+        const fetchedImageUrl = await getImageFromMetaTag(website);
+        if (fetchedImageUrl !== '') {
+            args.entity.imageUrl = fetchedImageUrl;
+        }
+    }
+    console.log('[Hook: BeforeCreate] Finished image url from tags.');
+
     console.log('[Hook: BeforeCreate] Fetching photos from existing places');
-    if (location) {
+    if (location && !imageUrl) {
         try {
             const otherCal = await args.em.findOne(Calendar, {
                 $and: [
@@ -66,21 +74,16 @@ async function beforeCreateHook(args: EventArgs<Calendar>) {
     }
     console.log('[Hook: BeforeCreate] Done with Places');
 
-    console.log('[Hook: BeforeCreate] Fetching image url from tags');
-    if (!imageUrl && website) {
-        const fetchedImageUrl = await getImageFromMetaTag(website);
-        if (fetchedImageUrl !== '') {
-            args.entity.imageUrl = fetchedImageUrl;
-        }
-    }
-    console.log('[Hook: BeforeCreate] Finished image url from tags.');
-
     /* eslint-disable require-atomic-updates */
     args.entity.timezone = timezone;
     if (dateTimeInput) {
-        args.entity.dateTime = fromZonedTime(
-            parse(dateTimeInput, 'yyyy-MM-dd HH:mm', new Date()),
-            timezone,
+        args.entity.dateTime = parse(
+            dateTimeInput,
+            'yyyy-MM-dd HH:mm',
+            new Date(),
+            {
+                in: tz(timezone),
+            },
         );
     }
     /* eslint-enable require-atomic-updates */
@@ -134,10 +137,9 @@ async function beforeUpdateHook(args: EventArgs<Calendar>) {
 
     const newDateTime =
         dateTimeInput !== undefined
-            ? fromZonedTime(
-                  parse(dateTimeInput, 'yyyy-MM-dd HH:mm', new Date()),
-                  timezone,
-              )
+            ? parse(dateTimeInput, 'yyyy-MM-dd HH:mm', new Date(), {
+                  in: tz(timezone),
+              })
             : undefined;
 
     if (
@@ -148,8 +150,29 @@ async function beforeUpdateHook(args: EventArgs<Calendar>) {
         args.changeSet.entity.dateTime = newDateTime;
     }
 
-    if (locationChanged) {
-        console.log('[Hook: BeforeUpdate] Fetching photos from Places API');
+    if (
+        websiteChanged &&
+        !args.changeSet.entity.imageUrl &&
+        args.changeSet.entity.website
+    ) {
+        console.log('[Hook: BeforeUpdate] Fetching image url from tags');
+        const fetchedImageUrl = await getImageFromMetaTag(
+            args.changeSet.entity.website,
+        );
+        if (fetchedImageUrl !== '') {
+            args.changeSet.payload.imageUrl = fetchedImageUrl;
+            args.changeSet.entity.imageUrl = fetchedImageUrl;
+        }
+    }
+
+    if (
+        locationChanged &&
+        !args.changeSet.payload.imageUrl &&
+        !args.changeSet.entity.imageUrl
+    ) {
+        console.log(
+            '[Hook: BeforeUpdate] Fetching photos from existing places',
+        );
         try {
             const otherCal = await args.em.findOne(Calendar, {
                 $and: [
@@ -166,22 +189,9 @@ async function beforeUpdateHook(args: EventArgs<Calendar>) {
         } catch (e) {
             console.log(`[Hook: BeforeUpdate] ${e}`);
         }
-        console.log('[Hook: BeforeUpdate] Done with Places API');
-    }
-
-    if (
-        websiteChanged &&
-        !args.changeSet.entity.imageUrl &&
-        args.changeSet.entity.website
-    ) {
-        console.log('[Hook: BeforeUpdate] Fetching image url from tags');
-        const fetchedImageUrl = await getImageFromMetaTag(
-            args.changeSet.entity.website,
+        console.log(
+            '[Hook: BeforeUpdate] Done with photos from existing places',
         );
-        if (fetchedImageUrl !== '') {
-            args.changeSet.payload.imageUrl = fetchedImageUrl;
-            args.changeSet.entity.imageUrl = fetchedImageUrl;
-        }
     }
 
     console.log('[Hook: BeforeUpdate] End\n');
@@ -227,10 +237,13 @@ export class Calendar {
     endDate?: string;
 
     @Property({ columnType: 'text', nullable: true })
-    imageUrl?: string;
+    imageUrl?: string | null;
 
     @Property({ persist: false })
     dateTimeInput?: string;
+
+    @Property({ default: false })
+    hidden?: boolean;
 
     @OneToMany({
         entity: () => CalendarPiece,

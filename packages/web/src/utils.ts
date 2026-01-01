@@ -1,6 +1,6 @@
-import { gsap } from 'gsap';
 // import { gsap } from 'gsap'
 import { getAge as _getAge, baseString, descriptions } from 'common';
+import { gsap } from 'gsap';
 
 export interface FormattedLocationShape {
     venue: string;
@@ -45,13 +45,13 @@ export const validateEmail = (email: string): boolean => {
 };
 
 export const fadeOnEnter =
-    (delay = 0, duration = 0.25) =>
-    (element: HTMLElement, isEntering?: boolean): void => {
-        if (element) {
+    (ref: React.RefObject<HTMLDivElement | null>, delay = 0, duration = 0.25) =>
+    (isEntering?: boolean): void => {
+        if (ref.current) {
             // console.log('enter', element);
             // console.log(isEntering);
             gsap.fromTo(
-                element,
+                ref.current,
                 { autoAlpha: 0 },
                 {
                     autoAlpha: 1,
@@ -64,12 +64,12 @@ export const fadeOnEnter =
     };
 
 export const fadeOnExit =
-    (delay = 0, duration = 0.25) =>
-    (element: HTMLElement): void => {
-        if (element) {
+    (ref: React.RefObject<HTMLDivElement | null>, delay = 0, duration = 0.25) =>
+    (): void => {
+        if (ref.current) {
             // console.log('exit', element);
             gsap.fromTo(
-                element,
+                ref.current,
                 { autoAlpha: 1 },
                 { autoAlpha: 0, delay, duration, ease: 'power1.inOut' },
             );
@@ -77,11 +77,12 @@ export const fadeOnExit =
     };
 
 export const slideOnEnter =
-    (delay = 0, duration = 0.25) =>
-    (element: HTMLElement): void => {
-        if (element) {
+    (ref: React.RefObject<HTMLDivElement | null>, delay = 0, duration = 0.25) =>
+    (): void => {
+        console.log(ref.current);
+        if (ref.current) {
             gsap.fromTo(
-                element,
+                ref.current,
                 { autoAlpha: 1 },
                 {
                     y: '0%',
@@ -95,10 +96,15 @@ export const slideOnEnter =
     };
 
 export const slideOnExit =
-    (delay = 0, duration = 0.25) =>
-    (element: HTMLElement): void => {
-        if (element) {
-            gsap.to(element, { y: '-100%', delay, duration, force3D: true });
+    (ref: React.RefObject<HTMLDivElement | null>, delay = 0, duration = 0.25) =>
+    (): void => {
+        if (ref.current) {
+            gsap.to(ref.current, {
+                y: '-100%',
+                delay,
+                duration,
+                force3D: true,
+            });
         }
     };
 

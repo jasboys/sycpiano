@@ -1,23 +1,26 @@
 import styled from '@emotion/styled';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { focusAtom } from 'jotai-optics';
 import * as React from 'react';
-
 import CartButton from 'src/components/App/NavBar/CartButton';
 import HamburgerNav from 'src/components/App/NavBar/HamburgerNav';
 import NavBarLinks from 'src/components/App/NavBar/NavBarLinks';
 import NavBarLogo from 'src/components/App/NavBar/NavBarLogo';
+import { cartAtoms } from 'src/components/Cart/store';
 import { navBarHeight } from 'src/styles/variables';
-import { navBarStore } from './store.js';
-import { cartStore } from 'src/components/Cart/store.js';
-import { rootStore } from 'src/store.js';
+import { mediaQueriesBaseAtom } from '../store';
+import { navBarAtoms, navBarStore } from './store';
 
 const shopEnabled = JSON.parse(ENABLE_SHOP) === true;
 
-interface NavBarProps {
+type NavBarProps = {
     readonly currentBasePath: string;
     readonly delayedRouteBase: string;
     readonly className?: string;
     readonly specificRouteName: string;
-}
+    readonly anchorRef: React.RefObject<HTMLButtonElement | null>;
+    readonly navbarRef: React.RefObject<HTMLDivElement | null>;
+};
 
 const StyledNavBar = styled.div<{
     height: number;
@@ -81,56 +84,68 @@ menu: (portrait || dppx > 2 || (max-width: 1280 and orientation: landscape)) ? h
 
 */
 
-const NavBar = React.forwardRef<HTMLDivElement, NavBarProps>(
-    ({ currentBasePath, specificRouteName, delayedRouteBase }, ref) => {
-        const isExpanded = navBarStore.use.isExpanded();
-        const cartIsOpen = cartStore.use.visible();
-        const { isHamburger, hiDpx } = rootStore.mediaQueries.useTrackedStore();
-
-        React.useEffect(() => {
-            navBarStore.set.specificRouteName(specificRouteName ?? '');
-        }, [specificRouteName]);
-
-        React.useEffect(() => {
-            if (!isHamburger) {
-                navBarStore.set.toggleExpanded(false);
-            }
-        }, [isHamburger]);
-
-        const isHome = delayedRouteBase === '/';
-        return (
-            <StyledNavBar
-                isHome={isHome}
-                hiDpx={hiDpx}
-                isHamburger={isHamburger}
-                menuExpanded={isExpanded}
-                cartExpanded={cartIsOpen}
-                height={navBarHeight.get(hiDpx)}
-            >
-                <NavBarLogo
-                    isHome={isHome}
-                    isExpanded={isExpanded}
-                    specificRouteName={specificRouteName}
-                />
-                <StyledNavAndCart isHamburger={isHamburger}>
-                    {isHamburger ? (
-                        <HamburgerNav
-                            currentBasePath={currentBasePath}
-                            specificPath={specificRouteName}
-                            key="hamburger-nav"
-                        />
-                    ) : (
-                        <NavBarLinks
-                            currentBasePath={currentBasePath}
-                            specificPath={specificRouteName}
-                            isHamburger={false}
-                        />
-                    )}
-                    {shopEnabled && <CartButton isHome={isHome} ref={ref} />}
-                </StyledNavAndCart>
-            </StyledNavBar>
-        );
-    },
+const mediaQueries = focusAtom(mediaQueriesBaseAtom, (optic) =>
+    optic.pick(['isHamburger', 'hiDpx']),
 );
+
+const NavBar = ({
+    currentBasePath,
+    specificRouteName,
+    delayedRouteBase,
+    navbarRef,
+    anchorRef,
+}: NavBarProps) => {
+    // const [nvbr] = useAtom(navBarStore);
+    const [isExpanded, toggleExpanded] = useAtom(navBarAtoms.isExpanded);
+    const cartIsOpen = useAtomValue(cartAtoms.visible);
+    const { isHamburger, hiDpx } = useAtomValue(mediaQueries);
+    const setSpecificRouteName = useSetAtom(navBarAtoms.specificRouteName);
+
+    React.useEffect(() => {
+        setSpecificRouteName(specificRouteName ?? '');
+    }, [specificRouteName]);
+
+
+    React.useEffect(() => {
+        if (!isHamburger) {
+            toggleExpanded(false);
+        }
+    }, [isHamburger, toggleExpanded]);
+
+    const isHome = delayedRouteBase === '/';
+    return (
+        <StyledNavBar
+            isHome={isHome}
+            hiDpx={hiDpx}
+            isHamburger={isHamburger}
+            menuExpanded={isExpanded}
+            cartExpanded={cartIsOpen}
+            height={navBarHeight.get(hiDpx)}
+            ref={navbarRef}
+        >
+            <NavBarLogo
+                isHome={isHome}
+                isExpanded={isExpanded}
+                specificRouteName={specificRouteName}
+            />
+            <StyledNavAndCart isHamburger={isHamburger}>
+                {isHamburger ? (
+                    <HamburgerNav
+                        currentBasePath={currentBasePath}
+                        specificPath={specificRouteName}
+                        key="hamburger-nav"
+                    />
+                ) : (
+                    <NavBarLinks
+                        currentBasePath={currentBasePath}
+                        specificPath={specificRouteName}
+                        isHamburger={false}
+                    />
+                )}
+                {shopEnabled && <CartButton isHome={isHome} ref={anchorRef} />}
+            </StyledNavAndCart>
+        </StyledNavBar>
+    );
+};
 
 export default NavBar;

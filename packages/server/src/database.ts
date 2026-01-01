@@ -1,13 +1,14 @@
 import {
+    type EntityProperty,
     LoadStrategy,
     MikroORM,
     PopulateHint,
     ReflectMetadataProvider,
-    type EntityProperty,
 } from '@mikro-orm/core';
 import { PostgreSqlDriver, PostgreSqlPlatform } from '@mikro-orm/postgresql';
 
 import * as dotenv from 'dotenv';
+
 dotenv.config({ override: true });
 
 import config from './config/config.js';

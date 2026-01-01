@@ -1,16 +1,15 @@
 import 'reflect-metadata';
 
+import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import { RequestContext } from '@mikro-orm/core';
 // import rootPath from 'app-root-path';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import express, { json, urlencoded, type RequestHandler } from 'express';
+import express, { json, type RequestHandler, urlencoded } from 'express';
 import helmet from 'helmet';
 import mustacheExpress from 'mustache-express';
-import { readFile } from 'node:fs/promises';
-import path from 'node:path';
-
 // import type { Options } from 'pino-http';
 import { AdminRest } from './adminAPI/index.js';
 import { AuthRouter, authAndGetRole, checkAdmin } from './authorization.js';
@@ -36,13 +35,10 @@ const main = async () => {
         if (isProduction) {
             const { pino } = await import('pino');
             const { pinoHttp } = await import('pino-http');
+            const { req, res, err } = await import('pino-std-serializers');
             return pinoHttp({
                 logger: pino(),
-                serializers: {
-                    req: pino.stdSerializers.req,
-                    res: pino.stdSerializers.res,
-                    err: pino.stdSerializers.err,
-                },
+                serializers: { req, res, err },
             });
         }
         const { default: morgan } = await import('morgan');
@@ -156,6 +152,7 @@ const main = async () => {
     let allowedOrigins = [
         /localhost:\d{4}$/,
         /https:\/\/\w*.googleapis\.com.*/,
+        /https:\/\/checkout\.stripe\.com.*/,
     ];
 
     const corsOptions = {
@@ -285,10 +282,9 @@ const main = async () => {
         cookieParser(process.env.COOKIE_SECRET),
         async (req, res) => {
             const { fbclid, ...queries } = req.query;
-            req.query = queries; // NO FACEBOOK
             const { sanitize = '', ...meta } = await getMetaFromPathAndSanitize(
                 req.path,
-                req.query.q as string,
+                queries.q as string,
             );
             if (sanitize) {
                 res.redirect(req.url.replace(`/${sanitize}`, ''));

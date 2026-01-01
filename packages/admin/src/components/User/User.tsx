@@ -3,18 +3,18 @@ import {
     ArrayField,
     Datagrid,
     Edit,
+    type EditProps,
     FunctionField,
+    type Identifier,
     List,
+    type ListProps,
+    type RaRecord,
     Show,
+    type ShowProps,
     SimpleForm,
     SimpleShowLayout,
     TextField,
     TextInput,
-    type EditProps,
-    type Identifier,
-    type ListProps,
-    type RaRecord,
-    type ShowProps,
 } from 'react-admin';
 
 const ProductList: React.FC<{

@@ -1,9 +1,8 @@
-import axios, { type AxiosError, type AxiosResponse } from 'axios';
-import { add, format, getUnixTime } from 'date-fns';
-import { JSDOM } from 'jsdom';
-
 // import { Calendar } from '../models/orm/Calendar.js';
 import type { EntityManager } from '@mikro-orm/core';
+import axios, { type AxiosError, type AxiosResponse } from 'axios';
+import { add, format, getUnixTime } from 'date-fns';
+import { parseHTML } from 'linkedom';
 import type { Calendar } from '../models/Calendar.js';
 import type { GCalEvent } from '../types.js';
 import { getToken } from './oauth.js';
@@ -161,7 +160,7 @@ export const updateCalendar = async (
                 Authorization: `Bearer ${token}`,
             },
         });
-    } catch (e) {
+    } catch (_e) {
         console.log('error writing to google calendar');
         return Promise.reject();
     }
@@ -283,7 +282,7 @@ export const getImageFromMetaTag = async (website: string) => {
     }
 
     try {
-        const { document } = new JSDOM(page).window;
+        const { document } = parseHTML(page).window;
         image =
             document
                 .querySelector('meta[name="twitter:image"]')
@@ -295,7 +294,7 @@ export const getImageFromMetaTag = async (website: string) => {
         if (image) {
             await axios.get(image);
         }
-    } catch (e) {
+    } catch (_e) {
         console.log('JSOM error or Image does not exist');
         image = '';
     }

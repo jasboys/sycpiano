@@ -8,6 +8,7 @@ export const PlaySVG: React.FC<React.SVGProps<SVGSVGElement>> = ({
     width,
     height,
     onClick,
+    onKeyDown,
     ...props
 }) => (
     <svg
@@ -21,6 +22,7 @@ export const PlaySVG: React.FC<React.SVGProps<SVGSVGElement>> = ({
         onMouseOut={onMouseOut}
         onFocus={onFocus}
         onBlur={onBlur}
+        onKeyDown={onKeyDown}
     >
         <title>Play Icon</title>
         <path d="M105.252 66.145L75.922 83.08l-29.33 16.932V32.28l29.33 16.932z" />
@@ -35,6 +37,7 @@ export const SkipSVG: React.FC<React.SVGProps<SVGSVGElement>> = ({
     width,
     height,
     onClick,
+    onKeyDown,
     ...props
 }) => (
     <svg
@@ -48,6 +51,7 @@ export const SkipSVG: React.FC<React.SVGProps<SVGSVGElement>> = ({
         onClick={onClick}
         onFocus={onFocus}
         onBlur={onBlur}
+        onKeyDown={onKeyDown}
     >
         <title>Skip Icon</title>
         <g>
@@ -66,6 +70,7 @@ export const PauseSVG: React.FC<React.SVGProps<SVGSVGElement>> = ({
     width,
     height,
     onClick,
+    onKeyDown,
     ...props
 }) => (
     <svg
@@ -79,6 +84,7 @@ export const PauseSVG: React.FC<React.SVGProps<SVGSVGElement>> = ({
         onClick={onClick}
         onFocus={onFocus}
         onBlur={onBlur}
+        onKeyDown={onKeyDown}
     >
         <title>Pause Icon</title>
         <g>

@@ -1,13 +1,15 @@
 import isPropValid from '@emotion/is-prop-valid';
 import styled from '@emotion/styled';
+import { useSetAtom } from 'jotai';
+import { mix } from 'polished';
 import type * as React from 'react';
 import { Link } from 'react-router-dom';
-
 import type { Product } from 'src/components/Shop/ShopList/types';
 import { staticImage } from 'src/imageUrls';
+import { logoBlue } from 'src/styles/colors.js';
 import { latoFont } from 'src/styles/fonts.js';
 import { formatPrice } from 'src/utils';
-import { cartStore } from './store.js';
+import { cartActions } from './store';
 
 const ItemContainer = styled.div({
     display: 'flex',
@@ -73,6 +75,7 @@ interface CartProps {
 }
 
 export const CartItem: React.FC<CartProps> = ({ item, error }) => {
+    const removeItem = useSetAtom(cartActions.removeItem);
     return (
         <ItemContainer>
             <ItemThumbnail>
@@ -85,19 +88,37 @@ export const CartItem: React.FC<CartProps> = ({ item, error }) => {
                 <div css={{ display: 'flex', justifyContent: 'space-between' }}>
                     <ItemName
                         to={`/shop/scores/${item.permalink}`}
+                        state={{ from: 'cart '}}
                         error={error}
                     >
                         {item.name}
                     </ItemName>
-                    <a
-                        css={{ flex: '0 0 auto', fontWeight: 300 }}
-                        role="button"
+                    <button
+                        css={{
+                            all: 'unset',
+                            flex: '0 0 auto',
+                            fontWeight: 300,
+                            fontSize: '0.72rem',
+                            borderRadius: 4,
+                            color: logoBlue,
+                            backgroundColor: 'white',
+                            border: `1px solid ${logoBlue}`,
+                            padding: '0.25rem 0.4rem',
+                            height: 'fit-content',
+                            transition: 'all 0.15s',
+                            '&:hover': {
+                                backgroundColor: mix(0.75, logoBlue, '#FFF'),
+                                color: 'white',
+                                cursor: 'pointer',
+                                border: `1px solid ${mix(0.75, logoBlue, '#FFF')}`,
+                            },
+                        }}
+                        type="button"
                         tabIndex={0}
-                        // biome-ignore lint/a11y/useValidAnchor: <explanation>
-                        onClick={() => cartStore.set.removeItem(item.id)}
+                        onClick={() => removeItem(item.id)}
                     >
-                        Remove
-                    </a>
+                        remove
+                    </button>
                 </div>
                 <div css={{ marginTop: '0.5rem' }}>
                     <ItemPrice>{formatPrice(item.price)}</ItemPrice>

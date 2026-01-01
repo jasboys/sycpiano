@@ -1,82 +1,20 @@
-import { formatInTimeZone } from 'date-fns-tz';
 import {
+    ArrayField,
     BooleanField,
-    Button,
-    CreateButton,
     Datagrid,
-    FilterButton,
     FunctionField,
+    type Identifier,
     List,
+    type ListProps,
     type RaRecord,
     SearchInput,
     TextField,
-    TopToolbar,
-    useNotify,
-    useRefresh,
-    type Identifier,
-    type ListProps,
-    ArrayField,
     useCanAccess,
 } from 'react-admin';
-
-import { useMutation } from '@tanstack/react-query';
-import { useAppDataProvider } from '../../providers/restProvider.js';
+import { DateTime, Empty } from '../Shared.jsx';
+import { BulkActionButtons, ListActions } from './Actions.jsx';
 
 const filters = [<SearchInput key="search" source="q" alwaysOn />];
-
-const PopulateImageFieldsButton = ({
-    selectedIds,
-}: { selectedIds?: Identifier[] }) => {
-    const notify = useNotify();
-    const refresh = useRefresh();
-    const dataProvider = useAppDataProvider();
-    const { mutate, isPending } = useMutation({
-        mutationFn: () =>
-            dataProvider.populateImageFields(
-                'calendars',
-                selectedIds ? { ids: selectedIds } : {},
-            ),
-
-            onSuccess: () => {
-                refresh();
-                notify('Populating Succeeded');
-            },
-            onError: (error) => notify(`Error: ${error}`, { type: 'warning' }),
-        },
-    );
-    return (
-        <Button
-            label="Populate Image Fields"
-            onClick={() => mutate()}
-            disabled={isPending}
-        />
-    );
-};
-
-const ListActions = () => (
-    <TopToolbar>
-        <FilterButton />
-        <CreateButton />
-        <PopulateImageFieldsButton />
-    </TopToolbar>
-);
-
-const BulkActionButtons = () => (
-    <>
-        <PopulateImageFieldsButton />
-    </>
-);
-
-/*    id?: string;
-    name: string;
-    dateTime: Date;
-    allDay: boolean;
-    endDate: Date;
-    timezone: string;
-    location: string;
-    type: string;
-    website: string;
-    */
 
 const CalendarPanel: React.FC<{
     id: Identifier;
@@ -84,16 +22,30 @@ const CalendarPanel: React.FC<{
     resource: string;
 }> = () => {
     return (
-        <ArrayField source="collaborators">
-            <Datagrid
-                sx={{ marginBottom: '1rem' }}
-                isRowSelectable={() => false}
-                bulkActionButtons={false}
-            >
-                <TextField source="name" />
-                <TextField source="instrument" />
-            </Datagrid>
-        </ArrayField>
+        <>
+            <ArrayField source="collaborators">
+                <Datagrid
+                    empty={<Empty assoc="collaborators" />}
+                    sx={{ marginBottom: '1rem' }}
+                    isRowSelectable={() => false}
+                    bulkActionButtons={false}
+                >
+                    <TextField source="name" />
+                    <TextField source="instrument" />
+                </Datagrid>
+            </ArrayField>
+            <ArrayField source="pieces">
+                <Datagrid
+                    empty={<Empty assoc="pieces" />}
+                    sx={{ marginBottom: '1rem' }}
+                    isRowSelectable={() => false}
+                    bulkActionButtons={false}
+                >
+                    <TextField source="composer" />
+                    <TextField source="piece" />
+                </Datagrid>
+            </ArrayField>
+        </>
     );
 };
 
@@ -123,18 +75,9 @@ export const CalendarList = (props: ListProps) => {
             >
                 <TextField source="id" />
                 <TextField source="name" />
-                <FunctionField
-                    label="Date Time"
-                    source="dateTime"
-                    render={(record: Record<string, any>) =>
-                        formatInTimeZone(
-                            record?.dateTime,
-                            record?.timezone || 'America/Chicago',
-                            'yyyy-MM-dd HH:mm zzz',
-                        )
-                    }
-                />
+                <DateTime />
                 <BooleanField source="allDay" />
+                <BooleanField source="hidden" />
                 <TextField source="endDate" />
                 <TextField source="timezone" />
                 <TextField source="location" />

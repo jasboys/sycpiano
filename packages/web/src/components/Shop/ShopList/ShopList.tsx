@@ -1,20 +1,19 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
+import type { QueryObserverResult } from '@tanstack/react-query';
+import { useAtomValue, useSetAtom } from 'jotai';
 import * as React from 'react';
-import { useParams } from 'react-router-dom';
-
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { mediaQueriesAtoms } from 'src/components/App/store.js';
+import { cartAtoms } from 'src/components/Cart/store.js';
 import { ShopItem } from 'src/components/Shop/ShopList/ShopItem';
-import type {
-    Product,
-    ProductTypes,
-} from 'src/components/Shop/ShopList/types';
+import type { Product, ProductMap, ProductTypes } from 'src/components/Shop/ShopList/types';
 import { toMedia } from 'src/mediaQuery.js';
 import { isHamburger, screenPortrait, screenXS } from 'src/screens.js';
 import { logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
-import { pushed } from 'src/styles/mixins';
-import { shopStore } from './store.js';
-import { useStore } from 'src/store.js';
+import { pushed, verticalTextStyle } from 'src/styles/mixins';
+import { shopItemsAtom } from './store.js';
 
 type ShopListProps = Record<never, unknown>;
 
@@ -67,6 +66,14 @@ const categoryListStyle = css({
     },
 });
 
+const verticalStyle = css(
+    verticalTextStyle,
+    {
+        left: 'calc(50% - min(50%, 375px))',
+        transform: 'rotate(90deg)',
+    }
+)
+
 const CategoryToLabel: Record<(typeof ProductTypes)[number], string> = {
     arrangement: 'Arrangements',
     cadenza: 'Cadenzas',
@@ -74,21 +81,35 @@ const CategoryToLabel: Record<(typeof ProductTypes)[number], string> = {
 };
 
 const ShopList: React.FC<ShopListProps> = () => {
-    const isHamburger = useStore().mediaQueries.isHamburger();
-    const { product } = useParams();
-    const shopItems = shopStore.use.items?.();
+    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
+    const setCartOpen = useSetAtom(cartAtoms.visible);
+    const params = useParams();
+    const { data: shopItems } = useAtomValue<QueryObserverResult<ProductMap>>(shopItemsAtom);
+    const location = useLocation();
+    const navigate = useNavigate();
 
     React.useEffect(() => {
-        if (shopItems && Object.keys(shopItems).length && product) {
-            const el = document.getElementById(product);
+        console.log(params.product);
+        if (shopItems && Object.keys(shopItems).length && params.product) {
+            const el = document.getElementById(params.product);
             if (el) {
                 el.scrollIntoView();
             }
         }
-    }, [shopItems, product]);
+    }, [shopItems, params.product, location.key]);
+
+    React.useEffect(() => {
+        console.log(location);
+        if (location.state?.from === 'cart') {
+            setCartOpen(false);
+            navigate({}, { replace: true });
+        }
+    }, [location])
 
     return (
-        shopItems && (
+        <>
+        {!isHamburger && <div css={verticalStyle}>SCORES</div>}
+        {shopItems && (
             <div css={listStyle}>
                 {Object.entries(shopItems).map(([key, items]) => (
                     <Category isHamburger={isHamburger} key={key}>
@@ -109,7 +130,8 @@ const ShopList: React.FC<ShopListProps> = () => {
                     </Category>
                 ))}
             </div>
-        )
+        )}
+        </>
     );
 };
 

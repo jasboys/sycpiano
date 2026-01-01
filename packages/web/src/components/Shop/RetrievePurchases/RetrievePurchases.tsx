@@ -3,15 +3,16 @@ import TextField from '@mui/material/TextField';
 import { ThemeProvider } from '@mui/system';
 import { useMutation } from '@tanstack/react-query';
 import axios from 'axios';
+import { useAtomValue } from 'jotai';
 import { mix } from 'polished';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
+import { mediaQueriesAtoms } from 'src/components/App/store.js';
 
 import { lightBlue, logoBlue, theme } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
-import { noHighlight, pushed } from 'src/styles/mixins';
+import { noHighlight, pushed, verticalTextStyle } from 'src/styles/mixins';
 import { validateEmail } from 'src/utils';
-import { useStore } from 'src/store.js';
 
 const Container = styled.div(latoFont(300), pushed, {
     display: 'flex',
@@ -90,17 +91,14 @@ const StyledSubmitButton = styled.button<{
         },
 );
 
-const Title = styled.div(latoFont(400), {
-    textAlign: 'center',
-    fontSize: '1.5rem',
-    color: logoBlue,
-    width: '100%',
-    maxWidth: 600,
-    marginBottom: '2rem',
+const Title = styled.div(verticalTextStyle, {
+    left: 'calc(50% - min(50%, 300px))',
+    transform: 'rotate(90deg)',
+    letterSpacing: '0.15rem',
 });
 
 const RetrievalForm: React.FC<Record<never, unknown>> = () => {
-    const isHamburger = useStore().mediaQueries.isHamburger();
+    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
     const [isMouseDown, setIsMouseDown] = React.useState(false);
     const [email, setEmail] = React.useState('');
     const [error, setError] = React.useState(false);
@@ -123,8 +121,8 @@ const RetrievalForm: React.FC<Record<never, unknown>> = () => {
 
     return (
         <Container>
-            {!isHamburger && <Title>Retrieve Purchases</Title>}
-
+            {!isHamburger && <Title>RETRIEVE PURCHASED</Title>}
+            <div css={{ width: '100%', height: '1rem' }}></div>
             <div css={{ fontSize: '1.2rem', width: '100%' }}>
                 Enter your email to request previously purchased scores.
             </div>

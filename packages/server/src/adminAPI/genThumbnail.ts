@@ -1,6 +1,6 @@
+import { resolve } from 'node:path';
 import { parse } from 'date-fns';
 import ExifReader from 'exifreader';
-import { resolve } from 'node:path';
 import Sharp from 'sharp';
 import smartcrop from 'smartcrop-sharp';
 
@@ -20,7 +20,7 @@ export const getDateTaken = async (fileName: string) => {
                     new Date(),
                 );
                 return parsed;
-            } catch (e) {
+            } catch (_e) {
                 return undefined;
             }
         }

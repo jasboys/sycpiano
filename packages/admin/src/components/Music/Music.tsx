@@ -1,47 +1,47 @@
-import IconCancel from '@mui/icons-material/Cancel.js';
-import IconDelete from '@mui/icons-material/Delete.js';
-import IconRestore from '@mui/icons-material/Restore.js';
+import IconCancel from '@mui/icons-material/Cancel';
+import IconDelete from '@mui/icons-material/Delete';
+import IconRestore from '@mui/icons-material/Restore';
 import {
     DialogActions,
     DialogContent,
     Button as MuiButton,
 } from '@mui/material';
+import { useMutation } from '@tanstack/react-query';
 import type * as React from 'react';
 import {
     ArrayField,
     Button,
     Create,
+    type CreateProps,
     Datagrid,
     Edit,
+    type EditProps,
     FileField,
     FileInput,
+    type Identifier,
     List,
+    type ListProps,
     NumberField,
     NumberInput,
+    type RaRecord,
+    required,
     SaveButton,
     SearchInput,
     SelectInput,
     Show,
+    type ShowProps,
     SimpleForm,
     SimpleShowLayout,
     TextField,
     TextInput,
-    required,
     useCreate,
     useDelete,
     useNotify,
     useRecordContext,
     useRefresh,
     useUpdate,
-    type CreateProps,
-    type EditProps,
-    type Identifier,
-    type ListProps,
-    type RaRecord,
-    type ShowProps,
 } from 'react-admin';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { useMutation } from '@tanstack/react-query';
 import { useAppDataProvider } from 'src/providers/restProvider.js';
 import type { AdminError, MutateForm } from 'src/types.js';
 import { AddReferenceButton, EditReferenceButton, Empty } from '../Shared.jsx';

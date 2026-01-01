@@ -19,13 +19,14 @@ import { musicFileHandler } from './musicFile.js';
 import { photoHandler } from './photo.js';
 import { pieceHandler } from './piece.js';
 import { productHandler } from './product.js';
+import { programHandler } from './program.js';
+import { programPieceHandler } from './programPiece.js';
 import { userHandler } from './user.js';
 
 const adminRest = express.Router();
-// adminRest.set('')
 adminRest.use(express.json());
 adminRest.use(express.urlencoded({ extended: true }));
-adminRest.post('*', csrfMiddleware);
+adminRest.post('*splat', csrfMiddleware);
 
 export const respondWithError = (error: Error, res: express.Response): void => {
     if (error instanceof ValidationError) {
@@ -64,5 +65,7 @@ adminRest.use(discLinkHandler);
 adminRest.use(userHandler);
 adminRest.use(productHandler);
 adminRest.use(faqHandler);
+adminRest.use(programHandler);
+adminRest.use(programPieceHandler);
 
 export const AdminRest = adminRest;

@@ -1,4 +1,4 @@
-import { Router, json } from 'express';
+import { json, Router } from 'express';
 
 import acclaimsHandler from './acclaims.js';
 import bioHandler from './bio.js';

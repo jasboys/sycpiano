@@ -1,41 +1,40 @@
 import { css } from '@emotion/css';
 import styled from '@emotion/styled';
 import { type InfiniteData, useInfiniteQuery } from '@tanstack/react-query';
+import { parseISO } from 'date-fns';
 import { Back, gsap } from 'gsap';
+import { atom, useAtomValue, useSetAtom } from 'jotai';
 import debounce from 'lodash-es/debounce';
 import startCase from 'lodash-es/startCase';
+import { transparentize } from 'polished';
+import type { JSX } from 'react';
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
-
 import { LoadingInstance } from 'src/components/LoadingSVG.jsx';
 import { MonthEvents } from 'src/components/Schedule/EventMonth.jsx';
-import { scheduleStore } from 'src/components/Schedule/store.js';
-import type {
-    EventItem,
-    EventListName,
-    FetchEventsArguments,
-} from 'src/components/Schedule/types';
+import {
+    scheduleActions,
+    scheduleAtoms,
+} from 'src/components/Schedule/store.js';
 import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenXS, screenXSandPortrait } from 'src/screens';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { metaDescriptions, titleStringBase } from 'src/utils';
-import { shallow } from 'zustand/shallow';
-import { transparentize } from 'polished';
-import { useStore } from 'src/store.js';
+import { mediaQueriesAtoms } from '../App/store.js';
 import {
     FETCH_LIMIT,
     fetchEvents,
     getInitFetchParams,
     getScrollFetchParams,
 } from './queryFunctions.js';
-
-interface EventListProps {
-    readonly type: EventListName;
-    readonly searchQ?: string;
-}
+import type {
+    EventItem,
+    EventListName,
+    FetchEventsArguments,
+} from './types.js';
 
 interface OnScrollProps {
     scrollTop: number;
@@ -108,17 +107,17 @@ const ScrollingContainer = styled.div<{ isSearch: boolean }>((props) => ({
     },
 }));
 
-const loadingOnEnter = (el: HTMLElement) => {
+const loadingOnEnter = (el: React.RefObject<HTMLDivElement | null>) => () => {
     gsap.fromTo(
-        el,
+        el.current,
         { y: 200 },
         { duration: 0.5, y: 0, ease: Back.easeOut.config(1) },
     );
 };
 
-const loadingOnExit = (el: HTMLElement) => {
+const loadingOnExit = (el: React.RefObject<HTMLDivElement | null>) => () => {
     gsap.fromTo(
-        el,
+        el.current,
         { y: 0 },
         {
             duration: 0.5,
@@ -129,92 +128,113 @@ const loadingOnExit = (el: HTMLElement) => {
     );
 };
 
-export const EventList: React.FC<EventListProps> = (props) => {
+const useEventList = (type: EventListName, searchQ?: string, date?: string) => {
     const {
-        eventItems,
-        minDate,
-        maxDate,
-        eventItemsLength,
-        lastQuery,
-        isSearching,
-    } = scheduleStore.useStore((state) => {
-        const name = props.type;
-        return {
-            eventItems: state[name].items,
-            eventItemsLength: state[name].items.length,
-            minDate: state[name].minDate,
-            maxDate: state[name].maxDate,
-            lastQuery: state[name].lastQuery,
-            isSearching: state.isFetching,
-        };
-    }, shallow);
+        fetchNextPage,
+        isFetchingNextPage,
+        hasNextPage,
+        isSuccess,
+        isFetching,
+        data,
+    } = useInfiniteQuery<
+        EventItem[],
+        Error,
+        InfiniteData<EventItem[], FetchEventsArguments>,
+        (string | undefined)[],
+        FetchEventsArguments
+    >({
+        queryKey: ['schedule', type, searchQ ?? undefined],
+        queryFn: async ({ pageParam }) => {
+            return await fetchEvents(pageParam);
+        },
+        initialPageParam: getInitFetchParams({
+            type: type,
+            searchQ,
+            eventDate: date,
+        }),
+        getNextPageParam: (_lastPage, allPages) => {
+            const lastPage = allPages[allPages.length - 1];
+            if (lastPage.length === 0 || lastPage.length !== FETCH_LIMIT) {
+                return undefined;
+            }
+            return getScrollFetchParams(type);
+        },
+        refetchOnWindowFocus: false,
+    });
+
+    const setFulfilled = useSetAtom(scheduleActions.fulfilled);
+
+    React.useEffect(() => {
+        isSuccess &&
+            data &&
+            setFulfilled({
+                pagedEvents: data.pages,
+                type,
+            });
+    }, [isSuccess, data, setFulfilled]);
+
+    return {
+        fetchNextPage,
+        hasNextPage,
+        isFetching,
+        isFetchingNextPage,
+    };
+};
+
+export const EventList: React.FC<{ type: EventListName; searchQ?: string }> = ({
+    type,
+    searchQ,
+}) => {
+    const loadingRef = React.useRef<HTMLDivElement>(null);
+
+    const setLastQuery = useSetAtom(scheduleAtoms.lastQuery);
+    const setDate = useSetAtom(scheduleAtoms.date);
+
+    React.useEffect(() => {
+        setLastQuery(searchQ);
+    }, [searchQ]);
+
+    const { eventItems, minDate, maxDate } = useAtomValue(
+        React.useMemo(
+            () =>
+                atom((get) => {
+                    const events = get(scheduleAtoms[type]);
+                    return {
+                        eventItems: events.items,
+                        minDate: events.minDate,
+                        maxDate: events.maxDate,
+                    };
+                }),
+            [],
+        ),
+    );
+
+    const eventItemsLength = useAtomValue(scheduleAtoms.itemsLength[type]);
+
     const navigate = useNavigate();
     const routeParams = useParams();
     const { '*': date } = routeParams;
-    const isHamburger = useStore().mediaQueries.isHamburger();
-
-    const searchQ = props.searchQ;
+    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
 
     const checkRedirects = React.useCallback(() => {
-        if (
-            props.type === 'search' &&
-            (searchQ === undefined || searchQ === '')
-        ) {
+        if (type === 'search' && (searchQ === undefined || searchQ === '')) {
             navigate('/schedule/upcoming');
             return;
         }
-        if (props.type === 'event' && !date) {
+        if (type === 'event' && !date) {
             navigate('/schedule/upcoming');
             return;
         }
         return;
-    }, [searchQ, date, props.type]);
+    }, [searchQ, date, type]);
 
     React.useEffect(() => {
         checkRedirects();
-    }, [props.type, searchQ, date]);
+        setDate(date);
+    }, [type, searchQ, date]);
 
-    const { fetchNextPage, hasNextPage, isSuccess, isFetching, data } =
-        useInfiniteQuery<
-            EventItem[],
-            Error,
-            InfiniteData<EventItem[], FetchEventsArguments>,
-            (string | undefined)[],
-            FetchEventsArguments
-        >({
-            queryKey: ['schedule', props.type, searchQ ?? undefined],
-            queryFn: async ({ pageParam }) => {
-                return await fetchEvents(pageParam);
-            },
-            initialPageParam: getInitFetchParams({
-                type: props.type,
-                searchQ,
-                eventDate: date,
-            }),
-            getNextPageParam: (_lastPage, allPages) => {
-                const lastPage = allPages[allPages.length - 1];
-                if (lastPage.length === 0 || lastPage.length !== FETCH_LIMIT) {
-                    return undefined;
-                }
-                return getScrollFetchParams(props.type);
-            },
-            refetchOnWindowFocus: false,
-        });
-
-    React.useEffect(() => {
-        scheduleStore.set.isFetching(isFetching);
-    }, [isFetching]);
-
-    // Store data (will be transformed into monthGroups)
-    React.useEffect(() => {
-        isSuccess &&
-            data &&
-            scheduleStore.set.fulfilled({
-                name: props.type,
-                pagedEvents: data.pages,
-                lastQuery: searchQ,
-            });
-    }, [isSuccess, props.type, data]);
+    const { fetchNextPage, isFetchingNextPage, hasNextPage, isFetching } =
+        useEventList(type, searchQ, date);
 
     const onScroll = React.useCallback(
         ({ clientHeight, scrollTop, scrollHeight }: OnScrollProps) => {
@@ -222,15 +242,16 @@ export const EventList: React.FC<EventListProps> = (props) => {
                 scrollTop + clientHeight > scrollHeight - 600 &&
                 hasNextPage &&
                 !isFetching &&
+                !isFetchingNextPage &&
                 !!maxDate &&
                 !!minDate
             ) {
-                if (props.type !== 'search' && props.type !== 'event') {
+                if (type !== 'search' && type !== 'event') {
                     fetchNextPage();
                 }
             }
         },
-        [hasNextPage, isFetching, maxDate, minDate, props.type],
+        [hasNextPage, isFetching, maxDate, minDate, type],
     );
 
     const debouncedFetch = React.useMemo(
@@ -238,16 +259,67 @@ export const EventList: React.FC<EventListProps> = (props) => {
         [onScroll],
     );
 
-    const title = `${titleStringBase}Schedule | ${props.type === 'archive' ? 'Archived' : startCase(props.type)} Events${searchQ ? '' : `: ${searchQ}`}`;
+    const getHeadTitle = React.useCallback(() => {
+        if (!eventItemsLength) {
+            return '';
+        }
+        const event = eventItems.monthGroups[0].events[0];
+        let title = `${titleStringBase}Schedule | `;
+        if (type !== 'event') {
+            title += type === 'archive' ? 'Past' : startCase(type);
+            title += ' Events';
+            if (type === 'search' && searchQ) {
+                title += `: ${searchQ}`;
+            }
+        } else {
+            const formattedDate = new Intl.DateTimeFormat('en-US', {
+                weekday: 'short',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                timeZoneName: 'short',
+                timeZone: event.timezone,
+            }).format(parseISO(event.dateTime));
+            title += `Event on ${formattedDate}`;
+        }
+        return title;
+    }, [searchQ, type, eventItems]);
 
-    const description = metaDescriptions[props.type] as string;
+    const description = metaDescriptions[type] as string;
 
     const loadingDimension = isHamburger ? 50 : 96;
+
+    const getFooterText = React.useCallback(() => {
+        let footerText: JSX.Element = <span></span>;
+        if (isFetching) {
+            footerText = <span>Fetching events...</span>;
+        } else if (eventItemsLength === 0) {
+            if (type === 'upcoming')
+                footerText = (
+                    <span>
+                        No upcoming events posted. For past events, visit the{' '}
+                        <Link to="/schedule/archive">archive</Link>.
+                    </span>
+                );
+        } else if (hasNextPage) {
+        } else if (!date) {
+            const redirect = type === 'upcoming' ? 'archive' : 'upcoming';
+            footerText = (
+                <span>
+                    End of {type} list. Check out the{' '}
+                    <Link to={`/schedule/${redirect}`}>{redirect}</Link>.
+                </span>
+            );
+        }
+        return footerText;
+    }, [date, hasNextPage, isFetching, eventItemsLength]);
 
     return (
         <React.Fragment>
             <Helmet
-                title={title}
+                title={getHeadTitle()}
                 meta={[
                     {
                         name: 'description',
@@ -256,48 +328,44 @@ export const EventList: React.FC<EventListProps> = (props) => {
                 ]}
             />
             <ScrollingContainer
-                isSearch={props.type === 'search'}
+                isSearch={type === 'search'}
                 onScroll={(ev) => {
                     ev.persist();
                     const { scrollTop, scrollHeight, clientHeight } =
                         ev.currentTarget;
-                    debouncedFetch({ scrollTop, scrollHeight, clientHeight });
+                    !isFetching &&
+                        debouncedFetch({
+                            scrollTop,
+                            scrollHeight,
+                            clientHeight,
+                        });
                 }}
             >
                 {eventItemsLength ? (
                     eventItems.monthGroups.map((monthGroup, idx) => (
                         <MonthEvents
                             key={monthGroup.dateTime}
-                            type={props.type}
+                            type={type}
                             idx={idx}
                             monthGroup={monthGroup}
                             isHamburger={isHamburger}
-                            lastQuery={lastQuery}
+                            lastQuery={searchQ}
                         />
                     ))
                 ) : (
                     <div />
                 )}
-                {props.type !== 'event' && (
-                    <EndOfList>
-                        {isFetching || isSearching
-                            ? 'Fetching events...'
-                            : eventItemsLength === 0
-                              ? 'No events fetched'
-                              : hasNextPage
-                                ? ''
-                                : 'No more events'}
-                    </EndOfList>
-                )}
+                {type !== 'event' && <EndOfList>{getFooterText()}</EndOfList>}
             </ScrollingContainer>
-            <Transition<undefined>
-                in={isFetching || isSearching}
+            <Transition
+                in={isFetching}
                 timeout={300}
-                onEnter={loadingOnEnter}
-                onExit={loadingOnExit}
+                onEnter={loadingOnEnter(loadingRef)}
+                onExit={loadingOnExit(loadingRef)}
                 appear={true}
+                nodeRef={loadingRef}
             >
-                <LoadingDiv>
+                <LoadingDiv ref={loadingRef}>
                     <SpinnerContainer>
                         <LoadingInstance
                             css={loadingStyle}

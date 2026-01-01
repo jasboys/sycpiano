@@ -1,21 +1,26 @@
-import IconMerge from '@mui/icons-material/Merge.js';
+import IconMerge from '@mui/icons-material/Merge';
 import { Box } from '@mui/material';
-import { formatInTimeZone } from 'date-fns-tz';
+import { useMutation } from '@tanstack/react-query';
 import {
     ArrayField,
     Button,
     Create,
     CreateButton,
+    type CreateProps,
     Datagrid,
     Edit,
+    type EditProps,
     FilterButton,
-    FunctionField,
+    type GetOneResult,
+    type Identifier,
     List,
     ListButton,
+    type ListProps,
     NumberField,
     SearchInput,
     Show,
     ShowButton,
+    type ShowProps,
     SimpleForm,
     Tab,
     TabbedShowLayout,
@@ -26,17 +31,10 @@ import {
     useNotify,
     useRecordContext,
     useRefresh,
-    type CreateProps,
-    type EditProps,
-    type GetOneResult,
-    type Identifier,
-    type ListProps,
-    type ShowProps,
 } from 'react-admin';
-import { useMutation } from '@tanstack/react-query';
 import { useAppDataProvider } from 'src/providers/restProvider.js';
 import type { AdminError } from 'src/types.js';
-import { TrimButton } from '../Shared.jsx';
+import { DateTime, TrimButton } from '../Shared.jsx';
 
 const filters = [<SearchInput key="search" source="q" alwaysOn />];
 
@@ -91,16 +89,7 @@ const ExpandPanel = () => {
                     bulkActionButtons={false}
                 >
                     <TextField source="name" />
-                    <FunctionField
-                        label="Date Time"
-                        render={(record: Record<string, any>) =>
-                            formatInTimeZone(
-                                record?.dateTime,
-                                record?.timezone || 'America/Chicago',
-                                'yyyy-MM-dd HH:mm zzz',
-                            )
-                        }
-                    />
+                    <DateTime />
                     <NumberField label="Order" source="calendarPiece.order" />
                 </Datagrid>
             </ArrayField>

@@ -6,9 +6,10 @@ import { Helmet } from 'react-helmet-async';
 import { useMatch, useNavigate } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
 
+import { useAtomValue, useSetAtom } from 'jotai';
+import { mediaQueriesAtoms } from 'src/components/App/store.js';
 import { LoadingInstance } from 'src/components/LoadingSVG';
 import PreviewOverlay from 'src/components/Media/Videos/PreviewOverlay';
-import { videoStore } from 'src/components/Media/Videos/store.js';
 import VideoPlaylist from 'src/components/Media/Videos/VideoPlaylist';
 import { toMedia } from 'src/mediaQuery';
 import { minRes, screenPortrait, screenXS, webkitMinDPR } from 'src/screens';
@@ -16,7 +17,7 @@ import youTube from 'src/services/YouTube';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 import { titleStringBase } from 'src/utils';
-import { useStore } from 'src/store.js';
+import { videoPlayerActions, videoPlayerAtoms } from './store.js';
 import type { VideoItemShape } from './types.js';
 
 type VideosProps = Record<never, unknown>;
@@ -117,10 +118,14 @@ const fetchVideos = async (): Promise<VideoItemShape[]> => {
 };
 
 const Videos: React.FC<VideosProps> = () => {
-    const isHamburger = useStore().mediaQueries.isHamburger();
-    const isPlayerReady = videoStore.use.isPlayerReady();
+    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
+    const isPlayerReady = useAtomValue(videoPlayerAtoms.isPlayerReady);
+    const playerIsReady = useSetAtom(videoPlayerActions.playerIsReady);
+    const resetPlayer = useSetAtom(videoPlayerActions.resetPlayer);
+    const setVideoId = useSetAtom(videoPlayerAtoms.videoId);
     const match = useMatch('media/videos/:videoId');
     const domElement = React.useRef<HTMLDivElement>(null);
+    const overlayRef = React.useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
 
     const { data: videos } = useQuery({
@@ -132,13 +137,13 @@ const Videos: React.FC<VideosProps> = () => {
         async function loadYoutubeElement() {
             if (domElement.current) {
                 await youTube.initializePlayerOnElement(domElement.current);
-                videoStore.set.playerIsReady();
+                playerIsReady();
             }
         }
 
         loadYoutubeElement();
         return function cleanup() {
-            videoStore.set.resetPlayer();
+            resetPlayer();
         };
     }, []);
 
@@ -148,9 +153,9 @@ const Videos: React.FC<VideosProps> = () => {
                 match?.params.videoId !== undefined &&
                 videos.find((i) => i.id === videoId)
             ) {
-                videoStore.set.videoId(match.params.videoId);
+                setVideoId(match.params.videoId);
             } else {
-                videoStore.set.videoId(videos[0].id);
+                setVideoId(videos[0].id);
                 navigate(`/media/videos/${videos[0].id}`);
             }
         }
@@ -177,16 +182,20 @@ const Videos: React.FC<VideosProps> = () => {
             )}
             <StyledVideos ref={domElement}>
                 <PreviewOverlay isMobile={isHamburger} />
-                <Transition<undefined>
+                <Transition
                     in={!isPlayerReady}
-                    onExit={(el) =>
-                        gsap.to(el, { duration: 0.3, autoAlpha: 0 })
+                    onExit={() =>
+                        gsap.to(overlayRef.current, {
+                            duration: 0.3,
+                            autoAlpha: 0,
+                        })
                     }
                     timeout={300}
                     mountOnEnter={true}
                     unmountOnExit={true}
+                    nodeRef={overlayRef}
                 >
-                    <LoadingOverlayDiv>
+                    <LoadingOverlayDiv ref={overlayRef}>
                         <LoadingInstanceContainer>
                             <LoadingInstance />
                         </LoadingInstanceContainer>

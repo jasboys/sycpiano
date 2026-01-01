@@ -1,18 +1,20 @@
+import type { QueryObserverResult } from '@tanstack/react-query';
 import axios from 'axios';
+import { atom, type WritableAtom } from 'jotai';
+import { atomWithImmer } from 'jotai-immer';
+import { atomWithQuery } from 'jotai-tanstack-query';
 import { compact, shuffle, sortBy } from 'lodash-es';
-
 import {
+    isMusicItem,
     type MusicCategories,
     type MusicFileItem,
     type MusicItem,
     type MusicListItem,
     type MusicResponse,
     type MusicStateShape,
-    isMusicItem,
 } from 'src/components/Media/Music/types';
+import { partialAtomGetter, toAtoms } from 'src/store.js';
 import { getLastName, modulo, normalizeString } from './utils.js';
-import { createStore } from 'zustand-x';
-import { zustandMiddlewareOptions } from 'src/utils.js';
 
 const initialState: MusicStateShape = {
     isFetching: false,
@@ -57,15 +59,7 @@ const musicListIfExists = (
     return [];
 };
 
-export interface FetchPlaylistThunkReturn {
-    items: MusicListItem[];
-    flatItems: MusicFileItem[];
-    firstTrack: MusicFileItem;
-    prevTrack?: MusicFileItem;
-    nextTrack?: MusicFileItem;
-}
-
-export const fetchPlaylistFn = async () => {
+const fetchPlaylistFn = async () => {
     const { data: response } = await axios.get<MusicResponse>('/api/music');
     const mappedResponse: MusicResponse = {};
     for (const category in response) {
@@ -112,84 +106,124 @@ export const fetchPlaylistFn = async () => {
     return items;
 };
 
-export const itemsToFlatItems = (items: MusicListItem[]): MusicFileItem[] => {
+// For typing purposes, does not work when created within the object.
+const queryItemsAtom: WritableAtom<
+    QueryObserverResult<MusicListItem[], Error>,
+    [],
+    void
+> = atomWithQuery<MusicListItem[]>(() => ({
+    queryKey: ['musicPlaylist'],
+    queryFn: fetchPlaylistFn,
+}));
+
+const flatItemsAtom = atom((get) => {
+    const items = get(queryItemsAtom).data;
+    const isShuffle = get(musicAtoms.isShuffle);
     const flatItems: MusicFileItem[] = [];
-    for (const musicListItem of items) {
-        if (isMusicItem(musicListItem)) {
-            flatItems.push(...musicListItem.musicFiles);
+    if (items?.length) {
+        for (const musicListItem of get(queryItemsAtom).data ?? []) {
+            if (isMusicItem(musicListItem)) {
+                flatItems.push(...musicListItem.musicFiles);
+            }
+        }
+
+        const out = flatItems.map((item, idx) => ({ ...item, idx }));
+        if (isShuffle) {
+            return shuffle(out);
+        } else {
+            return sortBy(out, ['idx']);
         }
     }
+    return [];
+});
 
-    return flatItems.map((item, idx) => ({ ...item, idx }));
+export const musicStore = atomWithImmer(initialState);
+const { toWriteAtom, toToggleAtom } = partialAtomGetter(musicStore);
+
+export const musicAtoms = {
+    ...toAtoms(musicStore),
+    items: queryItemsAtom,
+    flatItems: flatItemsAtom,
+    isShuffle: atom(
+        (get) => get(musicStore).isShuffle,
+        (_get, set) => {
+            set(musicStore, (draft) => {
+                draft.isShuffle = !draft.isShuffle;
+            });
+        },
+    ),
+    isPlaying: toToggleAtom('isPlaying'),
+    isLoading: toToggleAtom('isLoading'),
+    isMouseMove: toToggleAtom('isMouseMove'),
+    volume: toWriteAtom('volume'),
+    currentTrack: toWriteAtom('currentTrack'),
+    playbackPosition: toWriteAtom('playbackPosition'),
+    radii: toWriteAtom('radii'),
+    angle: toWriteAtom('angle'),
+    isHoverSeekring: toWriteAtom('isHoverSeekring'),
 };
 
-export const musicStore = createStore('musicPlayer')(
-    initialState,
-    zustandMiddlewareOptions,
-)
-    .extendSelectors((_set, get, _api) => ({
-        getFirstTrack: (args: {
-            composer?: string;
-            piece?: string;
-            movement?: string;
-        }) => {
-            const { composer, piece, movement = '' } = args;
-            const flatItems = get.flatItems();
+const getFirstTrackAtom = atom((get) => ({
+    fn: (args: { composer?: string; piece?: string; movement?: string }) => {
+        const { composer, piece, movement = '' } = args;
+        const flatItems = get(musicAtoms.flatItems);
 
-            if (composer && piece) {
-                return (
-                    flatItems.find((item) => {
-                        // early return before looking through props.items
-                        // if composer or piece don't match, return false
-                        if (
-                            (item.composer &&
-                                composer !== getLastName(item.composer)) ||
-                            (item.piece &&
-                                piece !== normalizeString(item.piece))
-                        ) {
-                            return false;
-                        }
+        if (composer && piece) {
+            return (
+                flatItems.find((item) => {
+                    // early return before looking through props.items
+                    // if composer or piece don't match, return false
+                    if (
+                        (item.composer &&
+                            composer !== getLastName(item.composer)) ||
+                        (item.piece && piece !== normalizeString(item.piece))
+                    ) {
+                        return false;
+                    }
 
-                        // If we're here, that means composer and piece matched
-                        // If movement also matches, we're golden.
-                        if (
-                            item.name &&
-                            movement === normalizeString(item.name)
-                        ) {
-                            return true;
-                        }
+                    // If we're here, that means composer and piece matched
+                    // If movement also matches, we're golden.
+                    if (item.name && movement === normalizeString(item.name)) {
+                        return true;
+                    }
 
-                        // If not, then the only last possible way this returns true
-                        // is if both movement and item.name are falsey, since that would mean there isn't
-                        // a movement name associated with this track.
-                        if (!movement && !item.name) {
-                            return true;
-                        }
-                    }) ?? flatItems[0]
-                );
-            }
-            return flatItems[0];
-        },
-        getNextTrack: (
-            currentTrack: MusicFileItem | undefined,
-            which: 'next' | 'prev',
-            force = false,
-        ) => {
-            const flat = get.flatItems();
-            const trackNo = flat.findIndex(
-                (item) => item.id === currentTrack?.id,
+                    // If not, then the only last possible way this returns true
+                    // is if both movement and item.name are falsey, since that would mean there isn't
+                    // a movement name associated with this track.
+                    // if (!movement && !item.name) {
+                    return true;
+                    // }
+                }) ?? flatItems[0]
             );
-            const nextTrackNo = which === 'next' ? trackNo + 1 : trackNo - 1;
-            if (force) {
-                return flat[modulo(nextTrackNo, flat.length)];
-            }
-            if (nextTrackNo >= 0 && nextTrackNo < flat.length) {
-                return flat[nextTrackNo];
-            }
-        },
-    }))
-    .extendActions((set, _get, _api) => ({
-        callbackAction: ({
+        }
+        return flatItems[0];
+    },
+}));
+
+const getNextTrackAtom = atom((get) => ({
+    fn: (
+        currentTrack: MusicFileItem | undefined,
+        which: 'next' | 'prev',
+        force = false,
+    ) => {
+        const flat = get(musicAtoms.flatItems);
+        const trackNo = flat.findIndex((item) => item.id === currentTrack?.id);
+        const nextTrackNo = which === 'next' ? trackNo + 1 : trackNo - 1;
+        if (force) {
+            return flat[modulo(nextTrackNo, flat.length)];
+        }
+        if (nextTrackNo >= 0 && nextTrackNo < flat.length) {
+            return flat[nextTrackNo];
+        }
+    },
+}));
+
+const callbackAction = atom(
+    null,
+    (
+        _get,
+        set,
+        {
             playing,
             playbackPosition,
             duration,
@@ -197,24 +231,114 @@ export const musicStore = createStore('musicPlayer')(
             playing?: boolean;
             playbackPosition: number;
             duration: number;
-        }) => {
-            set.state((state) => {
-                state.isPlaying = playing ?? state.isPlaying;
-                state.playbackPosition = playbackPosition;
-                state.duration = duration;
-            });
         },
-        toggleShuffle: () => {
-            set.state((state) => {
-                state.isShuffle = !state.isShuffle;
-                state.flatItems = state.isShuffle
-                    ? shuffle(state.flatItems)
-                    : sortBy(state.flatItems, ['idx']);
-            });
-        },
-        togglePlaying: () => {
-            set.state((state) => {
-                state.isPlaying = !state.isPlaying;
-            });
-        },
-    }));
+    ) => {
+        set(musicStore, (draft) => {
+            draft.isPlaying = playing ?? draft.isPlaying;
+            draft.playbackPosition = playbackPosition;
+            draft.duration = duration;
+        });
+    },
+);
+
+export const musicActions = {
+    callbackAction,
+    getFirstTrackAtom,
+    getNextTrackAtom,
+};
+
+// export const musicStore = createStore('musicPlayer')(
+//     initialState,
+//     zustandMiddlewareOptions,
+// )
+//     .extendSelectors((_set, get, _api) => ({
+//         getFirstTrack: (args: {
+//             composer?: string;
+//             piece?: string;
+//             movement?: string;
+//         }) => {
+//             const { composer, piece, movement = '' } = args;
+//             const flatItems = get.flatItems();
+
+//             if (composer && piece) {
+//                 return (
+//                     flatItems.find((item) => {
+//                         // early return before looking through props.items
+//                         // if composer or piece don't match, return false
+//                         if (
+//                             (item.composer &&
+//                                 composer !== getLastName(item.composer)) ||
+//                             (item.piece &&
+//                                 piece !== normalizeString(item.piece))
+//                         ) {
+//                             return false;
+//                         }
+
+//                         // If we're here, that means composer and piece matched
+//                         // If movement also matches, we're golden.
+//                         if (
+//                             item.name &&
+//                             movement === normalizeString(item.name)
+//                         ) {
+//                             return true;
+//                         }
+
+//                         // If not, then the only last possible way this returns true
+//                         // is if both movement and item.name are falsey, since that would mean there isn't
+//                         // a movement name associated with this track.
+//                         if (!movement && !item.name) {
+//                             return true;
+//                         }
+//                     }) ?? flatItems[0]
+//                 );
+//             }
+//             return flatItems[0];
+//         },
+//         getNextTrack: (
+//             currentTrack: MusicFileItem | undefined,
+//             which: 'next' | 'prev',
+//             force = false,
+//         ) => {
+//             const flat = get.flatItems();
+//             const trackNo = flat.findIndex(
+//                 (item) => item.id === currentTrack?.id,
+//             );
+//             const nextTrackNo = which === 'next' ? trackNo + 1 : trackNo - 1;
+//             if (force) {
+//                 return flat[modulo(nextTrackNo, flat.length)];
+//             }
+//             if (nextTrackNo >= 0 && nextTrackNo < flat.length) {
+//                 return flat[nextTrackNo];
+//             }
+//         },
+//     }))
+//     .extendActions((set, _get, _api) => ({
+//         callbackAction: ({
+//             playing,
+//             playbackPosition,
+//             duration,
+//         }: {
+//             playing?: boolean;
+//             playbackPosition: number;
+//             duration: number;
+//         }) => {
+//             set.state((state) => {
+//                 state.isPlaying = playing ?? state.isPlaying;
+//                 state.playbackPosition = playbackPosition;
+//                 state.duration = duration;
+//             });
+//         },
+//         toggleShuffle: () => {
+//             set.state((state) => {
+//                 state.isShuffle = !state.isShuffle;
+//                 state.flatItems = state.isShuffle
+//                     ? shuffle(state.flatItems)
+//                     : sortBy(state.flatItems, ['idx']);
+//             });
+//         },
+//         togglePlaying: () => {
+//             set.state((state) => {
+//                 state.isPlaying = !state.isPlaying;
+//             });
+//         },
+//     }));

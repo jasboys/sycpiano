@@ -1,33 +1,33 @@
+import { useMutation } from '@tanstack/react-query';
 import {
     Button,
     Create,
     CreateButton,
+    type CreateProps,
     Datagrid,
     DateField,
     Edit,
+    type EditProps,
     FunctionField,
     ImageField,
     ImageInput,
     List,
+    type ListProps,
     NumberInput,
     SelectInput,
     Show,
+    type ShowProps,
     SimpleForm,
     SimpleShowLayout,
     TextField,
     TextInput,
     TopToolbar,
+    type UseRecordContextParams,
     useNotify,
     useRecordContext,
     useRefresh,
-    type CreateProps,
-    type EditProps,
-    type ListProps,
-    type ShowProps,
-    type UseRecordContextParams,
 } from 'react-admin';
 import { useWatch } from 'react-hook-form';
-import { useMutation } from '@tanstack/react-query';
 import { useAppDataProvider } from 'src/providers/restProvider.js';
 import { IMAGES_URI } from 'src/uris.js';
 

@@ -39,6 +39,7 @@ function getEventsBefore(before: Date, limit?: number) {
     return orm.em.find(
         Calendar,
         {
+            hidden: false,
             dateTime: { $lt: before },
         },
         {
@@ -54,6 +55,7 @@ function getEventsAfter(after: Date, limit?: number) {
     return orm.em.find(
         Calendar,
         {
+            hidden: false,
             dateTime: { $gte: after },
         },
         {
@@ -69,6 +71,7 @@ function getEventsBetween(start: Date, end: Date, order: 'ASC' | 'DESC') {
     return orm.em.find(
         Calendar,
         {
+            hidden: false,
             $and: [{ dateTime: { $gte: start } }, { dateTime: { $lt: end } }],
         },
         {
@@ -81,7 +84,7 @@ function getEventsBetween(start: Date, end: Date, order: 'ASC' | 'DESC') {
 function getEventAt(at: Date) {
     return orm.em.findOneOrFail(
         Calendar,
-        { dateTime: at },
+        { dateTime: at, hidden: false },
         {
             populate: ['collaborators', 'pieces'],
         },
@@ -121,6 +124,7 @@ calendarRouter.get(
         const tokens = q.trim().replaceAll(', ', '|').replaceAll(' ', '&');
         const splitTokens = tokens.split('|').map((t) => t.split('&'));
         const where: FilterQuery<Calendar> = {
+            hidden: false,
             $or: splitTokens.map((token) => {
                 return {
                     $and: token.map((v) => {
@@ -147,7 +151,7 @@ calendarRouter.get(
         res,
     ) => {
         const limit =
-            (!!req.query.limit && Number.parseInt(req.query.limit)) ||
+            (!!req.query.limit && Number.parseInt(req.query.limit, 10)) ||
             undefined;
         const date = !!req.query.date && parseISO(req.query.date);
         const before = !!req.query.before && parseISO(req.query.before);

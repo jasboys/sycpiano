@@ -27,7 +27,11 @@ import { interFont, latoFont } from 'src/styles/fonts';
 import { container, noHighlight } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
-import { rootStore, useStore } from 'src/store.js';
+import { focusAtom } from 'jotai-optics';
+import { mediaQueriesBaseAtom } from '../App/store';
+import { useAtomValue } from 'jotai';
+import { navBarAtoms } from '../App/NavBar/store';
+import { cartAtoms } from '../Cart/store';
 
 const textShadowColor = 'rgba(0 0 0 / 0.75)';
 
@@ -206,22 +210,27 @@ const Content: React.FC = () => (
     </React.Fragment>
 );
 
-const Home: React.FC<Record<never, unknown>> = () => {
-    const { isHamburger, hiDpx, screenPortrait } =
-        rootStore.mediaQueries.useTrackedStore();
-    const menuExpanded = useStore().navBar.isExpanded();
-    const cartExpanded = useStore().cart.visible();
+const mediaQueries = focusAtom(mediaQueriesBaseAtom, (optic) =>
+    optic.pick(['isHamburger', 'hiDpx', 'screenPortrait']),
+);
 
+const Home: React.FC<Record<never, unknown>> = () => {
+    const { isHamburger, hiDpx, screenPortrait } = useAtomValue(mediaQueries);
+    const menuExpanded = useAtomValue(navBarAtoms.isExpanded);
+    const cartExpanded = useAtomValue(cartAtoms.visible);
+    const backgroundRef = React.useRef<HTMLDivElement>(null);
+    const navbarRef = React.useRef<HTMLDivElement>(null);
     return (
         <HomeContainer>
             <BackgroundContainer>
-                <Transition<undefined>
+                <Transition
                     in={isHamburger && (menuExpanded || cartExpanded)}
-                    onEnter={fadeOnEnter()}
-                    onExit={fadeOnExit(0.15)}
+                    onEnter={fadeOnEnter(backgroundRef)}
+                    onExit={fadeOnExit(backgroundRef, 0.15)}
                     timeout={400}
+                    nodeRef={backgroundRef}
                 >
-                    <MobileBackground>
+                    <MobileBackground ref={backgroundRef}>
                         <MobileBackgroundPreview />
                     </MobileBackground>
                 </Transition>
@@ -274,13 +283,18 @@ const Home: React.FC<Record<never, unknown>> = () => {
                     successCb={undefined}
                 />
                 <BackgroundCover isHamburger={isHamburger} />
-                <Transition<undefined>
+                <Transition
                     in={isHamburger && !(menuExpanded || cartExpanded)}
-                    onEnter={fadeOnEnter()}
-                    onExit={fadeOnExit(0.15)}
+                    onEnter={fadeOnEnter(navbarRef)}
+                    onExit={fadeOnExit(navbarRef, 0.15)}
                     timeout={400}
+                    nodeRef={navbarRef}
                 >
-                    <NavBarGradient hiDpx={hiDpx} isHamburger={isHamburger} />
+                    <NavBarGradient
+                        ref={navbarRef}
+                        hiDpx={hiDpx}
+                        isHamburger={isHamburger}
+                    />
                 </Transition>
             </BackgroundContainer>
             <ContentContainer

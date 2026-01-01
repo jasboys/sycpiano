@@ -1,5 +1,5 @@
-import * as argon2 from 'argon2';
 import { randomUUID } from 'node:crypto';
+import * as argon2 from 'argon2';
 import orm from './database.js';
 import { User } from './models/User.js';
 

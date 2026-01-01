@@ -1,13 +1,16 @@
 import styled from '@emotion/styled';
 import type * as React from 'react';
 
+import { useAtomValue, useSetAtom } from 'jotai';
 import ContactItem from 'src/components/Contact/ContactItem';
 import contacts from 'src/components/Contact/contacts';
 import { toMedia } from 'src/mediaQuery';
 import { minRes, webkitMinDPR } from 'src/screens';
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
-import { rootStore } from 'src/store.js';
+import { navBarActions } from '../App/NavBar/store';
+import { mediaQueriesBaseAtom } from '../App/store';
+import { focusAtom } from 'jotai-optics';
 
 type ContactProps = Record<never, unknown>;
 
@@ -30,14 +33,21 @@ const ContactContainer = styled.div(pushed, {
     },
 });
 
+const mediaQueries = focusAtom(mediaQueriesBaseAtom, (optic) =>
+    optic.pick(['isHamburger', 'hiDpx']),
+);
+
 const Contact: React.FC<ContactProps> = () => {
-    const { isHamburger, hiDpx } = rootStore.mediaQueries.useTrackedStore();
+    const { isHamburger, hiDpx } = useAtomValue(mediaQueries);
+    const onScroll = useSetAtom(navBarActions.onScroll);
 
     return (
         <ContactContainer
             onScroll={
                 isHamburger
-                    ? rootStore.navBar.set.onScroll(navBarHeight.get(hiDpx))
+                    ? (ev) => {
+                          onScroll(navBarHeight.get(hiDpx), ev);
+                      }
                     : undefined
             }
         >

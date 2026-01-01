@@ -1,12 +1,12 @@
-import IconDelete from '@mui/icons-material/Delete.js';
+import IconDelete from '@mui/icons-material/Delete';
 import { Button as MuiButton } from '@mui/material';
 import {
+    type Identifier,
+    type RaRecord,
     useDelete,
     useNotify,
     useRecordContext,
     useRefresh,
-    type Identifier,
-    type RaRecord,
 } from 'react-admin';
 import type { AdminError } from 'src/types.js';
 
@@ -17,7 +17,7 @@ export const DeleteCalendarPiece = () => {
     const notify = useNotify();
 
     const handleClick = () => {
-        deleteOne(
+        record && deleteOne(
             'calendar-pieces',
             {
                 id: record.pivotId,
@@ -51,7 +51,7 @@ export const DeleteCalendarCollaborator = () => {
 
 
     const handleClick = () => {
-            deleteOne(
+            record && deleteOne(
                 'calendar-collaborators',
                 {
                     id: record.pivotId,

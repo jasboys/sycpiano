@@ -1,12 +1,12 @@
 // Various CSS emotion mixins
 
 import { css } from '@emotion/react';
-import { mix, darken } from 'polished';
-
+import { darken, mix } from 'polished';
+import { toMedia } from 'src/mediaQuery';
 import { hiDpx } from 'src/screens';
 import { navBarHeight } from 'src/styles/variables';
 import { logoBlue } from './colors';
-import { toMedia } from 'src/mediaQuery';
+import { latoFont } from './fonts';
 
 export const pushedHelper = (marginTop: number, unit: '%' | 'vh' = '%') => ({
     height: `calc(100${unit} - ${marginTop}px)`,
@@ -25,8 +25,9 @@ export const pushed = css({
 
 export const link = (colorString: string, hoverDelta = 0.2) =>
     css({
+        // fontWeight: 'bold',
         color: colorString,
-        textDecoration: 'none',
+        // textDecoration: 'none',
         cursor: 'pointer',
         transition: 'color 0.5s',
         '&:hover': {
@@ -64,3 +65,18 @@ export const cardShadow = `
     0 1px 1px 0 rgba(0 0 0 / 0.14),
     0 2px 1px -1px rgba(0 0 0 / 0.12);
 `;
+
+export const verticalTextStyle = css(latoFont(300), {
+    position: 'fixed',
+    top: navBarHeight.lowDpx,
+    left: 0,
+    transformOrigin: '0 0',
+    transform: 'rotate(90deg) translateY(-100%)',
+    padding: '2rem 2.5rem',
+    fontSize: '3rem',
+    color: logoBlue,
+    letterSpacing: '0.6rem',
+    [toMedia(hiDpx)]: {
+        top: navBarHeight.hiDpx,
+    },
+});

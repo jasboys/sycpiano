@@ -35,6 +35,12 @@ import {
     ProductList,
     ProductShow,
 } from './Product';
+import {
+    ProgramCreate,
+    ProgramEdit,
+    ProgramList,
+    ProgramShow,
+} from './Program/Program.jsx';
 import { UserEdit, UserList, UserShow } from './User';
 
 export const AdminPage = () => (
@@ -107,6 +113,13 @@ export const AdminPage = () => (
             show={CollaboratorShow}
             create={CollaboratorCreate}
             edit={CollaboratorEdit}
+        />
+        <Resource
+            name="programs"
+            list={ProgramList}
+            show={ProgramShow}
+            create={ProgramCreate}
+            edit={ProgramEdit}
         />
         {/* <Resource
             name="calendar-pieces"

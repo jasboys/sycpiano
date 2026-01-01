@@ -1,3 +1,4 @@
+import { tz } from '@date-fns/tz';
 import binarySearch from 'binary-search';
 import {
     addMonths,
@@ -13,10 +14,9 @@ import {
     startOfMonth,
     subMonths,
 } from 'date-fns';
-import { toZonedTime } from 'date-fns-tz';
 import type {
-    EventItemResponse,
     EventItem,
+    EventItemResponse,
     HasDate,
     MonthGroup,
     MonthGroups,
@@ -110,16 +110,14 @@ export const createMonthGroups = (
     if (order === 'desc') {
         const sortedEvents = events.sort(eventDescend);
         const lastMonth = startOfMonth(
-            toZonedTime(
-                parseISO(sortedEvents[0].dateTime),
-                sortedEvents[0].timezone,
-            ),
+            parseISO(sortedEvents[0].dateTime, {
+                in: tz(sortedEvents[0].timezone),
+            }),
         );
         const firstMonth = startOfMonth(
-            toZonedTime(
-                parseISO(sortedEvents[events.length - 1].dateTime),
-                sortedEvents[events.length - 1].timezone,
-            ),
+            parseISO(sortedEvents[events.length - 1].dateTime, {
+                in: tz(sortedEvents[events.length - 1].timezone),
+            }),
         );
         const result: MonthGroup[] = [];
         let count = 0;
@@ -157,16 +155,14 @@ export const createMonthGroups = (
     }
     const sortedEvents = events.sort(eventAscend);
     const firstMonth = endOfMonth(
-        toZonedTime(
-            parseISO(sortedEvents[0].dateTime),
-            sortedEvents[0].timezone,
-        ),
+        parseISO(sortedEvents[0].dateTime, {
+            in: tz(sortedEvents[0].timezone),
+        }),
     );
     const lastMonth = endOfMonth(
-        toZonedTime(
-            parseISO(sortedEvents[events.length - 1].dateTime),
-            sortedEvents[events.length - 1].timezone,
-        ),
+        parseISO(sortedEvents[events.length - 1].dateTime, {
+            in: tz(sortedEvents[events.length - 1].timezone),
+        }),
     );
     const result: MonthGroup[] = [];
     let count = 0;
@@ -251,7 +247,7 @@ export const findDateInMonthGroups = (mgs: MonthGroups, d: Date) => {
         isSameMonth(parseISO(mg.dateTime), d),
     );
     return monthGroup?.events.find((ev) =>
-        isSameDay(toZonedTime(parseISO(ev.dateTime), ev.timezone), d),
+        isSameDay(parseISO(ev.dateTime, { in: tz(ev.timezone) }), d),
     );
 };
 

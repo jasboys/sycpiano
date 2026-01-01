@@ -7,8 +7,8 @@ import {
     PrimaryKey,
     Property,
 } from '@mikro-orm/core';
-import { CalendarCollaborator } from './CalendarCollaborator.js';
 import { Calendar } from './Calendar.js';
+import { CalendarCollaborator } from './CalendarCollaborator.js';
 
 @Entity()
 export class Collaborator {

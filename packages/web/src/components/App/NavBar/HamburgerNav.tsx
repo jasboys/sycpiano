@@ -1,14 +1,15 @@
 import styled from '@emotion/styled';
 import { gsap } from 'gsap';
+import { useAtom } from 'jotai';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
 
 import HamburgerMenu from 'src/components/App/NavBar/HamburgerMenu';
 import NavBarLinks from 'src/components/App/NavBar/NavBarLinks';
 import type { NavBarLinksProps } from 'src/components/App/NavBar/types';
+import { cartAtoms } from 'src/components/Cart/store';
 import { logoBlue } from 'src/styles/colors';
-import { navBarStore } from './store.js';
-import { cartStore } from 'src/components/Cart/store.js';
+import { navBarAtoms } from './store';
 
 const MenuContainer = styled.div({
     margin: 'auto 0',
@@ -18,10 +19,10 @@ const HamburgerNav: React.FC<Omit<NavBarLinksProps, 'isHamburger'>> = ({
     currentBasePath,
     specificPath,
 }) => {
-    const isExpanded = navBarStore.use.isExpanded();
-    const cartOpen = cartStore.use.visible();
-    const enterTimeline = React.useRef<GSAPTimeline>();
-    const exitTimeline = React.useRef<GSAPTimeline>();
+    const [isExpanded, toggleExpanded] = useAtom(navBarAtoms.isExpanded);
+    const [cartOpen, toggleCartOpen] = useAtom(cartAtoms.visible);
+    const enterTimeline = React.useRef<GSAPTimeline>(null);
+    const exitTimeline = React.useRef<GSAPTimeline>(null);
     const el = React.useRef<HTMLDivElement>(null);
 
     React.useLayoutEffect(() => {
@@ -59,8 +60,8 @@ const HamburgerNav: React.FC<Omit<NavBarLinksProps, 'isHamburger'>> = ({
     }, []);
 
     const onClick = React.useCallback(() => {
-        navBarStore.set.toggleExpanded();
-        cartOpen && cartStore.set.visible(false);
+        toggleExpanded();
+        cartOpen && toggleCartOpen(false);
     }, [cartOpen]);
 
     return (
@@ -70,7 +71,7 @@ const HamburgerNav: React.FC<Omit<NavBarLinksProps, 'isHamburger'>> = ({
                 onClick={onClick}
                 layerColor={specificPath === '' ? 'white' : logoBlue}
             />
-            <Transition<HTMLDivElement>
+            <Transition
                 nodeRef={el}
                 in={isExpanded}
                 onEnter={() => {

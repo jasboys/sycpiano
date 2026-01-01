@@ -1,3 +1,1 @@
-import Discs from 'src/components/About/Discs/Discs';
-
-export const Component = Discs;
+export { default } from 'src/components/About/Discs/Discs';

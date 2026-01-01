@@ -1,8 +1,8 @@
+import { rename, stat } from 'node:fs/promises';
+import { parse, resolve } from 'node:path';
 import { format } from 'date-fns';
 import type express from 'express';
 import multer from 'multer';
-import { rename, stat } from 'node:fs/promises';
-import { parse, resolve } from 'node:path';
 import orm from '../database.js';
 import { Product, type ProductTypes } from '../models/Product.js';
 import * as stripeClient from '../stripe.js';
@@ -42,7 +42,7 @@ const productStorage = multer.diskStorage({
                         `${name}_${format(oldDate, 'yyyyMMdd')}${ext}`,
                     ),
                 );
-            } catch (e) {
+            } catch (_e) {
             } finally {
                 cb(null, `${name}${ext}`);
             }
@@ -69,7 +69,7 @@ const productStorage = multer.diskStorage({
                     }${ext}`;
                     count++;
                 }
-            } catch (e) {
+            } catch (_e) {
             } finally {
                 cb(null, fileName);
             }
@@ -154,7 +154,7 @@ productRouter.post(
                     name,
                     description: description ?? '',
                     price: default_price.unit_amount ?? 0,
-                    pages: Number.parseInt(pages),
+                    pages: Number.parseInt(pages, 10),
                     file: file ?? '',
                     images:
                         images.length !== 0

@@ -1,14 +1,14 @@
 import styled from '@emotion/styled';
+import { atom, useAtomValue, useSetAtom } from 'jotai';
 import type * as React from 'react';
 import { Link } from 'react-router-dom';
-
 import { SycLogo, sycLogoSize } from 'src/components/App/NavBar/SycLogo';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
-import { navBarStore } from './store.js';
-import { rootStore } from 'src/store.js';
+import { mediaQueriesAtoms } from '../store';
+import { navBarAtoms } from './store';
 
 const navBarFontSizeREM = 2.5;
 const letterSpacing = 0.05;
@@ -43,6 +43,7 @@ const StyledLink = styled(Link, {
 })<{ isHome: boolean; isExpanded: boolean }>(
     latoFont(300),
     {
+        textDecoration: 'none',
         display: 'inline-flex',
         fontSize: `${navBarFontSizeREM}rem`,
         letterSpacing: `${letterSpacing}rem`,
@@ -93,10 +94,22 @@ const routeNameMapping: Record<string, string | string[]> = {
     checkout: 'shop',
 };
 
+const mediaQueries = atom((get) => {
+    const { hiDpx, screenS, screenXS, isHamburger } = mediaQueriesAtoms;
+    return {
+        isHamburger: get(isHamburger),
+        screenS: get(screenS),
+        screenXS: get(screenXS),
+        hiDpx: get(hiDpx),
+    };
+});
+
 const NavBarLogo: React.FC<
     React.HTMLAttributes<HTMLDivElement> & NavBarLogoProps
 > = ({ isHome, isExpanded, specificRouteName }) => {
-    const { hiDpx, screenS, screenXS, isHamburger } = rootStore.mediaQueries.useTrackedStore();
+    const { hiDpx, screenS, screenXS, isHamburger } =
+        useAtomValue(mediaQueries);
+    const toggleExpanded = useSetAtom(navBarAtoms.isExpanded);
     const mapped =
         specificRouteName &&
         (routeNameMapping[specificRouteName] ?? specificRouteName);
@@ -117,7 +130,7 @@ const NavBarLogo: React.FC<
             isHome={isHome}
             isExpanded={isExpanded}
             onClick={() => {
-                navBarStore.set.toggleExpanded(false);
+                toggleExpanded(false);
             }}
         >
             <SycLogo />

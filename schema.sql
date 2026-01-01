@@ -69,7 +69,8 @@ CREATE TABLE public.calendar (
     website text,
     all_day boolean DEFAULT false NOT NULL,
     end_date date,
-    image_url text
+    image_url text,
+    hidden boolean DEFAULT false
 );
 
 
@@ -503,6 +504,28 @@ CREATE TABLE public.product (
 
 
 --
+-- Name: program; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.program (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    nickname text
+);
+
+
+--
+-- Name: program_piece; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.program_piece (
+    id uuid DEFAULT gen_random_uuid() NOT NULL,
+    program_id uuid,
+    piece_id uuid,
+    "order" integer
+);
+
+
+--
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -668,6 +691,22 @@ ALTER TABLE ONLY public.product
 
 
 --
+-- Name: program_piece program_piece_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.program_piece
+    ADD CONSTRAINT program_piece_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: program program_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.program
+    ADD CONSTRAINT program_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: schema_migrations schema_migrations_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -746,6 +785,20 @@ CREATE INDEX disc_link_disc_idx ON public.disc_link USING btree (disc_id);
 --
 
 CREATE INDEX music_file_music_idx ON public.music_file USING btree (music_id);
+
+
+--
+-- Name: program_piece_piece_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX program_piece_piece_idx ON public.program_piece USING btree (piece_id);
+
+
+--
+-- Name: program_piece_program_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX program_piece_program_idx ON public.program_piece USING btree (program_id);
 
 
 --
@@ -832,6 +885,22 @@ ALTER TABLE ONLY public.music_file
 
 
 --
+-- Name: program_piece program_piece_piece_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.program_piece
+    ADD CONSTRAINT program_piece_piece_id_fkey FOREIGN KEY (piece_id) REFERENCES public.piece(id) ON DELETE CASCADE;
+
+
+--
+-- Name: program_piece program_piece_program_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.program_piece
+    ADD CONSTRAINT program_piece_program_id_fkey FOREIGN KEY (program_id) REFERENCES public.program(id) ON DELETE CASCADE;
+
+
+--
 -- Name: user_product user_product_product_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -864,4 +933,7 @@ INSERT INTO public.schema_migrations (version) VALUES
     ('20231101033621'),
     ('20240326040532'),
     ('20240813051412'),
-    ('20240920030006');
+    ('20240918235122'),
+    ('20240920030006'),
+    ('20240925041201'),
+    ('20251228043404');

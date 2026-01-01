@@ -1,6 +1,6 @@
-import multer from 'multer';
 import { stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import multer from 'multer';
 import orm from '../database.js';
 import { Photo } from '../models/Photo.js';
 import { crud, setGetListHeaders } from './crud.js';
@@ -16,7 +16,7 @@ const photoStorage = multer.diskStorage({
                 resolve(process.env.IMAGE_ASSETS_DIR, 'gallery', fileName),
             );
             cb(Error('File already exists'), '');
-        } catch (e) {
+        } catch (_e) {
             cb(null, req.body.fileName);
         }
     },
@@ -33,7 +33,7 @@ photoRouter.post(
         try {
             const imageData = await genThumbnail(req.body.fileName);
             res.json({ fileName: req.body.fileName, ...imageData });
-        } catch (e) {
+        } catch (_e) {
             res.statusMessage = 'Error generating thumbnail';
             res.sendStatus(500);
         }

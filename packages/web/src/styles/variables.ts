@@ -42,7 +42,7 @@ export const playlistWidth = {
 
 export const playlistPadding = 10;
 
-export const cartWidth = 400;
+export const cartWidth = 420;
 
 export const CSSVariables = {
     navBarHeight: navBarHeight.lowDpx,

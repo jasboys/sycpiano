@@ -1,14 +1,15 @@
 import styled from '@emotion/styled';
 import TextField from '@mui/material/TextField';
 import { ThemeProvider } from '@mui/system';
+import {
+    useMutation,
+} from '@tanstack/react-query';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import Markdown from 'markdown-to-jsx';
 import { mix } from 'polished';
 import * as React from 'react';
-import isEmail from 'validator/es/lib/isEmail';
-
 import { Link } from 'react-router-dom';
 import { CartItem } from 'src/components/Cart/CartItem';
-import type { Product } from 'src/components/Shop/ShopList/types';
 import { toMedia } from 'src/mediaQuery';
 import { screenS } from 'src/screens';
 import { lightBlue, logoBlue, theme } from 'src/styles/colors';
@@ -16,10 +17,10 @@ import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { cartWidth } from 'src/styles/variables';
 import { formatPrice } from 'src/utils';
+import isEmail from 'validator/es/lib/isEmail';
 import { LoadingInstance } from '../LoadingSVG.jsx';
-import { cartStore, checkoutFn } from './store.js';
-import { useTrackedStore } from 'src/store.js';
-import { useMutation } from '@tanstack/react-query';
+import { shopFlatItemsAtom } from '../Shop/ShopList/store.js';
+import { cartActions, cartAtoms } from './store.js';
 
 const ARROW_SIDE = 32;
 
@@ -162,10 +163,11 @@ const Subtotal = styled.div({
 });
 
 const EmptyMessage = styled.div({
-    padding: '1rem',
+    padding: '2rem 1rem',
     width: '100%',
-    fontSize: '1.2rem',
+    fontSize: '1rem',
     backgroundColor: 'white',
+    textAlign: 'center',
 });
 
 const StripeDiv = styled.div({
@@ -186,7 +188,7 @@ const StripeLink = styled.a({
 });
 
 const Heading: React.FC<Record<never, unknown>> = () => {
-
+    const toggleCartVisible = useSetAtom(cartAtoms.visible);
     return (
         <StyledHeading>
             <div
@@ -203,7 +205,7 @@ const Heading: React.FC<Record<never, unknown>> = () => {
                 viewBox="0 0 120 120"
                 height="42"
                 width="42"
-                onClick={() => cartStore.set.toggleCartVisible(false)}
+                onClick={() => toggleCartVisible(false)}
             >
                 <path
                     d="M40 40L80 80M40 80L80 40"
@@ -217,21 +219,23 @@ const Heading: React.FC<Record<never, unknown>> = () => {
 
 const CheckoutForm: React.FC<{ cartLength: number }> = ({ cartLength }) => {
     const [isMouseDown, setIsMouseDown] = React.useState(false);
-    const savedEmail = cartStore.use.email();
-    const [email, setEmail] = React.useState('');
+    const [email, setEmail] = useAtom(cartAtoms.email);
     const [error, setError] = React.useState(false);
+    const checkoutFn = useSetAtom(cartActions.checkoutFn);
+    const setIsCheckingOut = useSetAtom(cartAtoms.isCheckingOut);
 
     const { mutate, isPending } = useMutation({
         mutationFn: checkoutFn,
-    })
+        onSettled: (data) => {
+            if (data) {
+                window.location.href = data;
+            }
+        }
+    });
 
     React.useEffect(() => {
-        setEmail(savedEmail);
-    }, [savedEmail]);
-
-    React.useEffect(() => {
-        cartStore.set.isCheckingOut(isPending);
-    }, [isPending])
+        setIsCheckingOut(isPending);
+    }, [isPending]);
 
     const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setEmail(event.target.value);
@@ -313,10 +317,11 @@ const InnerBorderContainer = styled.div<{ isCheckingOut: boolean }>(
 const faqRedirectLink: React.FC<
     React.AnchorHTMLAttributes<HTMLAnchorElement>
 > = ({ href }) => {
+    const toggleCartVisible = useSetAtom(cartAtoms.visible);
 
     return (
         href && (
-            <Link to={href} onClick={() => cartStore.set.toggleCartVisible(false)}>
+            <Link to={href} onClick={() => toggleCartVisible(false)}>
                 FAQs
             </Link>
         )
@@ -324,25 +329,19 @@ const faqRedirectLink: React.FC<
 };
 
 export const CartList: React.FC<Record<never, unknown>> = () => {
-    // const isCheckingOut = useAppSelector(({ cart }) => cart.isCheckingOut);
-    // const shopItems = useAppSelector(({ shop }) => shop.items);
-    // const cart = useAppSelector(({ cart }) => cart.items);
-    // const checkoutError = useAppSelector(({ cart }) => cart.checkoutError);
-    const { isCheckingOut, cartItems, checkoutError } = cartStore.useStore(
-        (state) => ({
-            isCheckingOut: state.isCheckingOut,
-            cartItems: state.items,
-            checkoutError: state.checkoutError,
-        }),
-    );
-    const shopItems = useTrackedStore().shop.items?.();
+    const isCheckingOut = useAtomValue(cartAtoms.isCheckingOut);
+    const cartItems = useAtomValue(cartAtoms.items);
+    const checkoutError = useAtomValue(cartAtoms.checkoutError);
+    const clearErrors = useSetAtom(cartActions.clearErrors);
+
+    const shopItems = useAtomValue(shopFlatItemsAtom);
 
     let subtotal = 0;
     const clearError =
         checkoutError.message !== '' &&
         cartItems.every((val) => !checkoutError.data?.includes(val));
     if (clearError) {
-        cartStore.set.clearErrors();
+        clearErrors();
     }
 
     return (
@@ -356,7 +355,7 @@ export const CartList: React.FC<Record<never, unknown>> = () => {
                 <Heading />
                 {cartItems.length !== 0 &&
                 shopItems &&
-                Object.keys(shopItems).length !== 0 ? (
+                shopItems.length !== 0 ? (
                     <StyledItemList>
                         <PromoMessage green={cartItems.length >= 2}>
                             <div>
@@ -388,38 +387,30 @@ export const CartList: React.FC<Record<never, unknown>> = () => {
                                 </Markdown>
                             </ErrorMessage>
                         )}
-                        {cartItems.map((item: string) => {
-                            // item = cart item
-                            // reduce over all categories of shop items { arrangement: Product[]; cadenza: Product[]; original: Product[] },
-                            // accumulate starting with undefined
-                            // if accumulator is falsy, then return
-                            // within all items in that category find the one where id === item
-                            // null coalesce
-                            const currentItem = Object.values(shopItems).reduce(
-                                (acc: Product | undefined, prods) =>
-                                    acc !== undefined
-                                        ? acc
-                                        : prods?.find((el) => el.id === item),
-                                undefined,
-                            );
-                            subtotal += currentItem ? currentItem.price : 0;
-                            const error =
-                                checkoutError.message !== '' &&
-                                !!checkoutError.data &&
-                                checkoutError.data?.includes(item);
-                            return (
-                                currentItem && (
+                        {cartItems
+                            .map((id) => {
+                                return shopItems.find((prod) => prod.id === id);
+                            })
+                            .map((prod) => {
+                                if (!prod) {
+                                    return null;
+                                }
+                                subtotal += prod.price;
+                                const error =
+                                    checkoutError.message !== '' &&
+                                    !!checkoutError.data &&
+                                    checkoutError.data?.includes(prod.id);
+                                return (
                                     <CartItem
-                                        key={item}
-                                        item={currentItem}
+                                        key={prod.id}
+                                        item={prod}
                                         error={error}
                                     />
-                                )
-                            );
-                        })}
+                                );
+                            })}
                     </StyledItemList>
                 ) : (
-                    <EmptyMessage>Cart is Empty!</EmptyMessage>
+                    <EmptyMessage>Cart is Empty! Add items at the <Link to="/shop/scores" state={{ from: 'cart' }}>shop</Link> page.</EmptyMessage>
                 )}
                 <Subtotal>
                     <div>Subtotal:</div>

@@ -90,8 +90,6 @@ interface BioTextProps {
 const BioText: React.FunctionComponent<BioTextProps> = (props) => {
     return (
         <div css={bioTextStyles.textContainer}>
-            <div css={bioTextStyles.spacer} />
-            {props.needsTitle && <div css={bioTextStyles.title}>Biography</div>}
             <div css={bioTextStyles.textGroup}>
                 {props.bio.map(({ text }) => {
                     return (

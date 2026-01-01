@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/correctness/useHookAtTopLevel: use is for OpenGL */
 import { gsap } from 'gsap';
 import { parseToRgb } from 'polished';
 import getNormals from 'polyline-normals';
@@ -6,12 +7,12 @@ import {
     AudioVisualizerBase,
     TWO_PI,
 } from 'src/components/Media/Music/AudioVisualizerBase';
+import { polarToCartesian } from 'src/components/Media/Music/utils';
 import {
     CIRCLE_SAMPLES,
     constantQ,
     firLoader,
 } from 'src/components/Media/Music/VisualizationUtils';
-import { polarToCartesian } from 'src/components/Media/Music/utils';
 import { initShader } from 'src/components/Media/Music/webGLHelpers';
 import {
     cqFragWebGL2,
@@ -20,7 +21,7 @@ import {
     lineVert,
     phaseVert,
 } from './shadersGL2.js';
-import { musicStore } from './store.js';
+import { musicAtoms } from './store.js';
 
 interface ShaderProgram {
     shader: WebGLShader;
@@ -309,7 +310,7 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
                     (firLoader.coeffs[i] +
                         fractionalPart * firLoader.deltas[i]);
             }
-            const result = radius + musicStore.get.volume() * sum * this.SCALE;
+            const result = radius + this.props.store.get(musicAtoms.volume) * sum * this.SCALE;
             let { x, y } = constantQ.angles[currentSample];
             x *= result;
             y *= result;
@@ -369,7 +370,7 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
 
         const waveformLength = waveform.length / 2;
         const volumeHeightScale =
-            musicStore.get.volume() * this.WAVEFORM_HALF_HEIGHT;
+            this.props.store.get(musicAtoms.volume) * this.WAVEFORM_HALF_HEIGHT;
         if (
             !this.waveformVertices ||
             this.waveformVertices.length !== waveformLength * 4
@@ -468,15 +469,15 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
             currentPosition && duration
                 ? Math.min((TWO_PI * currentPosition) / duration)
                 : 0;
-        const volume = musicStore.get.volume();
+        const volume = this.props.store.get(musicAtoms.volume);
         this.drawPlaybackHead(
             angle,
             WAVEFORM_CENTER_AXIS - volume * this.WAVEFORM_HALF_HEIGHT,
             WAVEFORM_CENTER_AXIS + volume * this.WAVEFORM_HALF_HEIGHT,
             this.white,
         );
-        const hoverAngle = musicStore.get.angle?.();
-        if (musicStore.get.isHoverSeekring() && hoverAngle !== undefined) {
+        const hoverAngle = this.props.store.get(musicAtoms.angle);
+        if (this.props.store.get(musicAtoms.isHoverSeekring) && hoverAngle !== undefined) {
             this.drawPlaybackHead(
                 hoverAngle,
                 WAVEFORM_CENTER_AXIS - volume * this.WAVEFORM_HALF_HEIGHT,
@@ -677,4 +678,4 @@ class AudioVisualizer extends AudioVisualizerBase<WebGL2RenderingContext> {
     };
 }
 
-export const Component = AudioVisualizer;
+export default AudioVisualizer;

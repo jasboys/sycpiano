@@ -1,4 +1,5 @@
 import styled from '@emotion/styled';
+import { useAtomValue } from 'jotai';
 import { lighten, rgba } from 'polished';
 import * as React from 'react';
 import { useForm } from 'react-hook-form';
@@ -17,10 +18,9 @@ import { screenXSandPortrait } from 'src/screens';
 import { lightBlue, logoBlue } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
-
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
-import { scheduleStore } from './store.js';
-import { useStore } from 'src/store.js';
+import { mediaQueriesAtoms } from '../App/store.js';
+import { scheduleAtoms } from './store.js';
 
 const unfocusedGray = rgba(180, 180, 180, 0.4);
 
@@ -197,10 +197,11 @@ const SubmitButton = styled.button<{ dirty: boolean; expanded: boolean }>(
 );
 
 export const Search: React.FC<SearchProps> = () => {
-    const { lastQuery } = scheduleStore.useTracked.search();
-    const isFetching = scheduleStore.use.isFetching();
-    const itemsLength = scheduleStore.use.itemsLength('search');
-    const screenXS = useStore().mediaQueries.screenXS();
+    const inputRef = React.useRef<HTMLDivElement>(null);
+    const lastQuery = useAtomValue(scheduleAtoms.lastQuery);
+    const isFetching = useAtomValue(scheduleAtoms.isFetching);
+    const itemsLength = useAtomValue(scheduleAtoms.itemsLength.search);
+    const screenXS = useAtomValue(mediaQueriesAtoms.screenXS);
     const [searchParams] = useSearchParams();
     const [focused, setFocused] = React.useState(false);
     const match = useMatch('/schedule/search');
@@ -245,11 +246,6 @@ export const Search: React.FC<SearchProps> = () => {
 
     const onSubmit = React.useCallback(
         (data: { search: string }) => {
-            // if (data.search === '') {
-            //     navigate('/schedule/upcoming');
-            // }
-            scheduleStore.set.isFetching(true);
-            scheduleStore.set.clearList('search');
             navigate(
                 `/schedule/search?${createSearchParams({ q: data.search })}`,
                 {
@@ -320,15 +316,19 @@ export const Search: React.FC<SearchProps> = () => {
                 >
                     <SearchIconInstance />
                 </SubmitButton>
-                <Transition<undefined>
+                <Transition
                     in={expanded}
                     timeout={250}
-                    onEnter={fadeOnEnter()}
-                    onExit={fadeOnExit()}
+                    onEnter={fadeOnEnter(inputRef)}
+                    onExit={fadeOnExit(inputRef)}
                     mountOnEnter={false}
                     unmountOnExit={false}
+                    nodeRef={inputRef}
                 >
-                    <InputGroup isMobile={screenXS || !!searchParams.get('q')}>
+                    <InputGroup
+                        ref={inputRef}
+                        isMobile={screenXS || !!searchParams.get('q')}
+                    >
                         <Span focused={focused}>
                             <Input
                                 id="search"
@@ -355,7 +355,7 @@ export const Search: React.FC<SearchProps> = () => {
                     </InputGroup>
                 </Transition>
             </Container>
-            {!!match && !isFetching && (
+            {!!match && !isFetching && lastQuery && (
                 <ResultsContainer>
                     <div
                         css={{ height: 50, width: '100%', flex: '0 0 50px' }}

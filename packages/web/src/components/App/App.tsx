@@ -2,49 +2,29 @@ import { Global } from '@emotion/react';
 import styled from '@emotion/styled';
 import { arrow, offset, shift, useFloating } from '@floating-ui/react-dom';
 import { useMediaQueries } from '@react-hook/media-query';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
 import { format } from 'date-fns';
+import { useAtom, useSetAtom } from 'jotai';
 import { omit, startCase, toLower } from 'lodash-es';
 import { parse, stringify } from 'qs';
 import * as React from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import {
     Navigate,
+    type PathMatch,
     Route,
     Routes,
     useLocation,
     useMatch,
     useNavigate,
-    type PathMatch,
 } from 'react-router-dom';
 import { SwitchTransition, Transition } from 'react-transition-group';
-
 import Container from 'src/components/App/Container';
-
-import type { RequiredProps as BioProps } from 'src/components/About/Bio/Bio';
-import type { RequiredProps as DiscsProps } from 'src/components/About/Discs/Discs';
-import type { RequiredProps as PressProps } from 'src/components/About/Press/Press';
-import type { RequiredProps as ContactProps } from 'src/components/Contact/Contact';
-import type { RequiredProps as HomeProps } from 'src/components/Home/Home';
-import type { RequiredProps as MusicProps } from 'src/components/Media/Music/Music';
-import type { RequiredProps as PhotosProps } from 'src/components/Media/Photos/Photos';
-import type { RequiredProps as VideosProps } from 'src/components/Media/Videos/Videos';
-import type { RequiredProps as ScheduleProps } from 'src/components/Schedule/Schedule';
-import type { RequiredProps as CheckoutSuccessProps } from 'src/components/Shop/CheckoutSuccess/CheckoutSuccess';
-import type { RequiredProps as FAQsProps } from 'src/components/Shop/FAQs/FAQs';
-import type { RequiredProps as RetrievalFormProps } from 'src/components/Shop/RetrievePurchases/RetrievePurchases';
-import type { RequiredProps as ShopListProps } from 'src/components/Shop/ShopList/ShopList';
-
 import NavBar from 'src/components/App/NavBar/NavBar';
-import AsyncComponent from 'src/components/AsyncComponent';
 import Cart from 'src/components/Cart/Cart';
 import { ClickListenerOverlay } from 'src/components/ClickListenerOverlay';
 import { LogoSVG } from 'src/components/LogoSVG';
 import { eventListNamesArr } from 'src/components/Schedule/types';
-import extractModule from 'src/module';
 import { GLOBAL_QUERIES } from 'src/screens';
-import { rootStore } from 'src/store.js';
 import { globalCss } from 'src/styles/global';
 import {
     fadeOnEnter,
@@ -54,87 +34,31 @@ import {
     slideOnExit,
     titleStringBase,
 } from 'src/utils';
-import type { ProductMap } from '../Shop/ShopList/types.js';
-import { mediaQueriesStore } from './store';
+import { cartAtoms } from '../Cart/store.js';
+import { navBarAtoms } from './NavBar/store.js';
+import { mediaQueriesMatch } from './store.js';
 
-const register = extractModule();
-const Contact = () =>
-    register(
-        'contact',
-        import(/* webpackChunkName: 'contact' */ 'src/components/Contact'),
-    );
-const Home = () =>
-    register(
-        'home',
-        import(/* webpackChunkName: 'home' */ 'src/components/Home'),
-    );
-const Schedule = () =>
-    register(
-        'schedule',
-        import(/* webpackChunkName: 'schedule' */ 'src/components/Schedule'),
-    );
-const Page404 = () =>
-    register(
-        'page404',
-        import(/* webpackChunkName: 'page404' */ 'src/components/Error'),
-    );
+const Contact = React.lazy(() => import('src/components/Contact'));
+const Home = React.lazy(() => import('src/components/Home'));
+const Schedule = React.lazy(() => import('src/components/Schedule'));
+const Page404 = React.lazy(() => import('src/components/Error'));
 
-const Bio = () =>
-    register(
-        'bio',
-        import(/* webpackChunkName: 'bio' */ 'src/components/About/Bio'),
-    );
-const Press = () =>
-    register(
-        'press',
-        import(/* webpackChunkName: 'press' */ 'src/components/About/Press'),
-    );
-const Discs = () =>
-    register(
-        'discs',
-        import(/* webpackChunkName: 'discs' */ 'src/components/About/Discs'),
-    );
+const Bio = React.lazy(() => import('src/components/About/Bio'));
+const Press = React.lazy(() => import('src/components/About/Press'));
+const Discs = React.lazy(() => import('src/components/About/Discs'));
 
-const Music = () =>
-    register(
-        'music',
-        import(/* webpackChunkName: 'music' */ 'src/components/Media/Music'),
-    );
-const Photos = () =>
-    register(
-        'photos',
-        import(/* webpackChunkName: 'photos' */ 'src/components/Media/Photos'),
-    );
-const Videos = () =>
-    register(
-        'videos',
-        import(/* webpackChunkName: 'videos' */ 'src/components/Media/Videos'),
-    );
+const Music = React.lazy(() => import('src/components/Media/Music'));
+const Photos = React.lazy(() => import('src/components/Media/Photos'));
+const Videos = React.lazy(() => import('src/components/Media/Videos'));
 
-const ShopList = () =>
-    register(
-        'shop',
-        import(/* webpackChunkName: 'shop' */ 'src/components/Shop/ShopList'),
-    );
-const RetrievalForm = () =>
-    register(
-        'retrievalForm',
-        import(
-            /* webpackChunkName: 'retrievalForm' */ 'src/components/Shop/RetrievePurchases'
-        ),
-    );
-const FAQs = () =>
-    register(
-        'faqs',
-        import(/* webpackChunkName: 'faqs' */ 'src/components/Shop/FAQs'),
-    );
-const CheckoutSuccess = () =>
-    register(
-        'checkoutSuccess',
-        import(
-            /* webpackChunkName: 'checkoutSuccess' */ 'src/components/Shop/CheckoutSuccess'
-        ),
-    );
+const ShopList = React.lazy(() => import('src/components/Shop/ShopList'));
+const RetrievalForm = React.lazy(
+    () => import('src/components/Shop/RetrievePurchases'),
+);
+const FAQs = React.lazy(() => import('src/components/Shop/FAQs'));
+const CheckoutSuccess = React.lazy(
+    () => import('src/components/Shop/CheckoutSuccess'),
+);
 
 const shopEnabled = JSON.parse(ENABLE_SHOP) === true;
 
@@ -164,11 +88,16 @@ const getMostSpecificRouteName = (pathname: string) => {
     return match ? match.slice(1) : '';
 };
 
-const fadeOnEnter0 = fadeOnEnter(0);
-const slideOnEnter0 = slideOnEnter(0);
-const slideOnExit0 = slideOnExit(0);
-const fadeOnEnter02 = fadeOnEnter(0.2);
-const fadeOnExit05 = fadeOnExit(0.5);
+const fadeOnEnter0 = (ref: React.RefObject<HTMLDivElement | null>) =>
+    fadeOnEnter(ref, 0);
+const slideOnEnter0 = (ref: React.RefObject<HTMLDivElement | null>) =>
+    slideOnEnter(ref, 0);
+const slideOnExit0 = (ref: React.RefObject<HTMLDivElement | null>) =>
+    slideOnExit(ref, 0);
+const fadeOnEnter02 = (ref: React.RefObject<HTMLDivElement | null>) =>
+    fadeOnEnter(ref, 0.2);
+const fadeOnExit05 = (ref: React.RefObject<HTMLDivElement | null>) =>
+    fadeOnExit(ref, 0.5);
 
 type RouterMatchPaths =
     | PathMatch<'about'>
@@ -248,8 +177,14 @@ const StyledClickDiv = styled(ClickListenerOverlay)<{
 
 const App: React.FC<Record<never, unknown>> = () => {
     const location = useLocation();
-    const { visible: cartVisible } = rootStore.cart.useTrackedStore();
-    const { isVisible: navBarVisible, isExpanded: navBarExpanded, showSubs } = rootStore.navBar.useTrackedStore();
+    const [cartVisible, toggleCartVisible] = useAtom(cartAtoms.visible);
+    const [navBarVisible, toggleNavBar] = useAtom(navBarAtoms.isVisible);
+    const [navBarExpanded, toggleNavBarExpanded] = useAtom(
+        navBarAtoms.isExpanded,
+    );
+    const [showSubs, setShowSubs] = useAtom(navBarAtoms.showSubs);
+    const setMediaQueries = useSetAtom(mediaQueriesMatch);
+    // const { isVisible: navBarVisible, isExpanded: navBarExpanded, showSubs } = rootStore.navBar.useTrackedStore();
 
     const [delayedRouteBase, setDelayedRouteBase] = React.useState(
         getRouteBase(location.pathname),
@@ -259,8 +194,10 @@ const App: React.FC<Record<never, unknown>> = () => {
         getMostSpecificRouteName(location.pathname),
     );
 
-    const arrowRef = React.useRef<HTMLDivElement | null>(null);
-    const timerRef = React.useRef<ReturnType<typeof setTimeout>>();
+    const arrowRef = React.useRef<HTMLDivElement>(null);
+    const timerRef = React.useRef<ReturnType<typeof setTimeout>>(0);
+    const navbarRef = React.useRef<HTMLDivElement>(null);
+    const fadingRef = React.useRef<HTMLDivElement>(null);
 
     const { matches: mediaMatches } = useMediaQueries(GLOBAL_QUERIES);
     const { isHamburger, screenXS, screenM, hiDpx } = mediaMatches;
@@ -270,29 +207,29 @@ const App: React.FC<Record<never, unknown>> = () => {
     // Make sure to adjust this match array when adding new pages, especially with subpaths
     const [routerMatch, transitionMatch] = useCustomMatch();
 
-    const { data: shopItems, isSuccess } = useQuery({
-        queryKey: ['shop'],
-        queryFn: async () => {
-            const { data: items } =
-                await axios.get<ProductMap>('/api/shop/items');
-            return items;
-        },
-    });
+    // const { data: shopItems, isSuccess } = useQuery({
+    //     queryKey: ['shop'],
+    //     queryFn: async () => {
+    //         const { data: items } =
+    //             await axios.get<ProductMap>('/api/shop/items');
+    //         return items;
+    //     },
+    // });
 
-    React.useEffect(() => {
-        if (isSuccess) {
-            rootStore.shop.set.items?.(shopItems);
-        }
-    }, [shopItems, isSuccess]);
+    // React.useEffect(() => {
+    //     if (isSuccess) {
+    //         rootStore.shop.set.items?.(shopItems);
+    //     }
+    // }, [shopItems, isSuccess]);
 
     const {
         x,
         y,
-        refs: { reference, floating },
+        refs: { reference: anchorRef, floating },
         strategy,
         middlewareData,
         update,
-    } = useFloating<HTMLDivElement>({
+    } = useFloating<HTMLButtonElement>({
         middleware: [
             offset({ mainAxis: hiDpx ? -12 : -4 }),
             shift(),
@@ -325,10 +262,8 @@ const App: React.FC<Record<never, unknown>> = () => {
     }, [location]);
 
     React.useEffect(() => {
-        if (!isHamburger) {
-            if (!navBarVisible) {
-                rootStore.navBar.set.toggleNavBar(true);
-            }
+        if (!isHamburger && !navBarVisible) {
+            toggleNavBar(true);
         }
     }, [screenXS, screenM, navBarVisible]);
 
@@ -337,7 +272,7 @@ const App: React.FC<Record<never, unknown>> = () => {
         .map(([_, v]) => v);
 
     React.useEffect(() => {
-        mediaQueriesStore.set.matches(mediaMatches);
+        setMediaQueries(mediaMatches);
     }, [...stableMediaArray]);
 
     React.useEffect(() => {
@@ -373,35 +308,40 @@ const App: React.FC<Record<never, unknown>> = () => {
             />
             <RootContainer isHome={location.pathname === '/'}>
                 <LogoSVG />
-                <Transition<undefined>
+                <Transition
                     in={navBarVisible || !isMobile}
-                    onEntering={(el, isAppearing) => {
+                    onEntering={(isAppearing) => {
                         if (isAppearing) {
-                            fadeOnEnter0(el, isAppearing);
+                            fadeOnEnter0(navbarRef)(isAppearing);
                         } else {
-                            slideOnEnter0(el);
+                            slideOnEnter0(navbarRef)();
                         }
                     }}
-                    onExiting={slideOnExit0}
+                    onExiting={slideOnExit0(navbarRef)}
                     timeout={250}
                     appear={true}
+                    nodeRef={navbarRef}
                 >
                     <NavBar
                         delayedRouteBase={delayedRouteBase}
                         currentBasePath={getRouteBase(location.pathname)}
                         specificRouteName={delayedSpecific}
-                        ref={reference}
+                        anchorRef={anchorRef}
+                        navbarRef={navbarRef}
                     />
                 </Transition>
                 <SwitchTransition>
-                    <Transition<undefined>
+                    <Transition
                         key={transitionMatch?.pathnameBase}
-                        onEntering={fadeOnEnter02}
-                        onExiting={fadeOnExit05}
+                        onEntering={fadeOnEnter02(fadingRef)}
+                        onExiting={fadeOnExit05(fadingRef)}
                         timeout={800}
                         appear={true}
+                        nodeRef={fadingRef}
+                        mountOnEnter={true}
+                        unmountOnExit={true}
                     >
-                        <FadingContainer>
+                        <FadingContainer ref={fadingRef}>
                             <Routes
                                 location={{
                                     ...location,
@@ -410,29 +350,11 @@ const App: React.FC<Record<never, unknown>> = () => {
                                 }}
                             >
                                 <Route path="about/*" element={<Container />}>
-                                    <Route
-                                        path="biography"
-                                        element={
-                                            <AsyncComponent<BioProps>
-                                                moduleProvider={Bio}
-                                            />
-                                        }
-                                    />
-                                    <Route
-                                        path="press"
-                                        element={
-                                            <AsyncComponent<PressProps>
-                                                moduleProvider={Press}
-                                            />
-                                        }
-                                    />
+                                    <Route path="biography" element={<Bio />} />
+                                    <Route path="press" element={<Press />} />
                                     <Route
                                         path="discography"
-                                        element={
-                                            <AsyncComponent<DiscsProps>
-                                                moduleProvider={Discs}
-                                            />
-                                        }
+                                        element={<Discs />}
                                     />
                                     <Route
                                         index
@@ -445,39 +367,14 @@ const App: React.FC<Record<never, unknown>> = () => {
                                         element={<Navigate to="/not-found" />}
                                     />
                                 </Route>
-                                <Route
-                                    path="contact"
-                                    element={
-                                        <AsyncComponent<ContactProps>
-                                            moduleProvider={Contact}
-                                        />
-                                    }
-                                />
+                                <Route path="contact" element={<Contact />} />
                                 <Route path="media/*" element={<Container />}>
                                     <Route
                                         path="videos/*"
-                                        element={
-                                            <AsyncComponent<VideosProps>
-                                                moduleProvider={Videos}
-                                            />
-                                        }
+                                        element={<Videos />}
                                     />
-                                    <Route
-                                        path="music/*"
-                                        element={
-                                            <AsyncComponent<MusicProps>
-                                                moduleProvider={Music}
-                                            />
-                                        }
-                                    />
-                                    <Route
-                                        path="photos"
-                                        element={
-                                            <AsyncComponent<PhotosProps>
-                                                moduleProvider={Photos}
-                                            />
-                                        }
-                                    />
+                                    <Route path="music/*" element={<Music />} />
+                                    <Route path="photos" element={<Photos />} />
                                     <Route
                                         index
                                         element={
@@ -493,15 +390,15 @@ const App: React.FC<Record<never, unknown>> = () => {
                                     {eventListNamesArr.map((type) => (
                                         <Route
                                             key={`schedule-${type}`}
-                                            path={type}
-                                            element={
-                                                <AsyncComponent<ScheduleProps>
-                                                    moduleProvider={Schedule}
-                                                    type={type}
-                                                />
-                                            }
+                                            path={`${type}/*`}
+                                            element={<Schedule type={type} />}
                                         />
                                     ))}
+                                    <Route
+                                        key="schedule-event"
+                                        path="event/*"
+                                        element={<Schedule type="event" />}
+                                    />
                                     <Route
                                         index
                                         element={
@@ -516,36 +413,17 @@ const App: React.FC<Record<never, unknown>> = () => {
 
                                 <Route path="shop/*" element={<Container />}>
                                     <Route
-                                        path="scores/*"
-                                        element={
-                                            <AsyncComponent<ShopListProps>
-                                                moduleProvider={ShopList}
-                                            />
-                                        }
+                                        path="scores/:product?"
+                                        element={<ShopList />}
                                     />
                                     <Route
                                         path="retrieve-purchased"
-                                        element={
-                                            <AsyncComponent<RetrievalFormProps>
-                                                moduleProvider={RetrievalForm}
-                                            />
-                                        }
+                                        element={<RetrievalForm />}
                                     />
-                                    <Route
-                                        path="faqs"
-                                        element={
-                                            <AsyncComponent<FAQsProps>
-                                                moduleProvider={FAQs}
-                                            />
-                                        }
-                                    />
+                                    <Route path="faqs" element={<FAQs />} />
                                     <Route
                                         path="checkout-success"
-                                        element={
-                                            <AsyncComponent<CheckoutSuccessProps>
-                                                moduleProvider={CheckoutSuccess}
-                                            />
-                                        }
+                                        element={<CheckoutSuccess />}
                                     />
                                     <Route
                                         index
@@ -558,27 +436,15 @@ const App: React.FC<Record<never, unknown>> = () => {
                                 </Route>
                                 <Route
                                     path="not-found"
-                                    element={
-                                        <AsyncComponent<object>
-                                            moduleProvider={Page404}
-                                        />
-                                    }
+                                    element={<Page404 />}
                                 />
                                 <Route
                                     index
-                                    element={
-                                        <AsyncComponent<HomeProps>
-                                            moduleProvider={Home}
-                                        />
-                                    }
+                                    element={<Home />}
                                 />
                                 <Route
                                     path="*"
-                                    element={
-                                        <AsyncComponent<object>
-                                            moduleProvider={Page404}
-                                        />
-                                    }
+                                    element={<Page404 />}
                                 />
                             </Routes>
                         </FadingContainer>
@@ -587,7 +453,7 @@ const App: React.FC<Record<never, unknown>> = () => {
                 {shopEnabled && (
                     <Cart
                         floatingRef={
-                            floating as React.MutableRefObject<HTMLDivElement>
+                            floating as React.RefObject<HTMLDivElement>
                         }
                         arrowRef={arrowRef}
                         strategy={strategy}
@@ -596,17 +462,15 @@ const App: React.FC<Record<never, unknown>> = () => {
                         update={update}
                     />
                 )}
-                {(navBarExpanded || cartVisible) && (
+                {(navBarExpanded || cartVisible || showSubs.length) && (
                     <StyledClickDiv
                         isMobile={isMobile}
                         cartOpen={cartVisible}
                         onClick={() => {
-                            cartVisible &&
-                                rootStore.cart.set.toggleCartVisible(false);
-                            navBarExpanded &&
-                                rootStore.navBar.set.toggleExpanded(false);
+                            cartVisible && toggleCartVisible(false);
+                            navBarExpanded && toggleNavBarExpanded(false);
                             showSubs.length &&
-                                rootStore.navBar.set.callSub({
+                                setShowSubs({
                                     sub: '',
                                     isHamburger: isMobile,
                                 });

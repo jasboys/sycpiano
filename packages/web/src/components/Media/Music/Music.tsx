@@ -1,25 +1,25 @@
 /* global MUSIC_PATH */
 
+import { css } from '@emotion/react';
+import { getDefaultStore, useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { focusAtom } from 'jotai-optics';
 import isEmpty from 'lodash-es/isEmpty';
 import * as React from 'react';
 import {
-    useMatch,
-    useNavigate,
     type NavigateFunction,
     type PathMatch,
+    useMatch,
+    useNavigate,
 } from 'react-router-dom';
-
+import { navBarActions, navBarAtoms } from 'src/components/App/NavBar/store.js';
+import { mediaQueriesBaseAtom } from 'src/components/App/store.js';
 import AudioInfo from 'src/components/Media/Music/AudioInfo';
 import AudioUI from 'src/components/Media/Music/AudioUI';
 import type { AudioVisualizerType } from 'src/components/Media/Music/AudioVisualizerBase.jsx';
 import MusicPlaylist from 'src/components/Media/Music/MusicPlaylist';
-import { toMedia } from 'src/mediaQuery';
-
-import { css } from '@emotion/react';
-import { useQuery } from '@tanstack/react-query';
 import {
-    fetchPlaylistFn,
-    itemsToFlatItems,
+    musicActions,
+    musicAtoms,
     musicStore,
 } from 'src/components/Media/Music/store.js';
 import type {
@@ -32,6 +32,7 @@ import {
     getSrc,
     getWaveformSrc,
 } from 'src/components/Media/Music/utils';
+import { toMedia } from 'src/mediaQuery';
 import extractModule from 'src/module';
 import {
     minRes,
@@ -43,7 +44,6 @@ import {
 import { pushed } from 'src/styles/mixins';
 import { navBarHeight, playlistContainerWidth } from 'src/styles/variables';
 import { MusicPlayer } from './MusicPlayer.js';
-import { rootStore, useStore } from 'src/store.js';
 
 const detectWebGL = () => {
     const canvas = document.createElement('canvas');
@@ -53,6 +53,27 @@ const detectWebGL = () => {
         canvas.getContext('experimental-webgl');
     return gl;
 };
+
+let Visualizer: React.LazyExoticComponent<AudioVisualizerType>;
+const gl = detectWebGL();
+if (gl) {
+    if (gl instanceof WebGL2RenderingContext) {
+        Visualizer = React.lazy(
+            async () =>
+                import('src/components/Media/Music/AudioVisualizerWebGL2.js'),
+        );
+    } else {
+        Visualizer = React.lazy(
+            async () =>
+                import('src/components/Media/Music/AudioVisualizerWebGL.js'),
+        );
+    }
+} else {
+    Visualizer = React.lazy(
+        async () =>
+            import('src/components/Media/Music/AudioVisualizerCanvas.js'),
+    );
+}
 
 interface MusicStateToProps {
     readonly items: MusicListItem[];
@@ -66,11 +87,10 @@ type PathMatchResult =
     | PathMatch<'composer' | 'piece' | 'movement'>
     | null;
 
-type MusicProps = MusicStateToProps &
-    {
-        matches: PathMatchResult;
-        navigate: NavigateFunction;
-    };
+type MusicProps = MusicStateToProps & {
+    matches: PathMatchResult;
+    navigate: NavigateFunction;
+};
 
 const styles = {
     music: css(pushed, {
@@ -124,49 +144,74 @@ const styles = {
     }),
 };
 
-const Music: React.FC = () => {
-    const { data: items, isSuccess } = useQuery({
-        queryKey: ['musicPlaylist'],
-        queryFn: async () => await fetchPlaylistFn(),
-    });
+const musicSelectorAtom = focusAtom(musicStore, (optic) =>
+    optic.pick([
+        'isPlaying',
+        'flatItems',
+        'currentTrack',
+        'isShuffle',
+        'isHoverSeekring',
+        'duration',
+        'volume',
+        'angle',
+    ]),
+);
 
-    React.useEffect(() => {
-        isSuccess && items && musicStore.set.items(items);
-        isSuccess && items && musicStore.set.flatItems(itemsToFlatItems(items));
-    }, [isSuccess, items]);
+const mediaQueriesSelectorAtom = focusAtom(mediaQueriesBaseAtom, (optic) =>
+    optic.pick([
+        'hiDpx',
+        'isHamburger',
+        'screenPortrait',
+        'screenM',
+        'screenL',
+        'screenLandscape',
+    ]),
+);
+
+const Music: React.FC = () => {
+    const { isSuccess } = useAtomValue(musicAtoms.items);
 
     const matches: PathMatchResult = [
         useMatch('media/music/:composer/:piece'),
-        useMatch('media/music/:composer/:piece/:movement')
+        useMatch('media/music/:composer/:piece/:movement'),
     ].reduce((prev, curr) => prev ?? curr, null);
 
     const navigate = useNavigate();
 
-    const Visualizer = React.useRef<AudioVisualizerType>();
+    // const Visualizer = React.useRef<AudioVisualizerType>(null);
 
-    const [visualizerLoaded, setVisualizerLoaded] =
-        React.useState<boolean>(false);
+    // const [visualizerLoaded, setVisualizerLoaded] =
+    //     React.useState<boolean>(false);
 
     const [initialized, setInitialized] = React.useState<boolean>(false);
 
     const {
         isPlaying,
-        flatItems,
-        currentTrack,
         isShuffle,
         isHoverSeekring,
         duration,
         volume,
         angle,
-    } = musicStore.useTrackedStore();
-    const navBarShow = useStore().navBar.isVisible();
+    } = useAtomValue(musicSelectorAtom);
+    const flatItems = useAtomValue(musicAtoms.flatItems);
+    const setVolume = useSetAtom(musicAtoms.volume);
+    const setIsLoading = useSetAtom(musicAtoms.isLoading);
+    const setRadii = useSetAtom(musicAtoms.radii);
+    const setPlaybackPosition = useSetAtom(musicAtoms.playbackPosition);
+    const [currentTrack, setCurrentTrack] = useAtom(musicAtoms.currentTrack);
+    const { fn: getNextTrack } = useAtomValue(musicActions.getNextTrackAtom);
+    const { fn: getFirstTrack } = useAtomValue(musicActions.getFirstTrackAtom);
+    const callbackAction = useSetAtom(musicActions.callbackAction);
+
+    const navBarShow = useAtomValue(navBarAtoms.isVisible);
+    const onScroll = useSetAtom(navBarActions.onScroll);
 
     const audio = React.useRef<HTMLAudioElement | null>(null);
     const buffers = React.useRef<{
         prev: HTMLAudioElement | null;
         next: HTMLAudioElement | null;
     }>({ prev: null, next: null });
-    const shouldPlay = React.useRef<boolean>();
+    const shouldPlay = React.useRef<boolean>(false);
     const tracks = React.useRef<{
         prev: MusicFileItem | undefined;
         next: MusicFileItem | undefined;
@@ -179,24 +224,24 @@ const Music: React.FC = () => {
         screenM,
         screenL,
         screenLandscape,
-    } = rootStore.mediaQueries.useTrackedStore();
+    } = useAtomValue(mediaQueriesSelectorAtom);
 
     const musicPlayer = React.useRef<MusicPlayer>(
         new MusicPlayer({
             isMobile: isHamburger,
-            volumeCallback: (volume: number) => musicStore.set.volume(volume),
-            loadingCallback: () => musicStore.set.isLoading(true),
-            loadedCallback: () => musicStore.set.isLoading(false),
+            volumeCallback: (volume: number) => setVolume(volume),
+            loadingCallback: () => setIsLoading(true),
+            loadedCallback: () => setIsLoading(false),
         }),
     );
 
     React.useEffect(() => {
-        const prev = (tracks.current.prev = musicStore.get.getNextTrack(
+        const prev = (tracks.current.prev = getNextTrack(
             currentTrack,
             'prev',
             true,
         ));
-        const next = (tracks.current.next = musicStore.get.getNextTrack(
+        const next = (tracks.current.next = getNextTrack(
             currentTrack,
             'next',
             true,
@@ -243,7 +288,7 @@ const Music: React.FC = () => {
                         subsequent.name,
                     ),
                 );
-                musicStore.set.currentTrack?.(subsequent);
+                setCurrentTrack(subsequent);
                 musicPlayer.current.setTrack(
                     getSrc(subsequent),
                     getWaveformSrc(subsequent),
@@ -253,44 +298,6 @@ const Music: React.FC = () => {
         },
         [flatItems, currentTrack],
     );
-
-    const importVisualizer = React.useCallback(async () => {
-        const register = extractModule();
-        const gl = detectWebGL();
-        if (gl) {
-            if (gl instanceof WebGL2RenderingContext) {
-                const component = await register(
-                    'visualizer',
-                    import(
-                        /* webpackChunkName: 'visualizerWebGL2' */ 'src/components/Media/Music/AudioVisualizerWebGL2.js'
-                    ),
-                );
-                console.log('Using WebGL2');
-                Visualizer.current = component;
-                setVisualizerLoaded(true);
-            } else {
-                const component = await register(
-                    'visualizer',
-                    import(
-                        /* webpackChunkName: 'visualizerWebGL' */ 'src/components/Media/Music/AudioVisualizerWebGL.js'
-                    ),
-                );
-                console.log('Using WebGL');
-                Visualizer.current = component;
-                setVisualizerLoaded(true);
-            }
-        } else {
-            const component = await register(
-                'visualizer',
-                import(
-                    /* webpackChunkName: 'visualizerCanvas' */ 'src/components/Media/Music/AudioVisualizerCanvas'
-                ),
-            );
-            console.log('Using Canvas');
-            Visualizer.current = component;
-            setVisualizerLoaded(true);
-        }
-    }, []);
 
     React.useEffect(() => {
         if (isSuccess && flatItems.length && !initialized) {
@@ -308,13 +315,13 @@ const Music: React.FC = () => {
                     ...matches?.params,
                 };
 
-                const first = musicStore.get.getFirstTrack({
+                const first = getFirstTrack({
                     composer,
                     piece,
                     movement,
                 });
 
-                musicStore.set.currentTrack?.(first);
+                setCurrentTrack(first);
                 await musicPlayer.current.initialize(
                     audio.current,
                     buffers.current.prev,
@@ -323,14 +330,13 @@ const Music: React.FC = () => {
                 );
                 setInitialized(true);
             };
-            musicStore.set.isLoading(true);
-            importVisualizer();
+            setIsLoading(true);
             initialize();
             return () => {
                 musicPlayer.current.pause();
             };
         }
-    }, [isSuccess, flatItems, initialized, matches]);
+    }, [isSuccess, flatItems, initialized, matches, getFirstTrack]);
 
     React.useEffect(() => {
         if ('mediaSession' in navigator) {
@@ -343,7 +349,7 @@ const Music: React.FC = () => {
                 navigator.mediaSession.setActionHandler('previoustrack', () =>
                     playSubsequent('prev'),
                 );
-            } catch (e) {
+            } catch (_e) {
                 console.log('Media session action is not supported');
             }
         }
@@ -356,9 +362,9 @@ const Music: React.FC = () => {
     const onDrag = React.useCallback((percent: number) => {
         const position = musicPlayer.current.audio.duration * percent;
 
-        musicStore.set.playbackPosition(position);
+        setPlaybackPosition(position);
         musicPlayer.current.audio.currentTime = position;
-    }, []);
+    }, [setPlaybackPosition]);
 
     const onStartDrag = React.useCallback((percent: number) => {
         const audio = musicPlayer.current.audio;
@@ -382,7 +388,7 @@ const Music: React.FC = () => {
         (play?: boolean) => () => {
             if (currentTrack) {
                 const audio = musicPlayer.current.audio;
-                musicStore.set.callbackAction({
+                callbackAction({
                     playing:
                         play !== undefined && isPlaying !== play
                             ? play
@@ -392,7 +398,7 @@ const Music: React.FC = () => {
                 });
             }
         },
-        [currentTrack, isPlaying],
+        [currentTrack, isPlaying, callbackAction],
     );
 
     const selectTrack = React.useCallback(
@@ -401,7 +407,7 @@ const Music: React.FC = () => {
                 await musicPlayer.current.context.resume();
             }
             if (musicFile.id !== currentTrack?.id) {
-                musicStore.set.currentTrack?.(musicFile);
+                setCurrentTrack(musicFile);
                 musicPlayer.current.setTrack(
                     getSrc(musicFile),
                     getWaveformSrc(musicFile),
@@ -409,15 +415,19 @@ const Music: React.FC = () => {
                 );
             }
         },
-        [currentTrack],
+        [currentTrack, setCurrentTrack],
     );
+
+    // const visualizerLoadedCallback = React.useCallback(() => {
+    //     setVisualizerLoaded(true);
+    // })
 
     return (
         <div
             css={styles.music}
             onScroll={
                 isHamburger
-                    ? rootStore.navBar.set.onScroll(navBarHeight.get(hiDpx))
+                    ? (ev) => onScroll(navBarHeight.get(hiDpx), ev)
                     : undefined
             }
         >
@@ -438,13 +448,17 @@ const Music: React.FC = () => {
             <audio
                 id="prev"
                 crossOrigin="anonymous"
-                ref={(el) => (buffers.current.prev = el)}
+                ref={(el) => {
+                    buffers.current.prev = el;
+                }}
                 preload="auto"
             />
             <audio
                 id="next"
                 crossOrigin="anonymous"
-                ref={(el) => (buffers.current.next = el)}
+                ref={(el) => {
+                    buffers.current.next = el;
+                }}
                 preload="auto"
             />
             <div
@@ -461,8 +475,8 @@ const Music: React.FC = () => {
                     playSubsequent={playSubsequent}
                 />
                 <AudioInfo matchParams={!isEmpty(matches?.params)} />
-                {visualizerLoaded && Visualizer.current && (
-                    <Visualizer.current
+                <React.Suspense fallback={null}>
+                    <Visualizer
                         musicPlayer={musicPlayer.current}
                         isPlaying={isPlaying}
                         duration={duration}
@@ -473,9 +487,10 @@ const Music: React.FC = () => {
                         }
                         isHoverSeekring={isHoverSeekring}
                         hoverAngle={angle}
-                        setRadii={musicStore.set.radii}
+                        setRadii={setRadii}
+                        store={getDefaultStore()}
                     />
-                )}
+                </React.Suspense>
             </div>
             <MusicPlaylist onClick={selectTrack} />
         </div>

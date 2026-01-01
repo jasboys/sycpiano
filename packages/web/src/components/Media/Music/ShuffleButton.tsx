@@ -1,9 +1,10 @@
 import { css, type Interpolation, type Theme } from '@emotion/react';
+import { useAtomValue } from 'jotai';
 import * as React from 'react';
+import { mediaQueriesAtoms } from 'src/components/App/store';
 
 import { toMedia } from 'src/mediaQuery';
 import { screenM, screenPortrait, screenXS } from 'src/screens';
-import { useStore } from 'src/store.js';
 import { lightBlue } from 'src/styles/colors';
 import { playlistWidth } from 'src/styles/variables';
 
@@ -21,6 +22,7 @@ const upClass = css({
 
 const baseClass = (on?: boolean) =>
     css({
+        all: 'unset',
         position: 'fixed',
         bottom: 25,
         right: `calc(${playlistWidth.desktop} / 3)`,
@@ -51,10 +53,10 @@ const baseClass = (on?: boolean) =>
 const ShuffleButton: React.FC<ShuffleButtonProps> = ({ on, onClick }) => {
     const [extraClass, setExtraClass] =
         React.useState<Interpolation<Theme>>(null);
-    const screenTouch = useStore().mediaQueries.screenTouch();
+    const screenTouch = useAtomValue(mediaQueriesAtoms.screenTouch);
 
     return (
-        <div
+        <button
             css={[baseClass(on), extraClass]}
             onClick={onClick}
             onMouseDown={() => !screenTouch && setExtraClass(null)}
@@ -64,6 +66,7 @@ const ShuffleButton: React.FC<ShuffleButtonProps> = ({ on, onClick }) => {
             onBlur={() => !screenTouch && setExtraClass(null)}
             onFocus={() => !screenTouch && setExtraClass(upClass)}
             onKeyUp={onClick}
+            type="button"
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -92,7 +95,7 @@ const ShuffleButton: React.FC<ShuffleButtonProps> = ({ on, onClick }) => {
                     strokeWidth="6"
                 />
             </svg>
-        </div>
+        </button>
     );
 };
 

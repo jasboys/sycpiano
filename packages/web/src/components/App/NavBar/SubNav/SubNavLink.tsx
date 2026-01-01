@@ -20,6 +20,8 @@ interface SubNavLinkProps {
 const styles = {
     link: css({
         color: navFontColor,
+        textDecoration: 'none',
+        fontWeight: 'unset',
         position: 'relative',
         width: '100%',
         display: 'block',
@@ -46,8 +48,11 @@ const styles = {
         },
     }),
     isActive: css({
+        color: lightBlue,
+        borderLeft: '4px solid var(--light-blue)',
         [toMedia(isHamburger)]: {
             color: lightBlue,
+            borderLeft: 'unset',
         },
         '&:hover': {
             color: 'white',
@@ -83,6 +88,7 @@ const SubNavLink: React.FC<SubNavLinkProps> = ({
     isHome,
     currentSpecificPath,
 }) => {
+    console.log(link, currentSpecificPath);
     const isActive = link.name === currentSpecificPath;
     return (
         <li css={noHighlight} className={basePath.name}>

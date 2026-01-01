@@ -1,17 +1,17 @@
 import {
-    type ShowProps,
-    Show,
-    TabbedShowLayout,
-    Tab,
-    TextField,
-    BooleanField,
-    UrlField,
-    ImageField,
     ArrayField,
+    BooleanField,
     Datagrid,
-    Empty,
+    ImageField,
+    Show,
+    type ShowProps,
+    Tab,
+    TabbedShowLayout,
+    TextField,
+    UrlField,
     useCanAccess,
 } from 'react-admin';
+import { Empty } from '../Shared.jsx';
 
 export const CalendarShow = (props: ShowProps) => {
     const { canAccess: canAccessPieces } = useCanAccess({
@@ -30,6 +30,7 @@ export const CalendarShow = (props: ShowProps) => {
                     <TextField source="name" />
                     <TextField source="dateTime" />
                     <BooleanField source="allDay" />
+                    <BooleanField source="hidden" />
                     <TextField source="endDate" />
                     <TextField source="timezone" />
                     <TextField source="location" />
@@ -49,7 +50,7 @@ export const CalendarShow = (props: ShowProps) => {
                 <Tab label="Pieces">
                     <ArrayField source="pieces">
                         <Datagrid
-                            empty={<Empty />}
+                            empty={<Empty assoc="pieces" />}
                             rowClick={(id) => {
                                 const type = canAccessPieces ? 'edit' : 'show';
                                 return `/pieces/${id}/${type}`;
@@ -63,10 +64,12 @@ export const CalendarShow = (props: ShowProps) => {
                 </Tab>
                 <Tab label="Collaborators">
                     <ArrayField source="collaborators">
-                    <Datagrid
-                            empty={<Empty />}
+                        <Datagrid
+                            empty={<Empty assoc="collaborators" />}
                             rowClick={(id) => {
-                                const type = canAccessCollaborators ? 'edit' : 'show';
+                                const type = canAccessCollaborators
+                                    ? 'edit'
+                                    : 'show';
                                 return `/collaborators/${id}/${type}`;
                             }}
                         >

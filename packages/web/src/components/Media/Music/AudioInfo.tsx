@@ -3,6 +3,9 @@ import { gsap } from 'gsap';
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
 
+import { atom, useAtom, useAtomValue } from 'jotai';
+import { focusAtom } from 'jotai-optics';
+import { mediaQueriesAtoms } from 'src/components/App/store.js';
 import { formatTime } from 'src/components/Media/Music/utils';
 import { staticImage } from 'src/imageUrls.js';
 import { toMedia } from 'src/mediaQuery';
@@ -10,9 +13,7 @@ import { minRes, screenPortrait, webkitMinDPR } from 'src/screens';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { metaDescriptions, titleStringBase } from 'src/utils';
-import { musicStore } from './store.js';
-import { shallow } from 'zustand/shallow';
-import { useStore } from 'src/store.js';
+import { musicAtoms, musicStore } from './store.js';
 
 interface AudioInfoProps {
     matchParams: boolean;
@@ -78,31 +79,28 @@ const ContributingOrDuration = styled.div({
     },
 });
 
+const stateSelectorAtom = focusAtom(musicStore, (optic) =>
+    optic.pick(['isPlaying', 'playbackPosition', 'duration', 'currentTrack']),
+);
+
 const AudioInfo: React.FC<AudioInfoProps> = ({ matchParams }) => {
-    const timeline = React.useRef<GSAPTimeline>();
+    const timeline = React.useRef<GSAPTimeline>(null);
     const titleDiv = React.useRef<HTMLDivElement>(null);
     const marquee = React.useRef<HTMLDivElement>(null);
     const secondSpan = React.useRef<HTMLSpanElement>(null);
 
     const [forceUpdate, setForceUpdate] = React.useState<number>(0);
-    const isHamburger = useStore().mediaQueries.isHamburger();
+    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
 
-    const {
-        isPlaying,
-        playbackPosition,
-        playbackTimeString,
-        currentTrack,
-        duration,
-    } = musicStore.useStore(
-        (state) => ({
-            isPlaying: state.isPlaying,
-            playbackPosition: state.playbackPosition,
-            playbackTimeString: formatTime(state.playbackPosition),
-            currentTrack: state.currentTrack,
-            duration: state.duration,
-        }),
-        shallow,
+    const [playbackTimeString,] = useAtom(
+        React.useMemo(
+            () => atom((get) => formatTime(get(musicAtoms.playbackPosition))),
+            [],
+        ),
     );
+    const { isPlaying, playbackPosition, currentTrack, duration } =
+        useAtomValue(stateSelectorAtom);
+
     const currentTrackId = currentTrack?.id;
 
     React.useLayoutEffect(() => {

@@ -1,19 +1,23 @@
 import { css } from '@emotion/react';
-import { easeQuadOut } from 'd3-ease';
-import { gsap } from 'gsap';
-import * as React from 'react';
-
-import PortfolioButton from 'src/components/About/Bio/PortfolioButton';
-import { toMedia } from 'src/mediaQuery';
 // import { fetchBio } from 'src/components/About/Bio/store';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import { easeQuadOut } from 'd3-ease';
+import { gsap } from 'gsap';
+// import { rootStore, useStore } from 'src/store.js';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { focusAtom } from 'jotai-optics';
+import * as React from 'react';
+import PortfolioButton from 'src/components/About/Bio/PortfolioButton';
+import { navBarActions, navBarAtoms } from 'src/components/App/NavBar/store';
+import { mediaQueriesBaseAtom } from 'src/components/App/store';
 import { LazyImage } from 'src/components/LazyImage';
 import {
     generateSrcsetWidths,
     resizedImage,
     sycWithPianoBW,
 } from 'src/imageUrls';
+import { toMedia } from 'src/mediaQuery';
 import {
     screenLengths,
     screenM,
@@ -21,12 +25,11 @@ import {
     screenWidths,
     screenXS,
 } from 'src/screens';
-import { pushed } from 'src/styles/mixins';
+import { pushed, verticalTextStyle } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 import { isImageElement } from 'src/utils';
 import { MemoizedBioText } from './BioText';
 import type { Blurb } from './types.js';
-import { rootStore, useStore } from 'src/store.js';
 
 const pictureHeight = 250;
 
@@ -87,12 +90,25 @@ const IMAGE_RATIO = 1736 / 2560;
 
 const srcWidths = screenLengths.map((value) => Math.round(value * IMAGE_RATIO));
 
+const useMediaQuerySelectAtom = focusAtom(mediaQueriesBaseAtom, (optic) =>
+    optic.pick(['hiDpx', 'isHamburger', 'screenXS', 'screenPortrait']),
+);
+
+const verticalBioStyle = css(verticalTextStyle, {
+    color: 'white',
+    zIndex: 100,
+    left: '50vw',
+    transform: 'rotate(90deg)'
+});
+
 const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
-    const { hiDpx, isHamburger, screenXS, screenPortrait } =
-        rootStore.mediaQueries.useTrackedStore();
+    const { hiDpx, isHamburger, screenXS, screenPortrait } = useAtomValue(
+        useMediaQuerySelectAtom,
+    );
     const [bgImage, setBgImage] = React.useState('');
     const bgRef = React.useRef<HTMLImageElement>(null);
-    const scrollTop = useStore().navBar.lastScrollTop();
+    const scrollTop = useAtomValue(navBarAtoms.lastScrollTop);
+    const onScroll = useSetAtom(navBarActions.onScroll);
 
     const { data: bio } = useQuery({
         queryKey: ['bio'],
@@ -107,6 +123,7 @@ const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
             if (screenXS || screenPortrait) {
                 const height = Number.parseInt(
                     window.getComputedStyle(bgRef.current).height,
+                    10,
                 );
                 const float = easeQuadOut(Math.max(1 - scrollTop / height, 0));
                 const rounded =
@@ -144,85 +161,89 @@ const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
         }
     }, []);
 
+    const scrollCallback = React.useCallback(
+        (ev: UIEvent | React.UIEvent<HTMLElement, UIEvent>) => {
+            if (bgRef.current) {
+                const height = Number.parseInt(
+                    window.getComputedStyle(bgRef.current).height,
+                    10,
+                );
+                onScroll(height + navBarHeight.get(hiDpx), ev);
+            }
+        },
+        [],
+    );
+
     return (
-        bio && (
-            <div
-                css={bioStyles.container}
-                onScroll={
-                    isHamburger
-                        ? (ev) => {
-                              if (bgRef.current) {
-                                  const height = Number.parseInt(
-                                      window.getComputedStyle(bgRef.current)
-                                          .height,
-                                  );
-                                  rootStore.navBar.set.onScroll(
-                                      height + navBarHeight.get(hiDpx),
-                                  )(ev);
-                              }
-                          }
-                        : undefined
-                }
-            >
+        <>
+            {!isHamburger && <div css={verticalBioStyle}>BIOGRAPHY</div>}
+            {bio && (
                 <div
-                    css={[
-                        bioStyles.imageContainer,
-                        bgImage && bioStyles.hasBgImage(bgImage),
-                    ]}
-                    ref={bgRef}
+                    css={bioStyles.container}
+                    onScroll={isHamburger ? scrollCallback : undefined}
                 >
-                    <LazyImage
-                        isMobile={isHamburger}
-                        id="about_lazy_image"
-                        csss={{
-                            mobile: bioStyles.loader,
-                            desktop: bioStyles.loader,
-                        }}
-                        mobileAttributes={{
-                            webp: {
-                                srcset: generateSrcsetWidths(
-                                    sycWithPianoBW('webp'),
-                                    screenWidths,
-                                ),
-                                sizes: '100vw',
-                            },
-                            jpg: {
-                                srcset: generateSrcsetWidths(
-                                    sycWithPianoBW(),
-                                    screenWidths,
-                                ),
-                                sizes: '100vw',
-                            },
-                            src: resizedImage(sycWithPianoBW(), { width: 640 }),
-                        }}
-                        desktopAttributes={{
-                            webp: {
-                                srcset: generateSrcsetWidths(
-                                    sycWithPianoBW('webp'),
-                                    srcWidths,
-                                ),
-                                sizes: '100vh',
-                            },
-                            jpg: {
-                                srcset: generateSrcsetWidths(
-                                    sycWithPianoBW(),
-                                    srcWidths,
-                                ),
-                                sizes: '100vh',
-                            },
-                            src: resizedImage(sycWithPianoBW(), {
-                                height: 1080,
-                            }),
-                        }}
-                        alt="about background"
-                        successCb={onImageLoad}
-                        destroyCb={onImageDestroy}
-                    />
+                    <div
+                        css={[
+                            bioStyles.imageContainer,
+                            bgImage && bioStyles.hasBgImage(bgImage),
+                        ]}
+                        ref={bgRef}
+                    >
+                        <LazyImage
+                            isMobile={isHamburger}
+                            id="about_lazy_image"
+                            csss={{
+                                mobile: bioStyles.loader,
+                                desktop: bioStyles.loader,
+                            }}
+                            mobileAttributes={{
+                                webp: {
+                                    srcset: generateSrcsetWidths(
+                                        sycWithPianoBW('webp'),
+                                        screenWidths,
+                                    ),
+                                    sizes: '100vw',
+                                },
+                                jpg: {
+                                    srcset: generateSrcsetWidths(
+                                        sycWithPianoBW(),
+                                        screenWidths,
+                                    ),
+                                    sizes: '100vw',
+                                },
+                                src: resizedImage(sycWithPianoBW(), {
+                                    width: 640,
+                                }),
+                            }}
+                            desktopAttributes={{
+                                webp: {
+                                    srcset: generateSrcsetWidths(
+                                        sycWithPianoBW('webp'),
+                                        srcWidths,
+                                    ),
+                                    sizes: '100vh',
+                                },
+                                jpg: {
+                                    srcset: generateSrcsetWidths(
+                                        sycWithPianoBW(),
+                                        srcWidths,
+                                    ),
+                                    sizes: '100vh',
+                                },
+                                src: resizedImage(sycWithPianoBW(), {
+                                    height: 1080,
+                                }),
+                            }}
+                            alt="about background"
+                            successCb={onImageLoad}
+                            destroyCb={onImageDestroy}
+                        />
+                    </div>
+                    <MemoizedBioText bio={bio} needsTitle={false} />
+                    <PortfolioButton />
                 </div>
-                <MemoizedBioText bio={bio} needsTitle={!isHamburger} />
-                <PortfolioButton />
-            </div>
-        )
+            )}
+        </>
     );
 };
 

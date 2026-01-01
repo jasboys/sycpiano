@@ -1,12 +1,15 @@
 import { css } from '@emotion/react';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { focusAtom } from 'jotai-optics';
 import type * as React from 'react';
 
-import { toMedia } from 'src/mediaQuery';
 import AcclaimsList from 'src/components/About/Press/AcclaimsList';
+import { navBarActions } from 'src/components/App/NavBar/store';
+import { mediaQueriesBaseAtom } from 'src/components/App/store';
+import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenXS } from 'src/screens';
-import { pushed } from 'src/styles/mixins';
+import { pushed, verticalTextStyle } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
-import { rootStore } from 'src/store.js';
 
 interface PressProps {
     className?: string;
@@ -23,20 +26,36 @@ const containerStyle = css(pushed, {
     },
 });
 
+const mediaQueries = focusAtom(mediaQueriesBaseAtom, (optic) =>
+    optic.pick(['isHamburger', 'hiDpx']),
+);
+
+const verticalStyle = css(
+    verticalTextStyle,
+    {
+        left: 'calc(50% - min(50%, 400px))',
+        transform: 'rotate(90deg) translateY(50%)',
+    }
+)
+
 const Press: React.FC<PressProps> = () => {
-    const { isHamburger, hiDpx } = rootStore.mediaQueries.useTrackedStore();
+    const { isHamburger, hiDpx } = useAtomValue(mediaQueries);
+    const onScroll = useSetAtom(navBarActions.onScroll);
 
     return (
+        <>
+        {!isHamburger && <div css={verticalStyle}>PRESS</div>}
         <div
             css={containerStyle}
             onScroll={
                 isHamburger
-                    ? rootStore.navBar.set.onScroll(navBarHeight.get(hiDpx))
+                    ? (ev) => onScroll(navBarHeight.get(hiDpx), ev)
                     : undefined
             }
         >
             <AcclaimsList />
         </div>
+        </>
     );
 };
 

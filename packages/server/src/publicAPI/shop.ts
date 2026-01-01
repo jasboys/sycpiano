@@ -175,14 +175,14 @@ shopRouter.get<unknown, unknown, unknown, { session_id: string }>(
                 ]),
                 lineItems: lineItems.map((item) => item.description),
             });
-        } catch (e) {
+        } catch (_e) {
             res.sendStatus(400);
         }
     },
 );
 
 // Enforce csrf mitigation for post routes.
-shopRouter.post('*', csrfMiddleware);
+shopRouter.post('*splat', csrfMiddleware);
 
 // new stripe API: old skus = new prices
 // However, we are using the Product IDs in the front end, so have to fetch
@@ -219,6 +219,7 @@ shopRouter.post('/checkout', async (req, res) => {
         }, [] as string[]);
 
         if (duplicates.length !== 0) {
+            console.error('Duplicates found');
             res.status(422).json({
                 skus: duplicates,
             });
@@ -229,14 +230,19 @@ shopRouter.post('/checkout', async (req, res) => {
 
         const priceIds = prods.map((prod) => prod.priceId);
 
-        const sessionId = await stripeClient.createCheckoutSession(
+        const session = await stripeClient.createCheckoutSession(
             productIds,
             priceIds,
             customer.stripeId,
         );
-        res.json({
-            sessionId,
-        });
+        if (!session.url || !session.id) {
+            throw new Error('Checkout Session Creation Failed');
+        }
+        // res.json({
+        //     sessionId: session.id,
+        //     sessionUrl: session.url,
+        // });
+        res.json({ url: session.url });
     } catch (e) {
         console.error('Checkout error', e);
         res.sendStatus(400);

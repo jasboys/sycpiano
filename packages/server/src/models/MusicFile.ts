@@ -1,3 +1,4 @@
+import { parse } from 'node:path';
 import type { Rel } from '@mikro-orm/core';
 import {
     Entity,
@@ -7,7 +8,6 @@ import {
     Property,
 } from '@mikro-orm/core';
 import { Music } from './Music.js';
-import { parse } from 'node:path';
 
 @Entity()
 export class MusicFile {

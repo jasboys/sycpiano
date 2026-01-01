@@ -1,8 +1,8 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
+import { useAtomValue, useSetAtom } from 'jotai';
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-
 import {
     categoryMap,
     isMusicItem,
@@ -16,7 +16,7 @@ import {
 } from 'src/components/Media/Music/utils';
 import { lightBlue, playlistBackground } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts.js';
-import { musicStore } from './store.js';
+import { musicAtoms } from './store.js';
 
 interface MusicPlaylistItemProps {
     readonly item: MusicListItem;
@@ -119,12 +119,14 @@ interface MusicItemProps extends MusicPlaylistItemProps {
 }
 
 const MusicItem: React.FC<MusicItemProps> = ({ item, onClick }) => {
-    const currentTrack = musicStore.use.currentTrack?.();
+    const currentTrack = useAtomValue(musicAtoms.currentTrack);
+    const setIsPlaying = useSetAtom(musicAtoms.isPlaying);
 
     const musicFile = item.musicFiles[0];
     return (
         <StyledMusicItem id={musicFile.id}>
             <Link
+                css={{ textDecoration: 'none' }}
                 to={getRelativePermaLink(
                     item.composer,
                     item.piece,
@@ -134,8 +136,8 @@ const MusicItem: React.FC<MusicItemProps> = ({ item, onClick }) => {
                     // dispatch(updateAction({ playing: true }));
                     try {
                         onClick(musicFile);
-                        musicStore.set.isPlaying(true);
-                    } catch (e) {
+                        setIsPlaying(true);
+                    } catch (_e) {
                         // already loading track;
                     }
                 }}
@@ -162,11 +164,13 @@ const MusicItem: React.FC<MusicItemProps> = ({ item, onClick }) => {
 const MusicCollectionItem: React.FC<
     MusicItemProps & { index: number; musicFile: MusicFileItem }
 > = ({ item, onClick, index, musicFile }) => {
-    const currentTrack = musicStore.use.currentTrack?.();
+    const currentTrack = useAtomValue(musicAtoms.currentTrack);
+    const setIsPlaying = useSetAtom(musicAtoms.isPlaying);
 
     return (
         <StyledCollectionItem key={index} id={musicFile.id}>
             <Link
+                css={{ textDecoration: 'none' }}
                 to={getRelativePermaLink(
                     item.composer,
                     item.piece,
@@ -175,8 +179,8 @@ const MusicCollectionItem: React.FC<
                 onClick={async () => {
                     try {
                         onClick(musicFile);
-                        musicStore.set.isPlaying(true);
-                    } catch (e) {
+                        setIsPlaying(true);
+                    } catch (_e) {
                         // already loading track;
                     }
                 }}

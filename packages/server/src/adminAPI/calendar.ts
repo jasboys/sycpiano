@@ -1,15 +1,17 @@
 import {
-    wrap,
     type EntityData,
     type FilterQuery,
     type Loaded,
     type QueryOrderMap,
     type RequiredEntityData,
+    wrap,
 } from '@mikro-orm/core';
 import type express from 'express';
 import orm from '../database.js';
 import { getImageFromMetaTag } from '../gapi/calendar.js';
 import { Calendar } from '../models/Calendar.js';
+import { CalendarCollaborator } from '../models/CalendarCollaborator.js';
+import { CalendarPiece } from '../models/CalendarPiece.js';
 import { crud, setGetListHeaders } from './crud.js';
 import { respondWithError } from './index.js';
 import { mikroCrud } from './mikroCrud.js';
@@ -135,9 +137,7 @@ const calendarRouter = crud('/calendars', {
                     'collaborators',
                     'pieces',
                     'calendarPieces',
-                    'calendarPieces.piece',
                     'calendarCollaborators',
-                    'calendarCollaborators.collaborator',
                 ],
             },
         );
@@ -168,7 +168,7 @@ const calendarRouter = crud('/calendars', {
         };
     },
     search: async ({ q, limit }, _) => {
-        const matchArray = q.trim().match(/^id\:(.*)$/i);
+        const matchArray = q.trim().match(/^id:(.*)$/i);
         let where: FilterQuery<Calendar>;
         if (matchArray?.[1]) {
             where = {
@@ -193,8 +193,6 @@ const calendarRouter = crud('/calendars', {
         }
         const calendarResults = await orm.em.findAndCount(Calendar, where, {
             populate: [
-                'collaborators',
-                'pieces',
                 'calendarPieces',
                 'calendarPieces.piece',
                 'calendarCollaborators',
@@ -238,10 +236,10 @@ const populateImages = async (entity: Calendar) => {
             if (fetchedImageUrl !== '') {
                 entity.imageUrl = fetchedImageUrl;
             } else {
-                entity.imageUrl = undefined;
+                entity.imageUrl = null;
             }
         }
-    } catch (e) {
+    } catch (_e) {
         console.log('populate images error');
     }
 };
@@ -305,5 +303,67 @@ calendarRouter.post(
         }
     },
 );
+
+calendarRouter.post('/actions/calendars/duplicate', async (req, res) => {
+    try {
+        const id = req.body.id;
+        const calendar = await orm.em.findOneOrFail(
+            Calendar,
+            { id },
+            { populate: ['calendarPieces', 'calendarCollaborators'] },
+        );
+
+        const {
+            name,
+            dateTime,
+            timezone,
+            location,
+            type,
+            website,
+            allDay,
+            endDate,
+            hidden,
+            imageUrl,
+        } = calendar;
+
+        const newCalendar = orm.em.create(Calendar, {
+            name,
+            dateTime,
+            timezone,
+            location,
+            type,
+            website,
+            allDay,
+            endDate,
+            hidden,
+            imageUrl,
+        });
+        orm.em.persist(newCalendar);
+
+        for (const pivot of calendar.calendarPieces) {
+            const newPivot = orm.em.create(CalendarPiece, {
+                calendar: newCalendar,
+                piece: pivot.piece,
+                order: pivot.order,
+            });
+            orm.em.persist(newPivot);
+        }
+
+        for (const pivot of calendar.calendarCollaborators) {
+            const newPivot = orm.em.create(CalendarCollaborator, {
+                calendar: newCalendar,
+                collaborator: pivot.collaborator,
+                order: pivot.order,
+            });
+            orm.em.persist(newPivot);
+        }
+
+        await orm.em.flush();
+
+        res.json({ calendar });
+    } catch (e) {
+        respondWithError(e as Error, res);
+    }
+});
 
 export const calendarHandler = calendarRouter;

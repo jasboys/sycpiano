@@ -1,7 +1,7 @@
+import * as crypto from 'node:crypto';
 import * as argon2 from 'argon2';
 import * as express from 'express';
 import { upperCase } from 'lodash-es';
-import * as crypto from 'node:crypto';
 import { V3 as paseto } from 'paseto';
 import validator from 'validator';
 
@@ -71,7 +71,7 @@ export const authAndGetRole: HandlerWithRole = async (req, res, next) => {
         });
         res.locals.role = Role[upperCase(user.role) as keyof typeof Role];
         next();
-    } catch (e) {
+    } catch (_e) {
         res.status(401).send('Unauthorized');
     }
 };
@@ -120,7 +120,7 @@ authRouter.post('/register', async (req, res) => {
         await orm.em.persist(customer).flush();
         await mailer.emailRegisterNotification(username);
         return res.status(200).end();
-    } catch (e) {
+    } catch (_e) {
         return res.status(500).send('Account creation failed');
     }
 });
@@ -128,7 +128,6 @@ authRouter.post('/register', async (req, res) => {
 authRouter.post('/login', async (req, res) => {
     const { username, password }: { username: string; password: string } =
         req.body;
-    console.log(req.body);
     try {
         // We will check for email validation on front-end as well
         // But just in case someone sends a POST not from front-end
@@ -139,8 +138,6 @@ authRouter.post('/login', async (req, res) => {
         const user = await orm.em.findOneOrFail(User, {
             $and: [{ username }, { role: ['admin', 'readonly'] }],
         });
-
-        console.log(user);
 
         if (!user.passHash || !user.username) {
             throw new Error('password empty');
@@ -203,7 +200,7 @@ authRouter.post('/logout', async (req, res) => {
             throw new Error('neither id nor token cookies set');
         }
         return res.status(200).end();
-    } catch (e) {
+    } catch (_e) {
         return res.status(400).end();
     }
 });

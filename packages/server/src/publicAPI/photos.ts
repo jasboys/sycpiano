@@ -1,7 +1,7 @@
+import { QueryOrder } from '@mikro-orm/core';
 import type { NextFunction, Request, Response } from 'express';
 import orm from '../database.js';
 import { Photo } from '../models/Photo.js';
-import { QueryOrder } from '@mikro-orm/core';
 
 const photosHandler = async (
     _: Request,

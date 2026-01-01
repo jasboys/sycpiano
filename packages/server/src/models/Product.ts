@@ -82,7 +82,7 @@ export class Product {
     async afterDelete(args: EventArgs<Product>) {
         try {
             await deleteProduct(args.entity.id);
-        } catch (e) {
+        } catch (_e) {
             console.log('Failed to call delete Stripe product API');
         }
     }

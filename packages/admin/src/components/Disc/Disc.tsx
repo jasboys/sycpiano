@@ -1,4 +1,4 @@
-import IconCancel from '@mui/icons-material/Cancel.js';
+import IconCancel from '@mui/icons-material/Cancel';
 import IconDelete from '@mui/icons-material/Delete';
 import {
     DialogActions,
@@ -10,33 +10,33 @@ import {
     ArrayField,
     Button,
     Create,
+    type CreateProps,
     Datagrid,
     Edit,
+    type EditProps,
+    type Identifier,
     List,
+    type ListProps,
     NumberField,
     NumberInput,
+    type RaRecord,
+    required,
     SaveButton,
     SearchInput,
     Show,
+    type ShowProps,
     SimpleForm,
     SimpleShowLayout,
     TextField,
     TextInput,
     UrlField,
-    required,
+    type UseRecordContextParams,
     useCreate,
     useDelete,
     useNotify,
     useRecordContext,
     useRefresh,
     useUpdate,
-    type CreateProps,
-    type EditProps,
-    type Identifier,
-    type ListProps,
-    type RaRecord,
-    type ShowProps,
-    type UseRecordContextParams,
 } from 'react-admin';
 import { useFormContext } from 'react-hook-form';
 import type { AdminError, MutateForm } from 'src/types.js';

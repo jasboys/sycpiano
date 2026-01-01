@@ -2,6 +2,8 @@ import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import * as React from 'react';
 
+import { useAtom, useAtomValue } from 'jotai';
+import { mediaQueriesAtoms } from 'src/components/App/store.js';
 import MusicPlaylistItem from 'src/components/Media/Music/MusicPlaylistItem';
 import ShuffleButton from 'src/components/Media/Music/ShuffleButton';
 import SpotifyButton from 'src/components/Media/Music/SpotifyButton';
@@ -9,9 +11,8 @@ import Playlist from 'src/components/Media/Playlist';
 import { toMedia } from 'src/mediaQuery';
 import { hiDpx, screenPortrait } from 'src/screens';
 import { playlistBackground } from 'src/styles/colors';
-import { musicStore } from './store.js';
+import { musicAtoms } from './store.js';
 import type { MusicFileItem } from './types.js';
-import { useStore } from 'src/store.js';
 
 interface MusicPlaylistOwnProps {
     readonly onClick: (item: MusicFileItem, fade?: boolean) => void;
@@ -55,14 +56,16 @@ const PlaylistContainer = styled.div({
 
 const MusicPlaylist: React.FC<MusicPlaylistProps> = ({ onClick }) => {
     const didRun = React.useRef<boolean>(false);
-    const { currentTrack, isShuffle, items } = musicStore.useTrackedStore();
-    const isHamburger = useStore().mediaQueries.isHamburger();
+    const [isShuffle, toggleShuffle] = useAtom(musicAtoms.isShuffle);
+    const currentTrack = useAtomValue(musicAtoms.currentTrack);
+    const isHamburger = useAtomValue(mediaQueriesAtoms.isHamburger);
+    const { data: items } = useAtomValue(musicAtoms.items);
 
     const currentTrackId = currentTrack?.id;
 
     React.useEffect(() => {
         if (didRun.current === false) {
-            if (items.length && currentTrackId) {
+            if (items?.length && currentTrackId) {
                 !isHamburger &&
                     document.getElementById(currentTrackId)?.scrollIntoView();
                 didRun.current = true;
@@ -78,7 +81,7 @@ const MusicPlaylist: React.FC<MusicPlaylistProps> = ({ onClick }) => {
                 hasToggler={false}
                 shouldAppear={false}
             >
-                {items.map((item) => (
+                {items?.map((item) => (
                     <MusicPlaylistItem
                         key={item.id}
                         item={item}
@@ -87,10 +90,7 @@ const MusicPlaylist: React.FC<MusicPlaylistProps> = ({ onClick }) => {
                 ))}
             </Playlist>
             <SpotifyButton />
-            <ShuffleButton
-                onClick={() => musicStore.set.toggleShuffle()}
-                on={isShuffle}
-            />
+            <ShuffleButton onClick={() => toggleShuffle()} on={isShuffle} />
         </PlaylistContainer>
     );
 };

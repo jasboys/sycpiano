@@ -3,19 +3,18 @@ import * as React from 'react';
 import { TransitionGroup } from 'react-transition-group';
 
 import { format, parseISO } from 'date-fns';
+import { useAtom, useAtomValue } from 'jotai';
 import { readableColor } from 'polished';
+import { mediaQueriesAtoms } from 'src/components/App/store';
 import PhotoFader from 'src/components/Media/Photos/PhotoFader';
 import PhotoList from 'src/components/Media/Photos/PhotoList';
-import { photoStore } from 'src/components/Media/Photos/store';
 import type { PhotoItem } from 'src/components/Media/Photos/types';
 import { idFromItem } from 'src/components/Media/Photos/utils';
 import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenXS } from 'src/screens';
 import { latoFont } from 'src/styles/fonts';
 import { pushed } from 'src/styles/mixins';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import { useStore } from 'src/store.js';
+import { photoAtoms } from './store';
 
 const StyledPhotos = styled.div(pushed, {
     width: '100%',
@@ -52,26 +51,19 @@ const StyledCredit = styled.div(latoFont(200), {
 });
 
 const Photos: React.FC<Record<never, unknown>> = () => {
-    const screenXS = useStore().mediaQueries.screenXS();
-    const currentItem = photoStore.use.currentItem?.();
-    const background = photoStore.use.background();
-
-    const { data: photos } = useQuery({
-        queryKey: ['photos'],
-        queryFn: async () => {
-            const { data } = await axios.get<PhotoItem[]>('/api/photos');
-            return data;
-        },
-    });
+    const screenXS = useAtomValue(mediaQueriesAtoms.screenXS);
+    const [currentItem, setCurrentItem] = useAtom(photoAtoms.currentItem);
+    const background = useAtomValue(photoAtoms.background);
+    const { data: photos } = useAtomValue(photoAtoms.photos);
 
     React.useEffect(() => {
         if (photos?.length) {
-            photoStore.set.currentItem?.(photos[0]);
+            setCurrentItem(photos[0]);
         }
     }, [photos]);
 
     const selectPhotoCallback = React.useCallback((photo: PhotoItem) => {
-        photoStore.set.currentItem?.(photo);
+        setCurrentItem(photo);
     }, []);
 
     const isCurrentItem = React.useCallback(

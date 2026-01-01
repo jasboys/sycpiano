@@ -46,7 +46,7 @@ const musicHandler = async (
     //     getMusicInstancesOfType('videogame'),
     // ]);
     const groupedResults = groupMusic(results);
-    Object.keys(groupedResults).map((k: keyof GroupedMusic) => {
+    Object.keys(groupedResults).forEach((k: keyof GroupedMusic) => {
         groupedResults[k].sort(musicCompare);
     });
 

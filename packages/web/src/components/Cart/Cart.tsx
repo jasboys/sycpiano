@@ -1,16 +1,15 @@
 import styled from '@emotion/styled';
-import { useQuery } from '@tanstack/react-query';
 import { gsap } from 'gsap';
+import { useAtomValue } from 'jotai';
 import * as React from 'react';
 import isEqual from 'react-fast-compare';
 import { Transition } from 'react-transition-group';
-
 import { CartList } from 'src/components/Cart/CartList';
 import { toMedia } from 'src/mediaQuery.js';
 import { hiDpx, screenS } from 'src/screens.js';
 import { navBarHeight } from 'src/styles/variables';
-import { cartStore, initCartFn } from './store.js';
-import { useStore } from 'src/store.js';
+import { mediaQueriesAtoms } from '../App/store';
+import { cartAtoms } from './store';
 
 const Arrow = styled.div({
     position: 'absolute',
@@ -22,12 +21,10 @@ const Arrow = styled.div({
     borderBottom: '15.5px solid rgba(255 255 255 / 0.4)',
 });
 
-const CartFilterGroup = styled.div(
-    {
-        position: 'relative',
-        height: '100%',
-    },
-);
+const CartFilterGroup = styled.div({
+    position: 'relative',
+    height: '100%',
+});
 const CartContainer = styled.div<{ top: number }>(
     {
         zIndex: 5001,
@@ -62,8 +59,8 @@ interface CartProps {
         centerOffset: number;
     };
     strategy: 'absolute' | 'fixed';
-    floatingRef: React.MutableRefObject<HTMLDivElement | null>;
-    arrowRef: React.MutableRefObject<HTMLDivElement | null>;
+    floatingRef: React.RefObject<HTMLDivElement | null>;
+    arrowRef: React.RefObject<HTMLDivElement | null>;
     update: () => void;
 }
 
@@ -75,29 +72,26 @@ const Cart: React.FC<CartProps> = ({
     arrow,
     update,
 }) => {
-    const screenS = useStore().mediaQueries.screenS();
-    const visible = cartStore.use.visible();
-    const cartLength = cartStore.use.items().length;
-    const tl = React.useRef<gsap.core.Timeline>();
+    const screenS = useAtomValue(mediaQueriesAtoms.screenS);
+    const cartVisible = useAtomValue(cartAtoms.visible);
+    const tl = React.useRef<GSAPTimeline>(null);
+    const fadeRef = React.useRef<HTMLDivElement>(null);
 
-    const {
-        data: { items, email } = { items: [], email: '' },
-        isSuccess,
-    } = useQuery({
-        queryKey: ['localStorageCart'],
-        queryFn: initCartFn,
-    });
-
-    React.useEffect(() => {
-        if (isSuccess) {
-            cartStore.set.items(items);
-            cartStore.set.email(email);
+    React.useLayoutEffect(() => {
+        if (fadeRef.current) {
+            const ctx = gsap.context(() => {
+                tl.current = gsap
+                        .timeline({ reversed: true, paused: true })
+                        // .to(el, { height: 'auto', duration: 0.30, ease: 'quad.inOut' });
+                        .to(fadeRef.current, {
+                            autoAlpha: 1,
+                            duration: 0.12,
+                            ease: 'quad.inOut',
+                        }, 0);
+            }, fadeRef.current);
+            return () => ctx.revert();
         }
-    }, [items, email, isSuccess])
-
-    React.useEffect(() => {
-        cartStore.set.syncStorage();
-    }, [cartLength]);
+    }, []);
 
     const arrowCallback = React.useCallback(
         (el: HTMLDivElement) => {
@@ -108,25 +102,17 @@ const Cart: React.FC<CartProps> = ({
     );
 
     return (
-        <Transition<undefined>
-            in={visible}
+        <Transition
+            in={cartVisible}
             timeout={250}
-            onEnter={(el: HTMLElement) => {
-                if (!tl.current) {
-                    tl.current = gsap
-                        .timeline({ reversed: true, paused: true })
-                        // .to(el, { height: 'auto', duration: 0.30, ease: 'quad.inOut' });
-                        .to(el, {
-                            autoAlpha: 1,
-                            duration: 0.12,
-                            ease: 'quad.inOut',
-                        });
-                }
-                tl.current.pause().play();
+            onEnter={() => {
+                tl.current?.pause().play();
             }}
             onExit={() => {
                 tl.current?.pause().reverse();
             }}
+            nodeRef={fadeRef}
+            appear
         >
             <CartContainer
                 css={
@@ -138,7 +124,14 @@ const Cart: React.FC<CartProps> = ({
                 }
                 top={!screenS && position.y !== null ? position.y : 0}
                 ref={
-                    screenS ? () => {} : floatingRef
+                    screenS
+                        ? (el) => {
+                              fadeRef.current = el;
+                          }
+                        : (el) => {
+                              floatingRef.current = el;
+                              fadeRef.current = el;
+                          }
                 } /* eslint-disable-line @typescript-eslint/no-empty-function */
             >
                 <CartFilterGroup>

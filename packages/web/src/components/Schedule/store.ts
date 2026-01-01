@@ -1,19 +1,17 @@
+import { type Atom, atom } from 'jotai';
+import { atomWithImmer } from 'jotai-immer';
 import type {
     EventItem,
     EventItemsStateShape,
     EventListName,
     ScheduleStateShape,
 } from 'src/components/Schedule/types';
+import { partialAtomGetter } from 'src/store.js';
 import { createMonthGroups, maxOfMonthGroups, minOfMonthGroups } from './utils';
-import { createStore } from 'zustand-x';
-import { zustandMiddlewareOptions } from 'src/utils';
-
-// const FETCH_LIMIT = 25;
 
 interface FetchEventsReturn {
-    name: EventListName;
     pagedEvents: EventItem[][];
-    lastQuery?: string;
+    type: EventListName;
 }
 
 const initialState = (
@@ -21,7 +19,6 @@ const initialState = (
 ): EventItemsStateShape => ({
     minDate: undefined,
     maxDate: undefined,
-    lastQuery: undefined,
     items: { order, length: 0, monthGroups: [] },
 });
 
@@ -30,55 +27,59 @@ const initialScheduleState: ScheduleStateShape = {
     archive: initialState(),
     search: {
         ...initialState(),
-        lastQuery: '',
     },
     event: initialState(),
     isFetching: false,
+    date: undefined,
 };
 
-export const scheduleStore = createStore('scheduleEventItems')(
-    initialScheduleState,
-    zustandMiddlewareOptions,
-)
-    .extendSelectors((_set, get, _api) => ({
-        itemsLength: (name: EventListName) => get[name]().items.length,
-    }))
-    .extendActions((set, _get, _api) => ({
-        clearList: (name: EventListName) => {
-            set.state((state) => {
-                state[name] = {
-                    ...state[name],
-                    items: {
-                        order: state[name].items.order,
-                        length: 0,
-                        monthGroups: [],
-                    },
-                    minDate: undefined,
-                    maxDate: undefined,
-                    lastQuery: '',
-                };
-            });
-        },
-        fulfilled: ({ name, lastQuery, pagedEvents }: FetchEventsReturn) => {
-            set.state((state) => {
+const scheduleStore = atomWithImmer(initialScheduleState);
+// const currentTypeAtom = atom<EventListName>('upcoming');
+const currentItemsLengthAtoms: Record<EventListName, Atom<number>> = {
+    upcoming: atom((get) => get(scheduleStore).upcoming.items.length),
+    archive: atom((get) => get(scheduleStore).archive.items.length),
+    event: atom((get) => get(scheduleStore).event.items.length),
+    search: atom((get) => get(scheduleStore).search.items.length),
+};
+const lastQueryAtom = atom<string | undefined>('');
+
+export const upcomingMaxDate = atom(
+    (get) => get(scheduleStore).upcoming.maxDate,
+);
+export const archiveMinDate = atom((get) => get(scheduleStore).archive.minDate);
+
+export const scheduleAtoms = {
+    upcoming: atom((get) => get(scheduleStore).upcoming),
+    archive: atom((get) => get(scheduleStore).archive),
+    search: atom((get) => get(scheduleStore).search),
+    event: atom((get) => get(scheduleStore).event),
+    isFetching: partialAtomGetter(scheduleStore).toToggleAtom('isFetching'),
+
+    itemsLength: currentItemsLengthAtoms,
+    lastQuery: lastQueryAtom,
+    date: partialAtomGetter(scheduleStore).toWriteAtom('date'),
+};
+
+export const scheduleActions = {
+    fulfilled: atom(
+        null,
+        (_get, set, { pagedEvents, type }: FetchEventsReturn) => {
+            set(scheduleStore, (draft) => {
                 const events = pagedEvents.flat(1);
                 const monthGroup = createMonthGroups(
                     events,
-                    state[name].items.order,
+                    draft[type].items.order,
                 );
-                state[name] = {
-                    ...state[name],
-                    items: monthGroup,
-                    minDate:
-                        monthGroup.monthGroups.length === 0
-                            ? new Date().toISOString()
-                            : minOfMonthGroups(monthGroup).dateTime,
-                    maxDate:
-                        monthGroup.monthGroups.length === 0
-                            ? new Date().toISOString()
-                            : maxOfMonthGroups(monthGroup).dateTime,
-                    lastQuery: lastQuery,
-                };
+                draft[type].items = monthGroup;
+                draft[type].minDate =
+                    monthGroup.monthGroups.length === 0
+                        ? new Date().toISOString()
+                        : minOfMonthGroups(monthGroup).dateTime;
+                draft[type].maxDate =
+                    monthGroup.monthGroups.length === 0
+                        ? new Date().toISOString()
+                        : maxOfMonthGroups(monthGroup).dateTime;
             });
         },
-    }));
+    ),
+};

@@ -11,7 +11,8 @@ interface EventWebsiteButtonProps {
     className?: string;
 }
 
-const StyledWebsiteButton = styled.a(interFont(300), {
+const StyledWebsiteButton = styled.button(interFont(300), {
+    all: 'unset',
     display: 'block',
     fontSize: '0.85rem',
     width: 'fit-content',
@@ -22,10 +23,16 @@ const StyledWebsiteButton = styled.a(interFont(300), {
     marginRight: '1rem',
     borderRadius: 4,
     border: '1px solid var(--light-blue)',
+    a: {
+        textDecoration: 'none',
+        color: 'var(--light-blue)',
+    },
     '&:hover': {
         backgroundColor: mix(0.75, lightBlue, 'white'),
-        color: 'white',
         cursor: 'pointer',
+        a: {
+            color: 'white'
+        }
     },
     [toMedia(screenXS)]: {
         fontSize: '0.75rem',
@@ -36,11 +43,9 @@ const StyledWebsiteButton = styled.a(interFont(300), {
 export const EventWebsiteButton: React.FC<EventWebsiteButtonProps> = ({
     website,
 }) => (
-    <StyledWebsiteButton
-        href={website}
-        target="_blank"
-        rel="noopener noreferrer"
-    >
-        {'Tickets & Info'}
+    <StyledWebsiteButton>
+        <a href={website} target="_blank" rel="noopener noreferrer">
+            Tickets & Info
+        </a>
     </StyledWebsiteButton>
 );

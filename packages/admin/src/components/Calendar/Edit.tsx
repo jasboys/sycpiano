@@ -1,18 +1,25 @@
+import { Stack } from '@mui/material';
 import { default as MUITextField } from '@mui/material/TextField';
 import {
     ArrayField,
     BooleanInput,
     Datagrid,
     Edit,
-    FormDataConsumer,
+    type EditProps,
     FormTab,
     TabbedForm,
     TextField,
     TextInput,
-    type EditProps,
+    useRecordContext,
 } from 'react-admin';
+import { useWatch } from 'react-hook-form';
 import { toUTC } from 'src/utils.js';
-import { AddReferenceButton, EditReferenceButton, Empty } from '../Shared.jsx';
+import {
+    AddReferenceButton,
+    CustomFormButton,
+    EditReferenceButton,
+    Empty,
+} from '../Shared.jsx';
 import {
     AddCalendarCollaboratorForm,
     AddCalendarPieceForm,
@@ -26,6 +33,25 @@ import {
     EditCalendarPiece,
 } from './EditRelations.jsx';
 import { EndDate } from './EndDate.jsx';
+import { ExtractProgram } from './ExtractProgram.jsx';
+import { ImportProgram } from './ImportProgram.jsx';
+
+const UTCTime = () => {
+    const dateInput = useWatch({ name: 'dateTimeInput' });
+    const record = useRecordContext();
+    const utcTime = toUTC(dateInput, record?.timezone) ?? dateInput;
+    return (
+        <MUITextField
+            label="Date time UTC"
+            variant="filled"
+            fullWidth
+            value={utcTime}
+            margin="dense"
+            helperText=" "
+            disabled
+        />
+    );
+};
 
 export const CalendarEdit = (props: EditProps) => {
     return (
@@ -38,27 +64,9 @@ export const CalendarEdit = (props: EditProps) => {
                         source="dateTimeInput"
                         helperText="YYYY-MM-DD HH:MM"
                     />
-                    <FormDataConsumer>
-                        {({ formData }) => (
-                            <MUITextField
-                                label="Date time UTC"
-                                variant="filled"
-                                value={
-                                    toUTC(
-                                        formData.dateTimeInput,
-                                        formData.timezone,
-                                    ) ||
-                                    formData.dateTime ||
-                                    ''
-                                }
-                                margin="dense"
-                                helperText=" "
-                                disabled
-                                sx={{ width: 256 }}
-                            />
-                        )}
-                    </FormDataConsumer>
+                    <UTCTime />
                     <BooleanInput source="allDay" />
+                    <BooleanInput source="hidden" />
                     <EndDate sx={{ field: { width: 256 } }} />
                     <TextInput source="timezone" disabled />
                     <TextInput source="location" fullWidth />
@@ -67,10 +75,23 @@ export const CalendarEdit = (props: EditProps) => {
                     <TextInput source="imageUrl" fullWidth />
                 </FormTab>
                 <FormTab label="Pieces" path="pieces">
+                    <Stack direction={'row'} spacing={2}>
+                        <CustomFormButton
+                            action="Extract"
+                            description="Extract Pieces into Program"
+                            Component={ExtractProgram}
+                        />
+                        <CustomFormButton
+                            action="Import"
+                            description="Import Pieces from Program"
+                            Component={ImportProgram}
+                        />
+                    </Stack>
                     <ArrayField source="pieces">
                         <Datagrid
                             empty={<Empty assoc="Pieces" />}
                             sx={{
+                                marginTop: '1rem',
                                 marginBottom: '1rem',
                                 '& .column-undefined': {
                                     paddingRight: 0,

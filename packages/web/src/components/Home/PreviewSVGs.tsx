@@ -1,9 +1,8 @@
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 import svgToMiniDataURI from 'mini-svg-data-uri';
 import type * as React from 'react';
 import ReactDOMServer from 'react-dom/server';
-
-import { css } from '@emotion/react';
-import styled from '@emotion/styled';
 
 const previewStyle = css`
     height: 100%;
