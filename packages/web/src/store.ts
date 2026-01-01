@@ -1,5 +1,5 @@
-import { castDraft, castImmutable, WritableDraft } from 'immer';
-import { Atom, atom, getDefaultStore, WritableAtom } from 'jotai';
+import type { WritableDraft } from 'immer';
+import { type Atom, atom, getDefaultStore, type WritableAtom } from 'jotai';
 
 export type AtomMap<T> = {
     [K in keyof T]-?: Atom<T[K]>;
@@ -11,20 +11,6 @@ export type AtomMap<T> = {
 
 export type ReadWriteAtomMap<T, Arg extends unknown[]> = {
     [K in keyof T]-?: WritableAtom<T[K], [val: Arg], void>;
-};
-
-const typeSafeObjectFromEntries = <
-    const T extends ReadonlyArray<readonly [PropertyKey, unknown]>,
->(
-    entries: T,
-): { [K in T[number] as K[0]]: K[1] } => {
-    return Object.fromEntries(entries) as { [K in T[number] as K[0]]: K[1] };
-};
-
-const typeSafeObjectKeys = <T extends Record<PropertyKey, unknown>>(
-    obj: T,
-): [keyof T] => {
-    return Object.keys(obj) as [keyof T];
 };
 
 type AtomWithImmer<T> = WritableAtom<
@@ -40,6 +26,7 @@ export const toAtoms = <T extends {}, const K extends keyof T>(
         (prev, k) => {
             const key = k as K;
             return {
+                // biome-ignore lint/performance/noAccumulatingSpread: Need it.
                 ...prev,
                 [key]: atom((get) => get(stateAtom)[key]),
             };
@@ -54,7 +41,7 @@ export const partialAtomGetter = <T>(stateAtom: AtomWithImmer<T>) => ({
             (get) => get(stateAtom)[key],
             (_get, set, val: T[K]) => {
                 set(stateAtom, (draft) => {
-                    (draft[key] as T[K]) = val;
+                    (draft[key as keyof typeof draft] as T[K]) = val;
                 });
             },
         );
@@ -64,7 +51,8 @@ export const partialAtomGetter = <T>(stateAtom: AtomWithImmer<T>) => ({
             (get) => get(stateAtom)[key],
             (_get, set, val?: boolean) => {
                 set(stateAtom, (draft) => {
-                    (draft[key] as boolean) = val ?? !draft[key];
+                    (draft[key as keyof typeof draft] as boolean) =
+                        val ?? !draft[key as keyof typeof draft];
                 });
             },
         );

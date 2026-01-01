@@ -18,20 +18,6 @@ export const mediaQueriesMatch = atom(
     },
 );
 
-// export const mediaQueriesStore = createStore('mediaQueries')(
-//     defaultMedia,
-//     zustandMiddlewareOptions,
-// ).extendActions((set, _get, _api) => ({
-//     matches: (matches: MediaQueryStateShape) => {
-//         set.state((state) => {
-//             return {
-//                 ...state,
-//                 ...matches,
-//             };
-//         });
-//     },
-// }));
-
 type SelectorMapEntriesType = Iterable<
     readonly [
         keyof MediaQueryStateShape,
