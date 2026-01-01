@@ -222,12 +222,12 @@ jobs:
           HTML_DEST: ${{ vars.HTML_DEST }}
       - name: Install Deps on Server
         run: |
-          ssh server $COMMAND
+          ssh server '$COMMAND'
         env:
           COMMAND: ${{ format('cd {0} && . ~/.nvm/nvm.sh && nvm use 24 && yarn workspaces focus server --production', vars.BACKEND_DIR) }}
       - name: Migrate Up
         run: |
-          ssh server $COMMAND
+          ssh server '$COMMAND'
         env:
           COMMAND: ${{ format('cd {0} && dbmate -d ./packages/server/migrations up', vars.BACKEND_DIR) }}
 
@@ -248,7 +248,7 @@ jobs:
           ssh-user: ${{ secrets.SSH_USER }}
       - name: PM2 Start App
         run: |
-          ssh server $COMMAND
+          ssh server '$COMMAND'
         env:
           COMMAND: ${{ format('cd {0} && . ~/.nvm/nvm.sh && nvm use 24 && pm2 start ecosystem.config.cjs', vars.BACKEND_DIR) }}
 
