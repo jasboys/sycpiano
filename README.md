@@ -11,7 +11,9 @@ Deployment uses github actions.
 Service is persisted with PM2.
 
 ## Getting Started
-Make sure at least version 20 of Node.js is installed.
+Make sure at least version 24 of Node.js is installed.
+
+If updating Node version for prod, make sure github actions are updated, as well as package.json. On the server side, make sure you stop pm2 before uninstalling/updating node, then re-run pm2 setup (because of node install folder path change).
 
 ### Env file
 

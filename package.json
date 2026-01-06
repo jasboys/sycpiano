@@ -1,7 +1,7 @@
 {
     "$schema": "https://json.schemastore.org/package.json",
     "name": "seanchenpiano",
-    "version": "2.1.0",
+    "version": "2.2.0",
     "description": "Website Sean Chen Piano",
     "repository": {
         "type": "git",
@@ -21,15 +21,15 @@
     },
     "packageManager": "yarn@4.11.0",
     "engines": {
-        "node": ">=20.0.0"
+        "node": ">=24.0.0"
     },
     "dependencies": {
         "cross-env": "^10.1.0",
-        "turbo": "^2.7.2",
+        "turbo": "^2.7.3",
         "typescript": "^5.9.3"
     },
     "devDependencies": {
-        "@biomejs/biome": "2.3.10",
+        "@biomejs/biome": "2.3.11",
         "nodemon": "^3.1.11"
     },
     "resolutions": {

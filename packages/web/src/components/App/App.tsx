@@ -462,7 +462,7 @@ const App: React.FC<Record<never, unknown>> = () => {
                         update={update}
                     />
                 )}
-                {(navBarExpanded || cartVisible || showSubs.length) && (
+                {(navBarExpanded || cartVisible || (showSubs.length !== 0)) && (
                     <StyledClickDiv
                         isMobile={isMobile}
                         cartOpen={cartVisible}
