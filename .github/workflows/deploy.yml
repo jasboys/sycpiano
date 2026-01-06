@@ -126,7 +126,7 @@ jobs:
           node-version: 24.x
       - name: Admin Install Deps and Build
         run: |
-          yarn workspaces focus admin
+          yarn workspaces focus admin --production
           yarn workspace admin build
         env:
           GAPI_KEY_APP: ${{ secrets.GAPI_KEY_APP }}
@@ -163,7 +163,7 @@ jobs:
           node-version: 24.x
       - name: Web Install Deps and Build
         run: |
-          yarn workspaces focus web
+          yarn workspaces focus web --production
           yarn workspace web build
         env:
           GAPI_KEY_APP: ${{ secrets.GAPI_KEY_APP }}
@@ -201,7 +201,7 @@ jobs:
           node-version: 24.x
       - name: Server Install Deps and Build
         run: |
-          yarn workspaces focus server
+          yarn workspaces focus server --production
           yarn workspace server build
       - name: Setup SSH
         uses: ./.github/actions/setup-ssh
