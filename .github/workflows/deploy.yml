@@ -224,7 +224,7 @@ jobs:
         run: |
           ssh server '$COMMAND'
         env:
-          COMMAND: ${{ format('cd {0} && . ~/.nvm/nvm.sh && nvm use 24 && yarn workspaces focus server', vars.BACKEND_DIR) }}
+          COMMAND: ${{ format('cd {0} && . ~/.nvm/nvm.sh && nvm use 24 && yarn', vars.BACKEND_DIR) }}
       - name: Migrate Up
         run: |
           ssh server '$COMMAND'
