@@ -109,15 +109,9 @@ export const createMonthGroups = (
     }
     if (order === 'desc') {
         const sortedEvents = events.sort(eventDescend);
-        const lastMonth = startOfMonth(
-            parseISO(sortedEvents[0].dateTime, {
-                in: tz(sortedEvents[0].timezone),
-            }),
-        );
+        const lastMonth = startOfMonth(parseISO(sortedEvents[0].dateTime));
         const firstMonth = startOfMonth(
-            parseISO(sortedEvents[events.length - 1].dateTime, {
-                in: tz(sortedEvents[events.length - 1].timezone),
-            }),
+            parseISO(sortedEvents[events.length - 1].dateTime),
         );
         const result: MonthGroup[] = [];
         let count = 0;
@@ -154,15 +148,9 @@ export const createMonthGroups = (
         };
     }
     const sortedEvents = events.sort(eventAscend);
-    const firstMonth = endOfMonth(
-        parseISO(sortedEvents[0].dateTime, {
-            in: tz(sortedEvents[0].timezone),
-        }),
-    );
+    const firstMonth = endOfMonth(parseISO(sortedEvents[0].dateTime));
     const lastMonth = endOfMonth(
-        parseISO(sortedEvents[events.length - 1].dateTime, {
-            in: tz(sortedEvents[events.length - 1].timezone),
-        }),
+        parseISO(sortedEvents[events.length - 1].dateTime),
     );
     const result: MonthGroup[] = [];
     let count = 0;

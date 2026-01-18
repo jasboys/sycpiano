@@ -250,7 +250,7 @@ jobs:
         run: |
           ssh server '$COMMAND'
         env:
-          COMMAND: ${{ format('cd {0} && . ~/.nvm/nvm.sh && nvm use 24 && pm2 start ecosystem.config.cjs', vars.BACKEND_DIR) }}
+          COMMAND: ${{ format('cd {0} && . ~/.nvm/nvm.sh && nvm use 24 && yarn && pm2 start ecosystem.config.cjs', vars.BACKEND_DIR) }}
 
   save-cache:
     runs-on: ubuntu-latest
