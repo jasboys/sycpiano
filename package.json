@@ -25,11 +25,11 @@
     },
     "dependencies": {
         "cross-env": "^10.1.0",
-        "turbo": "^2.8.1",
+        "turbo": "^2.8.3",
         "typescript": "^5.9.3"
     },
     "devDependencies": {
-        "@biomejs/biome": "2.3.13",
+        "@biomejs/biome": "2.3.14",
         "nodemon": "^3.1.11"
     },
     "resolutions": {

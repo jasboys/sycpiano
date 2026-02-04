@@ -19,7 +19,7 @@ if (process.env.STRIPE_SECRET_KEY === undefined) {
     throw new Error('Stripe Secret Key undefined');
 }
 const stripe: Stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2025-12-15.clover',
+    apiVersion: '2026-01-28.clover',
 });
 
 const stripeCustomerActive = (cr: CustomerReturn): cr is Stripe.Customer => {
