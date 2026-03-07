@@ -4732,7 +4732,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"brace-expansion@npm:^1.1.12":
+"brace-expansion@npm:^1.1.7":
   version: 1.1.12
   resolution: "brace-expansion@npm:1.1.12"
   dependencies:
@@ -5692,15 +5692,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dompurify@npm:^3.2.4":
-  version: 3.3.0
-  resolution: "dompurify@npm:3.3.0"
+"dompurify@npm:^3.3.2":
+  version: 3.3.2
+  resolution: "dompurify@npm:3.3.2"
   dependencies:
     "@types/trusted-types": "npm:^2.0.7"
   dependenciesMeta:
     "@types/trusted-types":
       optional: true
-  checksum: 10/d8782b10a0454344476936c91038d06c9450b3e3ada2ceb8f722525e6b54e64d847939b9f35bf385facd4139f0a2eaf7f5553efce351f8e9295620570875f002
+  checksum: 10/3ca02559677ce6d9583a500f21ffbb6b9e88f1af99f69fa0d0d9442cddbac98810588c869f8b435addb5115492d6e49870024bca322169b941bafedb99c7f281
   languageName: node
   linkType: hard
 
@@ -7097,10 +7097,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"immutable@npm:^4.3.4":
-  version: 4.3.7
-  resolution: "immutable@npm:4.3.7"
-  checksum: 10/37d963c5050f03ae5f3714ba7a43d469aa482051087f4c65d673d1501c309ea231d87480c792e19fa85e2eaf965f76af5d0aa92726505f3cfe4af91619dfb80b
+"immutable@npm:^4.3.8":
+  version: 4.3.8
+  resolution: "immutable@npm:4.3.8"
+  checksum: 10/27a134cec0089ba60c5f50fdd08a0296533c9ce6d112188461c89a6bb3c720368e4363dc5f8d40440c6f9120400867e9cf86bd7463c7d3ee12d4ad44f797d4cc
   languageName: node
   linkType: hard
 
@@ -8057,39 +8057,39 @@ __metadata:
   languageName: node
   linkType: hard
 
-"minimatch@npm:^10.2.1":
-  version: 10.2.2
-  resolution: "minimatch@npm:10.2.2"
+"minimatch@npm:^10.2.3":
+  version: 10.2.4
+  resolution: "minimatch@npm:10.2.4"
   dependencies:
     brace-expansion: "npm:^5.0.2"
-  checksum: 10/e135be7b502ac97c02bcee42ccc1c55dc26dbac036c0f4acde69e42fe339d7fb53fae711e57b3546cb533426382ea492c73a073c7f78832e0453d120d48dd015
+  checksum: 10/aea4874e521c55bb60744685bbffe3d152e5460f84efac3ea936e6bbe2ceba7deb93345fec3f9bb17f7b6946776073a64d40ae32bf5f298ad690308121068a1f
   languageName: node
   linkType: hard
 
-"minimatch@npm:^3.1.1":
-  version: 3.1.2
-  resolution: "minimatch@npm:3.1.2"
+"minimatch@npm:^3.1.4":
+  version: 3.1.5
+  resolution: "minimatch@npm:3.1.5"
   dependencies:
     brace-expansion: "npm:^1.1.7"
-  checksum: 10/e0b25b04cd4ec6732830344e5739b13f8690f8a012d73445a4a19fbc623f5dd481ef7a5827fde25954cd6026fede7574cc54dc4643c99d6c6b653d6203f94634
+  checksum: 10/b11a7ee5773cd34c1a0c8436cdbe910901018fb4b6cb47aa508a18d567f6efd2148507959e35fba798389b161b8604a2d704ccef751ea36bd4582f9852b7d63f
   languageName: node
   linkType: hard
 
-"minimatch@npm:^5.1.0":
-  version: 5.1.6
-  resolution: "minimatch@npm:5.1.6"
+"minimatch@npm:^5.1.8":
+  version: 5.1.9
+  resolution: "minimatch@npm:5.1.9"
   dependencies:
     brace-expansion: "npm:^2.0.1"
-  checksum: 10/126b36485b821daf96d33b5c821dac600cc1ab36c87e7a532594f9b1652b1fa89a1eebcaad4dff17c764dce1a7ac1531327f190fed5f97d8f6e5f889c116c429
+  checksum: 10/23b4feb64dcb77ba93b70a72be551eb2e2677ac02178cf1ed3d38836cc4cd84802d90b77f60ef87f2bac64d270d2d8eba242e428f0554ea4e36bfdb7e9d25d0c
   languageName: node
   linkType: hard
 
-"minimatch@npm:^9.0.4":
-  version: 9.0.5
-  resolution: "minimatch@npm:9.0.5"
+"minimatch@npm:^9.0.7":
+  version: 9.0.9
+  resolution: "minimatch@npm:9.0.9"
   dependencies:
-    brace-expansion: "npm:^2.0.1"
-  checksum: 10/dd6a8927b063aca6d910b119e1f2df6d2ce7d36eab91de83167dd136bb85e1ebff97b0d3de1cb08bd1f7e018ca170b4962479fefab5b2a69e2ae12cb2edc8348
+    brace-expansion: "npm:^2.0.2"
+  checksum: 10/b91fad937deaffb68a45a2cb731ff3cff1c3baf9b6469c879477ed16f15c8f4ce39d63a3f75c2455107c2fdff0f3ab597d97dc09e2e93b883aafcf926ef0c8f9
   languageName: node
   linkType: hard
 
@@ -10899,16 +10899,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"tar@npm:^7.5.8":
-  version: 7.5.9
-  resolution: "tar@npm:7.5.9"
+"tar@npm:^7.5.10":
+  version: 7.5.10
+  resolution: "tar@npm:7.5.10"
   dependencies:
     "@isaacs/fs-minipass": "npm:^4.0.0"
     chownr: "npm:^3.0.0"
     minipass: "npm:^7.1.2"
     minizlib: "npm:^3.1.0"
     yallist: "npm:^5.0.0"
-  checksum: 10/1213cdde9c22d6acf8809ba5d2a025212ce3517bc99c4a4c6981b7dc0489bf3b164db9c826c9517680889194c9ba57448c8ff0da35eca9a60bb7689bf0b3897d
+  checksum: 10/98ba6421a250b233c36a54f7441647bdfee1ed0b916cd57850259a3602154d996f5b8422f67ef5c8ce77f582ed938054775c2873fc7c901e0c7530ed50febc40
   languageName: node
   linkType: hard
 
