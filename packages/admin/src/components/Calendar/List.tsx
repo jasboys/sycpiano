@@ -13,6 +13,7 @@ import {
 } from 'react-admin';
 import { DateTime, Empty } from '../Shared.jsx';
 import { BulkActionButtons, ListActions } from './Actions.jsx';
+import { useQueryClient } from '@tanstack/react-query';
 
 const filters = [<SearchInput key="search" source="q" alwaysOn />];
 
@@ -50,6 +51,8 @@ const CalendarPanel: React.FC<{
 };
 
 export const CalendarList = (props: ListProps) => {
+    const queryClient = useQueryClient()
+    console.log(queryClient);
     const { canAccess } = useCanAccess({
         action: 'edit',
         resource: 'calendars',

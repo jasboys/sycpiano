@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
     BulkDeleteButton,
     Button,
@@ -15,6 +15,8 @@ import { useAppDataProvider } from '../../providers/restProvider.js';
 
 
 export const PopulateImageFieldsButton = () => {
+    const query = useQueryClient();
+    console.log(query);
     const context = useListContext();
     const notify = useNotify();
     const refresh = useRefresh();
