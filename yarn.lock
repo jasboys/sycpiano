@@ -1576,6 +1576,7 @@ __metadata:
 "@biomejs/cli-linux-x64@npm:2.4.6":
   version: 2.4.6
   resolution: "@biomejs/cli-linux-x64@npm:2.4.6"
+  checksum: 10/756b972a17fe8a9b31b8c4a149118fff2714a2ad651f672b5207fe380537453753310d817db5368c8b342c5f80ec07248c271e48d3e966ad7e51d7ccf033668e
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
@@ -1590,6 +1591,7 @@ __metadata:
 "@biomejs/cli-win32-x64@npm:2.4.6":
   version: 2.4.6
   resolution: "@biomejs/cli-win32-x64@npm:2.4.6"
+  checksum: 10/bf7d0a9faeb06ab58e1ecc9bfe78f2ba576ebc50b3534f288280c8c397a982e887964372a00d6a6fa8e22ddd15feddb2bb56b1fd70f9e51988498fd5b1f89212
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -10186,6 +10188,8 @@ __metadata:
   resolution: "seanchenpiano@workspace:."
   dependencies:
     "@biomejs/biome": "npm:2.4.6"
+    "@biomejs/cli-linux-x64": "npm:2.4.6"
+    "@biomejs/cli-win32-x64": "npm:2.4.6"
     cross-env: "npm:^10.1.0"
     nodemon: "npm:^3.1.14"
     turbo: "npm:^2.8.14"

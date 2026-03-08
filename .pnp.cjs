@@ -49,6 +49,8 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./",\
         "packageDependencies": [\
           ["@biomejs/biome", "npm:2.4.6"],\
+          ["@biomejs/cli-linux-x64", "npm:2.4.6"],\
+          ["@biomejs/cli-win32-x64", "npm:2.4.6"],\
           ["cross-env", "npm:10.1.0"],\
           ["nodemon", "npm:3.1.14"],\
           ["seanchenpiano", "workspace:."],\
@@ -14368,6 +14370,8 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./",\
         "packageDependencies": [\
           ["@biomejs/biome", "npm:2.4.6"],\
+          ["@biomejs/cli-linux-x64", "npm:2.4.6"],\
+          ["@biomejs/cli-win32-x64", "npm:2.4.6"],\
           ["cross-env", "npm:10.1.0"],\
           ["nodemon", "npm:3.1.14"],\
           ["seanchenpiano", "workspace:."],\

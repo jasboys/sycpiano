@@ -19,6 +19,10 @@
         "watch": "nodemon --config nodemon.json packages/server/build/app.js",
         "migrate": "dbmate -d ./packages/server/migrations -s ./schema.sql"
     },
+    "os": [
+        "linux",
+        "win32"
+    ],
     "packageManager": "yarn@4.11.0",
     "engines": {
         "node": ">=24.0.0"
@@ -30,6 +34,8 @@
     },
     "devDependencies": {
         "@biomejs/biome": "2.4.6",
+        "@biomejs/cli-linux-x64": "2.4.6",
+        "@biomejs/cli-win32-x64": "2.4.6",
         "nodemon": "^3.1.14"
     },
     "resolutions": {
