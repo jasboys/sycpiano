@@ -1,12 +1,5 @@
-import type { EventArgs, Rel } from '@mikro-orm/core';
-import {
-    AfterCreate,
-    AfterDelete,
-    AfterUpdate,
-    Entity,
-    ManyToOne,
-    Property,
-} from '@mikro-orm/core';
+import type { EventArgs } from '@mikro-orm/core';
+import { defineEntity, p } from '@mikro-orm/core';
 import { transformModelToGoogle, updateCalendar } from '../gapi/calendar.js';
 import { Calendar } from './Calendar.js';
 import { Collaborator } from './Collaborator.js';
@@ -20,40 +13,83 @@ const hook = async (args: EventArgs<CalendarCollaborator>) => {
     await updateCalendar(args.em, data);
 };
 
-@Entity()
-export class CalendarCollaborator {
-    @Property({ columnType: 'uuid', defaultRaw: 'gen_random_uuid()' })
-    id!: string;
+const calendarCollaboratorSchema = defineEntity({
+    name: 'CalendarCollaborator',
+    properties: {
+        id: p.uuid().defaultRaw('gen_random_uuid'),
+        calendar: () =>
+            p
+                .manyToOne(Calendar)
+                .primary()
+                .index('calendar_collaborator_calendar_idx'),
+        collaborator: () =>
+            p
+                .manyToOne(Collaborator)
+                .primary()
+                .index('calendar_collaborator_collaborator_idx'),
+        order: p.integer().nullable(),
+    },
+});
 
-    @ManyToOne({
-        entity: () => Calendar,
-        primary: true,
-        index: 'calendar_collaborator_calendar_idx',
-    })
-    calendar!: Rel<Calendar>;
+export class CalendarCollaborator extends calendarCollaboratorSchema.class {}
 
-    @ManyToOne({
-        entity: () => Collaborator,
-        primary: true,
-        index: 'calendar_collaborator_collaborator_idx',
-    })
-    collaborator!: Rel<Collaborator>;
+calendarCollaboratorSchema.setClass(CalendarCollaborator);
 
-    @Property({ nullable: true })
-    order?: number;
-
-    @AfterCreate()
-    async afterCreate(args: EventArgs<CalendarCollaborator>) {
+calendarCollaboratorSchema.addHook(
+    'afterCreate',
+    async (args: EventArgs<CalendarCollaborator>) => {
         await hook(args);
-    }
+    },
+);
 
-    @AfterUpdate()
-    async afterUpdate(args: EventArgs<CalendarCollaborator>) {
+calendarCollaboratorSchema.addHook(
+    'afterUpdate',
+    async (args: EventArgs<CalendarCollaborator>) => {
         await hook(args);
-    }
+    },
+);
 
-    @AfterDelete()
-    async afterDelete(args: EventArgs<CalendarCollaborator>) {
+calendarCollaboratorSchema.addHook(
+    'afterDelete',
+    async (args: EventArgs<CalendarCollaborator>) => {
         await hook(args);
-    }
-}
+    },
+);
+
+// @Entity()
+// export class CalendarCollaborator {
+//     @Property({ columnType: 'uuid', defaultRaw: 'gen_random_uuid()' })
+//     id!: string;
+
+//     @ManyToOne({
+//         entity: () => Calendar,
+//         primary: true,
+//         index: 'calendar_collaborator_calendar_idx',
+//     })
+//     calendar!: Rel<Calendar>;
+
+//     @ManyToOne({
+//         entity: () => Collaborator,
+//         primary: true,
+//         index: 'calendar_collaborator_collaborator_idx',
+//     })
+//     collaborator!: Rel<Collaborator>;
+
+//     @Property({ nullable: true })
+//     order?: number;
+
+//     @AfterCreate()
+//     async afterCreate(args: EventArgs<CalendarCollaborator>) {
+//         await hook(args);
+//     }
+
+//     @AfterUpdate()
+//     async afterUpdate(args: EventArgs<CalendarCollaborator>) {
+//         await hook(args);
+//     }
+
+//     @AfterDelete()
+//     async afterDelete(args: EventArgs<CalendarCollaborator>) {
+//         await hook(args);
+//     }
+// }

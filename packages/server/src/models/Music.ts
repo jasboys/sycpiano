@@ -1,39 +1,50 @@
-import {
-    Collection,
-    Entity,
-    OneToMany,
-    OptionalProps,
-    PrimaryKey,
-    Property,
-} from '@mikro-orm/core';
+import { defineEntity, p } from '@mikro-orm/core';
 import { MusicFile } from './MusicFile.js';
 
-@Entity()
-export class Music {
-    [OptionalProps]?: 'id';
+const musicSchema = defineEntity({
+    name: 'Music',
+    properties: {
+        id: p.uuid().primary().defaultRaw('gen_random_uuid'),
+        composer: p.text(),
+        piece: p.text(),
+        contributors: p.text().nullable(),
+        type: p.text(),
+        year: p.integer().nullable(),
+        musicFiles: () =>
+            p.oneToMany(MusicFile).mappedBy('music').orderBy({ name: 'ASC' }),
+    },
+});
 
-    @PrimaryKey({ columnType: 'uuid', defaultRaw: 'gen_random_uuid()' })
-    id!: string;
+export class Music extends musicSchema.class {}
 
-    @Property({ columnType: 'text' })
-    composer!: string;
+musicSchema.setClass(Music);
 
-    @Property({ columnType: 'text' })
-    piece!: string;
+// @Entity()
+// export class Music {
+//     [OptionalProps]?: 'id';
 
-    @Property({ columnType: 'text', nullable: true })
-    contributors?: string;
+//     @PrimaryKey({ columnType: 'uuid', defaultRaw: 'gen_random_uuid()' })
+//     id!: string;
 
-    @Property({ columnType: 'text' })
-    type!: string;
+//     @Property({ columnType: 'text' })
+//     composer!: string;
 
-    @Property({ nullable: true })
-    year?: number;
+//     @Property({ columnType: 'text' })
+//     piece!: string;
 
-    @OneToMany({
-        entity: () => MusicFile,
-        mappedBy: 'music',
-        orderBy: { name: 'asc' },
-    })
-    musicFiles = new Collection<MusicFile>(this);
-}
+//     @Property({ columnType: 'text', nullable: true })
+//     contributors?: string;
+
+//     @Property({ columnType: 'text' })
+//     type!: string;
+
+//     @Property({ nullable: true })
+//     year?: number;
+
+//     @OneToMany({
+//         entity: () => MusicFile,
+//         mappedBy: 'music',
+//         orderBy: { name: 'asc' },
+//     })
+//     musicFiles = new Collection<MusicFile>(this);
+// }

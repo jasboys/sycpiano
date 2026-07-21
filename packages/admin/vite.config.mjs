@@ -14,16 +14,6 @@ export default defineConfig({
         },
     },
     root: path.resolve(__dirname, 'src'),
-    // define: {
-    //     BINARY_PATH: JSON.stringify(staticPrefix + '/binary'),
-    //     IMAGES_PATH: JSON.stringify(staticPrefix + '/images'),
-    //     MUSIC_PATH: JSON.stringify(staticPrefix + '/music'),
-    //     VIDEOS_PATH: JSON.stringify(staticPrefix + '/videos'),
-    //     GAPI_KEY: JSON.stringify(process.env.GAPI_KEY_APP),
-    //     STRIPE_PUBLIC_KEY: JSON.stringify(process.env.STRIPE_PUBLIC_KEY),
-    //     global: 'window',
-    //     preventAssignment: true,
-    // },
     define: {
         'import.meta.env.PUBLIC_GAPI_KEY': JSON.stringify(
             process.env.GAPI_KEY_APP,

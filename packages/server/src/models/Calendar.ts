@@ -1,18 +1,6 @@
 import { tz } from '@date-fns/tz';
 import type { EventArgs } from '@mikro-orm/core';
-import {
-    AfterDelete,
-    AfterUpdate,
-    BeforeCreate,
-    BeforeUpdate,
-    Collection,
-    Entity,
-    Index,
-    ManyToMany,
-    OneToMany,
-    PrimaryKey,
-    Property,
-} from '@mikro-orm/core';
+import { defineEntity, p } from '@mikro-orm/core';
 import { parse, startOfDay } from 'date-fns';
 import {
     createCalendarEvent,
@@ -90,7 +78,7 @@ async function beforeCreateHook(args: EventArgs<Calendar>) {
     console.log(
         `[Hook: BeforeCreate] Creating google calendar event '${
             args.entity.name
-        }' on ${args.entity.dateTime.toISOString()}`,
+        }' on ${args.entity.dateTime?.toISOString()}`,
     );
     const googleParams = transformModelToGoogle(args.entity);
     const createResponse = await createCalendarEvent(args.em, googleParams);
@@ -116,12 +104,11 @@ async function beforeUpdateHook(args: EventArgs<Calendar>) {
     const location = args.changeSet.entity.location;
     const dateTimeInput = args.changeSet.entity.dateTimeInput;
 
-    if (locationChanged || timezone === undefined) {
+    if ((locationChanged || timezone === undefined) && location) {
         console.log(
             '[Hook: BeforeUpdate] Location changed or timezone was undefined, fetching timezone',
         );
 
-        const location = args.changeSet.entity.location;
         const { latlng } = await getLatLng(location);
         const dayStart = dateTimeInput
             ? startOfDay(parse(dateTimeInput, 'yyyy-MM-dd HH:mm', new Date()))
@@ -136,7 +123,7 @@ async function beforeUpdateHook(args: EventArgs<Calendar>) {
     }
 
     const newDateTime =
-        dateTimeInput !== undefined
+        dateTimeInput !== undefined && timezone
             ? parse(dateTimeInput, 'yyyy-MM-dd HH:mm', new Date(), {
                   in: tz(timezone),
               })
@@ -206,96 +193,157 @@ async function afterUpdateHook(args: EventArgs<Calendar>) {
     console.log('[Hook: AfterUpdate] End\n');
 }
 
-@Entity()
-export class Calendar {
-    @PrimaryKey({ columnType: 'text' })
-    id!: string;
+const CalendarSchema = defineEntity({
+    name: 'Calendar',
+    properties: {
+        id: p.text().primary(),
+        name: p.text().nullable(),
+        dateTime: p.datetime(6).nullable().index('calendar_time'),
+        timezone: p.text().nullable(),
+        location: p.text().nullable(),
+        type: p.text().nullable(),
+        website: p.text().nullable(),
+        allDay: p.boolean().default(false),
+        endDate: p.date().nullable(),
+        imageUrl: p.text().nullable(),
+        dateTimeInput: p.text().persist(false),
+        hidden: p.boolean().default(false),
+        calendarPieces: () =>
+            p
+                .oneToMany(CalendarPiece)
+                .mappedBy('calendar')
+                .orphanRemoval(true)
+                .orderBy({ order: 'ASC' }),
+        calendarCollaborators: () =>
+            p
+                .oneToMany(CalendarCollaborator)
+                .mappedBy('calendar')
+                .orphanRemoval(true)
+                .orderBy({ order: 'ASC' }),
+        pieces: () =>
+            p
+                .manyToMany(Piece)
+                .pivotEntity(() => CalendarPiece)
+                .fixedOrderColumn('order'),
+        collaborators: () =>
+            p
+                .manyToMany(Collaborator)
+                .pivotEntity(() => CalendarCollaborator)
+                .fixedOrderColumn('order'),
+    },
+});
 
-    @Property({ columnType: 'text', nullable: true })
-    name!: string;
+export class Calendar extends CalendarSchema.class {}
+CalendarSchema.setClass(Calendar);
 
-    @Index({ name: 'calendar_time' })
-    @Property({ length: 6, nullable: true })
-    dateTime!: Date;
+CalendarSchema.addHook('beforeCreate', async (args: EventArgs<Calendar>) => {
+    await beforeCreateHook(args);
+});
 
-    @Property({ columnType: 'text', nullable: true })
-    timezone!: string;
+CalendarSchema.addHook('beforeUpdate', async (args: EventArgs<Calendar>) => {
+    await beforeUpdateHook(args);
+});
 
-    @Property({ columnType: 'text', nullable: true })
-    location!: string;
+CalendarSchema.addHook('afterUpdate', async (args: EventArgs<Calendar>) => {
+    await afterUpdateHook(args);
+});
 
-    @Property({ columnType: 'text', nullable: true })
-    type!: string;
+CalendarSchema.addHook('afterDelete', async (args: EventArgs<Calendar>) => {
+    console.log('[Hook: AfterDelete] Start');
+    await deleteCalendarEvent(args.em, args.entity.id);
+    console.log(`[Hook: AfterDelete] Deleted calendar id: ${args.entity.id}`);
+});
 
-    @Property({ columnType: 'text', nullable: true })
-    website?: string;
+// @Entity()
+// export class Calendar {
+//     @PrimaryKey({ columnType: 'text' })
+//     id!: string;
 
-    @Property({ default: false })
-    allDay!: boolean;
+//     @Property({ columnType: 'text', nullable: true })
+//     name!: string;
 
-    @Property({ columnType: 'date', nullable: true })
-    endDate?: string;
+//     @Index({ name: 'calendar_time' })
+//     @Property({ length: 6, nullable: true })
+//     dateTime!: Date;
 
-    @Property({ columnType: 'text', nullable: true })
-    imageUrl?: string | null;
+//     @Property({ columnType: 'text', nullable: true })
+//     timezone!: string;
 
-    @Property({ persist: false })
-    dateTimeInput?: string;
+//     @Property({ columnType: 'text', nullable: true })
+//     location!: string;
 
-    @Property({ default: false })
-    hidden?: boolean;
+//     @Property({ columnType: 'text', nullable: true })
+//     type!: string;
 
-    @OneToMany({
-        entity: () => CalendarPiece,
-        mappedBy: (cp) => cp.calendar,
-        orphanRemoval: true,
-        orderBy: { order: 'ASC' },
-    })
-    calendarPieces = new Collection<CalendarPiece>(this);
+//     @Property({ columnType: 'text', nullable: true })
+//     website?: string;
 
-    @OneToMany({
-        entity: () => CalendarCollaborator,
-        mappedBy: (cp) => cp.calendar,
-        orphanRemoval: true,
-        orderBy: { order: 'ASC' },
-    })
-    calendarCollaborators = new Collection<CalendarCollaborator>(this);
+//     @Property({ default: false })
+//     allDay!: boolean;
 
-    @ManyToMany({
-        entity: () => Piece,
-        pivotEntity: () => CalendarPiece,
-        fixedOrderColumn: 'order',
-    })
-    pieces = new Collection<Piece>(this);
+//     @Property({ columnType: 'date', nullable: true })
+//     endDate?: string;
 
-    @ManyToMany({
-        entity: () => Collaborator,
-        pivotEntity: () => CalendarCollaborator,
-        fixedOrderColumn: 'order',
-    })
-    collaborators = new Collection<Collaborator>(this);
+//     @Property({ columnType: 'text', nullable: true })
+//     imageUrl?: string | null;
 
-    @BeforeCreate()
-    async beforeCreate(args: EventArgs<Calendar>) {
-        await beforeCreateHook(args);
-    }
+//     @Property({ persist: false })
+//     dateTimeInput?: string;
 
-    @BeforeUpdate()
-    async beforeUpdate(args: EventArgs<Calendar>) {
-        await beforeUpdateHook(args);
-    }
+//     @Property({ default: false })
+//     hidden?: boolean;
 
-    @AfterUpdate()
-    async afterUpdate(args: EventArgs<Calendar>) {
-        await afterUpdateHook(args);
-    }
+//     @OneToMany({
+//         entity: () => CalendarPiece,
+//         mappedBy: (cp) => cp.calendar,
+//         orphanRemoval: true,
+//         orderBy: { order: 'ASC' },
+//     })
+//     calendarPieces = new Collection<CalendarPiece>(this);
 
-    @AfterDelete()
-    async AfterDelete(args: EventArgs<Calendar>) {
-        console.log('[Hook: AfterDelete] Start');
-        await deleteCalendarEvent(args.em, args.entity.id);
-        console.log(
-            `[Hook: AfterDelete] Deleted calendar id: ${args.entity.id}`,
-        );
-    }
-}
+//     @OneToMany({
+//         entity: () => CalendarCollaborator,
+//         mappedBy: (cp) => cp.calendar,
+//         orphanRemoval: true,
+//         orderBy: { order: 'ASC' },
+//     })
+//     calendarCollaborators = new Collection<CalendarCollaborator>(this);
+
+//     @ManyToMany({
+//         entity: () => Piece,
+//         pivotEntity: () => CalendarPiece,
+//         fixedOrderColumn: 'order',
+//     })
+//     pieces = new Collection<Piece>(this);
+
+//     @ManyToMany({
+//         entity: () => Collaborator,
+//         pivotEntity: () => CalendarCollaborator,
+//         fixedOrderColumn: 'order',
+//     })
+//     collaborators = new Collection<Collaborator>(this);
+
+//     @BeforeCreate()
+//     async beforeCreate(args: EventArgs<Calendar>) {
+//         await beforeCreateHook(args);
+//     }
+
+//     @BeforeUpdate()
+//     async beforeUpdate(args: EventArgs<Calendar>) {
+//         await beforeUpdateHook(args);
+//     }
+
+//     @AfterUpdate()
+//     async afterUpdate(args: EventArgs<Calendar>) {
+//         await afterUpdateHook(args);
+//     }
+
+//     @AfterDelete()
+//     async AfterDelete(args: EventArgs<Calendar>) {
+//         console.log('[Hook: AfterDelete] Start');
+//         await deleteCalendarEvent(args.em, args.entity.id);
+//         console.log(
+//             `[Hook: AfterDelete] Deleted calendar id: ${args.entity.id}`,
+//         );
+//     }
+// }

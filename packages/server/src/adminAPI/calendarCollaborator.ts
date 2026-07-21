@@ -59,7 +59,7 @@ export const calendarCollaboratorHandler = crud('/calendar-collaborators', {
             collab.instrument = body.instrument;
             collab.name = body.name;
         }
-        if (body.order !== null) {
+        if (typeof body.order === 'number') {
             record.order = body.order;
         }
         await orm.em.flush();

@@ -1,35 +1,44 @@
-import {
-    Collection,
-    Entity,
-    OneToMany,
-    OptionalProps,
-    PrimaryKey,
-    Property,
-} from '@mikro-orm/core';
+import { defineEntity, p } from '@mikro-orm/core';
 import { DiscLink } from './DiscLink.js';
 
-@Entity()
-export class Disc {
-    [OptionalProps]?: 'id';
+const discSchema = defineEntity({
+    name: 'Disc',
+    properties: {
+        id: p.uuid().primary().defaultRaw('gen_random_uuid'),
+        title: p.text().nullable(),
+        description: p.text().nullable(),
+        label: p.text().nullable(),
+        releaseDate: p.integer().nullable(),
+        thumbnailFile: p.text().nullable(),
+        discLink: () => p.oneToMany(() => DiscLink).mappedBy('disc'),
+    },
+});
 
-    @PrimaryKey({ columnType: 'uuid', defaultRaw: 'gen_random_uuid()' })
-    id!: string;
+export class Disc extends discSchema.class {}
+discSchema.setClass(Disc);
 
-    @Property({ columnType: 'text', nullable: true })
-    title?: string;
+// @Entity()
+// export class Disc {
+//     [OptionalProps]?: 'id';
 
-    @Property({ columnType: 'text', nullable: true })
-    description?: string;
+//     @PrimaryKey({ columnType: 'uuid', defaultRaw: 'gen_random_uuid()' })
+//     id!: string;
 
-    @Property({ columnType: 'text', nullable: true })
-    label?: string;
+//     @Property({ columnType: 'text', nullable: true })
+//     title?: string;
 
-    @Property({ nullable: true })
-    releaseDate?: number;
+//     @Property({ columnType: 'text', nullable: true })
+//     description?: string;
 
-    @Property({ columnType: 'text', nullable: true })
-    thumbnailFile?: string;
+//     @Property({ columnType: 'text', nullable: true })
+//     label?: string;
 
-    @OneToMany({ entity: () => DiscLink, mappedBy: 'disc' })
-    discLinks = new Collection<DiscLink>(this);
-}
+//     @Property({ nullable: true })
+//     releaseDate?: number;
+
+//     @Property({ columnType: 'text', nullable: true })
+//     thumbnailFile?: string;
+
+//     @OneToMany({ entity: () => DiscLink, mappedBy: 'disc' })
+//     discLinks = new Collection<DiscLink>(this);
+// }

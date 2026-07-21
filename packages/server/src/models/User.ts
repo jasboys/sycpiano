@@ -1,39 +1,51 @@
-import {
-    Collection,
-    Entity,
-    ManyToMany,
-    PrimaryKey,
-    Property,
-} from '@mikro-orm/core';
+import { defineEntity, p } from '@mikro-orm/core';
 import { Product } from './Product.js';
 import { UserProduct } from './UserProduct.js';
 
-@Entity()
-export class User {
-    @PrimaryKey({ columnType: 'text' })
-    id!: string;
+const userSchema = defineEntity({
+    name: 'User',
+    properties: {
+        id: p.text().primary(),
+        username: p.text().nullable(),
+        passHash: p.text().nullable(),
+        pasetoSecret: p.text().nullable(),
+        resetToken: p.text().nullable(),
+        role: p.text().nullable(),
+        session: p.text().nullable(),
+        lastRequest: p.datetime(6).nullable(),
+        products: () => p.manyToMany(Product).pivotEntity(() => UserProduct),
+    },
+});
 
-    @Property({ columnType: 'text', nullable: true })
-    username?: string;
+export class User extends userSchema.class {}
+userSchema.setClass(User);
 
-    @Property({ columnType: 'text', nullable: true })
-    passHash?: string;
+// @Entity()
+// export class User {
+//     @PrimaryKey({ columnType: 'text' })
+//     id!: string;
 
-    @Property({ columnType: 'text', nullable: true })
-    pasetoSecret?: string;
+//     @Property({ columnType: 'text', nullable: true })
+//     username?: string;
 
-    @Property({ columnType: 'text', nullable: true })
-    resetToken?: string;
+//     @Property({ columnType: 'text', nullable: true })
+//     passHash?: string;
 
-    @Property({ columnType: 'text', nullable: true })
-    role?: string;
+//     @Property({ columnType: 'text', nullable: true })
+//     pasetoSecret?: string;
 
-    @Property({ columnType: 'text', nullable: true })
-    session?: string;
+//     @Property({ columnType: 'text', nullable: true })
+//     resetToken?: string;
 
-    @Property({ length: 6, nullable: true })
-    lastRequest?: Date;
+//     @Property({ columnType: 'text', nullable: true })
+//     role?: string;
 
-    @ManyToMany({ entity: () => Product, pivotEntity: () => UserProduct })
-    products = new Collection<Product>(this);
-}
+//     @Property({ columnType: 'text', nullable: true })
+//     session?: string;
+
+//     @Property({ length: 6, nullable: true })
+//     lastRequest?: Date;
+
+//     @ManyToMany({ entity: () => Product, pivotEntity: () => UserProduct })
+//     products = new Collection<Product>(this);
+// }

@@ -47,7 +47,7 @@ export const mapSearchFields = (token: string) =>
         };
     });
 
-const calendarRouter = crud('/calendars', {
+const calendarRouter = crud<Calendar>('/calendars', {
     ...mikroCrud({ entity: Calendar }),
     create: async (body) => {
         console.log(body);

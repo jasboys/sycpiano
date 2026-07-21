@@ -1,11 +1,7 @@
-import {
-    NotFoundError,
-    type Primary,
-    type QueryOrderMap,
-} from '@mikro-orm/core';
+import { NotFoundError, type QueryOrderMap } from '@mikro-orm/core';
 import express from 'express';
 import type QueryString from 'qs';
-import type { CrudActions, FilterOptions } from './types.js';
+import type { CrudActions, CrudId, FilterOptions } from './types.js';
 
 const orderArrayToObj = <R extends object, K extends keyof QueryOrderMap<R>>(
     arr: [K, string][],
@@ -71,9 +67,9 @@ export const setGetListHeaders = (
     res.set('X-Total-Count', `${total.toFixed(0)}`);
 };
 
-export const crud = <I extends NonNullable<Primary<R>>, R extends object>(
+export const crud = <R extends { id: string | number }>(
     path: string,
-    actions: CrudActions<I, R>,
+    actions: CrudActions<R>,
     options?: FilterOptions<R>,
 ) => {
     const router = express.Router();
@@ -117,10 +113,13 @@ export const crud = <I extends NonNullable<Primary<R>>, R extends object>(
         router.get(`${path}/:id`, async (req, res, next) => {
             try {
                 if (actions.getOne) {
-                    const record = await actions.getOne(req.params.id as I, {
-                        req,
-                        res,
-                    });
+                    const record = await actions.getOne(
+                        req.params.id as CrudId<R>,
+                        {
+                            req,
+                            res,
+                        },
+                    );
                     res.json(record);
                 } else {
                     throw Error('Not Implemented');
@@ -156,7 +155,7 @@ export const crud = <I extends NonNullable<Primary<R>>, R extends object>(
             try {
                 if (actions.update) {
                     const record = await actions.update(
-                        req.params.id as I,
+                        req.params.id as CrudId<R>,
                         req.body,
                         {
                             req,
@@ -182,10 +181,13 @@ export const crud = <I extends NonNullable<Primary<R>>, R extends object>(
         router.delete(`${path}/:id`, async (req, res, next) => {
             try {
                 if (actions.destroy) {
-                    const id = await actions.destroy(req.params.id as I, {
-                        req,
-                        res,
-                    });
+                    const id = await actions.destroy(
+                        req.params.id as CrudId<R>,
+                        {
+                            req,
+                            res,
+                        },
+                    );
                     res.json({
                         id,
                     });

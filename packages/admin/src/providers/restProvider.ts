@@ -404,6 +404,7 @@ const provider = (apiUrl: string): AdminProvider => {
                 `/actions/${resource}/extract`,
                 {
                     calendarId: params.id,
+                    nickname: params.nickname,
                 },
                 {
                     headers: {

@@ -1,18 +1,32 @@
-import { Entity, OptionalProps, PrimaryKey, Property } from '@mikro-orm/core';
+import { defineEntity, p } from '@mikro-orm/core';
 
-@Entity()
-export class Faq {
-    [OptionalProps]?: 'id';
+const faqSchema = defineEntity({
+    name: 'Faq',
+    properties: {
+        id: p.uuid().primary().defaultRaw('gen_random_uuid'),
+        question: p.text().nullable(),
+        answer: p.text().nullable(),
+        order: p.integer().nullable(),
+    },
+});
 
-    @PrimaryKey({ columnType: 'uuid', defaultRaw: 'gen_random_uuid()' })
-    id!: string;
+export class Faq extends faqSchema.class {}
 
-    @Property({ columnType: 'text', nullable: true })
-    question?: string;
+faqSchema.setClass(Faq);
 
-    @Property({ columnType: 'text', nullable: true })
-    answer?: string;
+// @Entity()
+// export class Faq {
+//     [OptionalProps]?: 'id';
 
-    @Property({ nullable: true })
-    order?: number;
-}
+//     @PrimaryKey({ columnType: 'uuid', defaultRaw: 'gen_random_uuid()' })
+//     id!: string;
+
+//     @Property({ columnType: 'text', nullable: true })
+//     question?: string;
+
+//     @Property({ columnType: 'text', nullable: true })
+//     answer?: string;
+
+//     @Property({ nullable: true })
+//     order?: number;
+// }

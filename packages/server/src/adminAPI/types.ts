@@ -4,14 +4,13 @@ import type {
     FromEntityType,
     IsSubset,
     Loaded,
-    Primary,
     QueryOrderMap,
     RequiredEntityData,
 } from '@mikro-orm/core';
 import type { Request, Response } from 'express';
 
 export interface FilterOptions<R extends object> {
-    filters: FilterQuery<R>;
+    filters: FilterQuery<NoInfer<R>>;
     primaryKeyName?: string;
 }
 
@@ -20,7 +19,7 @@ interface ListReturn<R extends object> {
     rows: EntityData<R>[];
 }
 interface GetListParams<R extends object> {
-    filter: FilterQuery<R>;
+    filter: FilterQuery<NoInfer<R>>;
     limit?: number;
     offset?: number;
     order: QueryOrderMap<R>[];
@@ -43,31 +42,29 @@ export class NotFoundError extends Error {
     }
 }
 
-export interface CrudActions<
-    I extends NonNullable<Primary<R>>,
-    R extends object,
-> {
+export type CrudUpdateData<R extends object> = EntityData<
+    FromEntityType<Loaded<R, never, never, never>>
+>;
+
+export type CrudId<R extends { id: string | number }> = R['id'];
+
+export interface CrudActions<R extends { id: string | number }> {
     create:
         | ((
               body: RequiredEntityData<R>,
               opts: RequestResponse,
-          ) => Promise<EntityData<R> & { id: I | number | string }>)
+          ) => Promise<EntityData<R> & { id: CrudId<R> }>)
         | null;
     update:
         | (<ExtraParams extends Record<string, string>>(
-              id: I,
-              body: R &
-                  IsSubset<
-                      EntityData<FromEntityType<Loaded<R, never, '*', never>>>,
-                      R
-                  > &
-                  ExtraParams,
+              id: CrudId<R>,
+              body: CrudUpdateData<R> & ExtraParams,
               opts: RequestResponse,
           ) => Promise<EntityData<R>>)
         | null;
     updateMany:
         | ((
-              ids: I[],
+              ids: CrudId<R>[],
               body: R &
                   IsSubset<
                       EntityData<FromEntityType<Loaded<R, never, '*', never>>>,
@@ -76,14 +73,18 @@ export interface CrudActions<
               opts: RequestResponse,
           ) => Promise<ListReturn<R>>)
         | null;
-    getOne: ((id: I, opts: RequestResponse) => Promise<EntityData<R>>) | null;
+    getOne:
+        | ((id: CrudId<R>, opts: RequestResponse) => Promise<EntityData<R>>)
+        | null;
     getList:
         | ((
               params: GetListParams<R>,
               opts: RequestResponse,
           ) => Promise<ListReturn<R>>)
         | null;
-    destroy: ((id: I, opts: RequestResponse) => Promise<{ id: I }>) | null;
+    destroy:
+        | ((id: CrudId<R>, opts: RequestResponse) => Promise<{ id: CrudId<R> }>)
+        | null;
     search:
         | ((
               params: SearchParams,

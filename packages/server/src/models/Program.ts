@@ -1,37 +1,51 @@
-import {
-    Collection,
-    Entity,
-    ManyToMany,
-    OneToMany,
-    OptionalProps,
-    PrimaryKey,
-    Property,
-} from '@mikro-orm/core';
+import { defineEntity, p } from '@mikro-orm/core';
 import { Piece } from './Piece.js';
 import { ProgramPiece } from './ProgramPiece.js';
 
-@Entity()
-export class Program {
-    [OptionalProps]?: 'id';
+const programSchema = defineEntity({
+    name: 'Program',
+    properties: {
+        id: p.uuid().primary().defaultRaw('gen_random_uuid'),
+        nickname: p.text().nullable(),
+        programPieces: () =>
+            p
+                .oneToMany(ProgramPiece)
+                .mappedBy('program')
+                .orphanRemoval(true)
+                .orderBy({ order: 'ASC' }),
+        pieces: () =>
+            p
+                .manyToMany(Piece)
+                .pivotEntity(() => ProgramPiece)
+                .fixedOrderColumn('order'),
+    },
+});
 
-    @PrimaryKey({ columnType: 'uuid', defaultRaw: 'gen_random_uuid()' })
-    id!: string;
+export class Program extends programSchema.class {}
+programSchema.setClass(Program);
 
-    @Property({ columnType: 'text', nullable: true })
-    nickname?: string;
+// @Entity()
+// export class Program {
+//     [OptionalProps]?: 'id';
 
-    @OneToMany({
-        entity: () => ProgramPiece,
-        mappedBy: (pp) => pp.program,
-        orphanRemoval: true,
-        orderBy: { order: 'ASC' },
-    })
-    programPieces = new Collection<ProgramPiece>(this);
+//     @PrimaryKey({ columnType: 'uuid', defaultRaw: 'gen_random_uuid()' })
+//     id!: string;
 
-    @ManyToMany({
-        entity: () => Piece,
-        pivotEntity: () => ProgramPiece,
-        fixedOrderColumn: 'order',
-    })
-    pieces = new Collection<Piece>(this);
-}
+//     @Property({ columnType: 'text', nullable: true })
+//     nickname?: string;
+
+//     @OneToMany({
+//         entity: () => ProgramPiece,
+//         mappedBy: (pp) => pp.program,
+//         orphanRemoval: true,
+//         orderBy: { order: 'ASC' },
+//     })
+//     programPieces = new Collection<ProgramPiece>(this);
+
+//     @ManyToMany({
+//         entity: () => Piece,
+//         pivotEntity: () => ProgramPiece,
+//         fixedOrderColumn: 'order',
+//     })
+//     pieces = new Collection<Piece>(this);
+// }

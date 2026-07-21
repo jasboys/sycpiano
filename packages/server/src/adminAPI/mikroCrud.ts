@@ -1,20 +1,24 @@
 import {
     type EntityClass,
-    type EntityData,
     type EntityName,
     type FilterQuery,
     type FindOptions,
-    type FromEntityType,
-    type IsSubset,
-    type Loaded,
     type Populate,
     type Primary,
     wrap,
 } from '@mikro-orm/core';
 import orm from '../database.js';
-import { type CrudActions, NotFoundError, type SearchParams } from './types.js';
+import {
+    type CrudActions,
+    type CrudUpdateData,
+    NotFoundError,
+    type SearchParams,
+} from './types.js';
 
-interface CrudParams<R extends {}, K extends keyof R & string> {
+interface CrudParams<
+    R extends { id: string | number },
+    K extends keyof R & string = never,
+> {
     entity: EntityClass<R>;
     populate?: FindOptions<R, any>['populate'];
     searchableFields?: K[];
@@ -27,13 +31,12 @@ const mapSearchFields =
     ) =>
     (token: string) => {
         return searchableFields.map((field) => {
-            const name =
-                typeof entity === 'string'
-                    ? entity
-                    : (entity as EntityClass<R>).name;
-            const typeOfField = orm.em.getMetadata().get(name).properties[
-                field
-            ].type;
+            const name = entity.name;
+            const metaData =
+                typeof name === 'string'
+                    ? orm.em.getMetadata().getByClassName(name)
+                    : orm.em.getMetadata().get(name);
+            const typeOfField = metaData.properties[field].type;
             if (typeOfField === 'string') {
                 return {
                     [field]: {
@@ -50,7 +53,7 @@ const mapSearchFields =
 const mikroSearchFields = <R extends {}, K extends keyof R & string>(
     entity: EntityName<R>,
     searchableFields?: K[],
-    populate?: Populate<R, string>,
+    populate?: Populate<R, any>,
 ) => {
     const mappedFields =
         searchableFields && mapSearchFields(entity, searchableFields);
@@ -90,35 +93,31 @@ const mikroSearchFields = <R extends {}, K extends keyof R & string>(
 };
 
 export const mikroCrud = <
-    I extends NonNullable<Primary<R>>,
-    R extends object,
-    K extends keyof R & string,
+    R extends { id: string | number },
+    K extends keyof R & string = never,
 >({
     entity,
     populate,
     searchableFields,
-}: CrudParams<R, K>): CrudActions<I, R> => {
+}: CrudParams<R, K>): CrudActions<R> => {
     return {
         create: async (body) => {
             console.log(body);
             const created = orm.em.create(entity, body);
             await orm.em.persist(created).flush();
-            return created as R & { id: I };
+            return created as R;
         },
         update: async (id, body) => {
-            const record = await orm.em.findOneOrFail(entity, { id } as R, {
-                failHandler: () => new NotFoundError(),
-            });
-            wrap(record).assign(
-                body as R &
-                    IsSubset<
-                        EntityData<
-                            FromEntityType<Loaded<R, never, '*', never>>
-                        >,
-                        R
-                    >,
-                { mergeObjectProperties: true },
+            const record = await orm.em.findOneOrFail(
+                entity,
+                { id } as FilterQuery<R>,
+                {
+                    failHandler: () => new NotFoundError(),
+                },
             );
+            wrap(record).assign(body as CrudUpdateData<R>, {
+                mergeObjectProperties: true,
+            });
             await orm.em.flush();
             return record;
         },
@@ -129,10 +128,10 @@ export const mikroCrud = <
                         entity,
                         {
                             id: { $in: ids },
-                        } as R,
+                        } as unknown as FilterQuery<R>,
                     );
                     for (const record of records) {
-                        wrap(record).assign(body, {
+                        wrap(record).assign(body as CrudUpdateData<R>, {
                             mergeObjectProperties: true,
                         });
                     }
@@ -146,10 +145,14 @@ export const mikroCrud = <
             };
         },
         getOne: async (id) => {
-            const record = await orm.em.findOneOrFail(entity, id, {
-                populate,
-                failHandler: () => new NotFoundError(),
-            });
+            const record = await orm.em.findOneOrFail(
+                entity,
+                { id } as FilterQuery<R>,
+                {
+                    populate,
+                    failHandler: () => new NotFoundError(),
+                },
+            );
             return record;
         },
         getList: async ({ filter, limit, offset, order }) => {
@@ -162,7 +165,7 @@ export const mikroCrud = <
             return { rows, count };
         },
         destroy: async (id) => {
-            const record = await orm.em.getReference(
+            const record = orm.em.getReference(
                 entity,
                 id as NonNullable<Primary<R>>,
             );

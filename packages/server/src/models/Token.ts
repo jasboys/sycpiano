@@ -1,13 +1,25 @@
-import { Entity, PrimaryKey, Property } from '@mikro-orm/core';
+import { defineEntity, p } from '@mikro-orm/core';
 
-@Entity()
-export class Token {
-    @PrimaryKey({ columnType: 'text' })
-    id!: string;
+const tokenSchema = defineEntity({
+    name: 'Token',
+    properties: {
+        id: p.text().primary(),
+        token: p.text(),
+        expires: p.datetime(6).nullable(),
+    },
+});
 
-    @Property({ columnType: 'text' })
-    token!: string;
+export class Token extends tokenSchema.class {}
+tokenSchema.setClass(Token);
 
-    @Property({ length: 6, nullable: true })
-    expires?: Date;
-}
+// @Entity()
+// export class Token {
+//     @PrimaryKey({ columnType: 'text' })
+//     id!: string;
+
+//     @Property({ columnType: 'text' })
+//     token!: string;
+
+//     @Property({ length: 6, nullable: true })
+//     expires?: Date;
+// }
