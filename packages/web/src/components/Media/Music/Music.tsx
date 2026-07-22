@@ -33,7 +33,6 @@ import {
     getWaveformSrc,
 } from 'src/components/Media/Music/utils';
 import { toMedia } from 'src/mediaQuery';
-import extractModule from 'src/module';
 import {
     minRes,
     screenM,

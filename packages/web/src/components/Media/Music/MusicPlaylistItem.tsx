@@ -127,7 +127,7 @@ const MusicItem: React.FC<MusicItemProps> = ({ item, onClick }) => {
         <StyledMusicItem id={musicFile.id}>
             <Link
                 css={{ textDecoration: 'none' }}
-                to={getRelativePermaLink(
+                to={'/media/music/' + getRelativePermaLink(
                     item.composer,
                     item.piece,
                     musicFile.name,
@@ -171,7 +171,7 @@ const MusicCollectionItem: React.FC<
         <StyledCollectionItem key={index} id={musicFile.id}>
             <Link
                 css={{ textDecoration: 'none' }}
-                to={getRelativePermaLink(
+                to={'/media/music/' + getRelativePermaLink(
                     item.composer,
                     item.piece,
                     musicFile.name,
