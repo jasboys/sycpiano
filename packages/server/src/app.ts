@@ -157,6 +157,7 @@ const main = async () => {
         /localhost:\d{4}$/,
         /https:\/\/\w*.googleapis\.com.*/,
         /https:\/\/checkout\.stripe\.com.*/,
+        /https:\/\/static\.cloudflareinsights\.com.*/,
     ];
 
     const corsOptions = {
