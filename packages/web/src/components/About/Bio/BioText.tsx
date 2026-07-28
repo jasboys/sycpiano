@@ -66,6 +66,7 @@ const bioTextStyles = {
         },
 
         [toMedia([screenXS, screenPortrait])]: {
+            top: 'var(--bio-pic-height)',
             position: 'relative',
             zIndex: 1,
             marginTop: 0,

@@ -57,7 +57,6 @@ const bioStyles = {
             backgroundSize: '106%',
             backgroundPosition: 'center 15%',
             maxWidth: 'unset',
-            paddingTop: 'var(--nav-bar-height)',
         },
     }),
     hasBgImage: (bgImage: string) =>
