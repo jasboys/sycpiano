@@ -37,16 +37,22 @@ export const genThumbnail = async (fileName: string) => {
         const metadata = await sharpImage.metadata();
         const dateTaken = await getDateTaken(fileName);
 
-        const newWidth = metadata.width;
+        let newWidth = metadata.width;
         if (!newWidth) {
             throw Error('could not get width of image');
         }
-        const newHeight = Math.round((newWidth * 2) / 3);
+        let newHeight = Math.round((newWidth * 2) / 3);
+        if (newHeight > metadata.height) {
+            newHeight = metadata.height;
+            newWidth = Math.round((newHeight * 3) / 2);
+        }
+
         const { topCrop } = await smartcrop.crop(imageFile, {
             minScale: 1.0,
             width: newWidth,
             height: newHeight,
         });
+        console.log(topCrop, newWidth, newHeight);
         const output = await sharpImage
             .extract({
                 left: topCrop.x,

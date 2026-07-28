@@ -167,10 +167,10 @@ export const PhotoEdit = (props: EditProps) => (
                     { id: null, name: 'null' },
                 ]}
             />
-            <NumberInput source="width" />
-            <NumberInput source="height" />
-            <NumberInput source="thumbnailWidth" />
-            <NumberInput source="thumbnailHeight" />
+            <NumberInput source="width" disabled/>
+            <NumberInput source="height" disabled />
+            <NumberInput source="thumbnailWidth" disabled />
+            <NumberInput source="thumbnailHeight" disabled />
         </SimpleForm>
     </Edit>
 );

@@ -1,11 +1,13 @@
-import { stat } from 'node:fs/promises';
+import { access, rename, stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { EntityData, wrap } from '@mikro-orm/core';
 import multer from 'multer';
 import orm from '../database.js';
 import { Photo } from '../models/Photo.js';
 import { crud, setGetListHeaders } from './crud.js';
 import { genThumbnail, getDateTaken } from './genThumbnail.js';
 import { mikroCrud } from './mikroCrud.js';
+import { NotFoundError } from './types.js';
 
 const photoStorage = multer.diskStorage({
     destination: resolve(process.env.IMAGE_ASSETS_DIR, 'gallery'),
@@ -22,9 +24,75 @@ const photoStorage = multer.diskStorage({
     },
 });
 
+const renameFile = async (oldPath: string, newPath: string) => {
+    try {
+        await access(newPath);
+        return false;
+    } catch (e) {
+        if (e instanceof Error && 'code' in e && e.code === 'ENOENT') {
+            try {
+                await rename(oldPath, newPath);
+                return true;
+            } catch (renameError) {
+                console.error('Rename failed:', e.message);
+                throw renameError;
+            }
+        }
+    }
+};
+
 const photoUpload = multer({ storage: photoStorage });
 
-const photoRouter = crud('/photos', mikroCrud({ entity: Photo }));
+const photoRouter = crud('/photos', {
+    ...mikroCrud({ entity: Photo }),
+    update: async (id, body) => {
+        const record = await orm.em.findOneOrFail(
+            Photo,
+            { id },
+            {
+                failHandler: () => new NotFoundError(),
+            },
+        );
+        if (record.file && body.file && body.file !== record.file) {
+            const oldPath = resolve(
+                process.env.IMAGE_ASSETS_DIR,
+                'gallery',
+                record.file,
+            );
+            const newPath = resolve(
+                process.env.IMAGE_ASSETS_DIR,
+                'gallery',
+                body.file,
+            );
+            let success = await renameFile(oldPath, newPath);
+            if (!success) {
+                throw new Error('Cannot rename, file exists');
+            }
+            const oldThumb = resolve(
+                process.env.IMAGE_ASSETS_DIR,
+                'gallery',
+                'thumbnails',
+                record.file,
+            );
+            const newThumb = resolve(
+                process.env.IMAGE_ASSETS_DIR,
+                'gallery',
+                'thumbnails',
+                body.file,
+            );
+            success = await renameFile(oldThumb, newThumb);
+            if (!success) {
+                throw new Error('Cannot rename, file exists');
+            }
+        }
+        wrap(record).assign(body as EntityData<Photo>, {
+            mergeObjectProperties: true,
+        });
+        console.log(record);
+        await orm.em.flush();
+        return record;
+    },
+});
 
 photoRouter.post(
     '/photos/upload',
