@@ -15,6 +15,7 @@ import { generateSrcsetWidths, resizedImage } from 'src/imageUrls';
 import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenWidths, screenXS } from 'src/screens';
 import { isImageElement } from 'src/utils';
+import { latoFont } from '../../../styles/fonts.js';
 
 const PhotoRow = styled.div<{ isLoaded: boolean }>(
     {
@@ -43,7 +44,10 @@ const PhotoRow = styled.div<{ isLoaded: boolean }>(
             },
         },
         [toMedia([screenXS, screenPortrait])]: {
-            lineHeight: 0,
+            display: 'flex',
+            picture: {
+                flex: '1 1 auto',
+            },
             img: {
                 position: 'relative',
                 filter: 'unset',
@@ -80,6 +84,17 @@ const loadingStyle = css({
     svg: {
         width: 64,
     },
+});
+
+const creditStyle = css(latoFont(500), {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    padding: '0.5rem',
+    borderTopLeftRadius: '0.8rem',
+    fontSize: '0.6rem',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    backdropFilter: 'blur(1px)',
 });
 
 const PhotoListItem: React.FC<ChildRendererProps<PhotoItem>> = (props) => {
@@ -146,6 +161,7 @@ const PhotoListItem: React.FC<ChildRendererProps<PhotoItem>> = (props) => {
                 }}
                 successCb={successCb}
             />
+            {(isMobile && item.credit) ? <div css={creditStyle}>{item.credit}</div> : null}
         </PhotoRow>
     );
     // Only wrap with Highlight component in non-mobile width/layout,

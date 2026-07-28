@@ -67,6 +67,13 @@ const PhotoList: React.FC<PhotoListProps> = (props) => {
     const hiDpx = useAtomValue(mediaQueriesAtoms.hiDpx);
     const onScroll = useSetAtom(navBarActions.onScroll);
 
+    // const calculateBackground = React.useCallback(() => {
+    //     const ref = props.ref
+    //     if (typeof ref === 'object' && ref?.current) {
+    //         console.log(ref.current);
+    //     }
+    // }, [props.items, props.ref])
+
     const { items, currentItem, selectPhoto } = props;
     return (
         <StyledPhotoListContainer>
@@ -79,7 +86,9 @@ const PhotoList: React.FC<PhotoListProps> = (props) => {
                 shouldAppear={false}
                 onScroll={
                     screenXS
-                        ? (ev) => onScroll(navBarHeight.get(hiDpx), ev)
+                        ? (ev) => {
+                            onScroll(navBarHeight.get(hiDpx), ev);
+                        }
                         : undefined
                 }
             >

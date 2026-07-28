@@ -1,6 +1,6 @@
 import { access, rename, stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { EntityData, wrap } from '@mikro-orm/core';
+import { type EntityData, wrap } from '@mikro-orm/core';
 import multer from 'multer';
 import orm from '../database.js';
 import { Photo } from '../models/Photo.js';

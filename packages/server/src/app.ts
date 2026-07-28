@@ -119,6 +119,8 @@ const main = async () => {
                         "'self'",
                         'ws://localhost:5173/',
                         'ws://localhost:5174/',
+                        'http://localhost:5173',
+                        'http://localhost:5174',
                         'https://analytics.seanchenpiano.com',
                         'https://static.cloudflareinsights.com',
                         'https://api.stripe.com',
