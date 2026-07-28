@@ -1,6 +1,6 @@
 import { css } from '@emotion/react';
+import Markdown from 'markdown-to-jsx';
 import type * as React from 'react';
-
 import type { AcclaimItemShape } from 'src/components/About/Press/types';
 import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenXS } from 'src/screens';
@@ -35,11 +35,24 @@ interface AcclaimsListItemProps {
 const AcclaimsListItem: React.FC<AcclaimsListItemProps> = ({ acclaim }) => (
     <div>
         <div css={styles.container}>
-            <div css={styles.quote}>{acclaim.quote}</div>
-            <Author
-                author={acclaim.author}
-                website={acclaim.website}
-            />
+            <div css={styles.quote}>
+                <Markdown
+                    options={{
+                        forceBlock: true,
+                        overrides: {
+                            p: {
+                                component: 'p',
+                            },
+                            strong: {
+                                component: 'span',
+                            },
+                        },
+                    }}
+                >
+                    {acclaim.quote}
+                </Markdown>
+            </div>
+            <Author author={acclaim.author} website={acclaim.website} />
         </div>
     </div>
 );

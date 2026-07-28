@@ -7913,9 +7913,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"markdown-to-jsx@npm:^9.7.8":
-  version: 9.7.8
-  resolution: "markdown-to-jsx@npm:9.7.8"
+"markdown-to-jsx@npm:^9.9.0":
+  version: 9.9.0
+  resolution: "markdown-to-jsx@npm:9.9.0"
   peerDependencies:
     react: ">= 16.0.0"
     solid-js: ">=1.0.0"
@@ -7929,7 +7929,7 @@ __metadata:
       optional: true
     vue:
       optional: true
-  checksum: 10/c6896c133d48d4522893efb5f6aaaa85195cc79b424f7724e2aad64bb995579c542dff7b93be451d8bd1199fe099c2037345b5195f0a3cb9c0d34266cba2735c
+  checksum: 10/50e791ca24cbb9c6eeae93e3b4529d846849b8708ca090db75485266e54bc45dd45aa641354c6788239161bf3f548e00be5c21e5425efb1a99a8a8c95b6d8a2c
   languageName: node
   linkType: hard
 
@@ -10191,6 +10191,7 @@ __metadata:
     "@biomejs/cli-linux-x64": "npm:2.4.6"
     "@biomejs/cli-win32-x64": "npm:2.4.6"
     cross-env: "npm:^10.1.0"
+    markdown-to-jsx: "npm:^9.9.0"
     nodemon: "npm:^3.1.14"
     turbo: "npm:^2.8.14"
     typescript: "npm:^5.9.3"
@@ -11580,7 +11581,7 @@ __metadata:
     jotai-optics: "npm:^0.4.0"
     jotai-tanstack-query: "npm:^0.11.0"
     lodash-es: "npm:^4.17.23"
-    markdown-to-jsx: "npm:^9.7.8"
+    markdown-to-jsx: "npm:^9.9.0"
     mathjs: "npm:^15.1.1"
     mini-svg-data-uri: "npm:^1.4.4"
     optics-ts: "npm:^2.4.1"

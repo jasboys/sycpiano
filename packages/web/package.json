@@ -63,7 +63,7 @@
     "jotai-optics": "^0.4.0",
     "jotai-tanstack-query": "^0.11.0",
     "lodash-es": "^4.17.23",
-    "markdown-to-jsx": "^9.7.8",
+    "markdown-to-jsx": "^9.9.0",
     "mathjs": "^15.1.1",
     "mini-svg-data-uri": "^1.4.4",
     "optics-ts": "^2.4.1",
