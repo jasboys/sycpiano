@@ -34,7 +34,7 @@ export class MusicFile {
         entity: () => Music,
         index: 'music_file_music_idx',
     })
-    music?: Rel<Music>;
+    music!: Rel<Music>;
 
     @Property({ columnType: 'text', nullable: true })
     hash!: string;
