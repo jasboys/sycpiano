@@ -2,7 +2,7 @@ const socials: {
     [key: string]: string;
 } = {
     facebook: 'https://www.facebook.com/seanchenpiano',
-    twitter: 'https://twitter.com/seanchenpiano',
+    bluesky: 'https://bsky.app/profile/seanchenpiano.com',
     youtube: 'https://www.youtube.com/user/SeanChenPiano',
     spotify:
         'https://open.spotify.com/artist/6kMZjx0C2LY2v2fUsaN27y?si=8Uxb9kFTQPisQCvAyOybMQ',

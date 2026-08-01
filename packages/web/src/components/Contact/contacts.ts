@@ -36,7 +36,7 @@ const contacts: Omit<ContactItemShape, 'isMobile'>[] = [
         email: ['seanchen@seanchenpiano.com', 'chensy@umkc.edu'],
         social: {
             facebook: 'https://www.facebook.com/seanchenpiano',
-            twitter: 'https://twitter.com/seanchenpiano',
+            bluesky: 'https://bsky.app/profile/seanchenpiano.com',
             youtube: 'https://www.youtube.com/user/SeanChenPiano',
             linkedin: 'https://www.linkedin.com/in/seanchenpiano',
             instagram: 'https://www.instagram.com/seanchenpiano',
