@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
-import type * as React from 'react';
-
 import { useAtomValue, useSetAtom } from 'jotai';
+import { focusAtom } from 'jotai-optics';
+import type * as React from 'react';
 import ContactItem from 'src/components/Contact/ContactItem';
 import contacts from 'src/components/Contact/contacts';
 import { toMedia } from 'src/mediaQuery';
@@ -10,7 +10,6 @@ import { pushed } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 import { navBarActions } from '../App/NavBar/store';
 import { mediaQueriesBaseAtom } from '../App/store';
-import { focusAtom } from 'jotai-optics';
 
 type ContactProps = Record<never, unknown>;
 
@@ -29,7 +28,7 @@ const ContactContainer = styled.div(pushed, {
         height: '100%',
         marginTop: 0,
         overflowY: 'scroll',
-        justifyContent: 'unset',
+        justifyContent: 'space-evenly',
     },
 });
 

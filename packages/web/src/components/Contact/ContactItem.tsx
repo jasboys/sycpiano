@@ -1,16 +1,15 @@
 import { css, type Interpolation, type Theme } from '@emotion/react';
 import styled from '@emotion/styled';
 import { gsap } from 'gsap';
-import * as React from 'react';
-
 import { useAtomValue } from 'jotai';
+import * as React from 'react';
 import { ContactInfo } from 'src/components/Contact/ContactInfo';
 import { ContactSocialMedia } from 'src/components/Contact/ContactSocialMedia';
 import type { ContactItemShape } from 'src/components/Contact/types';
 import { LazyImage } from 'src/components/LazyImage';
 import {
+    cadenzaContactPhotoUrl,
     generateSrcsetWidths,
-    marthaWoodsContactPhotoUrl,
     resizedImage,
     seanChenContactPhotoUrl,
     staticImage,
@@ -30,7 +29,7 @@ interface PhotoAttributes {
 }
 
 const photosAttributesMap: Record<string, PhotoAttributes> = {
-    'Sean Chen': {
+    seanChen: {
         jpg: seanChenContactPhotoUrl(),
         webp: seanChenContactPhotoUrl('webp'),
         css: css({
@@ -38,18 +37,31 @@ const photosAttributesMap: Record<string, PhotoAttributes> = {
             backgroundPosition: '0 28%',
         }),
     },
-    'Martha Woods': {
-        svg: marthaWoodsContactPhotoUrl(),
+    // 'marthaWoods': {
+    //     svg: marthaWoodsContactPhotoUrl(),
+    //     css: css({
+    //         backgroundSize: 'unset',
+    //         backgroundPosition: '0 0',
+    //         backgroundColor: 'white',
+    //         display: 'flex',
+    //         alignItems: 'center',
+    //         justifyContent: 'space-evenly',
+    //     }),
+    //     imgCss: css({
+    //         width: '90%',
+    //     }),
+    // },
+    cadenza: {
+        svg: cadenzaContactPhotoUrl(),
         css: css({
-            backgroundSize: 'unset',
-            backgroundPosition: '0 0',
-            backgroundColor: 'white',
+            backgroundColor: '#DDDDDD',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-evenly',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            padding: '2rem',
         }),
         imgCss: css({
-            width: '90%',
+            flex: '0 1 auto',
         }),
     },
 };
@@ -105,6 +117,7 @@ const StyledContactItem = styled.div({
         '&:first-of-type': {
             marginTop: navBarHeight.hiDpx,
         },
+        maxHeight: '80vh',
     },
 });
 
@@ -142,15 +155,17 @@ const ContactItem: React.FC<ContactItemProps> = (props) => {
         email,
         social,
         website,
+        className,
     }: Partial<ContactItemProps> = props;
+    console.log(className, name);
 
-    const { webp, jpg, svg, imgCss } = photosAttributesMap[name];
+    const { webp, jpg, svg, imgCss } = photosAttributesMap[className ?? ''];
     const webpSrcSet = webp && generateSrcsetWidths(webp, screenWidths);
     const jpgSrcSet = jpg && generateSrcsetWidths(jpg, screenWidths);
 
     return (
         <StyledContactItem>
-            <ImageContainer bgImage={bgImage} ref={bgRef} contact={name}>
+            <ImageContainer bgImage={bgImage} ref={bgRef} contact={className ?? ''}>
                 {!svg ? (
                     <LazyImage
                         isMobile={isHamburger}

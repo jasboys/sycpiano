@@ -1,10 +1,8 @@
 import styled from '@emotion/styled';
-import * as React from 'react';
-import { TransitionGroup } from 'react-transition-group';
-
-import { format, parseISO } from 'date-fns';
 import { useAtom, useAtomValue } from 'jotai';
 import { readableColor } from 'polished';
+import * as React from 'react';
+import { TransitionGroup } from 'react-transition-group';
 import { mediaQueriesAtoms } from 'src/components/App/store';
 import PhotoFader from 'src/components/Media/Photos/PhotoFader';
 import PhotoList from 'src/components/Media/Photos/PhotoList';
@@ -94,23 +92,12 @@ const Photos: React.FC<Record<never, unknown>> = () => {
                             );
                         })}
                     </TransitionGroup>
-                    {(currentItem?.credit || currentItem?.dateTaken) && (
+                    {(currentItem?.credit) && (
                         <StyledCredit
                             style={{ color: readableColor(lastColor) }}
                         >{`${
                             currentItem.credit
                                 ? `credit: ${currentItem.credit}`
-                                : ''
-                        }${
-                            currentItem.credit && currentItem.dateTaken
-                                ? ' | '
-                                : ''
-                        }${
-                            currentItem.dateTaken
-                                ? format(
-                                      parseISO(currentItem.dateTaken),
-                                      'yyyy',
-                                  )
                                 : ''
                         }`}</StyledCredit>
                     )}

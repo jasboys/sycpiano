@@ -310,7 +310,7 @@ const RAW_RUNTIME_STATE =
           ["@types/babel__core", null],\
           ["debug", "virtual:428f325a939c2653ad822eb3d75efb02ac311523dd0d4f9645afc39ea00bd86eceac35a9d59c9b6977d76b670a4ef0ae057ea572338a44729aa592711a8c05a3#npm:4.4.3"],\
           ["lodash.debounce", "npm:4.0.8"],\
-          ["resolve", "patch:resolve@npm%3A1.22.11#optional!builtin<compat/resolve>::version=1.22.11&hash=c3c19d"]\
+          ["resolve", "patch:resolve@npm%3A1.22.11#optional!builtin<compat/resolve>::version=1.22.11&hash=9bd1a5"]\
         ],\
         "packagePeers": [\
           "@babel/core",\
@@ -328,7 +328,7 @@ const RAW_RUNTIME_STATE =
           ["@types/babel__core", null],\
           ["debug", "virtual:428f325a939c2653ad822eb3d75efb02ac311523dd0d4f9645afc39ea00bd86eceac35a9d59c9b6977d76b670a4ef0ae057ea572338a44729aa592711a8c05a3#npm:4.4.3"],\
           ["lodash.debounce", "npm:4.0.8"],\
-          ["resolve", "patch:resolve@npm%3A1.22.11#optional!builtin<compat/resolve>::version=1.22.11&hash=c3c19d"]\
+          ["resolve", "patch:resolve@npm%3A1.22.11#optional!builtin<compat/resolve>::version=1.22.11&hash=9bd1a5"]\
         ],\
         "packagePeers": [\
           "@babel/core",\
@@ -7484,7 +7484,7 @@ const RAW_RUNTIME_STATE =
           ["@babel/runtime", "npm:7.28.4"],\
           ["babel-plugin-macros", "npm:3.1.0"],\
           ["cosmiconfig", "npm:7.1.0"],\
-          ["resolve", "patch:resolve@npm%3A1.22.11#optional!builtin<compat/resolve>::version=1.22.11&hash=c3c19d"]\
+          ["resolve", "patch:resolve@npm%3A1.22.11#optional!builtin<compat/resolve>::version=1.22.11&hash=9bd1a5"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -13981,7 +13981,7 @@ const RAW_RUNTIME_STATE =
         "packageLocation": "./.yarn/cache/rechoir-npm-0.8.0-fb660b3bc8-ad3caed8af.zip/node_modules/rechoir/",\
         "packageDependencies": [\
           ["rechoir", "npm:0.8.0"],\
-          ["resolve", "patch:resolve@npm%3A1.22.11#optional!builtin<compat/resolve>::version=1.22.11&hash=c3c19d"]\
+          ["resolve", "patch:resolve@npm%3A1.22.11#optional!builtin<compat/resolve>::version=1.22.11&hash=9bd1a5"]\
         ],\
         "linkType": "HARD"\
       }]\
@@ -14120,12 +14120,12 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["resolve", [\
-      ["patch:resolve@npm%3A1.22.11#optional!builtin<compat/resolve>::version=1.22.11&hash=c3c19d", {\
-        "packageLocation": "./.yarn/cache/resolve-patch-8d5745ba49-fd342cad25.zip/node_modules/resolve/",\
+      ["patch:resolve@npm%3A1.22.11#optional!builtin<compat/resolve>::version=1.22.11&hash=9bd1a5", {\
+        "packageLocation": "./.yarn/cache/resolve-patch-6a14e45123-c990146fed.zip/node_modules/resolve/",\
         "packageDependencies": [\
           ["is-core-module", "npm:2.16.1"],\
           ["path-parse", "npm:1.0.7"],\
-          ["resolve", "patch:resolve@npm%3A1.22.11#optional!builtin<compat/resolve>::version=1.22.11&hash=c3c19d"],\
+          ["resolve", "patch:resolve@npm%3A1.22.11#optional!builtin<compat/resolve>::version=1.22.11&hash=9bd1a5"],\
           ["supports-preserve-symlinks-flag", "npm:1.0.0"]\
         ],\
         "linkType": "HARD"\
@@ -16588,16 +16588,16 @@ function convertToBigIntStats(stats) {
     if (Object.hasOwn(stats, key)) {
       const element = stats[key];
       if (typeof element === `number`) {
-        bigintStats[key] = BigInt(element);
+        bigintStats[key] = BigInt(Math.floor(element));
       } else if (nodeUtils__namespace.types.isDate(element)) {
         bigintStats[key] = new Date(element);
       }
     }
   }
-  bigintStats.atimeNs = bigintStats.atimeMs * BigInt(1e6);
-  bigintStats.mtimeNs = bigintStats.mtimeMs * BigInt(1e6);
-  bigintStats.ctimeNs = bigintStats.ctimeMs * BigInt(1e6);
-  bigintStats.birthtimeNs = bigintStats.birthtimeMs * BigInt(1e6);
+  bigintStats.atimeNs = bigintStats.atimeMs * BigInt(1e6) + BigInt(Math.floor(stats.atimeMs % 1 * 1e3)) * BigInt(1e3);
+  bigintStats.mtimeNs = bigintStats.mtimeMs * BigInt(1e6) + BigInt(Math.floor(stats.mtimeMs % 1 * 1e3)) * BigInt(1e3);
+  bigintStats.ctimeNs = bigintStats.ctimeMs * BigInt(1e6) + BigInt(Math.floor(stats.ctimeMs % 1 * 1e3)) * BigInt(1e3);
+  bigintStats.birthtimeNs = bigintStats.birthtimeMs * BigInt(1e6) + BigInt(Math.floor(stats.birthtimeMs % 1 * 1e3)) * BigInt(1e3);
   return bigintStats;
 }
 function areStatsEqual(a, b) {
@@ -22085,7 +22085,7 @@ function getPathForDisplay(p) {
   return npath.normalize(npath.fromPortablePath(p));
 }
 
-const [major, minor] = process.versions.node.split(`.`).map((value) => parseInt(value, 10));
+const [major, minor, patch] = process.versions.node.split(`.`).map((value) => parseInt(value, 10));
 const WATCH_MODE_MESSAGE_USES_ARRAYS = major > 19 || major === 19 && minor >= 2 || major === 18 && minor >= 13;
 
 function readPackageScope(checkPath) {
@@ -22120,9 +22120,9 @@ Instead change the require of ${basename} in ${parentPath} to a dynamic import()
   err.code = `ERR_REQUIRE_ESM`;
   return err;
 }
-function reportRequiredFilesToWatchMode(files) {
+function reportRequiredFilesToWatchMode(paths) {
   if (process.env.WATCH_REPORT_DEPENDENCIES && process.send) {
-    files = files.map((filename) => npath.fromPortablePath(VirtualFS.resolveVirtual(npath.toPortablePath(filename))));
+    const files = paths.map((filename) => npath.fromPortablePath(VirtualFS.resolveVirtual(filename)));
     if (WATCH_MODE_MESSAGE_USES_ARRAYS) {
       process.send({ "watch:require": files });
     } else {
@@ -23765,9 +23765,10 @@ Required by: ${issuerLocator.name}@${issuerLocator.reference} (via ${issuerForDi
     const candidates = [];
     const qualifiedPath = applyNodeExtensionResolution(unqualifiedPath, candidates, { extensions });
     if (qualifiedPath) {
+      reportRequiredFilesToWatchMode([qualifiedPath]);
       return ppath.normalize(qualifiedPath);
     } else {
-      reportRequiredFilesToWatchMode(candidates.map((candidate) => npath.fromPortablePath(candidate)));
+      reportRequiredFilesToWatchMode(candidates);
       const unqualifiedPathForDisplay = getPathForDisplay(unqualifiedPath);
       const containingPackage = findPackageLocator(unqualifiedPath);
       if (containingPackage) {

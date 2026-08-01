@@ -10,10 +10,7 @@ module.exports = {
     apps: [
         {
             name: getName(),
-            script: 'yarn',
-            args: 'start',
-            exec_mode: 'fork',
-            interpreter: 'bash',
+            script: './packages/server/build/app.js',
             watch: [
                 'packages/server/build',
                 'packages/common/dist',

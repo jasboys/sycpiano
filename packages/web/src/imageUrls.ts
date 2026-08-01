@@ -12,6 +12,7 @@ export const joelHarrisonContactPhotoUrl = (
     format: imageFormat = 'jpg',
 ): string => `/joel.${format}`;
 export const marthaWoodsContactPhotoUrl = (): string => '/logos/wentworth.svg';
+export const cadenzaContactPhotoUrl = (): string => '/logos/cadenza.svg';
 // export const marthaWoodsContactPhotoUrl = (format: imageFormat = 'jpg') => `/wentworth.${format}`;
 export const bg1 = '/bg_1.jpg';
 export const homeBackground = (format: imageFormat = 'jpg'): string =>

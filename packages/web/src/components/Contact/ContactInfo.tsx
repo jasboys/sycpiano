@@ -84,8 +84,6 @@ const PersonalContact: React.FC<PersonalContactShape> = ({
     website,
 }) => (
     <div className={className}>
-        {phone && <ContactMethod>{phone}</ContactMethod>}
-
         {email.map((em) => (
             <ContactMethod key={em}>
                 <div>
@@ -95,6 +93,7 @@ const PersonalContact: React.FC<PersonalContactShape> = ({
                 </div>
             </ContactMethod>
         ))}
+        {phone && <ContactMethod>{phone}</ContactMethod>}
         {website && (
             <ContactMethod>
                 <a href={website} css={link(contactPageLinkColor)}>
@@ -129,8 +128,8 @@ const ContactInfo: React.FC<ContactInfoProps> = (props) => (
         <Divider />
 
         <StyledPersonalContact
-            phone={props.phone}
             email={props.email}
+            phone={props.phone}
             website={props.website}
         />
     </InfoContainer>

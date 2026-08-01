@@ -2,6 +2,26 @@ import type { ContactItemShape } from 'src/components/Contact/types';
 
 const contacts: Omit<ContactItemShape, 'isMobile'>[] = [
     {
+        name: 'Cadenza Artists',
+        className: 'cadenza',
+        position: [
+            {
+                title: 'Worldwide Representation',
+            },
+            {
+                title: 'For booking inquiries, please contact:',
+            },
+        ],
+        phone: ['(310) 896-5827'],
+        website: 'https://www.cadenzaartists.com',
+        email: ['info@cadenzaartists.com'],
+        social: {
+            facebook: 'https://www.facebook.com/CadenzaArtists/',
+            twitter: 'https://twitter.com/CadenzaArtist',
+            instagram: 'https://www.instagram.com/cadenzaartists/',
+        },
+    },
+    {
         name: 'Sean Chen',
         className: 'seanChen',
         position: [
@@ -36,21 +56,21 @@ const contacts: Omit<ContactItemShape, 'isMobile'>[] = [
     //         instagram: 'https://www.instagram.com/apapianists/',
     //     },
     // },
-    {
-        name: 'Martha Woods',
-        className: 'marthaWoods',
-        position: [
-            {
-                title: 'President',
-                organization: 'Jonathan Wentworth Associates',
-            },
-        ],
-        phone: ['(301) 277-8205'],
-        email: ['martha@jwentworth.com'],
-        social: {
-            web: 'https://www.jwentworth.com/',
-        },
-    },
+    // {
+    //     name: 'Martha Woods',
+    //     className: 'marthaWoods',
+    //     position: [
+    //         {
+    //             title: 'President',
+    //             organization: 'Jonathan Wentworth Associates',
+    //         },
+    //     ],
+    //     phone: ['(301) 277-8205'],
+    //     email: ['martha@jwentworth.com'],
+    //     social: {
+    //         web: 'https://www.jwentworth.com/',
+    //     },
+    // },
 ];
 
 export default contacts;
