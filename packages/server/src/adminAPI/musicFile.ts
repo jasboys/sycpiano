@@ -39,6 +39,7 @@ musicFileRouter.post(
     musicFileUpload.single('audioFile'),
     async (req, res) => {
         try {
+            console.log('gen');
             const duration = await genWaveformAndReturnDuration(
                 req.body.fileName,
             );

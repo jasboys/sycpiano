@@ -260,10 +260,15 @@ export const AddMusicFile: React.FC<{
     const refresh = useRefresh();
 
     const onSubmit = async (values: Partial<RaRecord>) => {
-        create(
+        record && create(
             'music-files',
             {
-                data: values,
+                data: {
+                    name: values.name,
+                    music: record.id,
+                    audioFile: values.audioFile,
+                    audioFileBlob: values.audioFileBlob,
+                },
             },
             {
                 onSuccess: () => {

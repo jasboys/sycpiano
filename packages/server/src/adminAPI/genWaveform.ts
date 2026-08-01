@@ -66,17 +66,21 @@ export const getAudioDuration = async (audioFile: string) => {
 };
 
 export const genWaveformAndReturnDuration = async (audioFile: string) => {
-    const { streams } = await getFileInfo(audioFile);
-    const { sample_rate: sampleRateString, duration: durationString } =
-        streams[0];
-    const sampleRate = Number.parseInt(sampleRateString, 10);
-    const duration = Number.parseFloat(durationString);
-    const samplesPerPixel = (sampleRate * duration) / TARGET_LENGTH;
-    const waveformFile = parse(audioFile).name;
-    await callAudioWaveForm(
-        audioFile,
-        `${WAVEFORM_FOLDER}${waveformFile}.dat`,
-        samplesPerPixel,
-    );
-    return Math.round(duration);
+    try {
+        const { streams } = await getFileInfo(audioFile);
+        const { sample_rate: sampleRateString, duration: durationString } =
+            streams[0];
+        const sampleRate = Number.parseInt(sampleRateString, 10);
+        const duration = Number.parseFloat(durationString);
+        const samplesPerPixel = (sampleRate * duration) / TARGET_LENGTH;
+        const waveformFile = parse(audioFile).name;
+        await callAudioWaveForm(
+            audioFile,
+            `${WAVEFORM_FOLDER}${waveformFile}.dat`,
+            samplesPerPixel,
+        );
+        return Math.round(duration);
+    } catch (e) {
+        console.log(e);
+    }
 };

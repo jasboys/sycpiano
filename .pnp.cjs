@@ -52,7 +52,6 @@ const RAW_RUNTIME_STATE =
           ["@biomejs/cli-linux-x64", "npm:2.4.6"],\
           ["@biomejs/cli-win32-x64", "npm:2.4.6"],\
           ["cross-env", "npm:10.1.0"],\
-          ["markdown-to-jsx", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:9.9.0"],\
           ["nodemon", "npm:3.1.14"],\
           ["seanchenpiano", "workspace:."],\
           ["turbo", "npm:2.8.14"],\
@@ -11442,31 +11441,6 @@ const RAW_RUNTIME_STATE =
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:9.9.0", {\
-        "packageLocation": "./.yarn/__virtual__/markdown-to-jsx-virtual-b911740950/0/cache/markdown-to-jsx-npm-9.9.0-26b91a2a5c-50e791ca24.zip/node_modules/markdown-to-jsx/",\
-        "packageDependencies": [\
-          ["@types/react", null],\
-          ["@types/react-native", null],\
-          ["@types/solid-js", null],\
-          ["@types/vue", null],\
-          ["markdown-to-jsx", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:9.9.0"],\
-          ["react", null],\
-          ["react-native", null],\
-          ["solid-js", null],\
-          ["vue", null]\
-        ],\
-        "packagePeers": [\
-          "@types/react-native",\
-          "@types/react",\
-          "@types/solid-js",\
-          "@types/vue",\
-          "react-native",\
-          "react",\
-          "solid-js",\
-          "vue"\
-        ],\
-        "linkType": "HARD"\
-      }],\
       ["virtual:569035de073023aa8b0b5018956311b227b0a904329a09033178811fc3e35e666a9055672cf1571918d7dc6006c37bb02ee20b7a6a08428927cea962afec4a25#npm:9.9.0", {\
         "packageLocation": "./.yarn/__virtual__/markdown-to-jsx-virtual-32ace32af8/0/cache/markdown-to-jsx-npm-9.9.0-26b91a2a5c-50e791ca24.zip/node_modules/markdown-to-jsx/",\
         "packageDependencies": [\
@@ -14399,7 +14373,6 @@ const RAW_RUNTIME_STATE =
           ["@biomejs/cli-linux-x64", "npm:2.4.6"],\
           ["@biomejs/cli-win32-x64", "npm:2.4.6"],\
           ["cross-env", "npm:10.1.0"],\
-          ["markdown-to-jsx", "virtual:3060cce5f5314219700392fa2ac20ee798f2218ca7d62e59b7c0fc8dbb55c9ff5a8b0f84e5a448b48210c7b8b4d6a0f78de33edffec11cdf5b3bbbc63b350027#npm:9.9.0"],\
           ["nodemon", "npm:3.1.14"],\
           ["seanchenpiano", "workspace:."],\
           ["turbo", "npm:2.8.14"],\

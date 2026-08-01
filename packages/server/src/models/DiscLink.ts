@@ -25,5 +25,5 @@ export class DiscLink {
         entity: () => Disc,
         index: 'disc_link_disc_idx',
     })
-    disc!: Rel<Disc>;
+    disc?: Rel<Disc>;
 }
