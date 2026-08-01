@@ -257,7 +257,6 @@ const AddDiscLink: React.FC<{
     const refresh = useRefresh();
 
     const onSubmit = async (values: Partial<RaRecord>) => {
-        console.log(values);
         record && create(
             'disc-links',
             {
