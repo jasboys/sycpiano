@@ -206,7 +206,7 @@ jobs:
       - name: Rsync Build Artifacts
         if: ${{ vars.BACKEND_DIR != '' }}
         run: |
-          rsync --delete -rpivz --chown=deploy:www-data --chmod=Dg=rwx,Fg=rwx --files-from=$SYNC_FILE_LIST --exclude=.env .deploy-complete $SRC server:$DEST
+          rsync --delete -rpivz --chown=deploy:www-data --chmod=Dg=rwx,Fg=rwx --files-from=$SYNC_FILE_LIST --exclude=.env --exclude=.deploy-complete $SRC server:$DEST
           rsync -ivz --chown=deploy:www-data --chmod=Dg=rwx,Fg=rwx -p $HTML_SRC server:$HTML_DEST
         env:
           SYNC_FILE_LIST: ${{ format('{0}/rsync-server-list', github.workspace) }}
