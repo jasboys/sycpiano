@@ -124,7 +124,7 @@ jobs:
         uses: ./.github/actions/setup-node-and-common
       - name: Admin Install Deps and Build
         run: |
-          yarn workspaces focus admin --immutable --immutable-cache
+          yarn install --immutable --immutable-cache
           yarn workspace admin build
         env:
           GAPI_KEY_APP: ${{ secrets.GAPI_KEY_APP }}
