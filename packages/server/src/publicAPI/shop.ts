@@ -50,36 +50,37 @@ shopRouter.post(
                 const email =
                     await stripeClient.getEmailFromCustomer(customerId);
                 // Add associations to local model
-                const user = await orm.em.findOne(User, {
-                    $or: [{ id: customerId }, { username: email }],
-                });
-                if (user === null) {
-                    throw new Error('no customer found');
-                }
                 let alreadyProcessed = false;
-                for (const id of productIds) {
-                    // check if userProduct exists
-                    const existing = await orm.em.findOne(UserProduct, {
-                        product: id,
-                        user: customerId,
-                    });
-                    if (existing) {
-                        alreadyProcessed = true;
-                        break;
-                    }
 
-                    const items = orm.em.create(UserProduct, {
-                        product: id,
-                        user: customerId,
+                await orm.em.transactional(async (forkedEm) => {
+                    const user = await forkedEm.findOne(User, {
+                        $or: [{ id: customerId }, { username: email }],
                     });
-                    orm.em.persist(items);
-
-                    const product = await orm.em.findOne(Product, id);
-                    if (product) {
-                        product.purchasedCount += 1;
+                    if (user === null) {
+                        throw new Error('no customer found');
                     }
-                }
-                orm.em.flush();
+                    for (const id of productIds) {
+                        // check if userProduct exists
+                        const existing = await forkedEm.findOne(UserProduct, {
+                            product: id,
+                            user: customerId,
+                        });
+                        if (existing) {
+                            alreadyProcessed = true;
+                            continue;
+                        }
+
+                        forkedEm.create(UserProduct, {
+                            product: id,
+                            user: customerId,
+                        });
+
+                        const product = await forkedEm.findOne(Product, id);
+                        if (product) {
+                            product.purchasedCount += 1;
+                        }
+                    }
+                });
                 if (!alreadyProcessed) {
                     await mailer.emailPDFs(
                         productIds,
@@ -103,28 +104,32 @@ const productSortPredicate = (a: ShopItem, b: ShopItem) => {
 };
 
 shopRouter.get('/items', async (_, res) => {
-    const products = await orm.em.find(
-        Product,
-        {},
-        { exclude: ['purchasedCount'] },
-    );
-    const storeItems = ProductTypes.reduce(
-        (acc, type) => {
-            const prods = products
-                .filter(({ type: t }) => t === type)
-                .map((product) => {
-                    return {
-                        ...product,
-                        format: 'pdf',
-                    };
-                })
-                .sort(productSortPredicate);
-            acc[type] = prods;
-            return acc;
-        },
-        {} as Record<(typeof ProductTypes)[number], ShopItem[]>,
-    );
-    res.json(storeItems);
+    try {
+        const products = await orm.em.find(
+            Product,
+            {},
+            { exclude: ['purchasedCount'] },
+        );
+        const storeItems = ProductTypes.reduce(
+            (acc, type) => {
+                const prods = products
+                    .filter(({ type: t }) => t === type)
+                    .map((product) => {
+                        return {
+                            ...product,
+                            format: 'pdf',
+                        };
+                    })
+                    .sort(productSortPredicate);
+                acc[type] = prods;
+                return acc;
+            },
+            {} as Record<(typeof ProductTypes)[number], ShopItem[]>,
+        );
+        res.json(storeItems);
+    } catch (e) {
+        console.log(e);
+    }
 });
 
 shopRouter.get('/faqs', async (_, res) => {
@@ -294,7 +299,6 @@ shopRouter.post('/resend-purchased', async (req, res) => {
         const purchasedIDs = purchased.toArray().map((prod) => prod.id);
         await mailer.emailPDFs(purchasedIDs, email);
         localCustomer.lastRequest = new Date();
-        orm.em.flush();
         res.sendStatus(200);
     } catch (e) {
         console.error(`Failed to resend purchased pdfs of email: ${email}`, e);

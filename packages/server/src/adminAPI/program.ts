@@ -152,31 +152,31 @@ programHandler.post('/actions/programs/extract', async (req, res) => {
     const calId: string = req.body.calendarId;
     const nickname: string | undefined = req.body.nickname;
     try {
-        const cal = await orm.em.findOneOrFail(
-            Calendar,
-            { id: calId },
-            {
-                populate: ['calendarPieces'],
-                failHandler: () => new NotFoundError(),
-            },
-        );
-        const program = orm.em.create(Program, {
-            nickname:
-                nickname ??
-                uniqueNamesGenerator({
-                    dictionaries: [adjectives, colors, animals],
-                }),
-        });
-        orm.em.persist(program);
-        for (const calendarPiece of cal.calendarPieces) {
-            const programPiece = orm.em.create(ProgramPiece, {
-                program,
-                piece: calendarPiece.piece,
-                order: calendarPiece.order,
+        const program = await orm.em.transactional(async (forkedEm) => {
+            const cal = await forkedEm.findOneOrFail(
+                Calendar,
+                { id: calId },
+                {
+                    populate: ['calendarPieces'],
+                    failHandler: () => new NotFoundError(),
+                },
+            );
+            const program = forkedEm.create(Program, {
+                nickname:
+                    nickname ??
+                    uniqueNamesGenerator({
+                        dictionaries: [adjectives, colors, animals],
+                    }),
             });
-            orm.em.persist(programPiece);
-        }
-        await orm.em.flush();
+            for (const calendarPiece of cal.calendarPieces) {
+                forkedEm.create(ProgramPiece, {
+                    program,
+                    piece: calendarPiece.piece,
+                    order: calendarPiece.order,
+                });
+            }
+            return program;
+        });
 
         res.json({ program });
     } catch (e) {
@@ -186,43 +186,48 @@ programHandler.post('/actions/programs/extract', async (req, res) => {
 
 programHandler.post('/actions/programs/import', async (req, res) => {
     try {
-        const calId: string = req.body.calendarId;
-        const progId: string = req.body.programId;
-        const cal = await orm.em.findOneOrFail(
-            Calendar,
-            { id: calId },
-            {
-                populate: ['pieces', 'calendarPieces', 'calendarPieces.piece'],
-                failHandler: () => new NotFoundError(),
-            },
-        );
-        const highestOrder = cal.calendarPieces.length
-            ? cal.calendarPieces.reduce((prev, item) => {
-                  return item.order ? Math.max(prev, item.order) : prev;
-              }, 0) + 1
-            : 0;
-        const prog = await orm.em.findOneOrFail(
-            Program,
-            { id: progId },
-            {
-                populate: ['programPieces'],
-                failHandler: () => new NotFoundError(),
-            },
-        );
-        for (const programPiece of prog.programPieces) {
-            const calPiece = orm.em.create(CalendarPiece, {
-                piece: programPiece.piece,
-                calendar: cal.id,
-                order:
-                    programPiece.order !== undefined
-                        ? programPiece.order + highestOrder
-                        : undefined,
-            });
-            orm.em.persist(calPiece);
-        }
-        await orm.em.flush();
+        const calendar = await orm.em.transactional(async (forkedEm) => {
+            const calId: string = req.body.calendarId;
+            const progId: string = req.body.programId;
+            const cal = await forkedEm.findOneOrFail(
+                Calendar,
+                { id: calId },
+                {
+                    populate: [
+                        'pieces',
+                        'calendarPieces',
+                        'calendarPieces.piece',
+                    ],
+                    failHandler: () => new NotFoundError(),
+                },
+            );
+            const highestOrder = cal.calendarPieces.length
+                ? cal.calendarPieces.reduce((prev, item) => {
+                      return item.order ? Math.max(prev, item.order) : prev;
+                  }, 0) + 1
+                : 0;
+            const prog = await forkedEm.findOneOrFail(
+                Program,
+                { id: progId },
+                {
+                    populate: ['programPieces'],
+                    failHandler: () => new NotFoundError(),
+                },
+            );
+            for (const programPiece of prog.programPieces) {
+                forkedEm.create(CalendarPiece, {
+                    piece: programPiece.piece,
+                    calendar: cal.id,
+                    order:
+                        programPiece.order !== undefined
+                            ? programPiece.order + highestOrder
+                            : undefined,
+                });
+            }
+            return cal;
+        });
 
-        res.json({ calendar: cal });
+        res.json({ calendar });
     } catch (e) {
         respondWithError(e as Error, res);
     }

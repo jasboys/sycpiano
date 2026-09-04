@@ -307,60 +307,60 @@ calendarRouter.post(
 calendarRouter.post('/actions/calendars/duplicate', async (req, res) => {
     try {
         const id = req.body.id;
-        const calendar = await orm.em.findOneOrFail(
-            Calendar,
-            { id },
-            { populate: ['calendarPieces', 'calendarCollaborators'] },
-        );
 
-        const {
-            name,
-            dateTime,
-            timezone,
-            location,
-            type,
-            website,
-            allDay,
-            endDate,
-            hidden,
-            imageUrl,
-        } = calendar;
+        const returnCal = await orm.em.transactional(async (forkedEm) => {
+            const calendar = await forkedEm.findOneOrFail(
+                Calendar,
+                { id },
+                { populate: ['calendarPieces', 'calendarCollaborators'] },
+            );
 
-        const newCalendar = orm.em.create(Calendar, {
-            name,
-            dateTime,
-            timezone,
-            location,
-            type,
-            website,
-            allDay,
-            endDate,
-            hidden,
-            imageUrl,
+            const {
+                name,
+                dateTime,
+                timezone,
+                location,
+                type,
+                website,
+                allDay,
+                endDate,
+                hidden,
+                imageUrl,
+            } = calendar;
+
+            const newCalendar = forkedEm.create(Calendar, {
+                name,
+                dateTime,
+                timezone,
+                location,
+                type,
+                website,
+                allDay,
+                endDate,
+                hidden,
+                imageUrl,
+            });
+
+            for (const pivot of calendar.calendarPieces) {
+                forkedEm.create(CalendarPiece, {
+                    calendar: newCalendar,
+                    piece: pivot.piece,
+                    order: pivot.order,
+                });
+            }
+
+            for (const pivot of calendar.calendarCollaborators) {
+                forkedEm.create(CalendarCollaborator, {
+                    calendar: newCalendar,
+                    collaborator: pivot.collaborator,
+                    order: pivot.order,
+                });
+            }
+
+            return newCalendar;
         });
-        orm.em.persist(newCalendar);
 
-        for (const pivot of calendar.calendarPieces) {
-            const newPivot = orm.em.create(CalendarPiece, {
-                calendar: newCalendar,
-                piece: pivot.piece,
-                order: pivot.order,
-            });
-            orm.em.persist(newPivot);
-        }
-
-        for (const pivot of calendar.calendarCollaborators) {
-            const newPivot = orm.em.create(CalendarCollaborator, {
-                calendar: newCalendar,
-                collaborator: pivot.collaborator,
-                order: pivot.order,
-            });
-            orm.em.persist(newPivot);
-        }
-
-        await orm.em.flush();
-
-        res.json({ calendar });
+        res.json({ calendar: returnCal });
     } catch (e) {
         respondWithError(e as Error, res);
     }

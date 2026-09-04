@@ -19,27 +19,27 @@ export const calendarPieceHandler = crud('/calendar-pieces', {
     ...mikroCrud({ entity: CalendarPiece, searchableFields: ['piece'] }),
     create: async (body) => {
         const createBody = body as CalendarPieceCreate;
-        const cal = await orm.em.findOneOrFail(Calendar, {
-            id: createBody.calendarId,
-        });
-        const piece =
-            createBody.id ??
-            orm.em.create(Piece, {
-                piece: createBody.piece,
-                composer: createBody.composer,
-            });
+        const { cal, calPiece } = await orm.em.transactional(
+            async (forkedEm) => {
+                const cal = await forkedEm.findOneOrFail(Calendar, {
+                    id: createBody.calendarId,
+                });
+                const piece =
+                    createBody.id ??
+                    forkedEm.create(Piece, {
+                        piece: createBody.piece,
+                        composer: createBody.composer,
+                    });
 
-        const calPiece = orm.em.create(CalendarPiece, {
-            calendar: cal,
-            piece,
-            order: createBody.order,
-        });
+                const calPiece = forkedEm.create(CalendarPiece, {
+                    calendar: cal,
+                    piece,
+                    order: createBody.order,
+                });
 
-        if (typeof piece !== 'string') {
-            orm.em.persist(piece);
-        }
-        orm.em.persist(calPiece);
-        await orm.em.flush();
+                return { cal, calPiece };
+            },
+        );
 
         return {
             ...calPiece,

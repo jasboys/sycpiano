@@ -123,13 +123,23 @@ export const mikroCrud = <
             return record;
         },
         updateMany: async (ids, body) => {
-            const [records, count] = await orm.em.findAndCount(entity, {
-                id: { $in: ids },
-            } as R);
-            for (const record of records) {
-                wrap(record).assign(body, { mergeObjectProperties: true });
-            }
-            await orm.em.flush();
+            const { records, count } = await orm.em.transactional(
+                async (forkedEm) => {
+                    const [records, count] = await forkedEm.findAndCount(
+                        entity,
+                        {
+                            id: { $in: ids },
+                        } as R,
+                    );
+                    for (const record of records) {
+                        wrap(record).assign(body, {
+                            mergeObjectProperties: true,
+                        });
+                    }
+                    return { records, count };
+                },
+            );
+
             return {
                 count,
                 rows: records,

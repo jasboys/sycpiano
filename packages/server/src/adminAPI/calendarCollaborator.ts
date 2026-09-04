@@ -19,27 +19,27 @@ export const calendarCollaboratorHandler = crud('/calendar-collaborators', {
     ...mikroCrud({ entity: CalendarCollaborator }),
     create: async (body) => {
         const createBody = body as CalendarCollaboratorCreate;
-        const cal = await orm.em.findOneOrFail(Calendar, {
-            id: createBody.calendarId,
-        });
-        const collab =
-            createBody.id ??
-            orm.em.create(Collaborator, {
-                name: createBody.name,
-                instrument: createBody.instrument,
-            });
+        const { cal, calCollab } = await orm.em.transactional(
+            async (forkedEm) => {
+                const cal = await forkedEm.findOneOrFail(Calendar, {
+                    id: createBody.calendarId,
+                });
+                const collab =
+                    createBody.id ??
+                    forkedEm.create(Collaborator, {
+                        name: createBody.name,
+                        instrument: createBody.instrument,
+                    });
 
-        const calCollab = orm.em.create(CalendarCollaborator, {
-            calendar: cal,
-            collaborator: collab,
-            order: createBody.order,
-        });
+                const calCollab = forkedEm.create(CalendarCollaborator, {
+                    calendar: cal,
+                    collaborator: collab,
+                    order: createBody.order,
+                });
 
-        if (typeof collab !== 'string') {
-            orm.em.persist(collab);
-        }
-        orm.em.persist(calCollab);
-        await orm.em.flush();
+                return { cal, calCollab };
+            },
+        );
 
         return {
             ...calCollab,

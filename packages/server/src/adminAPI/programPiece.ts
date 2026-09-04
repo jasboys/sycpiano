@@ -18,32 +18,32 @@ interface ProgramPieceCreate extends EntityData<ProgramPiece> {
 export const programPieceHandler = crud('/program-pieces', {
     ...mikroCrud({ entity: ProgramPiece, searchableFields: ['piece'] }),
     create: async (body) => {
-        const createBody = body as ProgramPieceCreate;
-        const prog = await orm.em.findOneOrFail(Program, {
-            id: createBody.programId,
-        });
-        const piece =
-            createBody.id ??
-            orm.em.create(Piece, {
-                piece: createBody.piece,
-                composer: createBody.composer,
-            });
+        const { programPiece, program } = await orm.em.transactional(
+            async (forkedEm) => {
+                const createBody = body as ProgramPieceCreate;
+                const program = await forkedEm.findOneOrFail(Program, {
+                    id: createBody.programId,
+                });
+                const piece =
+                    createBody.id ??
+                    forkedEm.create(Piece, {
+                        piece: createBody.piece,
+                        composer: createBody.composer,
+                    });
 
-        const programPiece = orm.em.create(ProgramPiece, {
-            program: prog,
-            piece,
-            order: createBody.order,
-        });
+                const programPiece = forkedEm.create(ProgramPiece, {
+                    program,
+                    piece,
+                    order: createBody.order,
+                });
 
-        if (typeof piece !== 'string') {
-            orm.em.persist(piece);
-        }
-        orm.em.persist(programPiece);
-        await orm.em.flush();
+                return { programPiece, program };
+            },
+        );
 
         return {
             ...programPiece,
-            id: prog.id,
+            id: program.id,
         };
     },
     update: async (id, body) => {
@@ -66,9 +66,13 @@ export const programPieceHandler = crud('/program-pieces', {
         return record;
     },
     destroy: async (id) => {
-        const programPiece = await orm.em.findOneOrFail(ProgramPiece, { id });
-        orm.em.remove(programPiece);
-        await orm.em.flush();
+        await orm.em.transactional(async (forkedEm) => {
+            const programPiece = await forkedEm.findOneOrFail(ProgramPiece, {
+                id,
+            });
+            forkedEm.remove(programPiece);
+        });
+
         return { id };
     },
 });

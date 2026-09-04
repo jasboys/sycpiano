@@ -41,6 +41,11 @@ const orm = await MikroORM.init<FixedPostgresql>({
     discovery: {
         checkDuplicateFieldNames: false,
     },
+    pool: {
+        min: 2,
+        max: 30,
+        idleTimeoutMillis: 30000,
+    },
 });
 
 export default orm;

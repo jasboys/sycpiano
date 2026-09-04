@@ -1,0 +1,7 @@
+[Unit]
+Description=Restart sycpiano after deploy
+After=sycpiano.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'sleep 2; /usr/bin/systemctl restart sycpiano.service'

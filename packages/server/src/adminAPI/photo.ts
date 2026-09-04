@@ -46,51 +46,52 @@ const photoUpload = multer({ storage: photoStorage });
 const photoRouter = crud('/photos', {
     ...mikroCrud({ entity: Photo }),
     update: async (id, body) => {
-        const record = await orm.em.findOneOrFail(
-            Photo,
-            { id },
-            {
-                failHandler: () => new NotFoundError(),
-            },
-        );
-        if (record.file && body.file && body.file !== record.file) {
-            const oldPath = resolve(
-                process.env.IMAGE_ASSETS_DIR,
-                'gallery',
-                record.file,
+        return await orm.em.transactional(async (forkedEm) => {
+            const record = await forkedEm.findOneOrFail(
+                Photo,
+                { id },
+                {
+                    failHandler: () => new NotFoundError(),
+                },
             );
-            const newPath = resolve(
-                process.env.IMAGE_ASSETS_DIR,
-                'gallery',
-                body.file,
-            );
-            let success = await renameFile(oldPath, newPath);
-            if (!success) {
-                throw new Error('Cannot rename, file exists');
+            if (record.file && body.file && body.file !== record.file) {
+                const oldPath = resolve(
+                    process.env.IMAGE_ASSETS_DIR,
+                    'gallery',
+                    record.file,
+                );
+                const newPath = resolve(
+                    process.env.IMAGE_ASSETS_DIR,
+                    'gallery',
+                    body.file,
+                );
+                let success = await renameFile(oldPath, newPath);
+                if (!success) {
+                    throw new Error('Cannot rename, file exists');
+                }
+                const oldThumb = resolve(
+                    process.env.IMAGE_ASSETS_DIR,
+                    'gallery',
+                    'thumbnails',
+                    record.file,
+                );
+                const newThumb = resolve(
+                    process.env.IMAGE_ASSETS_DIR,
+                    'gallery',
+                    'thumbnails',
+                    body.file,
+                );
+                success = await renameFile(oldThumb, newThumb);
+                if (!success) {
+                    throw new Error('Cannot rename, file exists');
+                }
             }
-            const oldThumb = resolve(
-                process.env.IMAGE_ASSETS_DIR,
-                'gallery',
-                'thumbnails',
-                record.file,
-            );
-            const newThumb = resolve(
-                process.env.IMAGE_ASSETS_DIR,
-                'gallery',
-                'thumbnails',
-                body.file,
-            );
-            success = await renameFile(oldThumb, newThumb);
-            if (!success) {
-                throw new Error('Cannot rename, file exists');
-            }
-        }
-        wrap(record).assign(body as EntityData<Photo>, {
-            mergeObjectProperties: true,
+            wrap(record).assign(body as EntityData<Photo>, {
+                mergeObjectProperties: true,
+            });
+
+            return record;
         });
-        console.log(record);
-        await orm.em.flush();
-        return record;
     },
 });
 
@@ -109,14 +110,17 @@ photoRouter.post(
 );
 
 photoRouter.post('/actions/photos/populate-date-taken', async (_req, res) => {
-    const [photos, count] = await orm.em.findAndCount(Photo, {
-        dateTaken: { $eq: null },
+    const { photos, count } = await orm.em.transactional(async (forkedEm) => {
+        const [photos, count] = await forkedEm.findAndCount(Photo, {
+            dateTaken: { $eq: null },
+        });
+        for (const p of photos) {
+            const dateTaken = p.file ? await getDateTaken(p.file) : undefined;
+            p.dateTaken = dateTaken;
+        }
+
+        return { photos, count };
     });
-    for (const p of photos) {
-        const dateTaken = p.file ? await getDateTaken(p.file) : undefined;
-        p.dateTaken = dateTaken;
-    }
-    await orm.em.flush();
     setGetListHeaders(res, count, photos.length);
     res.json({ count, rows: photos });
 });

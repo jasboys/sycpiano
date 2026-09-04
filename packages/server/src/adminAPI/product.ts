@@ -105,18 +105,21 @@ productRouter.post(
     '/actions/products/populate-purchase-count',
     async (_: express.Request, res: express.Response) => {
         try {
-            const [products, count] = await orm.em.findAndCount(
-                Product,
-                {},
-                {
-                    populate: ['users'],
+            const { products, count } = await orm.em.transactional(
+                async (forkedEm) => {
+                    const [products, count] = await forkedEm.findAndCount(
+                        Product,
+                        {},
+                        {
+                            populate: ['users'],
+                        },
+                    );
+                    for (const prod of products) {
+                        prod.purchasedCount = prod.users.count();
+                    }
+                    return { products, count };
                 },
             );
-            for (const prod of products) {
-                prod.purchasedCount = prod.users.count();
-            }
-
-            await orm.em.flush();
 
             setGetListHeaders(res, count, products.length);
             res.status(201).json(products);
@@ -168,8 +171,13 @@ productRouter.post(
                     permalink: permalink ?? '',
                 };
             });
-            const products = await orm.em.upsertMany(Product, data);
-            const count = await orm.em.count(Product, {});
+            const { products, count } = await orm.em.transactional(
+                async (forkedEm) => {
+                    const products = await forkedEm.upsertMany(Product, data);
+                    const count = await forkedEm.count(Product, {});
+                    return { products, count };
+                },
+            );
 
             setGetListHeaders(res, count, products.length);
             res.status(201).json(products);
