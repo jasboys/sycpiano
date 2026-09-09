@@ -14,6 +14,7 @@ const initialState: NavBarStateShape = {
     lastScrollTop: 0,
     visiblePending: false,
     specificRouteName: '',
+    useDarkFont: true,
 };
 
 export const navBarStore = atomWithImmer(initialState);
@@ -85,6 +86,7 @@ export const navBarAtoms = {
     ),
     specificRouteName:
         partialAtomGetter(navBarStore).toWriteAtom('specificRouteName'),
+    useDarkFont: partialAtomGetter(navBarStore).toToggleAtom('useDarkFont'),
 };
 
 const debouncedToggleFn = debounce(

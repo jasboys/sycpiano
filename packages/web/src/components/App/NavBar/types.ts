@@ -22,5 +22,6 @@ export interface NavBarStateShape {
     readonly lastScrollTop: number;
     readonly visiblePending: boolean;
     readonly specificRouteName: string;
+    readonly useDarkFont: boolean;
     // readonly onScroll?: (event: React.SyntheticEvent<HTMLElement> | UIEvent) => void;
 }

@@ -9,7 +9,7 @@ import NavBarLogo from 'src/components/App/NavBar/NavBarLogo';
 import { cartAtoms } from 'src/components/Cart/store';
 import { navBarHeight } from 'src/styles/variables';
 import { mediaQueriesBaseAtom } from '../store';
-import { navBarAtoms, navBarStore } from './store';
+import { navBarAtoms } from './store';
 
 const shopEnabled = JSON.parse(ENABLE_SHOP) === true;
 
@@ -27,6 +27,7 @@ const StyledNavBar = styled.div<{
     hiDpx: boolean;
     isHamburger: boolean;
     isHome: boolean;
+    isPhotos: boolean;
     menuExpanded: boolean;
     cartExpanded: boolean;
 }>(
@@ -43,7 +44,13 @@ const StyledNavBar = styled.div<{
         zIndex: 5000,
         transition: 'background-color 0.25s',
         boxShadow: '0 0 6px 1px rgba(0, 0, 0, 0.3)',
-        backdropFilter: 'blur(1px)',
+        '&::before': {
+            content: '""',
+            position: 'absolute',
+            inset: 0,
+            backdropFilter: 'blur(1px)',
+            zIndex: -1,
+        },
     },
     ({ height }) => ({
         height,
@@ -52,12 +59,13 @@ const StyledNavBar = styled.div<{
         hiDpx && {
             paddingRight: 15,
         },
-    ({ isHome, menuExpanded, cartExpanded, isHamburger }) => ({
-        backgroundColor: isHome
-            ? isHamburger && (menuExpanded || cartExpanded)
-                ? 'rgba(0, 0, 0, 0.1)'
-                : 'transparent'
-            : 'white',
+    ({ isHome, menuExpanded, cartExpanded, isHamburger, isPhotos }) => ({
+        backgroundColor:
+            isHome || isPhotos
+                ? isHamburger && (menuExpanded || cartExpanded)
+                    ? 'rgba(0, 0, 0, 0.1)'
+                    : 'transparent'
+                : 'white',
     }),
 );
 
@@ -97,14 +105,17 @@ const NavBar = ({
 }: NavBarProps) => {
     // const [nvbr] = useAtom(navBarStore);
     const [isExpanded, toggleExpanded] = useAtom(navBarAtoms.isExpanded);
+    const setDarkFont = useSetAtom(navBarAtoms.useDarkFont);
     const cartIsOpen = useAtomValue(cartAtoms.visible);
     const { isHamburger, hiDpx } = useAtomValue(mediaQueries);
     const setSpecificRouteName = useSetAtom(navBarAtoms.specificRouteName);
 
+    const isHome = delayedRouteBase === '/';
+
     React.useEffect(() => {
         setSpecificRouteName(specificRouteName ?? '');
-    }, [specificRouteName]);
-
+        setDarkFont(!isHome);
+    }, [specificRouteName, isHome]);
 
     React.useEffect(() => {
         if (!isHamburger) {
@@ -112,10 +123,11 @@ const NavBar = ({
         }
     }, [isHamburger, toggleExpanded]);
 
-    const isHome = delayedRouteBase === '/';
+    const isPhotos = specificRouteName.includes('photos');
     return (
         <StyledNavBar
             isHome={isHome}
+            isPhotos={isPhotos}
             hiDpx={hiDpx}
             isHamburger={isHamburger}
             menuExpanded={isExpanded}

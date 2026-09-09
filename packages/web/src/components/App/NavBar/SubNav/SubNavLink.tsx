@@ -10,7 +10,7 @@ import { lightBlue, navFontColor } from 'src/styles/colors';
 import { noHighlight } from 'src/styles/mixins';
 
 interface SubNavLinkProps {
-    readonly isHome: boolean;
+    readonly useDarkFont: boolean;
     readonly basePath: LinkShape;
     readonly link: LinkShape;
     readonly onClick: () => void;
@@ -19,21 +19,21 @@ interface SubNavLinkProps {
 
 const styles = {
     link: css({
-        color: navFontColor,
         textDecoration: 'none',
         fontWeight: 'unset',
         position: 'relative',
         width: '100%',
         display: 'block',
         padding: '10px',
-        backgroundColor: 'white',
+        backgroundColor: 'transparent',
         textAlign: 'center',
-        boxShadow: '0 6px 11px -5px rgba(0, 0, 0, 0.3)',
-        transition: 'all 0.25s',
+        // boxShadow: '0 6px 11px -5px rgba(0, 0, 0, 0.3)',
+        transition: 'all 0.25s ease',
         lineHeight: '2rem',
         '&:hover': {
             color: 'white',
             backgroundColor: lightBlue,
+            transform: 'scale(1.02)',
         },
         [toMedia(isHamburger)]: {
             color: navFontColor,
@@ -47,7 +47,11 @@ const styles = {
             },
         },
     }),
-    isActive: css({
+    darkFont: css({
+        color: navFontColor,
+
+    }),
+    darkFontActive: css({
         color: lightBlue,
         borderLeft: '4px solid var(--light-blue)',
         [toMedia(isHamburger)]: {
@@ -61,10 +65,8 @@ const styles = {
             },
         },
     }),
-    isHome: css({
+    lightFont: css({
         color: 'white',
-        backgroundColor: 'transparent',
-        boxShadow: 'none',
         [toMedia(isHamburger)]: {
             color: 'white',
         },
@@ -79,13 +81,19 @@ const styles = {
             },
         },
     }),
+    lightFontActive: css({
+        borderLeft: '4px solid white',
+        [toMedia(isHamburger)]: {
+            borderLeft: 'unset',
+        },
+    }),
 };
 
 const SubNavLink: React.FC<SubNavLinkProps> = ({
     basePath,
     link,
     onClick,
-    isHome,
+    useDarkFont,
     currentSpecificPath,
 }) => {
     const isActive = link.name === currentSpecificPath;
@@ -94,8 +102,8 @@ const SubNavLink: React.FC<SubNavLinkProps> = ({
             <Link
                 css={[
                     styles.link,
-                    isHome && styles.isHome,
-                    isActive && styles.isActive,
+                    useDarkFont ? styles.darkFont : styles.lightFont,
+                    isActive && (useDarkFont ? styles.darkFontActive : styles.lightFontActive),
                 ]}
                 to={`${basePath.path}${link.path}`}
                 onClick={() => {
@@ -110,7 +118,7 @@ const SubNavLink: React.FC<SubNavLinkProps> = ({
 
 export default React.memo(SubNavLink, (prev, next) => {
     return (
-        prev.isHome === next.isHome &&
+        prev.useDarkFont === next.useDarkFont &&
         prev.currentSpecificPath === next.currentSpecificPath
     );
 });

@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { readableColor } from 'polished';
 import * as React from 'react';
 import { TransitionGroup } from 'react-transition-group';
@@ -12,11 +12,18 @@ import { toMedia } from 'src/mediaQuery';
 import { screenPortrait, screenXS } from 'src/screens';
 import { latoFont } from 'src/styles/fonts';
 import { pushed } from 'src/styles/mixins';
+import { navBarAtoms } from '../../App/NavBar/store.js';
 import { photoAtoms } from './store';
+
+const Backdrop = styled.div({
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+});
 
 const StyledPhotos = styled.div(pushed, {
     width: '100%',
-    backgroundColor: 'rgb(248 248 248)',
+    backgroundColor: 'transparent',
     position: 'relative',
     transition: 'background 0.5s',
     [toMedia([screenXS, screenPortrait])]: {
@@ -52,6 +59,7 @@ const Photos: React.FC<Record<never, unknown>> = () => {
     const screenXS = useAtomValue(mediaQueriesAtoms.screenXS);
     const [currentItem, setCurrentItem] = useAtom(photoAtoms.currentItem);
     const background = useAtomValue(photoAtoms.background);
+    const setUseDarkFont = useSetAtom(navBarAtoms.useDarkFont);
     const { data: photos } = useAtomValue(photoAtoms.photos);
 
     React.useEffect(() => {
@@ -71,46 +79,57 @@ const Photos: React.FC<Record<never, unknown>> = () => {
         [currentItem],
     );
 
+    const firstColorMatches = background.match(/\((#[0-9a-f]{6})/i);
+    const firstColor = firstColorMatches?.[1];
     const endColorMatches = background.match(/(#[0-9a-f]{6})\)$/i);
     const lastColor = endColorMatches?.[1] ?? 'rgb(248 248 248)';
 
+    console.log(firstColor);
+    React.useEffect(() => {
+        if (firstColor) {
+            setUseDarkFont(readableColor(firstColor) === '#000')
+        };
+    }, [firstColor, setUseDarkFont]);
+
     return (
-        <StyledPhotos style={{ background }}>
-            {!screenXS && (
-                <StyledPhotoViewer>
-                    <TransitionGroup component={null}>
-                        {photos?.map((item, idx) => {
-                            const isCurrent = isCurrentItem(item);
-                            return (
-                                <PhotoFader
-                                    key={item.file}
-                                    idx={idx}
-                                    item={item}
-                                    isCurrent={isCurrent}
-                                    isMobile={screenXS}
-                                />
-                            );
-                        })}
-                    </TransitionGroup>
-                    {(currentItem?.credit) && (
-                        <StyledCredit
-                            style={{ color: readableColor(lastColor) }}
-                        >{`${
-                            currentItem.credit
-                                ? `credit: ${currentItem.credit}`
-                                : ''
-                        }`}</StyledCredit>
-                    )}
-                </StyledPhotoViewer>
-            )}
-            {photos && (
-                <PhotoList
-                    items={photos}
-                    currentItem={currentItem}
-                    selectPhoto={selectPhotoCallback}
-                />
-            )}
-        </StyledPhotos>
+        <Backdrop style={{ background }}>
+            <StyledPhotos>
+                {!screenXS && (
+                    <StyledPhotoViewer>
+                        <TransitionGroup component={null}>
+                            {photos?.map((item, idx) => {
+                                const isCurrent = isCurrentItem(item);
+                                return (
+                                    <PhotoFader
+                                        key={item.file}
+                                        idx={idx}
+                                        item={item}
+                                        isCurrent={isCurrent}
+                                        isMobile={screenXS}
+                                    />
+                                );
+                            })}
+                        </TransitionGroup>
+                        {currentItem?.credit && (
+                            <StyledCredit
+                                style={{ color: readableColor(lastColor) }}
+                            >{`${
+                                currentItem.credit
+                                    ? `credit: ${currentItem.credit}`
+                                    : ''
+                            }`}</StyledCredit>
+                        )}
+                    </StyledPhotoViewer>
+                )}
+                {photos && (
+                    <PhotoList
+                        items={photos}
+                        currentItem={currentItem}
+                        selectPhoto={selectPhotoCallback}
+                    />
+                )}
+            </StyledPhotos>
+        </Backdrop>
     );
 };
 

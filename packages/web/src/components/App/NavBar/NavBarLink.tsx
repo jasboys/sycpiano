@@ -1,6 +1,6 @@
 import { css } from '@emotion/react';
 import { gsap } from 'gsap';
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { mix } from 'polished';
 import * as React from 'react';
 import { Link, type LinkProps } from 'react-router-dom';
@@ -25,7 +25,6 @@ interface NavBarLinkProps {
 
 const linkStyles = {
     base: css(noHighlight, {
-        color: navFontColor,
         textDecoration: 'none',
         cursor: 'pointer',
         transition: 'all 0.5s',
@@ -39,17 +38,26 @@ const linkStyles = {
             },
         },
     }),
-    active: css({
-        color: lightBlue,
+    dark: css({
+        color: navFontColor,
+        '&:hover': {
+            color: mix(0.5, logoBlue, '#444'),
+            '.highlight': {
+                opacity: 0.5,
+            },
+        },
     }),
-    home: css({
+    activeDark: css({
+        color: logoBlue,
+    }),
+    light: css({
         color: 'white',
         '&:hover': {
             color: 'white',
             textShadow: '0 0 1px rgba(255, 255, 255, 1)',
         },
     }),
-    activeHome: css({
+    activeLight: css({
         textShadow: '0 0 1px rgba(255, 255, 255, 1)',
     }),
     hamburger: css({
@@ -62,7 +70,7 @@ const linkStyles = {
 
 const subNavStyles = {
     base: css({
-        visibility: 'hidden',
+        // visibility: 'hidden',
     }),
     hamburger: css({
         visibility: 'unset',
@@ -74,11 +82,12 @@ const subNavStyles = {
 };
 
 const subNavHighlight = {
-    base: css({
+    dark: css({
         flex: '0 0 1px',
         backgroundColor: navFontColor,
     }),
-    home: css({
+    light: css({
+        flex: '0 0 1px',
         backgroundColor: 'white',
     }),
 };
@@ -120,6 +129,7 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
 }) => {
     const [showSubs, setShowSubs] = useAtom(navBarAtoms.showSubs);
     const toggleExpanded = useSetAtom(navBarAtoms.isExpanded);
+    const useDarkFont = useAtomValue(navBarAtoms.useDarkFont);
     const enterTimeline = React.useRef<GSAPTimeline>(null);
     const exitTimeline = React.useRef<GSAPTimeline>(null);
     const el = React.useRef<HTMLDivElement>(null);
@@ -128,9 +138,9 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
     const attr: AorLink = {};
     const linkInstanceStyle = css([
         linkStyles.base,
-        active && linkStyles.active,
-        isHome && linkStyles.home,
-        active && isHome && linkStyles.activeHome,
+        useDarkFont ? linkStyles.dark : linkStyles.light,
+        active &&
+            (useDarkFont ? linkStyles.activeDark : linkStyles.activeLight),
         isHamburger && linkStyles.hamburger,
     ]);
 
@@ -197,17 +207,23 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
                             0,
                         );
                 } else {
-                    enterTimeline.current = enterTimeline.current.to(
-                        el.current,
-                        {
-                            autoAlpha: 1,
-                            duration: 0.25,
-                        },
-                    );
-                    exitTimeline.current = exitTimeline.current.to(el.current, {
-                        autoAlpha: 0,
-                        duration: 0.25,
-                    });
+                    const ulElement = el.current?.querySelector('ul');
+                    if (ulElement) {
+                        enterTimeline.current = enterTimeline.current.to(
+                            ulElement,
+                            {
+                                autoAlpha: 1,
+                                duration: 0.25,
+                            },
+                        );
+                        exitTimeline.current = exitTimeline.current.to(
+                            ulElement,
+                            {
+                                autoAlpha: 0,
+                                duration: 0.25,
+                            },
+                        );
+                    }
                 }
             }, el.current);
             return () => ctx.revert();
@@ -261,13 +277,14 @@ const NavBarLink: React.FC<NavBarLinkProps> = ({
                                 !isHamburger && setShowSubs({});
                                 isHamburger && toggleExpanded(false);
                             }}
-                            isHome={isHome}
+                            useDarkFont={useDarkFont}
                         />
                         {isHamburger && (
                             <div
                                 css={[
-                                    subNavHighlight.base,
-                                    isHome && subNavHighlight.home,
+                                    useDarkFont
+                                        ? subNavHighlight.dark
+                                        : subNavHighlight.light,
                                 ]}
                             />
                         )}

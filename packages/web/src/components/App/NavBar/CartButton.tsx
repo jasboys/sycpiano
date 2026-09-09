@@ -40,7 +40,7 @@ const cartStyles = {
         },
         '--cart-color': '#4d4d4d',
     }),
-    isHome: css({
+    useLight: css({
         '--cart-drop-shadow': 'drop-shadow(0 0 1px rgba(0 0 0 / 0.8))',
         '--cart-color': 'white',
         filter: 'var(--cart-drop-shadow)',
@@ -105,6 +105,7 @@ const CartButton = ({
     )
     const [cartVisible, toggleCartVisible] = useAtom(cartAtoms.visible);
     const toggleExpanded = useSetAtom(navBarAtoms.isExpanded);
+    const useDarkFont = useAtomValue(navBarAtoms.useDarkFont);
     const menuOpened = useAtomValue(navBarAtoms.isExpanded);
     const cartRef = React.useRef<HTMLButtonElement>(null);
 
@@ -134,7 +135,7 @@ const CartButton = ({
             type="button"
             css={[
                 cartStyles.base,
-                isHome && cartStyles.isHome,
+                !useDarkFont && cartStyles.useLight,
                 cartVisible && !isHome && cartStyles.isOpen,
             ]}
             onClick={onClick}

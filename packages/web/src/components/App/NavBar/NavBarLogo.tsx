@@ -39,8 +39,9 @@ const LogoText = styled.div<{ hiDpx: boolean }>(
 );
 
 const StyledLink = styled(Link, {
-    shouldForwardProp: (prop) => prop !== 'isHome' && prop !== 'isExpanded',
-})<{ isHome: boolean; isExpanded: boolean }>(
+    shouldForwardProp: (prop) =>
+        prop !== 'useDarkFont' && prop !== 'isExpanded',
+})<{ useDarkFont: boolean; isExpanded: boolean }>(
     latoFont(300),
     {
         textDecoration: 'none',
@@ -59,18 +60,20 @@ const StyledLink = styled(Link, {
             color: lightBlue,
         },
     },
-    ({ isHome }) =>
-        isHome
+    ({ useDarkFont }) =>
+        useDarkFont
             ? {
-                  fill: 'white',
-                  '&:hover': {
-                      filter: 'drop-shadow(0px 0px 4px white)',
-                  },
-              }
-            : {
                   fill: logoBlue,
                   '&:hover': {
                       fill: lightBlue,
+                  },
+              }
+            : {
+                  fill: 'white',
+                  color: 'white',
+                  '&:hover': {
+                      color: 'white',
+                      filter: 'drop-shadow(0px 0px 4px white)',
                   },
               },
 );
@@ -110,6 +113,7 @@ const NavBarLogo: React.FC<
     const { hiDpx, screenS, screenXS, isHamburger } =
         useAtomValue(mediaQueries);
     const toggleExpanded = useSetAtom(navBarAtoms.isExpanded);
+    const useDarkFont = useAtomValue(navBarAtoms.useDarkFont);
     const mapped =
         specificRouteName &&
         (routeNameMapping[specificRouteName] ?? specificRouteName);
@@ -127,7 +131,7 @@ const NavBarLogo: React.FC<
     return (
         <StyledLink
             to="/"
-            isHome={isHome}
+            useDarkFont={useDarkFont}
             isExpanded={isExpanded}
             onClick={() => {
                 toggleExpanded(false);
