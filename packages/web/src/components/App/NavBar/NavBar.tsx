@@ -61,7 +61,7 @@ const StyledNavBar = styled.div<{
         },
     ({ isHome, menuExpanded, cartExpanded, isHamburger, isPhotos }) => ({
         backgroundColor:
-            isHome || isPhotos
+            isHome || (isPhotos && !isHamburger)
                 ? isHamburger && (menuExpanded || cartExpanded)
                     ? 'rgba(0, 0, 0, 0.1)'
                     : 'transparent'
