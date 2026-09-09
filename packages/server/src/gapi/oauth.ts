@@ -22,9 +22,9 @@ export const getToken = async (_em: EntityManager): Promise<string> => {
     const tokenInstance = await em.findOne(Token, { id: 'access_token' });
     if (tokenInstance) {
         const expired =
-            tokenInstance.expires === undefined
-                ? undefined
-                : Date.now() > tokenInstance.expires.valueOf();
+            tokenInstance.expires instanceof Date
+                ? Date.now() > tokenInstance.expires.valueOf()
+                : undefined;
         if (expired !== undefined && !expired) {
             return tokenInstance.token;
         }

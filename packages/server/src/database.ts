@@ -3,7 +3,6 @@ import {
     LoadStrategy,
     MikroORM,
     PopulateHint,
-    ReflectMetadataProvider,
 } from '@mikro-orm/core';
 import { PostgreSqlDriver, PostgreSqlPlatform } from '@mikro-orm/postgresql';
 
@@ -32,7 +31,6 @@ export class FixedPostgresql extends PostgreSqlDriver {
 const orm = await MikroORM.init<FixedPostgresql>({
     entities: ['packages/server/build/models'],
     entitiesTs: ['packages/server/src/models'],
-    metadataProvider: ReflectMetadataProvider,
     clientUrl: databaseUrl,
     debug: true,
     driver: FixedPostgresql,

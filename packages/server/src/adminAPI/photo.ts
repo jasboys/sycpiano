@@ -54,7 +54,11 @@ const photoRouter = crud('/photos', {
                     failHandler: () => new NotFoundError(),
                 },
             );
-            if (record.file && body.file && body.file !== record.file) {
+            if (
+                record.file &&
+                typeof body.file === 'string' &&
+                body.file !== record.file
+            ) {
                 const oldPath = resolve(
                     process.env.IMAGE_ASSETS_DIR,
                     'gallery',

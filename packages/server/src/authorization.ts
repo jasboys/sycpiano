@@ -61,8 +61,12 @@ export const authAndGetRole: HandlerWithRole = async (req, res, next) => {
         }
         const token = split[1];
         const user = await orm.em.findOneOrFail(User, { session });
-        if (user.pasetoSecret === undefined) {
-            throw new Error('No paseto secret');
+        if (
+            typeof user.pasetoSecret !== 'string' ||
+            typeof user.username !== 'string' ||
+            typeof user.role !== 'string'
+        ) {
+            throw new Error('No paseto secret or user');
         }
         await paseto.decrypt(token, user.pasetoSecret, {
             subject: user.username,

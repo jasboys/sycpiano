@@ -105,20 +105,23 @@ const calendarRouter = crud<Calendar>('/calendars', {
                 ],
             },
         );
-        const { calendarPieces, calendarCollaborators, ...plainCal } =
-            wrap(cal).toPOJO();
+        const {
+            calendarPieces: _,
+            calendarCollaborators: __,
+            ...plainCal
+        } = wrap(cal).toPOJO();
         return {
             ...plainCal,
-            collaborators: calendarCollaborators.map((val) => {
+            collaborators: cal.calendarCollaborators.getItems().map((val) => {
                 return {
-                    ...val.collaborator,
+                    ...wrap(val.collaborator).toPOJO(),
                     order: val.order,
                     pivotId: val.id,
                 };
             }),
-            pieces: calendarPieces.map((val) => {
+            pieces: cal.calendarPieces.getItems().map((val) => {
                 return {
-                    ...val.piece,
+                    ...wrap(val.piece).toPOJO(),
                     order: val.order,
                     pivotId: val.id,
                 };
@@ -149,16 +152,18 @@ const calendarRouter = crud<Calendar>('/calendars', {
                     wrap(cal).toPOJO();
                 return {
                     ...plainCal,
-                    collaborators: calendarCollaborators.map((val) => {
+                    collaborators: cal.calendarCollaborators
+                        .getItems()
+                        .map((val) => {
+                            return {
+                                ...wrap(val.collaborator).toPOJO(),
+                                order: val.order,
+                                pivotId: val.id,
+                            };
+                        }),
+                    pieces: cal.calendarPieces.getItems().map((val) => {
                         return {
-                            ...val.collaborator,
-                            order: val.order,
-                            pivotId: val.id,
-                        };
-                    }),
-                    pieces: calendarPieces.map((val) => {
-                        return {
-                            ...val.piece,
+                            ...wrap(val.piece).toPOJO(),
                             order: val.order,
                             pivotId: val.id,
                         };
@@ -208,16 +213,18 @@ const calendarRouter = crud<Calendar>('/calendars', {
                     wrap(cal).toPOJO();
                 return {
                     ...plainCal,
-                    collaborators: calendarCollaborators.map((val) => {
+                    collaborators: cal.calendarCollaborators
+                        .getItems()
+                        .map((val) => {
+                            return {
+                                ...wrap(val.collaborator).toPOJO(),
+                                order: val.order,
+                                pivotId: val.id,
+                            };
+                        }),
+                    pieces: cal.calendarPieces.getItems().map((val) => {
                         return {
-                            ...val.collaborator,
-                            order: val.order,
-                            pivotId: val.id,
-                        };
-                    }),
-                    pieces: calendarPieces.map((val) => {
-                        return {
-                            ...val.piece,
+                            ...wrap(val.piece).toPOJO(),
                             order: val.order,
                             pivotId: val.id,
                         };

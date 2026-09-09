@@ -242,8 +242,8 @@ export const getTimeZone = async (
 };
 
 export const transformModelToGoogle = (c: Calendar) => {
-    const collaborators = c.collaborators.toArray();
-    const pieces = c.pieces.toArray();
+    const collaborators = c.collaborators.getItems();
+    const pieces = c.pieces.getItems();
     const data: GoogleCalendarParams = {
         summary: c.name,
         location: c.location,

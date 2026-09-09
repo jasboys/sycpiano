@@ -405,6 +405,7 @@ const Music: React.FC = () => {
             if (musicPlayer.current.context?.state === 'suspended') {
                 await musicPlayer.current.context.resume();
             }
+            console.log(musicFile);
             if (musicFile.id !== currentTrack?.id) {
                 setCurrentTrack(musicFile);
                 musicPlayer.current.setTrack(

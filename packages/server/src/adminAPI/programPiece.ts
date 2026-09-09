@@ -59,7 +59,7 @@ export const programPieceHandler = crud('/program-pieces', {
             piece.piece = body.pieceName;
             piece.composer = body.composer;
         }
-        if (body.order !== null) {
+        if (typeof body.order === 'number') {
             record.order = body.order;
         }
         await orm.em.flush();

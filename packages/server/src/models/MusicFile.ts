@@ -10,6 +10,7 @@ const musicFileSchema = defineEntity({
         audioFile: p.text(),
         durationSeconds: p.integer(),
         hash: p.text().nullable(),
+        waveformFile: p.type('method').persist(false).getter(),
         music: () => p.manyToOne(Music).index('music_file_music_idx'),
     },
 });

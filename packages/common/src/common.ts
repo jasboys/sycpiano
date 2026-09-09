@@ -17,7 +17,7 @@ export const descriptions: {
     press: string;
     scores: string;
     faqs: string;
-    getMusic: (piece: string, contributors?: string) => string;
+    getMusic: (piece: string, contributors?: string | null) => string;
     searchResults: (query: string) => string;
     /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
     [key: string]: string | ((...args: any[]) => string);
@@ -32,7 +32,7 @@ export const descriptions: {
     searchResults: (query: string) => `Search results for "${query}"`,
     videos: `A playlist of Sean Chen's YouTube clips.`,
     music: `A playlist of Sean Chen's live concert recordings, and a link to his Spotify musician page.`,
-    getMusic: (piece: string, contributors?: string) =>
+    getMusic: (piece: string, contributors?: string | null) =>
         `Listen to Sean Chen's live performance of ${piece}${
             contributors ? `, with ${contributors}` : '.'
         }`,

@@ -4,7 +4,7 @@ import { Disc } from './Disc.js';
 const discLinkSchema = defineEntity({
     name: 'DiscLink',
     properties: {
-        id: p.uuid().primary().defaultRaw('gen_random_uuid'),
+        id: p.uuid().primary().defaultRaw('gen_random_uuid()'),
         type: p.text().nullable(),
         url: p.text().nullable(),
         disc: () => p.manyToOne(Disc).index('disc_link_disc_idx'),
@@ -12,6 +12,7 @@ const discLinkSchema = defineEntity({
 });
 
 export class DiscLink extends discLinkSchema.class {}
+
 discLinkSchema.setClass(DiscLink);
 
 // @Entity()

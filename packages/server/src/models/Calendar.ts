@@ -1,6 +1,6 @@
 import { tz } from '@date-fns/tz';
 import type { EventArgs } from '@mikro-orm/core';
-import { defineEntity, p } from '@mikro-orm/core';
+import { defineEntity, OptionalProps, p } from '@mikro-orm/core';
 import { parse, startOfDay } from 'date-fns';
 import {
     createCalendarEvent,
@@ -197,11 +197,11 @@ const CalendarSchema = defineEntity({
     name: 'Calendar',
     properties: {
         id: p.text().primary(),
-        name: p.text().nullable(),
-        dateTime: p.datetime(6).nullable().index('calendar_time'),
-        timezone: p.text().nullable(),
-        location: p.text().nullable(),
-        type: p.text().nullable(),
+        name: p.text(),
+        dateTime: p.datetime(6).index('calendar_time'),
+        timezone: p.text(),
+        location: p.text(),
+        type: p.text(),
         website: p.text().nullable(),
         allDay: p.boolean().default(false),
         endDate: p.date().nullable(),
@@ -233,7 +233,9 @@ const CalendarSchema = defineEntity({
     },
 });
 
-export class Calendar extends CalendarSchema.class {}
+export class Calendar extends CalendarSchema.class {
+    [OptionalProps]?: 'id' | 'location' | 'timezone';
+}
 CalendarSchema.setClass(Calendar);
 
 CalendarSchema.addHook('beforeCreate', async (args: EventArgs<Calendar>) => {

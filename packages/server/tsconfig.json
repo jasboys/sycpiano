@@ -28,6 +28,6 @@
         "tsBuildInfoFile": ".tsbuildinfo"
     },
     "include": [
-        "src"
+        "src/**/*.ts"
     ]
 }

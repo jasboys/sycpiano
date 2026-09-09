@@ -212,7 +212,7 @@ shopRouter.post('/checkout', async (req, res) => {
 
         const previouslyPurchased = customer.products;
         const previouslyPurchasedIds = previouslyPurchased
-            ? previouslyPurchased.toArray().map((prod) => prod.id)
+            ? previouslyPurchased.getItems().map((prod) => prod.id)
             : undefined;
 
         const duplicates = productIds.reduce((acc, pID) => {
@@ -265,7 +265,7 @@ shopRouter.post('/get-purchased', async (req, res) => {
         );
 
         const purchased = localCustomer.products;
-        const purchasedIDs = purchased.toArray().map((prod) => prod.id);
+        const purchasedIDs = purchased.getItems().map((prod) => prod.id);
 
         res.json({
             skus: purchasedIDs,
@@ -296,7 +296,7 @@ shopRouter.post('/resend-purchased', async (req, res) => {
         if (purchased.length === 0) {
             throw Error('No products purchased');
         }
-        const purchasedIDs = purchased.toArray().map((prod) => prod.id);
+        const purchasedIDs = purchased.getItems().map((prod) => prod.id);
         await mailer.emailPDFs(purchasedIDs, email);
         localCustomer.lastRequest = new Date();
         res.sendStatus(200);

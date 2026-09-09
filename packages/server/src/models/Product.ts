@@ -1,4 +1,9 @@
-import { defineEntity, type EventArgs, p } from '@mikro-orm/core';
+import {
+    defineEntity,
+    type EventArgs,
+    OptionalProps,
+    p,
+} from '@mikro-orm/core';
 import { createProduct, deleteProduct, updateProduct } from '../stripe.js';
 import { User } from './User.js';
 
@@ -12,7 +17,7 @@ const productSchema = defineEntity({
         file: p.text(),
         description: p.text().nullable(),
         sample: p.text().nullable(),
-        images: p.array().nullable(),
+        images: p.array(),
         pages: p.integer().nullable(),
         price: p.integer(),
         type: p.text().nullable(),
@@ -23,7 +28,9 @@ const productSchema = defineEntity({
     },
 });
 
-export class Product extends productSchema.class {}
+export class Product extends productSchema.class {
+    [OptionalProps]?: 'images';
+}
 productSchema.setClass(Product);
 
 productSchema.addHook('beforeCreate', async (args: EventArgs<Product>) => {

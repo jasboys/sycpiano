@@ -4,13 +4,13 @@ import { DiscLink } from './DiscLink.js';
 const discSchema = defineEntity({
     name: 'Disc',
     properties: {
-        id: p.uuid().primary().defaultRaw('gen_random_uuid'),
+        id: p.uuid().primary().defaultRaw('gen_random_uuid()'),
         title: p.text().nullable(),
         description: p.text().nullable(),
         label: p.text().nullable(),
         releaseDate: p.integer().nullable(),
         thumbnailFile: p.text().nullable(),
-        discLink: () => p.oneToMany(() => DiscLink).mappedBy('disc'),
+        discLinks: () => p.oneToMany(DiscLink).mappedBy('disc'),
     },
 });
 

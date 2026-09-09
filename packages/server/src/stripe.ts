@@ -199,7 +199,7 @@ export const createProduct = async (attributes: Product): Promise<string[]> => {
         console.log('attributes', attributes);
         const product = await stripe.products.create({
             name: attributes.name,
-            description: attributes.description,
+            description: attributes.description ?? undefined,
             metadata: {
                 format: 'pdf',
                 file: attributes.file ?? null,

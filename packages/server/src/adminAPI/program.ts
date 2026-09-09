@@ -63,13 +63,11 @@ export const programHandler = crud('/programs', {
         const { programPieces, ...plainProg } = wrap(prog).toPOJO();
         return {
             ...plainProg,
-            pieces: programPieces.map((val) => {
-                return {
-                    ...val.piece,
-                    order: val.order,
-                    pivotId: val.id,
-                };
-            }),
+            pieces: prog.programPieces.getItems().map((programPiece) => ({
+                ...wrap(programPiece.piece).toPOJO(),
+                order: programPiece.order,
+                pivotId: programPiece.id,
+            })),
         };
     },
     getList: async ({ filter, limit, offset, order }) => {
@@ -90,13 +88,13 @@ export const programHandler = crud('/programs', {
                 const { programPieces, ...plainProg } = wrap(prog).toPOJO();
                 return {
                     ...plainProg,
-                    pieces: programPieces.map((val) => {
-                        return {
-                            ...val.piece,
-                            order: val.order,
-                            pivotId: val.id,
-                        };
-                    }),
+                    pieces: prog.programPieces
+                        .getItems()
+                        .map((programPiece) => ({
+                            ...wrap(programPiece.piece).toPOJO(),
+                            order: programPiece.order,
+                            pivotId: programPiece.id,
+                        })),
                 };
             }),
         };
@@ -135,13 +133,13 @@ export const programHandler = crud('/programs', {
                 const { programPieces, ...plainProg } = wrap(prog).toPOJO();
                 return {
                     ...plainProg,
-                    pieces: programPieces.map((val) => {
-                        return {
-                            ...val.piece,
-                            order: val.order,
-                            pivotId: val.id,
-                        };
-                    }),
+                    pieces: prog.programPieces
+                        .getItems()
+                        .map((programPiece) => ({
+                            ...wrap(programPiece.piece).toPOJO(),
+                            order: programPiece.order,
+                            pivotId: programPiece.id,
+                        })),
                 };
             }),
         };
@@ -219,7 +217,7 @@ programHandler.post('/actions/programs/import', async (req, res) => {
                     piece: programPiece.piece,
                     calendar: cal.id,
                     order:
-                        programPiece.order !== undefined
+                        typeof programPiece.order === 'number'
                             ? programPiece.order + highestOrder
                             : undefined,
                 });
