@@ -33,12 +33,18 @@ const main = async () => {
     const app = express();
     const logger = await (async () => {
         if (isProduction) {
-            const { pino } = await import('pino');
             const { pinoHttp } = await import('pino-http');
-            const { req, res, err } = await import('pino-std-serializers');
             return pinoHttp({
-                logger: pino(),
-                serializers: { req, res, err },
+                customLogLevel: (_req, res, err) => {
+                    if (err || res.statusCode >= 500) return 'error';
+                    if (res.statusCode >= 400) return 'warn';
+                    return 'info';
+                },
+                customSuccessMessage: (req, res) =>
+                    `${req.method} ${req.url} ${res.statusCode}`,
+
+                customErrorMessage: (req, res, err) =>
+                    `${req.method} ${req.url} ${res.statusCode}: ${err.message}`,
             });
         }
         const { default: morgan } = await import('morgan');

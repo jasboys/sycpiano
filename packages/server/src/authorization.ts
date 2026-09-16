@@ -2,7 +2,14 @@ import * as crypto from 'node:crypto';
 import * as argon2 from 'argon2';
 import * as express from 'express';
 import { upperCase } from 'lodash-es';
-import { V3 as paseto } from 'paseto';
+import { LocalProtocol } from 'paseto';
+import {
+    DecryptFactory,
+    EncryptFactory,
+    ExportKeyFactory,
+    GenerateKeyFactory,
+    ImportKeyFactory,
+} from 'paseto/v3/local';
 import validator from 'validator';
 
 import orm from './database.js';
@@ -17,14 +24,20 @@ authRouter.use(express.urlencoded({ extended: true }));
 
 export const authorize = async (user: string) => {
     try {
-        const key = await paseto.generateKey('local', { format: 'paserk' });
-        const token = await paseto.encrypt({}, key, {
-            subject: user,
+        const v3 = new LocalProtocol(
+            GenerateKeyFactory,
+            EncryptFactory,
+            ExportKeyFactory,
+        );
+        const key = await v3.GenerateKey({ extractable: true });
+        const token = await v3.Encrypt(key, {
+            sub: user,
             expiresIn: '24h',
-            audience: 'seanchenpiano.com',
-            issuer: 'seanchenpiano.com',
+            aud: 'seanchenpiano.com',
+            iss: 'seanchenpiano.com',
         });
-        return { token, key };
+        const serialized = await v3.ExportKey(key);
+        return { token, key: serialized };
     } catch (e) {
         console.log(e);
         throw e;
@@ -45,6 +58,10 @@ type HandlerWithRole = express.RequestHandler<
     { role: Role }
 >;
 
+const isK3Local = (v: string): v is `k3.local.${string}` => {
+    return v.startsWith('k3.local.');
+};
+
 export const authAndGetRole: HandlerWithRole = async (req, res, next) => {
     if (ignoredMethods.includes(req.method)) {
         return next();
@@ -59,7 +76,7 @@ export const authAndGetRole: HandlerWithRole = async (req, res, next) => {
         if (split.length !== 2 || split[0] !== 'Bearer') {
             throw new Error('Wrong format');
         }
-        const token = split[1];
+        const token: string = split[1];
         const user = await orm.em.findOneOrFail(User, { session });
         if (
             typeof user.pasetoSecret !== 'string' ||
@@ -68,14 +85,21 @@ export const authAndGetRole: HandlerWithRole = async (req, res, next) => {
         ) {
             throw new Error('No paseto secret or user');
         }
-        await paseto.decrypt(token, user.pasetoSecret, {
-            subject: user.username,
-            audience: 'seanchenpiano.com',
-            issuer: 'seanchenpiano.com',
-        });
-        res.locals.role = Role[upperCase(user.role) as keyof typeof Role];
-        next();
+        const v3 = new LocalProtocol(DecryptFactory, ImportKeyFactory);
+        if (isK3Local(user.pasetoSecret)) {
+            const key = await v3.ImportKey(user.pasetoSecret);
+            await v3.Decrypt(key, token, {
+                subject: user.username,
+                audience: 'seanchenpiano.com',
+                issuer: 'seanchenpiano.com',
+            });
+            res.locals.role = Role[upperCase(user.role) as keyof typeof Role];
+            next();
+        } else {
+            throw new Error('Paseto key does not start with k3.local.');
+        }
     } catch (_e) {
+        console.log(_e);
         res.status(401).send('Unauthorized');
     }
 };
@@ -154,6 +178,7 @@ authRouter.post('/login', async (req, res) => {
             user.pasetoSecret = key;
             user.session = session;
             await orm.em.flush();
+            console.log(token);
             res.cookie('access_token', `Bearer ${token}`, {
                 httpOnly: true,
                 secure: true,

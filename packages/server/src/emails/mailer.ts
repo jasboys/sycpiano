@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
-import archiver from 'archiver';
+import { ZipArchive } from '@archiver/archiver';
 import { getYear } from 'date-fns';
 import mustache from 'mustache';
 import * as nodemailer from 'nodemailer';
@@ -195,7 +195,7 @@ class ConnectedMailer implements Mailer {
                     },
                 ];
             } else {
-                const zip = archiver('zip', {
+                const zip = new ZipArchive({
                     zlib: { level: 9 },
                 });
 

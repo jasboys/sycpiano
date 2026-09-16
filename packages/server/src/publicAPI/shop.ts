@@ -23,6 +23,8 @@ shopRouter.post(
         const sig = req.headers['stripe-signature'];
 
         if (sig === undefined) {
+            req.log.error({}, 'Webhook: No Stripe Signature Header');
+
             return res
                 .status(400)
                 .send('Webhook Error: no stripe signature header.');
@@ -34,7 +36,7 @@ shopRouter.post(
         try {
             event = stripeClient.constructEvent(req.body, sig);
         } catch (e) {
-            console.error(e);
+            req.log.error({ e }, 'Webhook: Construct Event Failed.');
             const err = e as Error;
             return res.status(400).send(`Webhook Error: ${err.message}`);
         }
@@ -89,7 +91,8 @@ shopRouter.post(
                     );
                 }
             } catch (e) {
-                console.error('Failed to send email: ', e);
+                req.log.error({ e }, 'Webhook: Failed to send email');
+                // console.error('Failed to send email: ', e);
             }
         }
 
@@ -103,7 +106,7 @@ const productSortPredicate = (a: ShopItem, b: ShopItem) => {
     return a.name.localeCompare(b.name);
 };
 
-shopRouter.get('/items', async (_, res) => {
+shopRouter.get('/items', async (req, res) => {
     try {
         const products = await orm.em.find(
             Product,
@@ -128,7 +131,8 @@ shopRouter.get('/items', async (_, res) => {
         );
         res.json(storeItems);
     } catch (e) {
-        console.log(e);
+        req.log.error({ e }, 'PublicAPI: Failed to get shop items');
+        // console.log(e);
     }
 });
 
@@ -138,31 +142,27 @@ shopRouter.get('/faqs', async (_, res) => {
 });
 
 const getOrCreateLocalCustomer = async (email: string) => {
-    try {
-        const stripeCustomer = await stripeClient.getOrCreateCustomer(email);
+    const stripeCustomer = await stripeClient.getOrCreateCustomer(email);
 
-        const localCustomer = await orm.em.findOne(
-            User,
-            { $and: [{ username: email }, { role: 'customer' }] },
-            { populate: ['products'] },
-        );
+    const localCustomer = await orm.em.findOne(
+        User,
+        { $and: [{ username: email }, { role: 'customer' }] },
+        { populate: ['products'] },
+    );
 
-        if (!localCustomer) {
-            console.log(email);
-            const user = orm.em.create(User, {
-                id: stripeCustomer.id,
-                username: email,
-                role: 'customer',
-            });
-            await orm.em.persist(user).flush();
-        }
-        return {
-            stripeId: stripeCustomer.id,
-            ...localCustomer,
-        };
-    } catch (e) {
-        console.log(e);
+    if (!localCustomer) {
+        console.log(email);
+        const user = orm.em.create(User, {
+            id: stripeCustomer.id,
+            username: email,
+            role: 'customer',
+        });
+        await orm.em.persist(user).flush();
     }
+    return {
+        stripeId: stripeCustomer.id,
+        ...localCustomer,
+    };
 };
 
 shopRouter.get<unknown, unknown, unknown, { session_id: string }>(
@@ -180,7 +180,11 @@ shopRouter.get<unknown, unknown, unknown, { session_id: string }>(
                 ]),
                 lineItems: lineItems.map((item) => item.description),
             });
-        } catch (_e) {
+        } catch (e) {
+            req.log.error(
+                { e },
+                'PublicAPI: Checkout-success failed to get session',
+            );
             res.sendStatus(400);
         }
     },
@@ -249,7 +253,8 @@ shopRouter.post('/checkout', async (req, res) => {
         // });
         res.json({ url: session.url });
     } catch (e) {
-        console.error('Checkout error', e);
+        req.log.error({ e }, 'PublicAPI: Checkout Error');
+        // console.error('Checkout error', e);
         res.sendStatus(400);
     }
 });
@@ -271,7 +276,11 @@ shopRouter.post('/get-purchased', async (req, res) => {
             skus: purchasedIDs,
         });
     } catch (e) {
-        console.error(`Failed to get skus of customer with email: ${email}`, e);
+        req.log.error(
+            { e },
+            `PublicAPI: get-purchased failed for customer ${email}`,
+        );
+        // console.error(`Failed to get skus of customer with email: ${email}`, e);
         res.sendStatus(400);
     }
 });
@@ -301,7 +310,11 @@ shopRouter.post('/resend-purchased', async (req, res) => {
         localCustomer.lastRequest = new Date();
         res.sendStatus(200);
     } catch (e) {
-        console.error(`Failed to resend purchased pdfs of email: ${email}`, e);
+        req.log.error(
+            { e },
+            `PublicAPI: resend-purchased failed for customer ${email}`,
+        );
+        // console.error(`Failed to resend purchased pdfs of email: ${email}`, e);
         res.sendStatus(200); // We don't want to give away whether email exists or not.
     }
 });

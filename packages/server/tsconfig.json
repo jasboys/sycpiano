@@ -5,6 +5,9 @@
             "esnext",
             "DOM"
         ],
+        "types": [
+            "node"
+        ],
         "module": "NodeNext",
         "target": "ESNext",
         "allowJs": true,
@@ -18,8 +21,7 @@
         "sourceMap": false,
         "skipLibCheck": true,
         "outDir": "build",
-        "baseUrl": "src",
-        "rootDir": "src",
+        "rootDir": "./src",
         "experimentalDecorators": true,
         "emitDecoratorMetadata": true,
         "esModuleInterop": true,
@@ -28,6 +30,6 @@
         "tsBuildInfoFile": ".tsbuildinfo"
     },
     "include": [
-        "src/**/*.ts"
+        "./src/**/*.ts"
     ]
 }

@@ -7,9 +7,9 @@
         ],
         "paths": {
             "*": [
-                "node_modules/*",
-                "@types/*",
-                "node_modules/@types/*"
+                "./node_modules/*",
+                "./@types/*",
+                "./node_modules/@types/*"
             ],
             "src/*": ["./src/*"]
         },
@@ -34,9 +34,7 @@
         "preserveConstEnums": true,
         "sourceMap": true,
         "allowSyntheticDefaultImports": true,
-        "downlevelIteration": true,
         "skipLibCheck": true,
-        "baseUrl": ".",
         "strict": true,
         "noErrorTruncation": true
     },

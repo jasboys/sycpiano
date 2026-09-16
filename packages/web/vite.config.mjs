@@ -1,8 +1,8 @@
 import * as path from 'node:path';
 import react from '@vitejs/plugin-react';
 import dotenv from 'dotenv';
-import jotaiDebugLabel from 'jotai/babel/plugin-debug-label';
-import jotaiReactRefresh from 'jotai/babel/plugin-react-refresh';
+import jotaiDebugLabel from 'jotai-babel/plugin-debug-label';
+import jotaiReactRefresh from 'jotai-babel/plugin-react-refresh';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig } from 'vite';
 
@@ -11,10 +11,10 @@ dotenv.config({ override: true, path: '../../.env' });
 const staticPrefix = '/static';
 
 export default defineConfig({
-    root: path.resolve(__dirname, 'src'),
+    root: path.resolve(import.meta.dirname, 'src'),
     resolve: {
         alias: {
-            src: path.resolve(__dirname, 'src'),
+            src: path.resolve(import.meta.dirname, 'src'),
             path: 'path-browserify',
             gsap: 'gsap/dist/gsap',
         },
@@ -46,7 +46,7 @@ export default defineConfig({
     build: {
         target: ['es2015'],
         manifest: true,
-        outDir: path.resolve(__dirname, 'build'),
+        outDir: path.resolve(import.meta.dirname, 'build'),
         assetsDir: 'static/scripts/web',
         emptyOutDir: true,
     },

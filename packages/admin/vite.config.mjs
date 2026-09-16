@@ -1,7 +1,8 @@
-import { defineConfig } from 'vite';
-import react from '@vitejs/plugin-react-swc';
 import * as path from 'node:path';
+import react from '@vitejs/plugin-react';
 import dotenv from 'dotenv';
+import { defineConfig } from 'vite';
+
 dotenv.config({ override: true, path: '../../.env' });
 
 export default defineConfig({
@@ -10,10 +11,10 @@ export default defineConfig({
     },
     resolve: {
         alias: {
-            src: path.resolve(__dirname, 'src'),
+            src: path.resolve(import.meta.dirname, 'src'),
         },
     },
-    root: path.resolve(__dirname, 'src'),
+    root: path.resolve(import.meta.dirname, 'src'),
     define: {
         'import.meta.env.PUBLIC_GAPI_KEY': JSON.stringify(
             process.env.GAPI_KEY_APP,
@@ -31,10 +32,10 @@ export default defineConfig({
     ],
     build: {
         manifest: true,
-        rollupOptions: {
+        rolldownOptions: {
             input: 'src/admin.html',
         },
-        outDir: path.resolve(__dirname, 'build'),
+        outDir: path.resolve(import.meta.dirname, 'build'),
         assetsDir: 'static/scripts/admin',
         emptyOutDir: true,
     },
