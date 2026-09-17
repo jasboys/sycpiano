@@ -2,8 +2,7 @@ package.json
 yarn.lock
 ecosystem.config.cjs
 .yarnrc.yml
-.yarn/releases/
-.yarn/cache/
+.yarn/
 .pnp.cjs
 .pnp.loader.mjs
 packages/server/migrations
