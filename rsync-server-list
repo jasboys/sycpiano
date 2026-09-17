@@ -5,6 +5,7 @@ ecosystem.config.cjs
 .yarn/releases/
 .yarn/cache/
 .pnp.cjs
+.pnp.loader.mjs
 packages/server/migrations
 packages/server/package.json
 packages/server/build
