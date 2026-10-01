@@ -19,7 +19,7 @@ if (process.env.STRIPE_SECRET_KEY === undefined) {
     throw new Error('Stripe Secret Key undefined');
 }
 const stripe: Stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2026-08-26.dahlia',
+    apiVersion: '2026-09-30.endive',
 });
 
 const stripeCustomerActive = (cr: CustomerReturn): cr is Stripe.Customer => {
@@ -119,7 +119,7 @@ export const createCheckoutSession = async (
             mode: 'payment',
             success_url: `${host}/shop/checkout-success?session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${host}/shop/scores`,
-            payment_method_types: ['card'],
+            allowed_payment_method_types: ['card'],
             line_items: priceIDs.map((id) => ({
                 price: id,
                 quantity: 1,
