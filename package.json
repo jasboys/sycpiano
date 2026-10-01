@@ -51,8 +51,6 @@
         "ra-core/react-router-dom": "^7.18.4",
         "react-admin/react-router": "^7.18.4",
         "react-admin/react-router-dom": "^7.18.4",
-        "react-admin/react-hook-form": "^7.71.2",
-        "react-hook-form@*": "^7.71.2",
         "@tootallnate/once@2": "^2.0.1",
         "path-to-regexp": "^8.4.2",
         "brace-expansion@^2.0.2": "^2.1.7",
@@ -60,6 +58,7 @@
         "decode-uri-component": "^0.5.0",
         "picomatch@^2.3.1": "^2.3.2",
         "picomatch@^2.0.4": "^2.3.2",
-        "picomatch@^2.2.1": "^2.3.2"
+        "picomatch@^2.2.1": "^2.3.2",
+        "browserslist": "^4.29.3"
     }
 }
