@@ -35,6 +35,14 @@ const main = async () => {
         if (isProduction) {
             const { pinoHttp } = await import('pino-http');
             return pinoHttp({
+                serializers: {
+                    req: (req) => ({
+                        id: req.id,
+                        method: req.method,
+                        url: req.url,
+                    }),
+                    res: (res) => ({ statusCode: res.statusCode }),
+                },
                 customLogLevel: (_req, res, err) => {
                     if (err || res.statusCode >= 500) return 'error';
                     if (res.statusCode >= 400) return 'warn';
@@ -70,6 +78,24 @@ const main = async () => {
 
     app.use(logger);
 
+    const devScriptSrc = isProduction
+        ? []
+        : ['https://localhost:5173', 'http://localhost:5174'];
+    const devConnectSrc = isProduction
+        ? []
+        : [...devScriptSrc, 'ws://localhost:5173', 'ws://localhost:5174'];
+    const scriptHosts = [
+        'https://analytics.seanchenpiano.com',
+        'https://static.cloudflareinsights.com',
+        'https://js.stripe.com',
+        'https://checkout.stripe.com',
+        'https://m.stripe.network',
+        'https://www.youtube.com/iframe_api',
+        'https://www.youtube.com/s/player/',
+    ];
+    const devUnsafeEval = isProduction ? [] : ["'unsafe-eval'"];
+    const devUnsafeInline = isProduction ? [] : ["'unsafe-inline'"];
+
     // helmet will add HSTS to force HTTPS connections, remove x-powered-by non-standard header,
     // sets x-frame-options header to disallow our content to be rendered in iframes.
     app.use(
@@ -79,29 +105,16 @@ const main = async () => {
                     'script-src-attr': null,
                     'script-src': [
                         "'self'",
-                        "'unsafe-inline'",
-                        "'unsafe-eval'",
-                        'http://localhost:5173',
-                        'http://localhost:5174',
-                        'https://analytics.seanchenpiano.com',
-                        'https://static.cloudflareinsights.com',
-                        'https://js.stripe.com',
-                        'https://checkout.stripe.com',
-                        'https://www.youtube.com/iframe_api',
-                        'https://www.youtube.com/s/player/',
+                        ...devUnsafeEval,
+                        ...devUnsafeInline,
+                        ...scriptHosts,
+                        ...devScriptSrc,
                     ],
                     'script-src-elem': [
                         "'self'",
-                        "'unsafe-inline'",
-                        "'unsafe-eval'",
-                        'https://www.youtube.com/iframe_api',
-                        'https://www.youtube.com/s/player/',
-                        'https://static.cloudflareinsights.com',
-                        'https://m.stripe.network',
-                        'https://analytics.seanchenpiano.com',
-                        'http://localhost:5173',
-                        'http://localhost:5174',
-                        'https://js.stripe.com',
+                        ...devUnsafeInline,
+                        ...scriptHosts,
+                        ...devScriptSrc,
                     ],
                     'default-src': [
                         "'self'",
@@ -109,28 +122,12 @@ const main = async () => {
                         'https://www.googleapis.com/youtube/v3/',
                         'https://www.youtube.com/embed/',
                     ],
-                    'img-src': [
-                        "'self'",
-                        'https:',
-                        'data:',
-                        'blob:',
-                        // "https://i.ytimg.com/vi/",
-                        // "https://*.stripe.com",
-                        // "https://*.googleapis.com",
-                        // "https://*.gstatic.com",
-                        // "*.google.com",
-                        // "*.googleusercontent.com"
-                    ],
+                    'img-src': ["'self'", 'https:', 'data:', 'blob:'],
                     'connect-src': [
                         "'self'",
-                        'ws://localhost:5173/',
-                        'ws://localhost:5174/',
-                        'http://localhost:5173',
-                        'http://localhost:5174',
-                        'https://analytics.seanchenpiano.com',
-                        'https://static.cloudflareinsights.com',
+                        ...scriptHosts,
+                        ...devConnectSrc,
                         'https://api.stripe.com',
-                        'https://checkout.stripe.com',
                         'https://www.googleapis.com/youtube/v3/',
                         'https://*.googleapis.com',
                         '*.google.com',
