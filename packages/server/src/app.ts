@@ -101,7 +101,6 @@ const main = async () => {
     app.use(
         helmet({
             contentSecurityPolicy: {
-                reportOnly: true,
                 directives: {
                     'script-src-attr': null,
                     'script-src': [

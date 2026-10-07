@@ -59,6 +59,8 @@
         "picomatch@^2.3.1": "^2.3.2",
         "picomatch@^2.0.4": "^2.3.2",
         "picomatch@^2.2.1": "^2.3.2",
-        "browserslist": "^4.29.3"
+        "browserslist": "^4.29.3",
+        "seroval": "^1.6.3",
+        "http-cache-semantics": "^4.2.0"
     }
 }
