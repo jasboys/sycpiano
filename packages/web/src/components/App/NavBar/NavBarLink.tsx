@@ -9,7 +9,7 @@ import { Transition } from 'react-transition-group';
 import Highlight from 'src/components/App/NavBar/Highlight';
 import SubNav from 'src/components/App/NavBar/SubNav/SubNav';
 import type { LinkShape } from 'src/components/App/NavBar/types';
-import { lightBlue, logoBlue, navFontColor } from 'src/styles/colors';
+import { logoBlue, navFontColor } from 'src/styles/colors';
 import { latoFont } from 'src/styles/fonts';
 import { noHighlight } from 'src/styles/mixins';
 import { navBarAtoms } from './store';

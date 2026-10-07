@@ -89,7 +89,6 @@ const ShopList: React.FC<ShopListProps> = () => {
     const navigate = useNavigate();
 
     React.useEffect(() => {
-        console.log(params.product);
         if (shopItems && Object.keys(shopItems).length && params.product) {
             const el = document.getElementById(params.product);
             if (el) {
@@ -99,7 +98,6 @@ const ShopList: React.FC<ShopListProps> = () => {
     }, [shopItems, params.product, location.key]);
 
     React.useEffect(() => {
-        console.log(location);
         if (location.state?.from === 'cart') {
             setCartOpen(false);
             navigate({}, { replace: true });

@@ -1,12 +1,11 @@
 import styled from '@emotion/styled';
 import { useQuery } from '@tanstack/react-query';
 import { gsap } from 'gsap';
+import { useAtomValue, useSetAtom } from 'jotai';
 import * as React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useMatch, useNavigate } from 'react-router-dom';
 import { Transition } from 'react-transition-group';
-
-import { useAtomValue, useSetAtom } from 'jotai';
 import { mediaQueriesAtoms } from 'src/components/App/store.js';
 import { LoadingInstance } from 'src/components/LoadingSVG';
 import PreviewOverlay from 'src/components/Media/Videos/PreviewOverlay';

@@ -21,7 +21,7 @@ export const FaqList = (props: ListProps) => (
         <SimpleList
             primaryText={<TextField source="answer" />}
             secondaryText={<TextField source="question" />}
-            linkType="show"
+            rowClick="show"
         />
     </List>
 );

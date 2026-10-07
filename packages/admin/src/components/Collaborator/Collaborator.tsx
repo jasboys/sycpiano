@@ -57,7 +57,7 @@ export const CollaboratorCreate = (props: CreateProps) => (
 
 const ExpandPanel = () => {
     return (
-        <Box mb={1}>
+        <Box sx={{ mb: 1 }}>
             <ArrayField source="calendars">
                 <Datagrid
                     rowClick={(_id, _basePath, record) =>

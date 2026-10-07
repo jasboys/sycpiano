@@ -142,8 +142,8 @@ const PurchasedCountButton = () => {
 
 const Empty = () => {
     return (
-        <Box textAlign="center" m={1}>
-            <Typography variant="h4" paragraph>
+        <Box sx={{ textAlign: "center", m: 1 }}>
+            <Typography variant="h4" sx={{ mb: 2 }}>
                 No products available
             </Typography>
             <Typography variant="body1">
