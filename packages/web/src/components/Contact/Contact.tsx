@@ -57,6 +57,4 @@ const Contact: React.FC<ContactProps> = () => {
     );
 };
 
-export type ContactType = typeof Contact;
-export type RequiredProps = ContactProps;
 export default Contact;

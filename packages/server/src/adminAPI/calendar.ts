@@ -17,7 +17,7 @@ import { respondWithError } from './index.js';
 import { mikroCrud } from './mikroCrud.js';
 import { NotFoundError } from './types.js';
 
-export const mapSearchFields = (token: string) =>
+const mapSearchFields = (token: string) =>
     [
         'location',
         'type',

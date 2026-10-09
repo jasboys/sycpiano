@@ -56,6 +56,4 @@ const Discs: React.FC<DiscsProps> = () => {
     );
 };
 
-export type DiscsType = typeof Discs;
-export type RequiredProps = DiscsProps;
 export default Discs;

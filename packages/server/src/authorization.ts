@@ -22,7 +22,7 @@ const authRouter = express.Router();
 authRouter.use(express.json());
 authRouter.use(express.urlencoded({ extended: true }));
 
-export const authorize = async (user: string) => {
+const authorize = async (user: string) => {
     try {
         const v3 = new LocalProtocol(
             GenerateKeyFactory,

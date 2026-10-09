@@ -206,6 +206,4 @@ const Videos: React.FC<VideosProps> = () => {
     );
 };
 
-export type VideosType = typeof Videos;
-export type RequiredProps = VideosProps;
 export default Videos;

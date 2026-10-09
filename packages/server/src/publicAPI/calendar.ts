@@ -5,7 +5,7 @@ import * as express from 'express';
 import orm from '../database.js';
 import { Calendar } from '../models/Calendar.js';
 
-export const mapSearchFields = (token: string) =>
+const mapSearchFields = (token: string) =>
     [
         'location',
         'type',

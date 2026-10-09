@@ -23,7 +23,7 @@ export interface MusicFileItem {
     readonly idx?: number;
 }
 
-export const musicCategories = [
+const musicCategories = [
     'concerto',
     'solo',
     'chamber',
@@ -41,7 +41,7 @@ export const categoryMap = {
     videogame: 'Videogame-Inspired Works',
 };
 
-export interface MusicCategoryItem {
+interface MusicCategoryItem {
     readonly id: MusicCategories;
     readonly type: MusicCategories;
 }

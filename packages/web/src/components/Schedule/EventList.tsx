@@ -243,8 +243,8 @@ export const EventList: React.FC<{ type: EventListName; searchQ?: string }> = ({
                 hasNextPage &&
                 !isFetching &&
                 !isFetchingNextPage &&
-                !!maxDate &&
-                !!minDate
+                maxDate &&
+                minDate
             ) {
                 if (type !== 'search' && type !== 'event') {
                     fetchNextPage();
@@ -378,5 +378,3 @@ export const EventList: React.FC<{ type: EventListName; searchQ?: string }> = ({
         </React.Fragment>
     );
 };
-
-export default EventList;

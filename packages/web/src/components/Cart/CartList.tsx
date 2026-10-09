@@ -430,6 +430,3 @@ export const CartList: React.FC<Record<never, unknown>> = () => {
         </CartListDiv>
     );
 };
-
-export type CartListType = typeof CartList;
-export type RequiredProps = Record<never, unknown>;

@@ -246,6 +246,4 @@ const Bio: React.FunctionComponent<Record<never, unknown>> = () => {
     );
 };
 
-export type BioType = typeof Bio;
-export type RequiredProps = React.ComponentProps<typeof Bio>;
 export default Bio;

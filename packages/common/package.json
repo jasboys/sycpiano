@@ -1,18 +1,17 @@
 {
-  "$schema": "https://json.schemastore.org/package.json",
-  "name": "common",
-  "types": "dist/index.d.ts",
-  "main": "dist/index.js",
-  "type": "module",
-  "scripts": {
-    "build": "cross-env NODE_ENV=production tsc",
-    "watch": "cross-env NODE_ENV=development tsc --watch"
-  },
-  "devDependencies": {
-    "typescript": "6.0.3"
-  },
-  "dependencies": {
-    "cross-env": "^10.1.0",
-    "date-fns": "4.4.0"
-  }
+    "$schema": "https://json.schemastore.org/package.json",
+    "name": "common",
+    "types": "dist/index.d.ts",
+    "main": "dist/index.js",
+    "type": "module",
+    "scripts": {
+        "build": "NODE_ENV=production tsc",
+        "watch": "NODE_ENV=development tsc --watch"
+    },
+    "devDependencies": {
+        "typescript": "6.0.3"
+    },
+    "dependencies": {
+        "date-fns": "4.4.0"
+    }
 }

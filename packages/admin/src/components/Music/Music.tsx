@@ -151,7 +151,7 @@ const DeleteMusicFile = () => {
     );
 };
 
-export const EditMusicFile: MutateForm = ({ setShowDialog }) => {
+const EditMusicFile: MutateForm = ({ setShowDialog }) => {
     const refresh = useRefresh();
     const [update, { isLoading }] = useUpdate<
         RaRecord<Identifier>,
@@ -246,7 +246,7 @@ export const EditMusicFile: MutateForm = ({ setShowDialog }) => {
     );
 };
 
-export const AddMusicFile: React.FC<{
+const AddMusicFile: React.FC<{
     setShowDialog: (t: boolean) => void;
 }> = ({ setShowDialog }) => {
     const record = useRecordContext();

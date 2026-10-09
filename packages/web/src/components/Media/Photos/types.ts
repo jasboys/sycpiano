@@ -1,8 +1,3 @@
-export interface PhotoStoreShape {
-    currentItem?: PhotoItem;
-    background: string;
-}
-
 export interface PhotoItem {
     file: string;
     credit: string;

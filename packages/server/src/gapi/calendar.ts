@@ -4,7 +4,6 @@ import axios, { type AxiosError, type AxiosResponse } from 'axios';
 import { add, format, getUnixTime } from 'date-fns';
 import { parseHTML } from 'linkedom';
 import type { Calendar } from '../models/Calendar.js';
-import type { GCalEvent } from '../types.js';
 import { getToken } from './oauth.js';
 
 // From google api console; use general dev or server prod keys for respective environments.
@@ -16,44 +15,6 @@ const calendarId =
         ? 'qdoiu1uovuc05c4egu65vs9uck@group.calendar.google.com'
         : 'c7dolt217rdb9atggl25h4fspg@group.calendar.google.com';
 const uriEncCalId = calendarId;
-
-export const getCalendarSingleEvent = async (
-    em: EntityManager,
-    id: string,
-): Promise<AxiosResponse<GCalEvent>> => {
-    const token = await getToken(em);
-    const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events/${id}`;
-    return axios.get(url, {
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
-};
-
-interface EventsListResponse {
-    items: GCalEvent[];
-    nextPageToken: string;
-    nextSyncToken: string;
-}
-
-export const getCalendarEvents = async (
-    em: EntityManager,
-    nextPageToken?: string,
-    syncToken?: string,
-): Promise<AxiosResponse<EventsListResponse>> => {
-    const token = await getToken(em);
-    const url = `https://www.googleapis.com/calendar/v3/calendars/${uriEncCalId}/events`;
-    return axios.get(url, {
-        params: {
-            singleEvents: true,
-            pageToken: nextPageToken,
-            syncToken,
-        },
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    });
-};
 
 export const deleteCalendarEvent = async (
     em: EntityManager,
@@ -163,19 +124,6 @@ export const updateCalendar = async (
     } catch (_e) {
         console.log('error writing to google calendar');
         return Promise.reject();
-    }
-};
-
-export const extractEventDescription = (
-    event: GCalEvent,
-): Record<string, unknown> => {
-    try {
-        return JSON.parse(event.description);
-    } catch (e) {
-        console.log(e);
-        console.log('======Error parsing event description JSON======');
-        console.log(event.description);
-        return {};
     }
 };
 

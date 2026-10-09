@@ -29,9 +29,9 @@ type SelectorMapType = Record<
     (state: MediaQueryStateShape) => boolean
 >;
 
-export const mqSelectors = Object.fromEntries(
-    (Object.keys(GLOBAL_QUERIES) as (keyof MediaQueryStateShape)[]).map((k) => [
-        k,
-        (mqState) => mqState[k],
-    ]) as SelectorMapEntriesType,
-) as SelectorMapType;
+// export const mqSelectors = Object.fromEntries(
+//     (Object.keys(GLOBAL_QUERIES) as (keyof MediaQueryStateShape)[]).map((k) => [
+//         k,
+//         (mqState) => mqState[k],
+//     ]) as SelectorMapEntriesType,
+// ) as SelectorMapType;

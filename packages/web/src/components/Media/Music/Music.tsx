@@ -497,6 +497,4 @@ const Music: React.FC = () => {
     );
 };
 
-export type MusicType = React.Component<MusicProps>;
-export type RequiredProps = Record<never, unknown>;
 export default Music;

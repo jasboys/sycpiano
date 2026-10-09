@@ -40,16 +40,6 @@ export const respondWithError = (error: Error, res: express.Response): void => {
     }
 };
 
-export interface RequestWithBody extends express.Request {
-    body: {
-        data: {
-            attributes: {
-                ids: string[];
-            };
-        };
-    };
-}
-
 adminRest.use(bioHandler);
 adminRest.use(acclaimHandler);
 adminRest.use(calendarHandler);

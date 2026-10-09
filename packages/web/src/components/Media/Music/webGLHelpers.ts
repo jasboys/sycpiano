@@ -1,4 +1,4 @@
-export const loadShader = (
+const loadShader = (
     gl: WebGLRenderingContext,
     type: number,
     source: string,

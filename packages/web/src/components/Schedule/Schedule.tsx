@@ -5,7 +5,7 @@ import * as React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { SwitchTransition, Transition } from 'react-transition-group';
 import { BackIconSVG } from 'src/components/Schedule/BackIconSVG';
-import EventList from 'src/components/Schedule/EventList';
+import { EventList } from 'src/components/Schedule/EventList';
 import { LocationIconSVG } from 'src/components/Schedule/LocationIconSVG';
 import { Search } from 'src/components/Schedule/Search';
 import { SearchIconSVG } from 'src/components/Schedule/SearchIconSVG';
@@ -91,7 +91,4 @@ const Schedule: React.FC<ScheduleProps> = ({ type }) => {
     );
 };
 
-export { EventList };
-export type ScheduleType = typeof Schedule;
-export type RequiredProps = ScheduleProps;
 export default Schedule;

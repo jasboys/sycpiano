@@ -8,8 +8,3 @@ export interface AcclaimItemShape {
     readonly hasFullDate: boolean;
     readonly website?: string;
 }
-
-export interface AcclaimsListStateShape {
-    readonly isFetching: boolean;
-    readonly items: AcclaimItemShape[];
-}

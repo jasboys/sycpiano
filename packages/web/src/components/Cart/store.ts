@@ -55,7 +55,7 @@ const itemsAtom = atomWithStorage(
     { getOnInit: true },
 );
 
-export const emailAtom = atomWithStorage('customer_email', '', undefined, {
+const emailAtom = atomWithStorage('customer_email', '', undefined, {
     getOnInit: true,
 });
 

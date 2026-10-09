@@ -9,9 +9,9 @@ export type AtomMap<T> = {
 //     [K in keyof T]-?: T[K];
 // };
 
-export type ReadWriteAtomMap<T, Arg extends unknown[]> = {
-    [K in keyof T]-?: WritableAtom<T[K], [val: Arg], void>;
-};
+// export type ReadWriteAtomMap<T, Arg extends unknown[]> = {
+//     [K in keyof T]-?: WritableAtom<T[K], [val: Arg], void>;
+// };
 
 type AtomWithImmer<T> = WritableAtom<
     T,

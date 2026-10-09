@@ -14,7 +14,3 @@ export interface Product {
 }
 
 export type ProductMap = Record<(typeof ProductTypes)[number], Product[]>;
-
-export interface ShopStateShape {
-    items?: ProductMap;
-}

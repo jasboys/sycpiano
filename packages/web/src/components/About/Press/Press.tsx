@@ -59,6 +59,4 @@ const Press: React.FC<PressProps> = () => {
     );
 };
 
-export type PressType = typeof Press;
-export type RequiredProps = PressProps;
 export default Press;

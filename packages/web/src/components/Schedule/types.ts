@@ -24,8 +24,8 @@ export interface Piece {
     piece: string;
 }
 
-export type Collaborators = Collaborator[];
-export type Pieces = Piece[];
+type Collaborators = Collaborator[];
+type Pieces = Piece[];
 
 export interface HasDate {
     dateTime: string;
@@ -48,10 +48,6 @@ export interface EventItem extends HasDate {
 
 export interface EventItemResponse extends EventItem {
     readonly endDate: string;
-}
-
-export interface LoadingItem {
-    readonly type: 'loading';
 }
 
 export type ScheduleStateShape = Record<EventListName, EventItemsStateShape> & {
@@ -102,26 +98,26 @@ export interface FetchEventsAPIParams {
     limit: number;
 }
 
-export interface LatLngLiteral {
-    lat: number;
-    lng: number;
-}
+// interface LatLngLiteral {
+//     lat: number;
+//     lng: number;
+// }
 
-export declare class LatLng {
-    constructor(lat: number, lng: number, noWrap?: boolean);
-    /* Comparison function. */
-    equals(other: LatLng): boolean;
-    /* Returns the latitude in degrees. */
-    lat: number;
-    /* Returns the longitude in degrees. */
-    lng: number;
-    /* Converts to string representation. */
-    toString(): string;
-    /* Returns a string of the form "lat,lng". We round the lat/lng values to 6 decimal places by default. */
-    toUrlValue(precision?: number): string;
-    /* Converts to JSON representation. This function is intended to be used via JSON.stringify. */
-    toJSON(): LatLngLiteral;
-}
+// declare class LatLng {
+//     constructor(lat: number, lng: number, noWrap?: boolean);
+//     /* Comparison function. */
+//     equals(other: LatLng): boolean;
+//     /* Returns the latitude in degrees. */
+//     lat: number;
+//     /* Returns the longitude in degrees. */
+//     lng: number;
+//     /* Converts to string representation. */
+//     toString(): string;
+//     /* Returns a string of the form "lat,lng". We round the lat/lng values to 6 decimal places by default. */
+//     toUrlValue(precision?: number): string;
+//     /* Converts to JSON representation. This function is intended to be used via JSON.stringify. */
+//     toJSON(): LatLngLiteral;
+// }
 
 export interface EventDateTimeProps {
     dateTime: string;

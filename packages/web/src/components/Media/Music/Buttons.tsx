@@ -74,10 +74,10 @@ export const PauseIcon = React.memo(
     <Icon ref={ref} Component={PauseSVG} {...props} />
 )));
 
-export const SkipIcon = React.memo(
-    React.forwardRef<HTMLDivElement, IconProps>(({ ...props }, ref) => (
-    <Icon ref={ref} Component={SkipSVG} {...props} />
-)));
+// export const SkipIcon = React.memo(
+//     React.forwardRef<HTMLDivElement, IconProps>(({ ...props }, ref) => (
+//     <Icon ref={ref} Component={SkipSVG} {...props} />
+// )));
 
 interface ButtonProps {
     readonly isHovering: boolean;

@@ -20,6 +20,4 @@ const Container: React.FC<ContainerProps> = () => {
     );
 };
 
-export type ContainerType = typeof Container;
-export type RequiredProps = ContainerProps;
 export default Container;

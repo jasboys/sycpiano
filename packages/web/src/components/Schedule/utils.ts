@@ -64,14 +64,14 @@ export const getGoogleMapsSearchUrl = (query: string): string => `
 //     return a.dateTime === b.dateTime;
 // }
 
-export function eventAscend(a: HasDate, b: HasDate) {
+function eventAscend(a: HasDate, b: HasDate) {
     // if (a.dateTime.isSame(b.dateTime, 'minute')) { return 0; }
     // if (a.dateTime.isBefore(b.dateTime, 'minute')) { return -1; }
     // if (a.dateTime.isAfter(b.dateTime, 'minute')) { return 1; }
     return compareAsc(parseISO(a.dateTime), parseISO(b.dateTime));
 }
 
-export function eventDescend(a: HasDate, b: HasDate) {
+function eventDescend(a: HasDate, b: HasDate) {
     // if (aTime.isSame(bTime, 'minute')) { return 0; }
     // if (aTime.isBefore(bTime, 'minute')) { return 1; }
     // if (aTime.isAfter(bTime, 'minute')) { return -1; }
@@ -187,7 +187,7 @@ export const createMonthGroups = (
     };
 };
 
-export const mergeMonthGroups = (
+const mergeMonthGroups = (
     left: MonthGroups,
     right: MonthGroups,
 ): MonthGroups => {
@@ -230,7 +230,7 @@ export const mergeMonthGroups = (
     };
 };
 
-export const findDateInMonthGroups = (mgs: MonthGroups, d: Date) => {
+const findDateInMonthGroups = (mgs: MonthGroups, d: Date) => {
     const monthGroup = mgs.monthGroups.find((mg) =>
         isSameMonth(parseISO(mg.dateTime), d),
     );
@@ -243,10 +243,10 @@ export const findDateInMonthGroups = (mgs: MonthGroups, d: Date) => {
 //     return isSameMonth(parseISO(a.dateTime), parseISO(b.dateTime));
 // }
 
-export function monthGroupAscend(a: MonthGroup, b: MonthGroup) {
+function monthGroupAscend(a: MonthGroup, b: MonthGroup) {
     return compareAsc(parseISO(a.dateTime), parseISO(b.dateTime));
 }
 
-export function monthGroupDescend(a: MonthGroup, b: MonthGroup) {
+function monthGroupDescend(a: MonthGroup, b: MonthGroup) {
     return compareDesc(parseISO(a.dateTime), parseISO(b.dateTime));
 }

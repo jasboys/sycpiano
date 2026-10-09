@@ -97,5 +97,3 @@ const FAQs: React.FC<Record<never, unknown>> = () => {
 };
 
 export default FAQs;
-export type FAQsType = typeof FAQs;
-export type RequiredProps = React.ComponentProps<FAQsType>;

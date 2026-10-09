@@ -1,4 +1,4 @@
-export interface DiscLink {
+interface DiscLink {
     type: string;
     url: string;
 }
@@ -11,9 +11,4 @@ export interface Disc {
     releaseDate: number;
     thumbnailFile: string;
     discLinks: DiscLink[];
-}
-
-export interface DiscsStateShape {
-    isFetching: boolean;
-    discs: Disc[];
 }

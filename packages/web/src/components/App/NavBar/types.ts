@@ -1,4 +1,4 @@
-export interface LinkBaseShape {
+interface LinkBaseShape {
     readonly name: string;
     readonly path?: string;
 }

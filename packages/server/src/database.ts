@@ -24,7 +24,7 @@ class FixedPlatform extends PostgreSqlPlatform {
     }
 }
 
-export class FixedPostgresql extends PostgreSqlDriver {
+class FixedPostgresql extends PostgreSqlDriver {
     protected readonly platform = new FixedPlatform();
 }
 

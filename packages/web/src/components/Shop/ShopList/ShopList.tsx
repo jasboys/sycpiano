@@ -134,5 +134,3 @@ const ShopList: React.FC<ShopListProps> = () => {
 };
 
 export default ShopList;
-export type ShopListType = typeof ShopList;
-export type RequiredProps = React.ComponentProps<ShopListType>;

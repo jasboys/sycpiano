@@ -200,5 +200,3 @@ const RetrievalForm: React.FC<Record<never, unknown>> = () => {
 };
 
 export default RetrievalForm;
-export type RequiredProps = React.ComponentProps<typeof RetrievalForm>;
-export type RetrievalFormType = typeof RetrievalForm;

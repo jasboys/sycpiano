@@ -1,9 +1,10 @@
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 import { format } from 'date-fns';
+import { useAtomValue } from 'jotai';
+import { focusAtom } from 'jotai-optics';
 import * as React from 'react';
 import { Transition } from 'react-transition-group';
-
 import {
     DesktopBackgroundPreview,
     MobileBackgroundPreview,
@@ -27,10 +28,8 @@ import { interFont, latoFont } from 'src/styles/fonts';
 import { container, noHighlight } from 'src/styles/mixins';
 import { navBarHeight } from 'src/styles/variables';
 import { fadeOnEnter, fadeOnExit } from 'src/utils';
-import { focusAtom } from 'jotai-optics';
-import { mediaQueriesBaseAtom } from '../App/store';
-import { useAtomValue } from 'jotai';
 import { navBarAtoms } from '../App/NavBar/store';
+import { mediaQueriesBaseAtom } from '../App/store';
 import { cartAtoms } from '../Cart/store';
 
 const textShadowColor = 'rgba(0 0 0 / 0.75)';
@@ -307,6 +306,4 @@ const Home: React.FC<Record<never, unknown>> = () => {
     );
 };
 
-export type HomeType = typeof Home;
-export type RequiredProps = Record<never, unknown>;
 export default Home;

@@ -4,7 +4,7 @@ import { toMedia } from 'src/mediaQuery';
 import { isHamburger } from 'src/screens';
 import type { LinkShape } from './types';
 
-export interface HighlightProps {
+interface HighlightProps {
     readonly active: boolean;
     readonly expanded?: boolean;
     readonly isHamburger: boolean;

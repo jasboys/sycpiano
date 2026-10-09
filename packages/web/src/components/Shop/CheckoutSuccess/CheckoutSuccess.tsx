@@ -119,5 +119,3 @@ const CheckoutSuccess: React.FC<Record<never, unknown>> = () => {
 };
 
 export default CheckoutSuccess;
-export type CheckoutSuccessType = typeof CheckoutSuccess;
-export type RequiredProps = React.ComponentProps<CheckoutSuccessType>;

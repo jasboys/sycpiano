@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 import { gsap } from 'gsap';
-import type { Store } from 'jotai/vanilla/store';
+import type { Store } from 'jotai';
 import * as React from 'react';
 import type { MusicPlayer } from './MusicPlayer.js';
 import { musicAtoms, musicStore } from './store.js';
@@ -25,11 +25,11 @@ const VisualizerCanvas = styled.canvas({
 
 export const TWO_PI = 2 * Math.PI;
 export const HALF_PI = Math.PI / 2;
-export const SCALE_DESKTOP = 40;
-export const SCALE_MOBILE = 20;
+const SCALE_DESKTOP = 40;
+const SCALE_MOBILE = 20;
 export const HEIGHT_ADJUST_MOBILE = -45;
 export const HEIGHT_ADJUST_DESKTOP = -100;
-export const HIGH_FREQ_SCALE = 10;
+const HIGH_FREQ_SCALE = 10;
 export const MOBILE_MSPF = 1000 / 30;
 
 export interface AudioVisualizerProps {

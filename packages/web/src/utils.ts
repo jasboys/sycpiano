@@ -1,36 +1,8 @@
 // import { gsap } from 'gsap'
-import { getAge as _getAge, baseString, descriptions } from 'common';
+import { baseString, descriptions } from 'common';
 import { gsap } from 'gsap';
 
-export interface FormattedLocationShape {
-    venue: string;
-    street: string;
-    stateZipCountry: string;
-}
-
-export const formatLocation = (location: string): FormattedLocationShape => {
-    // Example location string:
-    // Howard L. Schrott Center for the Arts, 610 W 46th St, Indianapolis, IN 46208, USA
-    const [venue, street, ...rest] = location.split(', ');
-    const stateZipCountry = `${rest[1]}, ${rest[2]}`;
-
-    return { venue, street, stateZipCountry };
-};
-
-export const getViewportSize = (): { width: number; height: number } => ({
-    width: Math.max(
-        document.documentElement.clientWidth,
-        window.innerWidth || 0,
-    ),
-    height: Math.max(
-        document.documentElement.clientHeight,
-        window.innerHeight || 0,
-    ),
-});
-
 export const titleStringBase = baseString;
-
-export const getAge = _getAge;
 
 // map of page name to meta title strings
 export const metaDescriptions = descriptions;

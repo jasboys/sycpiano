@@ -30,7 +30,7 @@ export interface SearchParams {
     q: string;
 }
 
-export interface RequestResponse {
+interface RequestResponse {
     req: Request;
     res: Response;
 }

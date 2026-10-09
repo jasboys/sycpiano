@@ -8,13 +8,13 @@ export const cliburn1 = (format: imageFormat = 'jpg'): string =>
     `/gallery/cliburn1.${format}`;
 export const seanChenContactPhotoUrl = (format: imageFormat = 'jpg'): string =>
     `/gallery/syc_headshot1.${format}`;
-export const joelHarrisonContactPhotoUrl = (
-    format: imageFormat = 'jpg',
-): string => `/joel.${format}`;
-export const marthaWoodsContactPhotoUrl = (): string => '/logos/wentworth.svg';
+// export const joelHarrisonContactPhotoUrl = (
+//     format: imageFormat = 'jpg',
+// ): string => `/joel.${format}`;
+// export const marthaWoodsContactPhotoUrl = (): string => '/logos/wentworth.svg';
 export const cadenzaContactPhotoUrl = (): string => '/logos/cadenza.svg';
 // export const marthaWoodsContactPhotoUrl = (format: imageFormat = 'jpg') => `/wentworth.${format}`;
-export const bg1 = '/bg_1.jpg';
+// export const bg1 = '/bg_1.jpg';
 export const homeBackground = (format: imageFormat = 'jpg'): string =>
     `/syc_chair_bg_clean.${format}`;
 export const sycChairVertical = (format: imageFormat = 'jpg'): string =>
@@ -40,9 +40,9 @@ export const generateSrcsetWidths = (url: string, widths: number[]): string =>
     }, '');
 
 // Generates source set urls and heights for <picture> elements.
-export const generateSrcsetHeights = (url: string, heights: number[]): string =>
-    heights.reduce((acc, curr) => {
-        return `${resizedImage(url, {
-            height: curr,
-        })} ${curr}h${acc ? ', ' : ''}${acc}`;
-    }, '');
+// export const generateSrcsetHeights = (url: string, heights: number[]): string =>
+//     heights.reduce((acc, curr) => {
+//         return `${resizedImage(url, {
+//             height: curr,
+//         })} ${curr}h${acc ? ', ' : ''}${acc}`;
+//     }, '');

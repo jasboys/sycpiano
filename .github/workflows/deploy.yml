@@ -23,7 +23,7 @@ jobs:
       name: ${{ github.ref_name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Compute new hashes
         id: compute-hashes
         run: |
@@ -95,7 +95,7 @@ jobs:
       name: ${{ github.ref_name }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Setup SSH
         uses: ./.github/actions/setup-ssh
         with:
@@ -119,7 +119,7 @@ jobs:
     if: needs.check-cache.outputs.admin-matched != 'true'
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Setup Node and Common
         uses: ./.github/actions/setup-node-and-common
       - name: Admin Install Deps and Build
@@ -154,7 +154,7 @@ jobs:
     if: needs.check-cache.outputs.web-matched != 'true'
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Setup Node and Common
         uses: ./.github/actions/setup-node-and-common
       - name: Web Install Deps and Build
@@ -190,7 +190,7 @@ jobs:
     if: needs.check-cache.outputs.server-matched != 'true'
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Setup Node and Common
         uses: ./.github/actions/setup-node-and-common
       - name: Server Install Deps and Build
@@ -221,31 +221,32 @@ jobs:
           COMMAND: |
             cd ${{ vars.BACKEND_DIR }}
             . ~/.nvm/nvm.sh
-            nvm use 24
+            nvm use default
             yarn install --immutable --immutable-cache
             dbmate -d ./packages/server/migrations up
-            date +%s > .deploy-complete
 
-  # restart-app:
-  #   runs-on: ubuntu-latest
-  #   needs: [web, server, admin, assets]
-  #   if: ${{ !failure() && !cancelled() }}
-  #   environment:
-  #     name: ${{ github.ref_name }}
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
-  #     - name: Setup SSH
-  #       uses: ./.github/actions/setup-ssh
-  #       with:
-  #         ssh-key: ${{ secrets.SSH_ED25519 }}
-  #         ssh-host: ${{ secrets.SSH_HOST }}
-  #         ssh-user: ${{ secrets.SSH_USER }}
-  #     - name: PM2 Start App
-  #       run: |
-  #         ssh server '$COMMAND'
-  #       env:
-  #         COMMAND: ${{ format('cd {0} && . ~/.nvm/nvm.sh && nvm use default && sudo systemctl restart sycpiano.service', vars.BACKEND_DIR) }}
+  restart-app:
+    runs-on: ubuntu-latest
+    needs: [web, server, admin, assets]
+    if: ${{ !failure() && !cancelled() }}
+    environment:
+      name: ${{ github.ref_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Setup SSH
+        uses: ./.github/actions/setup-ssh
+        with:
+          ssh-key: ${{ secrets.SSH_ED25519 }}
+          ssh-host: ${{ secrets.SSH_HOST }}
+          ssh-user: ${{ secrets.SSH_USER }}
+      - name: Touch File
+        run: |
+          ssh server "$COMMAND"
+        env:
+          COMMAND: |
+            cd ${{ vars.BACKEND_DIR }}
+            date +%s > .deploy-complete
 
   save-cache:
     runs-on: ubuntu-latest

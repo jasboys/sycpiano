@@ -133,6 +133,4 @@ const Photos: React.FC<Record<never, unknown>> = () => {
     );
 };
 
-export type PhotosType = typeof Photos;
-export type RequiredProps = Record<never, unknown>;
 export default Photos;

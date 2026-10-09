@@ -82,18 +82,18 @@ export const getBufferSrc = (music?: MusicFileItem): BufferSrc | undefined =>
           }
         : undefined;
 
-export const getPermaLink = (
-    base: string,
-    composer: string,
-    piece: string,
-    movement?: string,
-): string => {
-    return path.normalize(
-        `${base}/${getLastName(composer)}/${normalizeString(piece)}${
-            movement ? `/${normalizeString(movement)}` : ''
-        }`,
-    );
-};
+// export const getPermaLink = (
+//     base: string,
+//     composer: string,
+//     piece: string,
+//     movement?: string,
+// ): string => {
+//     return path.normalize(
+//         `${base}/${getLastName(composer)}/${normalizeString(piece)}${
+//             movement ? `/${normalizeString(movement)}` : ''
+//         }`,
+//     );
+// };
 
 export const getRelativePermaLink = (
     composer: string,

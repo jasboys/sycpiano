@@ -30,26 +30,6 @@ export const productIsObject = (pr: ProductReturn): pr is Stripe.Product => {
     return typeof pr !== 'string' && pr.deleted !== true;
 };
 
-export const getPayments = async (): Promise<Stripe.PaymentIntent[]> => {
-    try {
-        let result: Stripe.PaymentIntent[] = [];
-        let nextPage: string | undefined = undefined;
-        do {
-            const temp = await stripe.paymentIntents.search({
-                query: 'status="succeeded"',
-                limit: 100,
-                page: nextPage,
-            });
-            nextPage = temp.next_page === null ? undefined : temp.next_page;
-            result = [...result, ...temp.data];
-        } while (nextPage);
-        return result;
-    } catch (e) {
-        console.error(e);
-        throw e;
-    }
-};
-
 export const getPricesAndProducts = async (): Promise<Stripe.Product[]> => {
     try {
         const result = await stripe.products.list({
@@ -62,14 +42,14 @@ export const getPricesAndProducts = async (): Promise<Stripe.Product[]> => {
     }
 };
 
-export const getCustomer = async (email: string): Promise<Stripe.Customer> => {
-    try {
-        return (await stripe.customers.list({ email })).data[0];
-    } catch (e) {
-        console.error(e);
-        throw e;
-    }
-};
+// export const getCustomer = async (email: string): Promise<Stripe.Customer> => {
+//     try {
+//         return (await stripe.customers.list({ email })).data[0];
+//     } catch (e) {
+//         console.error(e);
+//         throw e;
+//     }
+// };
 
 export const createCustomer = async (
     email: string,

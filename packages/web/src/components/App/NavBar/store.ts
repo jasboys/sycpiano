@@ -17,7 +17,7 @@ const initialState: NavBarStateShape = {
     useDarkFont: true,
 };
 
-export const navBarStore = atomWithImmer(initialState);
+const navBarStore = atomWithImmer(initialState);
 export const navBarAtoms = {
     ...toAtoms(navBarStore),
     isVisible: atom(

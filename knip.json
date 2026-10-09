@@ -1,0 +1,24 @@
+{
+    "$schema": "https://unpkg.com/knip@6/schema.json",
+    "ignoreBinaries": ["dbmate", "ffprobe", "audiowaveform"],
+    "workspaces": {
+        ".": {
+            "entry": [],
+            "project": []
+        },
+        "packages/admin": {
+            "entry": ["src/main.tsx"],
+            "project": ["src/**/*.{ts,tsx}"]
+        },
+        "packages/common": {
+            "project": ["src/**/*.ts"]
+        },
+        "packages/server": {
+            "entry": ["src/app.ts", "src/createAdmin.ts"],
+            "project": ["src/**/*.ts", "@types/**/*.d.ts"]
+        },
+        "packages/web": {
+            "project": ["src/**/*.{ts,tsx}"]
+        }
+    }
+}

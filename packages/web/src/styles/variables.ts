@@ -24,9 +24,9 @@ export const navBarHeight = {
     hiDpx: 60,
 };
 
-export const navBarMarginTop = 18;
+const navBarMarginTop = 18;
 
-export const desktopPlaylistWidth = 550;
+const desktopPlaylistWidth = 550;
 
 export const playlistContainerWidth = {
     desktop: `${desktopPlaylistWidth}px`,
@@ -40,7 +40,7 @@ export const playlistWidth = {
     tablet: `calc(${playlistContainerWidth.tablet} - ${playlistTogglerWidth}px)`,
 };
 
-export const playlistPadding = 10;
+const playlistPadding = 10;
 
 export const cartWidth = 420;
 

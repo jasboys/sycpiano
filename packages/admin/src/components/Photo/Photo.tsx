@@ -61,7 +61,7 @@ const FullImageField = (props: UseRecordContextParams) => {
     );
 };
 
-export const DateTakenButton = () => {
+const DateTakenButton = () => {
     const notify = useNotify();
     const refresh = useRefresh();
     const dataProvider = useAppDataProvider();

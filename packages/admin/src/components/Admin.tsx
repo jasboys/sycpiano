@@ -40,7 +40,7 @@ import {
     ProgramEdit,
     ProgramList,
     ProgramShow,
-} from './Program/Program.jsx';
+} from './Program';
 import { UserEdit, UserList, UserShow } from './User';
 
 export const AdminPage = () => (

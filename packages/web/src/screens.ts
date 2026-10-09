@@ -15,9 +15,9 @@ export const screenTouch = { hover: 'none', pointer: 'coarse' };
 export const screenXS = { maxWidth: xs };
 export const screenS = { maxWidth: s };
 export const screenM = { maxWidth: m };
-export const screenL = { maxWidth: l };
+const screenL = { maxWidth: l };
 export const screenPortrait = { orientation: 'portrait' };
-export const screenLandscape = { orientation: 'landscape' };
+const screenLandscape = { orientation: 'landscape' };
 export const screenShort = { maxHeight: short };
 export const minRes = { minResolution: 2.1 };
 export const webkitMinDPR = { '-webkit-min-device-pixel-ratio': 2.1 };
@@ -31,9 +31,9 @@ export const isHamburger = {
 };
 
 export const screenXL = { minWidth: xl };
-export const screenLandLandscape = { ...screenLandscape, ...screenL };
+// export const screenLandLandscape = { ...screenLandscape, ...screenL };
 export const screenXSandPortrait = { ...screenPortrait, ...screenXS };
-export const screenMandPortrait = { ...screenPortrait, ...screenM };
+// export const screenMandPortrait = { ...screenPortrait, ...screenM };
 export const hiDpx = [
     minRes,
     webkitMinDPR,

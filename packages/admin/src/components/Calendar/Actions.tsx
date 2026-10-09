@@ -14,7 +14,7 @@ import {
 import { useAppDataProvider } from '../../providers/restProvider.js';
 
 
-export const PopulateImageFieldsButton = () => {
+const PopulateImageFieldsButton = () => {
     const query = useQueryClient();
     console.log(query);
     const context = useListContext();
@@ -40,7 +40,7 @@ export const PopulateImageFieldsButton = () => {
     );
 };
 
-export const DuplicateButton = () => {
+const DuplicateButton = () => {
     const notify = useNotify();
     const context = useListContext();
     const dataProvider = useAppDataProvider();

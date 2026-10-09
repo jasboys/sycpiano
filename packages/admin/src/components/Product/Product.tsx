@@ -40,27 +40,12 @@ import { useAppDataProvider } from 'src/providers/restProvider.js';
 import type { AdminError } from 'src/types.js';
 import { IMAGES_URI } from 'src/uris';
 
-export const ProductTypes = ['arrangement', 'cadenza', 'original'] as const;
+const ProductTypes = ['arrangement', 'cadenza', 'original'] as const;
 
 const productTypeChoices = ProductTypes.map((v) => ({
     id: v,
     name: v,
 }));
-
-export interface ProductAttributes {
-    id: string;
-    file: string;
-    name: string;
-    permalink: string;
-    description: string;
-    sample: string;
-    images: string[];
-    pages: number;
-    price: number; // in cents
-    priceID: string;
-    purchasedCount: number;
-    type: (typeof ProductTypes)[number];
-}
 
 const ThumbnailField = ({ path }: { path: string }) => {
     return (

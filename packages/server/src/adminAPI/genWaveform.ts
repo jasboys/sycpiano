@@ -1,15 +1,15 @@
 import { exec } from 'node:child_process';
 import { parse } from 'node:path';
 
-export const WAVEFORM_FOLDER = 'waveforms/';
+const WAVEFORM_FOLDER = 'waveforms/';
 
-export interface StreamInfo {
+interface StreamInfo {
     index: number;
     sample_rate: string;
     duration: string;
 }
 
-export interface FFProbeStreamOutput {
+interface FFProbeStreamOutput {
     streams: StreamInfo[];
 }
 

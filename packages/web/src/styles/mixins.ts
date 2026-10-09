@@ -13,9 +13,6 @@ export const pushedHelper = (marginTop: number, unit: '%' | 'vh' = '%') => ({
     marginTop: `${marginTop}px`,
 });
 
-export const pushedDesktop = css(pushedHelper(navBarHeight.lowDpx));
-export const pushedMobile = css(pushedHelper(navBarHeight.hiDpx));
-
 export const pushed = css({
     ...pushedHelper(navBarHeight.lowDpx),
     [toMedia(hiDpx)]: {

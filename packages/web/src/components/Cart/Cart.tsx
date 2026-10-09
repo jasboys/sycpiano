@@ -158,5 +158,3 @@ const MemoizedCart = React.memo(Cart, (prev, next) => {
 });
 
 export default MemoizedCart;
-export type RequiredProps = CartProps;
-export type MemoizedCart = typeof MemoizedCart;
